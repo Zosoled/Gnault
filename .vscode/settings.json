@@ -1,0 +1,17 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "always"
+  },
+  "tslint.autoFixOnSave": true,
+  "i18n-ally.localesPaths": "src/assets/i18n",
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.sourceLanguage": "en",
+  "i18n-ally.extract.keyPrefix": "{fileNameWithoutExt}.",
+  "i18n-ally.sortKeys": true,
+  "i18n-ally.extract.keyMaxLength": 60,
+  "editor.detectIndentation": false,
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": false,
+  "typescript.format.semicolons": "insert"
+}
