@@ -17,7 +17,6 @@ interface AppSettings {
   lockInactivityMinutes: number;
   ledgerReconnect: LedgerConnectionType;
   powSource: PoWSource;
-  multiplierSource: number;
   customWorkServer: string;
   pendingOption: string;
   decentralizedAliasesOption: string;
@@ -46,7 +45,6 @@ export class AppSettingsService {
     lockInactivityMinutes: 30,
     ledgerReconnect: 'usb',
     powSource: 'server',
-    multiplierSource: 1,
     customWorkServer: '',
     pendingOption: 'amount',
     decentralizedAliasesOption: 'disabled',
@@ -132,7 +130,7 @@ export class AppSettingsService {
     private translate: TranslocoService
   ) { }
 
-  loadAppSettings() {
+  loadAppSettings () {
     let settings: AppSettings = this.settings;
     const settingsStore = localStorage.getItem(this.storeKey);
     if (settingsStore) {
@@ -223,7 +221,6 @@ export class AppSettingsService {
       lockInactivityMinutes: 30,
       ledgerReconnect: 'usb',
       powSource: 'server',
-      multiplierSource: 1,
       customWorkServer: '',
       pendingOption: 'amount',
       decentralizedAliasesOption: 'disabled',

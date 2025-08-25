@@ -235,30 +235,6 @@
                   </span>
                 </div>
               </div>
-              <div
-                class="uk-margin"
-                *ngIf="selectedPoWOption === 'client' || selectedPoWOption === 'custom'"
-              >
-                <label class="uk-form-label">{{ 'configure-app.pow-multiplier' | transloco }} <span
-                    uk-icon="icon: info;"
-                    uk-tooltip
-                    [title]="t('configure-app.optional-increased-work-for-transaction-priority-during')"
-                  ></span></label>
-                <div class="uk-form-controls">
-
-                  <div class="uk-inline uk-width-1-1">
-                    <select
-                      class="uk-select"
-                      [(ngModel)]="selectedMultiplierOption"
-                    >
-                      <option
-                        *ngFor="let multiplier of multiplierOptions"
-                        [value]="multiplier.value"
-                      >{{ multiplier.name }}</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 

@@ -49,7 +49,7 @@ export class WorkPoolService {
     localStorage.removeItem(this.storeKey);
   }
 
-  // Get work for a hash.  Uses the cache, or the current setting for generating it.
+  // Get work for a hash. Uses the cache, or the current setting for generating it.
   public async getWork(hash, multiplier = 1) {
     this.pow.shouldContinueQueue = true; // new pow should never be blocked
     // additional pow for the same hash will have to wait

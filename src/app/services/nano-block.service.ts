@@ -398,7 +398,7 @@ export class NanoBlockService {
       }
       const difficulty = (type === TxType.receive || type === TxType.open)
         ? 1 / 64
-        : multiplier
+        : 1
       block.work = await this.workPool.getWork(workBlock, difficulty);
       this.notifications.removeNotification('pow');
       this.workPool.removeFromCache(workBlock);

@@ -128,11 +128,6 @@ export class ConfigureAppComponent implements OnInit {
   ];
   selectedPoWOption = this.powOptions[0].value;
 
-  multiplierOptions = [
-    {name: this.translocoService.translate('configure-app.multiplier-options.default-1x-or-1-64x'), value: 1}
-  ];
-  selectedMultiplierOption: number = this.multiplierOptions[0].value;
-
   pendingOptions = [
     {name: this.translocoService.translate('configure-app.pending-options.automatic-largest-amount-first'), value: 'amount'},
     {name: this.translocoService.translate('configure-app.pending-options.automatic-oldest-transaction-first'), value: 'date'},
@@ -272,9 +267,6 @@ export class ConfigureAppComponent implements OnInit {
     const matchingPowOption = this.powOptions.find(d => d.value === settings.powSource);
     this.selectedPoWOption = matchingPowOption ? matchingPowOption.value : this.powOptions[0].value;
 
-    const matchingMultiplierOption = this.multiplierOptions.find(d => d.value === settings.multiplierSource);
-    this.selectedMultiplierOption = matchingMultiplierOption ? matchingMultiplierOption.value : this.multiplierOptions[0].value;
-
     this.customWorkServer = settings.customWorkServer;
 
     const matchingPendingOption = this.pendingOptions.find(d => d.value === settings.pendingOption);
@@ -365,7 +357,6 @@ export class ConfigureAppComponent implements OnInit {
     }
 
     let newPoW = this.selectedPoWOption;
-    const newMultiplier = this.selectedMultiplierOption;
     const pendingOption = this.selectedPendingOption;
     let minReceive = null;
     if (this.util.account.isValidNanoAmount(this.minimumReceive)) {
@@ -388,10 +379,6 @@ export class ConfigureAppComponent implements OnInit {
     }
 
     if (this.appSettings.settings.powSource !== newPoW) {
-      // reset multiplier when not using it to avoid user mistake
-      if (newPoW !== 'client' && newPoW !== 'custom') {
-        this.selectedMultiplierOption = this.multiplierOptions[0].value;
-      }
       // Cancel ongoing PoW if the old method was local PoW
       if (this.appSettings.settings.powSource === 'client') {
         // Check if work is ongoing, and cancel it
@@ -399,15 +386,10 @@ export class ConfigureAppComponent implements OnInit {
           reloadPending = true; // force reload balance => re-work pow
         }
       }
-    } else if (newPoW === 'client' && newMultiplier < this.appSettings.settings.multiplierSource) {
-      // Cancel pow and re-work if multiplier is lower than earlier
-      if (this.pow.cancelAllPow(false)) {
-        reloadPending = true;
-      }
     }
 
     // reset work cache so that the new PoW will be used but only if larger than before
-    if (newPoW === 'client' && newMultiplier > this.appSettings.settings.multiplierSource) {
+    if (newPoW === 'client') {
       // if user accept to reset cache
       if (await this.clearWorkCache()) {
         reloadPending = true; // force reload balance => re-work pow
@@ -418,7 +400,6 @@ export class ConfigureAppComponent implements OnInit {
       walletStore: newStorage,
       lockInactivityMinutes: Number(this.selectedInactivityMinutes),
       powSource: newPoW,
-      multiplierSource: Number(this.selectedMultiplierOption),
       customWorkServer: this.customWorkServer,
       pendingOption: pendingOption,
       decentralizedAliasesOption: decentralizedAliasesOption,
