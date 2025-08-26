@@ -67,11 +67,11 @@ export class WorkPoolService {
 		try {
 			if (cached && cached.work &&
 				this.util.nano.validateWork(hash, this.util.nano.difficultyFromMultiplier(multiplier, baseThreshold), cached.work)) {
-				console.log('Using cached work: ' + cached.work)
+				console.log(`Using cached work: ${cached.work}`)
 				return cached.work
 			}
 		} catch (err) {
-			console.log('Error validating cached work. ' + err)
+			console.log(`Error validating cached work. ${err}`)
 		}
 
 		this.currentlyProcessingHashes[hash] = true
@@ -94,7 +94,7 @@ export class WorkPoolService {
 			return null
 		}
 
-		console.log('Work found: ' + work.work)
+		console.log(`Work found: ${work.work}`)
 
 		// remove duplicates
 		this.workCache = this.workCache.filter(entry => (entry.hash !== hash))

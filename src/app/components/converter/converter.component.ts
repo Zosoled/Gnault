@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core'
 import { UtilService } from '../../services/util.service'
 import { AppSettingsService } from '../../services/app-settings.service'
-import * as nanocurrency from 'nanocurrency'
+import { Tools } from 'libnemo'
 import { PriceService } from '../../services/price.service'
 import { BigNumber } from 'bignumber.js'
 import { NotificationService } from '../../services/notification.service'
@@ -42,11 +42,11 @@ export class ConverterComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	unitChange (unit) {
+	async unitChange (unit) {
 		switch (unit) {
 			case 'mnano':
 				if (this.util.account.isValidNanoAmount(this.Mnano)) {
-					this.raw = nanocurrency.convert(this.Mnano, { from: nanocurrency.Unit.NANO, to: nanocurrency.Unit.raw })
+					this.raw = await Tools.convert(this.Mnano, 'nano', 'raw')
 					this.fiatPrice = (new BigNumber(this.Mnano)).times(this.price.price.lastPrice).toString(10)
 					this.invalidMnano = false
 					this.invalidRaw = false
@@ -59,7 +59,7 @@ export class ConverterComponent implements OnInit, OnDestroy {
 				break
 			case 'raw':
 				if (this.util.account.isValidAmount(this.raw)) {
-					this.Mnano = nanocurrency.convert(this.raw, { from: nanocurrency.Unit.raw, to: nanocurrency.Unit.NANO })
+					this.Mnano = await Tools.convert(this.raw, 'raw', 'nano')
 					this.fiatPrice = (new BigNumber(this.Mnano)).times(this.price.price.lastPrice).toString(10)
 					this.invalidRaw = false
 					this.invalidMnano = false
@@ -73,7 +73,7 @@ export class ConverterComponent implements OnInit, OnDestroy {
 			case 'fiat':
 				if (this.util.string.isNumeric(this.fiatPrice)) {
 					this.Mnano = (new BigNumber(this.fiatPrice)).dividedBy(this.price.price.lastPrice).toString(10)
-					this.raw = nanocurrency.convert(this.Mnano, { from: nanocurrency.Unit.NANO, to: nanocurrency.Unit.raw })
+					this.raw = await Tools.convert(this.Mnano, 'nano', 'raw')
 					this.invalidRaw = false
 					this.invalidMnano = false
 					this.invalidFiat = false

@@ -4,7 +4,7 @@ import { NotificationService } from '../../services/notification.service'
 import { BarcodeFormat } from '@zxing/library'
 import { BehaviorSubject } from 'rxjs'
 import { UtilService } from '../../services/util.service'
-import * as bip39 from 'bip39'
+import { Wallet } from 'libnemo'
 
 export type QRType = 'account' | 'hash' | 'mnemonic' | 'generic'
 
@@ -48,16 +48,19 @@ export class QrModalComponent implements OnInit {
 		this.hasDevices = Boolean(devices && devices.length)
 	}
 
-	onCodeResult (resultString: string) {
+	async onCodeResult (resultString: string) {
 		let type: QRType = null
 		let content = ''
 		// account
 		if (this.util.account.isValidAccount(resultString)) {
 			type = 'account'
 			content = resultString
-		} else if (bip39.validateMnemonic(resultString)) {
-			type = 'mnemonic'
-			content = resultString
+		} else if (/ /.test(resultString)) {
+			try {
+				await Wallet.load('BLAKE2b', '', resultString)
+				type = 'mnemonic'
+				content = resultString
+			} catch (err) { }
 		} else if (resultString.length === 128) {
 			// includes deterministic R value material which we ignore
 			resultString = resultString.substring(0, 64)

@@ -150,9 +150,10 @@ export class PowService {
 	 */
 	async getPowFromServer (hash, multiplier, workServer = '') {
 		const newThreshold = this.util.nano.difficultyFromMultiplier(multiplier, baseThreshold)
-		const serverString = workServer === '' ? 'external' : 'custom'
-		console.log('Generating work with multiplier ' + multiplier + ' at threshold ' +
-			newThreshold + ' using ' + serverString + ' server for hash: ', hash)
+		const serverString = workServer === ''
+			? 'external'
+			: 'custom'
+		console.log(`Generating work with multiplier ${multiplier} at threshold ${newThreshold} using ${serverString} server for hash: `, hash)
 		return await this.api.workGenerate(hash, newThreshold, workServer)
 			.then(result => result.work)
 			.catch(async err => {

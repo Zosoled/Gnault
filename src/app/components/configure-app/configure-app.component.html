@@ -226,12 +226,12 @@
 									<div class="uk-inline uk-width-1-1">
 										<select
 											class="uk-select"
-											[(ngModel)]="selectedPendingOption"
+											[(ngModel)]="selectedReceivableOption"
 										>
 											<option
-												*ngFor="let pending of pendingOptions"
-												[value]="pending.value"
-											>{{ pending.name }}</option>
+												*ngFor="let receivable of receivableOptions"
+												[value]="receivable.value"
+											>{{ receivable.name }}</option>
 										</select>
 									</div>
 								</div>
@@ -264,30 +264,6 @@
 												>
 											</div>
 										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="uk-width-1-1">
-						<div class="uk-form-horizontal">
-							<div class="uk-margin">
-								<label class="uk-form-label">{{ 'configure-app.decentralized-aliases' | transloco }} <span
-										uk-icon="icon: info;"
-										uk-tooltip
-										[title]="t('configure-app.decentralized-aliases-require-external-requests')"
-									></span></label>
-								<div class="uk-form-controls">
-									<div class="uk-inline uk-width-1-1">
-										<select
-											class="uk-select"
-											[(ngModel)]="selectedDecentralizedAliasesOption"
-										>
-											<option
-												*ngFor="let decentralizedAliasesOption of decentralizedAliasesOptions"
-												[value]="decentralizedAliasesOption.value"
-											>{{ decentralizedAliasesOption.name }}</option>
-										</select>
 									</div>
 								</div>
 							</div>
@@ -387,11 +363,14 @@
 								<label
 									class="uk-form-label"
 									for="form-horizontal-select"
-								>{{ 'configure-app.server-configuration' | transloco }} <span
+								>
+									{{ 'configure-app.server-configuration' | transloco }}
+									<span
 										uk-icon="icon: info;"
 										uk-tooltip
 										[title]="t('configure-app.change-which-server-is-used-to-communicate-with-the-nano')"
-									></span></label>
+									></span>
+								</label>
 								<div class="uk-form-controls">
 									<select
 										class="uk-select"

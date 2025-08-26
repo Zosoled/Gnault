@@ -248,16 +248,14 @@
 	class="import-panel-navigation"
 	*ngIf="( (activePanel === panels.import) || (activePanel === panels.mnemonicTypeSelection) )"
 	(click)="
-      (
-          (activePanel === panels.import)
-        && (
-             (selectedImportOption === 'mnemonic')
-          || (selectedImportOption === 'bip39-mnemonic')
-        )
-      )
-    ? setPanel(panels.mnemonicTypeSelection)
-    : setPanel(panels.landing)
-  "
+		activePanel === panels.import
+		&& (
+				selectedImportOption === 'mnemonic'
+				|| selectedImportOption === 'bip39-mnemonic'
+		)
+			? setPanel(panels.mnemonicTypeSelection)
+			: setPanel(panels.landing)
+	"
 >
 	<span uk-icon="icon: arrow-left; ratio: 1.5;"></span>
 	<span class="label">Back</span>
@@ -805,28 +803,38 @@
 			<div class="uk-width-1-2@m">
 				<input
 					type="password"
-					class="uk-input"
+					minlength="6"
+					class="uk-input form-control"
 					[(ngModel)]="walletPasswordModel"
 					placeholder="New Wallet Password"
+					(input)="validatePassword=false;"
+					(focusout)="validatePassword=true;"
 				>
-				<!-- <password-strength-meter *ngIf="walletPasswordModel.length > 0" [password]="walletPasswordModel" [enableFeedback]="true" [minPasswordLength]="6"></password-strength-meter> -->
 				<span
 					class="password-helper"
-					*ngIf="walletPasswordModel.length > 0 && walletPasswordModel.length < 6"
-				>{{ 'configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long' | transloco: { minCharacters: 6 } }}</span>
-				<span
-					class="password-helper"
-					*ngIf="walletPasswordConfirmModel.length >= 6 && walletPasswordModel !== walletPasswordConfirmModel"
-				>{{ 'configure-wallet.set-wallet-password.errors.passwords-do-not-match' | transloco }}</span>
+					*ngIf="validatePassword && walletPasswordModel.length > 0 && walletPasswordModel.length < 6"
+				>
+					{{ 'configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long' | transloco: { minCharacters: 6 } }}
+				</span>
 			</div>
 			<div class="uk-width-1-2@m">
 				<input
 					type="password"
-					class="uk-input"
-					(keyup.enter)="saveWalletPassword()"
+					minlength="6"
+					class="uk-input form-control"
 					[(ngModel)]="walletPasswordConfirmModel"
 					placeholder="Confirm Wallet Password"
+					[disabled]="(walletPasswordModel.length < 6 && walletPasswordConfirmModel.length == 0)"
+					(keyup.enter)="saveWalletPassword()"
+					(input)="validatePasswordConfirm=false;"
+					(focusout)="validatePasswordConfirm=walletPasswordConfirmModel.length>0;"
 				>
+				<span
+					class="password-helper"
+					*ngIf="(validatePasswordConfirm || walletPasswordModel.length <= walletPasswordConfirmModel.length) && walletPasswordModel !== walletPasswordConfirmModel"
+				>
+					{{ 'configure-wallet.set-wallet-password.errors.passwords-do-not-match' | transloco }}
+				</span>
 			</div>
 		</div>
 	</div>

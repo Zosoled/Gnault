@@ -20,7 +20,7 @@ export interface RepresentativeStatus {
 	warn: boolean
 	known: boolean
 	daysSinceLastVoted: number
-	uptime: number
+	uptime: string
 	score: number
 }
 
@@ -36,7 +36,6 @@ export interface StoredRepresentative {
 	warn?: boolean
 	trusted?: boolean
 }
-
 
 export interface RepresentativeApiOverview extends BaseApiAccount {
 	account: string
@@ -85,7 +84,7 @@ export class RepresentativeService {
 	 * @returns {Promise<FullRepresentativeOverview[]>}
 	 */
 	async detectChangeableReps (cachedReps?: FullRepresentativeOverview[]): Promise<FullRepresentativeOverview[]> {
-		const representatives = cachedReps ? cachedReps : await this.getRepresentativesOverview()
+		const representatives = cachedReps ?? await this.getRepresentativesOverview()
 
 		// Now based on some of their properties, we filter them out
 		const needsChange = []
@@ -135,6 +134,8 @@ export class RepresentativeService {
 			const repOnline = onlineReps.indexOf(representative.account) !== -1
 			const knownRep = this.getRepresentative(representative.account)
 			const knownRepNinja = await this.ninja.getAccount(representative.account)
+			console.log('knownRepNinja: ' + Object.getOwnPropertyNames(knownRepNinja))
+			// console.log('knownRepNinja: ' + JSON.stringify(knownRepNinja, null, 4))
 
 			const nanoWeight = Tools.convert(representative.weight || 0n, 'raw', 'mnano')
 			const percent = this.onlineStakeTotal
@@ -185,7 +186,9 @@ export class RepresentativeService {
 
 			if (knownRep) {
 				// in the list of known representatives
-				status = status === 'none' ? 'ok' : status
+				status = status === 'none'
+					? 'ok'
+					: status
 				label = knownRep.name
 				repStatus.known = true
 				if (knownRep.trusted) {
@@ -203,7 +206,9 @@ export class RepresentativeService {
 					repStatus.changeRequired = true
 				}
 			} else if (knownRepNinja) {
-				status = status === 'none' ? 'ok' : status
+				if (status === 'none') {
+					status = 'ok'
+				}
 				label = knownRepNinja.alias
 			}
 
@@ -238,36 +243,24 @@ export class RepresentativeService {
 				repStatus.uptime = uptimeIntervalValue
 				repStatus.score = knownRepNinja.score
 
-				const msSinceLastVoted = knownRepNinja.lastVoted ? (Date.now() - new Date(knownRepNinja.lastVoted).getTime()) : 0
-				repStatus.daysSinceLastVoted = Math.floor(msSinceLastVoted / 86400000)
-				if (uptimeIntervalValue === 0) {
-					// display a minimum of <interval days> if the uptime value is 0%
-					repStatus.daysSinceLastVoted = Math.max(repStatus.daysSinceLastVoted, uptimeIntervalDays)
-				}
-
-				if (uptimeIntervalValue < 50) {
+				if (repStatus.uptime && repStatus.uptime !== 'good') {
 					status = 'alert'
 					repStatus.veryLowUptime = true
 					repStatus.warn = true
 					repStatus.changeRequired = true
-				} else if (uptimeIntervalValue < 60) {
-					if (status !== 'alert') {
-						status = 'warn'
-					}
-					repStatus.lowUptime = true
-					repStatus.warn = true
 				}
 			} else if (knownRepNinja === false) {
 				// does not exist (404)
 				status = 'alert'
-				repStatus.uptime = 0
+				repStatus.uptime = 'bad'
 				repStatus.veryLowUptime = true
-				repStatus.daysSinceLastVoted = uptimeIntervalDays
 				repStatus.warn = true
 				repStatus.changeRequired = true
 			} else {
 				// any other api error
-				status = status === 'none' ? 'unknown' : status
+				if (status === 'none') {
+					status = 'unknown'
+				}
 			}
 
 			const additionalData = {
@@ -276,7 +269,7 @@ export class RepresentativeService {
 				statusText: status,
 				label: label,
 				status: repStatus,
-				donationAddress: knownRepNinja?.donation?.account,
+				donationAddress: knownRepNinja?.donation_address,
 			}
 
 			const fullRep = { ...representative, ...additionalData }

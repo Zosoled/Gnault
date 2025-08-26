@@ -108,12 +108,16 @@
 			<div
 				class="action"
 				*ngSwitchCase="isSendTransaction"
-			>{{ 'general.blockactions.sent' | transloco }}<ng-template [ngTemplateOutlet]="unconfirmedIcon"></ng-template>
+			>
+				{{ 'general.blockactions.sent' | transloco }}
+				<ng-template [ngTemplateOutlet]="unconfirmedIcon"></ng-template>
 			</div>
 			<div
 				class="action"
 				*ngSwitchCase="isReceiveTransaction"
-			>{{ 'general.blockactions.received' | transloco }}<ng-template [ngTemplateOutlet]="unconfirmedIcon"></ng-template>
+			>
+				{{ 'general.blockactions.received' | transloco }}
+				<ng-template [ngTemplateOutlet]="unconfirmedIcon"></ng-template>
 			</div>
 			<div
 				class="action"

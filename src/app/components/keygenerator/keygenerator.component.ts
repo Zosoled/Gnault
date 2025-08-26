@@ -1,7 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core'
-import { UtilService } from '../../services/util.service'
-import * as bip39 from 'bip39'
 import { NotificationService } from '../../services/notification.service'
+import { Wallet } from 'libnemo'
 
 @Component({
 	selector: 'app-keygenerator',
@@ -21,16 +20,16 @@ export class KeygeneratorComponent implements OnInit {
 	ngOnInit (): void {
 	}
 
-	generate () {
+	async generate () {
 		// generate random bytes and create seed/mnemonic
-		const seedBytes = this.util.account.generateSeedBytes()
-		this.seed = this.util.hex.fromUint8(seedBytes).toUpperCase()
-		this.mnemonic = bip39.entropyToMnemonic(this.seed)
+		const wallet = await Wallet.create('BLAKE2b', '')
+		await wallet.unlock('')
+		this.mnemonic = wallet.mnemonic
+		this.seed = wallet.seed
 		// derive private/public keys using index 0
-		const keyBytes = this.util.account.generateAccountSecretKeyBytes(seedBytes, 0)
-		const keyPair = this.util.account.generateAccountKeyPair(keyBytes)
-		this.privateKey = this.util.hex.fromUint8(keyPair.secretKey).toUpperCase()
-		this.account = this.util.account.getPublicAccountID(keyPair.publicKey)
+		const accounts = await wallet.accounts(0)
+		this.privateKey = accounts[0].privateKey
+		this.account = accounts[0].address
 
 		// Split the seed up so we can show 4 per line
 		const words = this.mnemonic.split(' ')

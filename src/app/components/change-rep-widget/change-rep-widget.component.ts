@@ -1,8 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core'
+import { Router } from '@angular/router'
 import { WalletService } from '../../services/wallet.service'
 import { NanoBlockService } from '../../services/nano-block.service'
 import { RepresentativeService } from '../../services/representative.service'
-import { Router } from '@angular/router'
 
 @Component({
 	selector: 'app-change-rep-widget',
@@ -95,37 +95,26 @@ export class ChangeRepWidgetComponent implements OnInit {
 	}
 
 	includeRepRequiringChange (displayedReps: any[]) {
-		const repRequiringChange =
-			this.changeableRepresentatives
-				.sort((a, b) => b.delegatedWeight.minus(a.delegatedWeight))
-				.filter(
-					(changeableRep) => (
-						(changeableRep.status.changeRequired === true)
-						&& displayedReps.every(
-							(displayedRep) =>
-								(displayedRep.id !== changeableRep.id)
-						)
-					)
-				)[0]
+		const repRequiringChange = this.changeableRepresentatives
+			.sort((a, b) => b.delegatedWeight.minus(a.delegatedWeight))
+			.filter(changeableRep => {
+				const isNoDisplayedRepChangeable = displayedReps.every(displayedRep => displayedRep.id !== changeableRep.id)
+				return changeableRep.status.changeRequired && isNoDisplayedRepChangeable
+			})[0]
 
-		if (repRequiringChange == null) {
-			return [...displayedReps]
+		if (!!repRequiringChange) {
+			displayedReps.push(Object.assign({}, repRequiringChange))
 		}
-
-		return [...displayedReps, Object.assign({}, repRequiringChange)]
+		return displayedReps
 	}
 
 	updateSelectedAccountHasRep () {
-		if (this.selectedAccount != null) {
+		if (this.selectedAccount !== null) {
 			this.selectedAccountHasRep = !!this.selectedAccount.frontier
 			return
 		}
-
-		this.selectedAccountHasRep =
-			this.walletService.wallet.accounts.some(
-				(acc) =>
-					(acc.frontier)
-			)
+		const accounts = this.walletService.wallet.accounts
+		this.selectedAccountHasRep = accounts.some(a => a.frontier)
 	}
 
 	getDisplayedRepresentatives (representatives: any[]) {
@@ -134,15 +123,8 @@ export class ChangeRepWidgetComponent implements OnInit {
 		}
 
 		if (this.selectedAccount !== null) {
-			const selectedAccountRep =
-				this.representatives
-					.filter(
-						(rep) =>
-							rep.accounts.some(
-								(a) =>
-									(a.id === this.selectedAccount.id)
-							)
-					)[0]
+			const selectedAccountRep = this.representatives
+				.filter(rep => rep.accounts.some(a => a.id === this.selectedAccount.id))[0]
 
 			if (selectedAccountRep == null) {
 				return []
@@ -168,25 +150,19 @@ export class ChangeRepWidgetComponent implements OnInit {
 
 	showRepSelectionForSpecificRep (clickedRep) {
 		this.showRepHelp = false
-		const accountsToChangeRepFor = (
-			(
-				(this.selectedAccount !== null)
-				&& clickedRep.accounts.some(a => (a.id === this.selectedAccount.id))
-			)
-				? this.selectedAccount.id
-				: ( // all accounts that delegate to this rep
-					this.representatives
-						.filter(
-							(rep) =>
-								(rep.id === clickedRep.id)
-						)
-						.map(
-							(rep) =>
-								rep.accounts.map(a => a.id).join(',')
-						)
-						.join(',')
-				)
+		const selectedAccountMatchesClickedRep = (
+			this.selectedAccount !== null
+			&& clickedRep.accounts.some(a => (a.id === this.selectedAccount.id))
 		)
+		const accountsToChangeRepFor = selectedAccountMatchesClickedRep
+			? this.selectedAccount.id
+			: // all accounts that delegate to this rep
+			this.representatives
+				.filter(rep => rep.id === clickedRep.id)
+				.map(rep => {
+					rep.accounts.map(a => a.id).join(',')
+				})
+				.join(',')
 
 		this.router.navigate(['/representatives'], {
 			queryParams: { hideOverview: true, accounts: accountsToChangeRepFor, showRecommended: true }
@@ -194,9 +170,12 @@ export class ChangeRepWidgetComponent implements OnInit {
 	}
 
 	showRepSelectionForAllChangeableReps () {
-		const allAccounts = this.changeableRepresentatives.map(rep => rep.accounts.map(a => a.id).join(',')).join(',')
+		const allAccounts = this.changeableRepresentatives
+			.map(rep => {
+				rep.accounts.map(a => a.id).join(',')
+			})
+			.join(',')
 
 		this.router.navigate(['/representatives'], { queryParams: { hideOverview: true, accounts: allAccounts, showRecommended: true } })
 	}
-
 }

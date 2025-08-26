@@ -7,16 +7,15 @@ import { UtilService } from '../../services/util.service'
 import { QrModalService } from '../../services/qr-modal.service'
 import { Router } from '@angular/router'
 import * as QRCode from 'qrcode'
-import { BigNumber } from 'bignumber.js'
 import { ApiService } from '../../services/api.service'
 import { PriceService } from '../../services/price.service'
 import { AppSettingsService } from '../../services/app-settings.service'
-import { TranslocoService } from '@ngneat/transloco'
+import { TranslocoService } from '@jsverse/transloco'
 
 export interface BalanceAccount {
 	balance: BigNumber
 	balanceRaw: BigNumber
-	pending: BigNumber
+	receivable: BigNumber
 	balanceFiat: number
 }
 
@@ -27,46 +26,46 @@ export interface BalanceAccount {
 })
 
 export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
-	private addressBookService = inject(AddressBookService);
-	private walletService = inject(WalletService);
-	notificationService = inject(NotificationService);
-	modal = inject(ModalService);
-	private util = inject(UtilService);
-	private qrModalService = inject(QrModalService);
-	private router = inject(Router);
-	private api = inject(ApiService);
-	private price = inject(PriceService);
-	appSettings = inject(AppSettingsService);
-	private translocoService = inject(TranslocoService);
+	private addressBookService = inject(AddressBookService)
+	private walletService = inject(WalletService)
+	notificationService = inject(NotificationService)
+	modal = inject(ModalService)
+	private util = inject(UtilService)
+	private qrModalService = inject(QrModalService)
+	private router = inject(Router)
+	private api = inject(ApiService)
+	private price = inject(PriceService)
+	appSettings = inject(AppSettingsService)
+	private translocoService = inject(TranslocoService)
 
 
-	nano = 1000000000000000000000000;
-	activePanel = 0;
-	creatingNewEntry = false;
+	nano = 1000000000000000000000000
+	activePanel = 0
+	creatingNewEntry = false
 
-	addressBook$ = this.addressBookService.addressBook$;
-	previousAddressName = '';
-	newAddressAccount = '';
-	newAddressName = '';
-	addressBookShowQRExport = false;
-	addressBookShowFileExport = false;
-	addressBookQRExportUrl = '';
-	addressBookQRExportImg = '';
-	importExport = false;
-	newTrackBalance = false;
-	newTrackTransactions = false;
-	accounts: BalanceAccount[] = [];
-	totalTrackedBalance = new BigNumber(0);
-	totalTrackedBalanceRaw = new BigNumber(0);
-	totalTrackedBalanceFiat = 0;
-	totalTrackedPending = new BigNumber(0);
-	fiatPrice = 0;
-	priceSub = null;
-	refreshSub = null;
-	statsRefreshEnabled = true;
-	timeoutIdAllowingRefresh: any = null;
-	loadingBalances = false;
-	numberOfTrackedBalance = 0;
+	addressBook$ = this.addressBookService.addressBook$
+	previousAddressName = ''
+	newAddressAccount = ''
+	newAddressName = ''
+	addressBookShowQRExport = false
+	addressBookShowFileExport = false
+	addressBookQRExportUrl = ''
+	addressBookQRExportImg = ''
+	importExport = false
+	newTrackBalance = false
+	newTrackTransactions = false
+	accounts: BalanceAccount[] = []
+	totalTrackedBalance = new BigNumber(0)
+	totalTrackedBalanceRaw = new BigNumber(0)
+	totalTrackedBalanceFiat = 0
+	totalTrackedReceivable = new BigNumber(0)
+	fiatPrice = 0
+	priceSub = null
+	refreshSub = null
+	statsRefreshEnabled = true
+	timeoutIdAllowingRefresh: any = null
+	loadingBalances = false
+	numberOfTrackedBalance = 0
 
 	async ngOnInit () {
 		this.addressBookService.loadAddressBook()
@@ -81,9 +80,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 				this.loadingBalances = true
 				// Check if we have a local wallet account tracked and update the balances
 				for (const entry of this.addressBookService.addressBook) {
-					if (!entry.trackBalance || !this.accounts[entry.account]) {
-						continue
-					}
+					if (!entry.trackBalance || !this.accounts[entry.account]) continue
 					// If the account exist in the wallet, take the info from there to save on RPC calls
 					const walletAccount = this.walletService.wallet.accounts.find(a => a.id === entry.account)
 					if (walletAccount) {
@@ -91,17 +88,17 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 						this.totalTrackedBalance = this.totalTrackedBalance.minus(this.accounts[entry.account].balance)
 						this.totalTrackedBalanceRaw = this.totalTrackedBalanceRaw.minus(this.accounts[entry.account].balanceRaw)
 						this.totalTrackedBalanceFiat = this.totalTrackedBalanceFiat - this.accounts[entry.account].balanceFiat
-						this.totalTrackedPending = this.totalTrackedPending.minus(this.accounts[entry.account].pending)
+						this.totalTrackedReceivable = this.totalTrackedReceivable.minus(this.accounts[entry.account].receivable)
 
-						this.accounts[entry.account].balance = walletAccount.balance
-						this.accounts[entry.account].pending = walletAccount.pending
+						this.accounts[entry.account].balance = walletAccount.balanceNano
+						this.accounts[entry.account].receivable = walletAccount.receivableNano
 						this.accounts[entry.account].balanceFiat = walletAccount.balanceFiat
-						this.accounts[entry.account].balanceRaw = walletAccount.balanceRaw
+						this.accounts[entry.account].balanceRaw = walletAccount.balance
 
-						this.totalTrackedBalance = this.totalTrackedBalance.plus(walletAccount.balance)
-						this.totalTrackedBalanceRaw = this.totalTrackedBalanceRaw.plus(walletAccount.balanceRaw)
+						this.totalTrackedBalance = this.totalTrackedBalance.plus(walletAccount.balanceNano)
+						this.totalTrackedBalanceRaw = this.totalTrackedBalanceRaw.plus(walletAccount.balance)
 						this.totalTrackedBalanceFiat = this.totalTrackedBalanceFiat + walletAccount.balanceFiat
-						this.totalTrackedPending = this.totalTrackedPending.plus(this.accounts[entry.account].pending)
+						this.totalTrackedReceivable = this.totalTrackedReceivable.plus(this.accounts[entry.account].receivable)
 					}
 				}
 				this.loadingBalances = false
@@ -139,9 +136,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	async updateTrackedBalances (refresh = false) {
-		if (refresh && !this.statsRefreshEnabled) {
-			return
-		}
+		if (refresh && !this.statsRefreshEnabled) return
 		this.statsRefreshEnabled = false
 		if (this.timeoutIdAllowingRefresh != null) {
 			clearTimeout(this.timeoutIdAllowingRefresh)
@@ -157,14 +152,12 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 			}
 		}
 		// No need to process if there is nothing to track
-		if (this.numberOfTrackedBalance === 0) {
-			return
-		}
+		if (this.numberOfTrackedBalance === 0) return
 
 		this.totalTrackedBalance = new BigNumber(0)
 		this.totalTrackedBalanceRaw = new BigNumber(0)
 		this.totalTrackedBalanceFiat = 0
-		this.totalTrackedPending = new BigNumber(0)
+		this.totalTrackedReceivable = new BigNumber(0)
 
 		// Get account balances for all account in address book not in wallet (which has tracking active)
 		const accountIDsWallet = this.walletService.wallet.accounts.map(a => a.id)
@@ -172,13 +165,13 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 			a.trackBalance).map(a => a.account)
 		const apiAccounts = await this.api.accountsBalances(accountIDs)
 
-		// Fetch pending of all tracked accounts
-		let pending
+		// Fetch receivable of all tracked accounts
+		let receivable
 		if (this.appSettings.settings.minimumReceive) {
 			const minAmount = this.util.nano.mnanoToRaw(this.appSettings.settings.minimumReceive)
-			pending = await this.api.accountsPendingLimitSorted(accountIDs, minAmount.toString(10))
+			receivable = await this.api.accountsReceivableLimitSorted(accountIDs, minAmount.toString(10))
 		} else {
-			pending = await this.api.accountsPendingSorted(accountIDs)
+			receivable = await this.api.accountsReceivableSorted(accountIDs)
 		}
 
 		// Save balances
@@ -188,16 +181,16 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 			const balanceAccount: BalanceAccount = {
 				balance: new BigNumber(0),
 				balanceRaw: new BigNumber(0),
-				pending: new BigNumber(0),
+				receivable: new BigNumber(0),
 				balanceFiat: 0
 			}
 			// If the account exist in the wallet, take the info from there to save on RPC calls
 			const walletAccount = this.walletService.wallet.accounts.find(a => a.id === entry.account)
 			if (walletAccount) {
-				balanceAccount.balance = walletAccount.balance
-				balanceAccount.pending = walletAccount.pending
+				balanceAccount.balance = walletAccount.balanceNano
+				balanceAccount.receivable = walletAccount.receivableNano
 				balanceAccount.balanceFiat = walletAccount.balanceFiat
-				balanceAccount.balanceRaw = walletAccount.balanceRaw
+				balanceAccount.balanceRaw = walletAccount.balance
 				// Add balances from RPC data
 			} else {
 				balanceAccount.balance = new BigNumber(apiAccounts.balances[entry.account].balance)
@@ -210,27 +203,27 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 			this.accounts[entry.account] = balanceAccount
 		}
 
-		// Add pending from RPC data
-		if (pending && pending.blocks) {
-			for (const block in pending.blocks) {
-				if (!pending.blocks.hasOwnProperty(block)) {
+		// Add receivable from RPC data
+		if (receivable && receivable.blocks) {
+			for (const block in receivable.blocks) {
+				if (!receivable.blocks.hasOwnProperty(block)) {
 					continue
 				}
 
 				const targetAccount = this.accounts[block]
 
-				if (pending.blocks[block]) {
-					let accountPending = new BigNumber(0)
+				if (receivable.blocks[block]) {
+					let accountReceivable = new BigNumber(0)
 
-					for (const hash in pending.blocks[block]) {
-						if (!pending.blocks[block].hasOwnProperty(hash)) {
+					for (const hash in receivable.blocks[block]) {
+						if (!receivable.blocks[block].hasOwnProperty(hash)) {
 							continue
 						}
-						accountPending = accountPending.plus(pending.blocks[block][hash].amount)
+						accountReceivable = accountReceivable.plus(receivable.blocks[block][hash].amount)
 					}
 					if (targetAccount) {
-						targetAccount.pending = accountPending
-						this.totalTrackedPending = this.totalTrackedPending.plus(targetAccount.pending)
+						targetAccount.receivable = accountReceivable
+						this.totalTrackedReceivable = this.totalTrackedReceivable.plus(targetAccount.receivable)
 					}
 				}
 			}
@@ -284,10 +277,6 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		const regexp = new RegExp('^(Account|' + this.translocoService.translate('general.account') + ') #\\d+$', 'g')
 		if (regexp.test(this.newAddressName) === true) {
 			return this.notificationService.sendError(this.translocoService.translate('address-book.this-name-is-reserved-for-wallet-accounts-without-a-label'))
-		}
-
-		if (this.newAddressName.startsWith('@') === true) {
-			return this.notificationService.sendError(this.translocoService.translate('address-book.this-name-is-reserved-for-decentralized-aliases'))
 		}
 
 		// Remove spaces and convert to nano prefix

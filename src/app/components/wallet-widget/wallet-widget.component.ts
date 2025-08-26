@@ -1,4 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core'
+import { translate } from '@jsverse/transloco'
 import { WalletService } from '../../services/wallet.service'
 import { NotificationService } from '../../services/notification.service'
 import { LedgerService, LedgerStatus } from '../../services/ledger.service'
@@ -26,6 +27,7 @@ export class WalletWidgetComponent implements OnInit {
 	powAlert = false;
 
 	unlockPassword = '';
+	validatePassword = false;
 
 	modal: any = null;
 	mayAttemptUnlock = true;
@@ -80,7 +82,7 @@ export class WalletWidgetComponent implements OnInit {
 		}
 		const locked = await this.walletService.lockWallet()
 		if (locked) {
-			this.notificationService.sendSuccess(`Wallet locked`)
+			this.notificationService.sendSuccess(translate('accounts.wallet-locked'))
 		} else {
 			this.notificationService.sendError(`Unable to lock wallet`)
 		}
@@ -91,8 +93,10 @@ export class WalletWidgetComponent implements OnInit {
 		try {
 			await this.ledgerService.loadLedger()
 			this.notificationService.removeNotification('ledger-status')
-			if (this.ledgerStatus.status === LedgerStatus.READY) {
+			if (this.ledgerStatus.status === 'CONNECTED') {
 				this.notificationService.sendSuccess(`Successfully connected to Ledger device`)
+			} else if (this.ledgerStatus.status === 'LOCKED') {
+				this.notificationService.sendError(`Ledger device locked. Unlock and try again.`)
 			}
 		} catch (err) {
 			console.log(`Got error when loading ledger! `, err)
@@ -132,12 +136,8 @@ export class WalletWidgetComponent implements OnInit {
 		const unlocked = await this.walletService.unlockWallet(this.unlockPassword)
 
 		if (unlocked) {
-			this.notificationService.sendSuccess(`Wallet unlocked`)
+			this.notificationService.sendSuccess(translate('accounts.wallet-unlocked'))
 			this.modal.hide()
-			if (this.unlockPassword.length < 6) {
-				// eslint-disable-next-line max-len
-				this.notificationService.sendWarning(`You are using an insecure password and encouraged to change it from settings > manage wallet`)
-			}
 
 			if (this.timeoutIdAllowingUnlock !== null) {
 				clearTimeout(this.timeoutIdAllowingUnlock)
@@ -146,7 +146,7 @@ export class WalletWidgetComponent implements OnInit {
 
 			this.allowUnlock({ focusInputElement: false })
 		} else {
-			this.notificationService.sendError(`Incorrect password, please try again!`)
+			this.notificationService.sendError(translate('accounts.wrong-password'))
 		}
 	}
 

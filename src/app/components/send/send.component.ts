@@ -1,23 +1,20 @@
+import { HttpClient } from '@angular/common/http'
 import { Component, OnInit, inject } from '@angular/core'
-import BigNumber from 'bignumber.js'
-import { AddressBookService } from '../../services/address-book.service'
+import { ActivatedRoute } from '@angular/router'
+import { TranslocoService } from '@jsverse/transloco'
+import { Tools } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
+import { AddressBookService } from '../../services/address-book.service'
 import { WalletService } from '../../services/wallet.service'
 import { NotificationService } from '../../services/notification.service'
 import { ApiService } from '../../services/api.service'
 import { UtilService } from '../../services/util.service'
 import { WorkPoolService } from '../../services/work-pool.service'
 import { AppSettingsService } from '../../services/app-settings.service'
-import { ActivatedRoute } from '@angular/router'
 import { PriceService } from '../../services/price.service'
 import { NanoBlockService } from '../../services/nano-block.service'
 import { QrModalService } from '../../services/qr-modal.service'
-import { environment } from 'environments/environment'
-import { TranslocoService } from '@ngneat/transloco'
-import { HttpClient } from '@angular/common/http'
-import * as nanocurrency from 'nanocurrency'
-
-const nacl = window['nacl']
+import { environment } from '../../../environments/environment'
 
 @Component({
 	selector: 'app-send',
@@ -40,46 +37,18 @@ export class SendComponent implements OnInit {
 	private translocoService = inject(TranslocoService);
 
 	nano = 1000000000000000000000000;
-
 	activePanel = 'send';
 	sendDestinationType = 'external-address';
+	accounts = this.walletService.wallet.accounts
 
-	accounts = this.walletService.wallet.accounts;
-
-	ALIAS_LOOKUP_DEFAULT_STATE = {
-		fullText: '',
-		name: '',
-		domain: '',
-	};
-
-	aliasLookup = {
-		...this.ALIAS_LOOKUP_DEFAULT_STATE,
-	};
-	aliasLookupInProgress = {
-		...this.ALIAS_LOOKUP_DEFAULT_STATE,
-	};
-	aliasLookupLatestSuccessful = {
-		...this.ALIAS_LOOKUP_DEFAULT_STATE,
-		address: '',
-	};
-	aliasResults$ = new BehaviorSubject([]);
 	addressBookResults$ = new BehaviorSubject([]);
-	isDestinationAccountAlias = false;
 	showAddressBook = false;
 	addressBookMatch = '';
-	addressAliasMatch = '';
-
-	amounts = [
-		{ name: 'XNO', shortName: 'XNO', value: 'mnano' },
-		{ name: 'knano', shortName: 'knano', value: 'knano' },
-		{ name: 'nano', shortName: 'nano', value: 'nano' },
-	];
-	selectedAmount = this.amounts[0];
 
 	amount = null;
-	amountExtraRaw = new BigNumber(0);
+	amountExtraRaw: bigint = 0n
 	amountFiat: number | null = null;
-	rawAmount: BigNumber = new BigNumber(0);
+	rawAmount: bigint = 0n
 	fromAccount: any = {};
 	fromAccountID: any = '';
 	fromAddressBook = '';
@@ -101,7 +70,7 @@ export class SendComponent implements OnInit {
 		this.addressBookService.loadAddressBook()
 
 		// Set default From account
-		this.fromAccountID = this.accounts.length ? this.accounts[0].id : ''
+		this.fromAccountID = this.accounts[0]?.id ?? ''
 
 		// Update selected account if changed in the sidebar
 		this.walletService.wallet.selectedAccount$.subscribe(async acc => {
@@ -136,26 +105,16 @@ export class SendComponent implements OnInit {
 
 	updateQueries (params) {
 		if (params && params.amount && !isNaN(params.amount)) {
-			const amountAsRaw =
-				new BigNumber(
-					this.util.nano.mnanoToRaw(
-						new BigNumber(params.amount)
-					)
-				)
+			const amountAsRaw = BigInt(Tools.convert(params.amount, 'mnano', 'raw'))
+			this.amountExtraRaw = amountAsRaw % BigInt(this.nano)
 
-			this.amountExtraRaw = amountAsRaw.mod(this.nano).floor()
-
-			this.amount =
-				this.util.nano.rawToMnano(
-					amountAsRaw.minus(this.amountExtraRaw)
-				).toNumber()
+			this.amount = Number(Tools.convert(amountAsRaw - this.amountExtraRaw, 'raw', 'mnano'))
 
 			this.syncFiatPrice()
 		}
 
 		if (params && params.to) {
 			this.toAccountID = params.to
-			this.offerLookupIfDestinationIsAlias()
 			this.validateDestination()
 			this.sendDestinationType = 'external-address'
 		}
@@ -163,7 +122,7 @@ export class SendComponent implements OnInit {
 
 	async findFirstAccount () {
 		// Load balances before we try to find the right account
-		if (this.walletService.wallet.balance.isZero()) {
+		if (this.walletService.wallet.balance === 0n) {
 			await this.walletService.reloadBalances()
 		}
 
@@ -180,46 +139,53 @@ export class SendComponent implements OnInit {
 	}
 
 	// An update to the Nano amount, sync the fiat value
-	syncFiatPrice () {
+	async syncFiatPrice () {
+		console.log(`syncFiatPrice()`)
+		console.log(`this.amountFiat: ${this.amount}`)
+		console.log(`this.price.price.lastPrice: ${this.price.price.lastPrice}`)
 		if (!this.validateAmount() || Number(this.amount) === 0) {
 			this.amountFiat = null
 			return
 		}
-		const rawAmount = this.getAmountBaseValue(this.amount || 0).plus(this.amountExtraRaw)
-		if (rawAmount.lte(0)) {
+
+		console.log(`sendTransaction() this.amount: ${this.amount}`)
+		console.log(typeof this.amount)
+		const rawAmount = BigInt(await Tools.convert(this.amount, 'nano', 'raw')) + this.amountExtraRaw
+		if (rawAmount < 0n) {
 			this.amountFiat = null
 			return
 		}
 
 		// This is getting hacky, but if their currency is bitcoin, use 6 decimals, if it is not, use 2
-		const precision = this.settings.settings.displayCurrency === 'BTC' ? 1000000 : 100
+		const precision = this.settings.settings.displayCurrency === 'BTC'
+			? 1000000
+			: 100
 
 		// Determine fiat value of the amount
-		const fiatAmount = this.util.nano.rawToMnano(rawAmount).times(this.price.price.lastPrice)
-			.times(precision).floor().div(precision).toNumber()
+		const fiatAmount = (parseFloat(Tools.convert(rawAmount, 'raw', 'mnano'))
+			* this.price.price.lastPrice).toFixed(3)
 
-		this.amountFiat = fiatAmount
+		this.amountFiat = Number(fiatAmount)
 	}
 
 	// An update to the fiat amount, sync the nano value based on currently selected denomination
-	syncNanoPrice () {
+	async syncNanoPrice () {
+		console.log(`syncNanoPrice()`)
+		console.log(`this.amountFiat: ${this.amountFiat}`)
+		console.log(`this.price.price.lastPrice: ${this.price.price.lastPrice}`)
 		if (!this.amountFiat) {
 			this.amount = ''
 			return
 		}
 		if (!this.util.string.isNumeric(this.amountFiat)) return
-		const rawAmount = this.util.nano.mnanoToRaw(new BigNumber(this.amountFiat).div(this.price.price.lastPrice))
-		const nanoVal = this.util.nano.rawToNano(rawAmount).floor()
-		const nanoAmount = this.getAmountValueFromBase(this.util.nano.nanoToRaw(nanoVal))
-
-		this.amount = nanoAmount.toNumber()
+		const fx = this.amountFiat / this.price.price.lastPrice
+		const nanoPrice = await Tools.convert(fx.toString(), 'mnano', 'nano')
+		this.amount = fx.toFixed(3)
 	}
 
-	onDestinationAddressInput () {
-		this.addressAliasMatch = ''
+	async onDestinationAddressInput () {
 		this.addressBookMatch = ''
 
-		this.offerLookupIfDestinationIsAlias()
 		this.searchAddressBook()
 
 		const destinationAddress = this.toAccountID || ''
@@ -235,12 +201,7 @@ export class SendComponent implements OnInit {
 
 				const amountAsXNO = (
 					amountAsRaw
-						? nanocurrency.convert(
-							amountAsRaw, {
-							from: nanocurrency.Unit.raw,
-							to: nanocurrency.Unit.NANO
-						}
-						).toString()
+						? await Tools.convert(amountAsRaw, 'raw', 'nano').toString()
 						: null
 				)
 
@@ -269,188 +230,9 @@ export class SendComponent implements OnInit {
 		this.addressBookResults$.next(matches)
 	}
 
-	offerLookupIfDestinationIsAlias () {
-		const destinationAddress = this.toAccountID || ''
-
-		const mayBeAnAlias = (
-			(destinationAddress.startsWith('@') === true)
-			&& (destinationAddress.includes('.') === true)
-			&& (destinationAddress.endsWith('.') === false)
-			&& (destinationAddress.includes('/') === false)
-			&& (destinationAddress.includes('?') === false)
-		)
-
-		if (mayBeAnAlias === false) {
-			this.isDestinationAccountAlias = false
-			this.aliasLookup = {
-				...this.ALIAS_LOOKUP_DEFAULT_STATE,
-			}
-			this.aliasResults$.next([])
-			return
-		}
-
-		this.isDestinationAccountAlias = true
-
-		let aliasWithoutFirstSymbol = destinationAddress.slice(1).toLowerCase()
-
-		if (aliasWithoutFirstSymbol.startsWith('_@') === true) {
-			aliasWithoutFirstSymbol = aliasWithoutFirstSymbol.slice(2)
-		}
-
-		const aliasSplitResults = aliasWithoutFirstSymbol.split('@')
-
-		let aliasName = ''
-		let aliasDomain = ''
-
-		if (aliasSplitResults.length === 2) {
-			aliasName = aliasSplitResults[0]
-			aliasDomain = aliasSplitResults[1]
-		} else {
-			aliasDomain = aliasSplitResults[0]
-		}
-
-		this.aliasLookup = {
-			fullText: `@${aliasWithoutFirstSymbol}`,
-			name: aliasName,
-			domain: aliasDomain,
-		}
-
-		this.aliasResults$.next([{ ...this.aliasLookup }])
-
-		this.toAccountStatus = 1 // Neutral state
-	}
-
-	async lookupAlias () {
-		if (this.aliasLookup.domain === '') {
-			return
-		}
-
-		if (this.settings.settings.decentralizedAliasesOption === 'disabled') {
-			const UIkit = window['UIkit']
-			try {
-				await UIkit.modal.confirm(
-					`<p class="uk-alert uk-alert-warning"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span>
-          <span style="font-size: 18px;">
-          ${this.translocoService.translate('configure-app.decentralized-aliases-require-external-requests')}
-          </span>`,
-					{
-						labels: {
-							cancel: this.translocoService.translate('general.cancel'),
-							ok: this.translocoService.translate('configure-app.allow-external-requests'),
-						}
-					}
-				)
-
-				this.settings.setAppSetting('decentralizedAliasesOption', 'enabled')
-			} catch (err) {
-				// pressed cancel, or a different error
-				return
-			}
-		}
-
-		this.toAccountStatus = 1 // Neutral state
-
-		const aliasLookup = { ...this.aliasLookup }
-
-		const aliasFullText = aliasLookup.fullText
-		const aliasDomain = aliasLookup.domain
-
-		const aliasName = (
-			(aliasLookup.name !== '')
-				? aliasLookup.name
-				: '_'
-		)
-
-		const lookupUrl =
-			`https://${aliasDomain}/.well-known/nano-currency.json?names=${aliasName}`
-
-		this.aliasLookupInProgress = {
-			...aliasLookup,
-		}
-
-		await this.http.get<any>(lookupUrl).toPromise()
-			.then(res => {
-				const isOutdatedRequest = (
-					this.aliasLookupInProgress.fullText
-					!== aliasFullText
-				)
-
-				if (isOutdatedRequest === true) {
-					return
-				}
-
-				this.aliasLookupInProgress = {
-					...this.ALIAS_LOOKUP_DEFAULT_STATE,
-				}
-
-				try {
-					const aliasesInJsonCount = (
-						(Array.isArray(res.names) === true)
-							? res.names.length
-							: 0
-					)
-
-					if (aliasesInJsonCount === 0) {
-						this.toAccountStatus = 0 // Error state
-						this.notificationService.sendWarning(`Alias @${aliasName} not found on ${aliasDomain}`)
-						return
-					}
-
-					const matchingAccount =
-						res.names.find(
-							(account) =>
-								(account.name === aliasName)
-						)
-
-					if (matchingAccount == null) {
-						this.toAccountStatus = 0 // Error state
-						this.notificationService.sendWarning(`Alias @${aliasName} not found on ${aliasDomain}`)
-						return
-					}
-
-					if (!this.util.account.isValidAccount(matchingAccount.address)) {
-						this.toAccountStatus = 0 // Error state
-						this.notificationService.sendWarning(`Alias ${aliasFullText} does not have a valid address`)
-						return
-					}
-
-					this.toAccountID = matchingAccount.address
-
-					this.aliasLookupLatestSuccessful = {
-						...aliasLookup,
-						address: this.toAccountID,
-					}
-
-					this.onDestinationAddressInput()
-					this.validateDestination()
-
-					return
-				} catch (err) {
-					this.toAccountStatus = 0 // Error state
-					this.notificationService.sendWarning(`Unknown error has occurred while trying to lookup ${aliasFullText}`)
-					return
-				}
-			})
-			.catch(err => {
-				this.aliasLookupInProgress = {
-					...this.ALIAS_LOOKUP_DEFAULT_STATE,
-				}
-				this.toAccountStatus = 0 // Error state
-
-				if (err.status === 404) {
-					this.notificationService.sendWarning(`No aliases found on ${aliasDomain}`)
-				} else {
-					this.notificationService.sendWarning(`Could not reach domain ${aliasDomain}`)
-				}
-
-				return
-			})
-	}
-
 	selectBookEntry (account) {
 		this.showAddressBook = false
 		this.toAccountID = account
-		this.isDestinationAccountAlias = false
 		this.searchAddressBook()
 		this.validateDestination()
 	}
@@ -465,21 +247,6 @@ export class SendComponent implements OnInit {
 
 		// Remove spaces from the account id
 		this.toAccountID = this.toAccountID.replace(/ /g, '')
-
-		this.addressAliasMatch = (
-			(
-				(this.aliasLookupLatestSuccessful.address !== '')
-				&& (this.aliasLookupLatestSuccessful.address === this.toAccountID)
-			)
-				? this.aliasLookupLatestSuccessful.fullText
-				: null
-		)
-
-		if (this.isDestinationAccountAlias === true) {
-			this.addressBookMatch = null
-			this.toAccountStatus = 1 // Neutral state
-			return
-		}
 
 		this.addressBookMatch = (
 			this.addressBookService.getAccountName(this.toAccountID)
@@ -572,29 +339,27 @@ export class SendComponent implements OnInit {
 			return this.notificationService.sendError(`From account not found`)
 		}
 
-		from.balanceBN = new BigNumber(from.balance || 0)
-		to.balanceBN = new BigNumber(to.balance || 0)
+		const bigBalanceFrom = BigInt(from.balance ?? 0n)
+		const bigBalanceTo = BigInt(to.balance ?? 0n)
 
 		this.fromAccount = from
 		this.toAccount = to
 
-		const rawAmount = this.getAmountBaseValue(this.amount || 0)
-		this.rawAmount = rawAmount.plus(this.amountExtraRaw)
+		const rawAmount = BigInt(await Tools.convert(this.amount, 'nano', 'raw'))
+		this.rawAmount = rawAmount + this.amountExtraRaw
 
-		const nanoAmount = this.rawAmount.div(this.nano)
-
-		if (this.amount < 0 || rawAmount.lessThan(0)) {
+		if (this.amount < 0 || rawAmount < 0n) {
 			return this.notificationService.sendWarning(`Amount is invalid`)
 		}
-		if (from.balanceBN.minus(rawAmount).lessThan(0)) {
+		if (bigBalanceFrom - rawAmount < 0n) {
 			return this.notificationService.sendError(`From account does not have enough XNO`)
 		}
 
 		// Determine a proper raw amount to show in the UI, if a decimal was entered
-		this.amountExtraRaw = this.rawAmount.mod(this.nano)
+		this.amountExtraRaw = this.rawAmount % BigInt(this.nano)
 
 		// Determine fiat value of the amount
-		this.amountFiat = this.util.nano.rawToMnano(rawAmount).times(this.price.price.lastPrice).toNumber()
+		this.amountFiat = parseFloat(Tools.convert(rawAmount, 'raw', 'mnano')) * this.price.price.lastPrice
 
 		this.fromAddressBook = (
 			this.addressBookService.getAccountName(this.fromAccountID)
@@ -613,6 +378,7 @@ export class SendComponent implements OnInit {
 	}
 
 	async confirmTransaction () {
+		const wallet = this.walletService.wallet.wallet
 		const walletAccount = this.walletService.wallet.accounts.find(a => a.id === this.fromAccountID)
 		if (!walletAccount) {
 			throw new Error(`Unable to find sending account in wallet`)
@@ -630,23 +396,22 @@ export class SendComponent implements OnInit {
 		try {
 			const destinationID = this.getDestinationID()
 
-			const newHash = await this.nanoBlock.generateSend(walletAccount, destinationID,
+			const newHash = await this.nanoBlock.generateSend(wallet, walletAccount, destinationID,
 				this.rawAmount, this.walletService.isLedgerWallet())
 
 			if (newHash) {
 				this.notificationService.removeNotification('success-send')
-				this.notificationService.sendSuccess(`Successfully sent ${this.amount} ${this.selectedAmount.shortName}!`, { identifier: 'success-send' })
+				this.notificationService.sendSuccess(`Successfully sent ${this.amount} XNO!`, { identifier: 'success-send' })
 				this.activePanel = 'send'
 				this.amount = null
 				this.amountFiat = null
-				this.resetRaw()
+				this.amountExtraRaw = 0n
 				this.toAccountID = ''
 				this.toOwnAccountID = ''
 				this.toAccountStatus = null
 				this.fromAddressBook = ''
 				this.toAddressBook = ''
 				this.addressBookMatch = ''
-				this.addressAliasMatch = ''
 			} else {
 				if (!this.walletService.isLedgerWallet()) {
 					this.notificationService.sendError(`There was an error sending your transaction, please try again.`)
@@ -660,41 +425,17 @@ export class SendComponent implements OnInit {
 		this.confirmingTransaction = false
 	}
 
-	setMaxAmount () {
+	async setMaxAmount () {
 		const walletAccount = this.walletService.wallet.accounts.find(a => a.id === this.fromAccountID)
 		if (!walletAccount) {
 			return
 		}
 
-		this.amountExtraRaw = walletAccount.balanceRaw
+		this.amountExtraRaw = walletAccount.balance
 
-		const nanoVal = this.util.nano.rawToNano(walletAccount.balance).floor()
-		const maxAmount = this.getAmountValueFromBase(this.util.nano.nanoToRaw(nanoVal))
-		this.amount = maxAmount.toNumber()
+		const nanoBalance = Tools.convert(walletAccount.balance, 'raw', 'nano')
+		this.amount = parseFloat(nanoBalance).toFixed(6)
 		this.syncFiatPrice()
-	}
-
-	resetRaw () {
-		this.amountExtraRaw = new BigNumber(0)
-	}
-
-	getAmountBaseValue (value) {
-
-		switch (this.selectedAmount.value) {
-			default:
-			case 'nano': return this.util.nano.nanoToRaw(value)
-			case 'knano': return this.util.nano.knanoToRaw(value)
-			case 'mnano': return this.util.nano.mnanoToRaw(value)
-		}
-	}
-
-	getAmountValueFromBase (value) {
-		switch (this.selectedAmount.value) {
-			default:
-			case 'nano': return this.util.nano.rawToNano(value)
-			case 'knano': return this.util.nano.rawToKnano(value)
-			case 'mnano': return this.util.nano.rawToMnano(value)
-		}
 	}
 
 	// open qr reader modal
