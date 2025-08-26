@@ -14,7 +14,7 @@ Seamless integration with any nano compatible RPC backend/websocket and the aim 
 
 Gnault comes in different flavors to suit your needs.
 
-#### Desktop App
+### Desktop App
 
 Available for Windows/Mac/Linux – just head over to the [latest release](https://github.com/Zosoled/Gnault/releases/latest) and download the version for your OS. Arch Linux users may [install it from the (unofficial) AUR](https://aur.archlinux.org/packages/gnault-bin/).
 
@@ -25,7 +25,7 @@ If you want to verify the binary checksum there are plenty of apps to do this. O
 
 Then compare the output hash with the one listed in the corresponding checksums file that you download.
 
-#### Web App
+### Web App
 
 You can also use Gnault from any device on the web at [gnault.cc](https://gnault.cc).
 
@@ -35,14 +35,19 @@ The web version can additionally be pulled from the [dockerhub repo](https://hub
 
 A full security guide and other useful articles can be found in [the original Nault docs](https://docs.nault.cc).
 
-#### Mobile App
-
+### Mobile App
 There is no native mobile app but the web wallet contains a Progressive Web App (PWA). That allows you to run it in offline mode for remote-signing.
 
 If you visit [gnault.cc](https://gnault.cc) in your phone you will be given the option to install it.
 
 * Android: Click on "Install Gnault for Android" in the menu
 * iOS (Safari only): 1 - Tap the share button. 2 - Select "+ Add to home screen". 3 - Open Gnault from the home screen
+
+## License
+
+Portions of this code were originally released and licensed under the MIT License, the text of which can be found under LICENSES/MIT.txt. Specifically, this version of Gnault was forked at commit c9ed1cca08833e406f9ceb58973e3198d5d66f81, and all content up to and including that commit are licensed under the MIT License.
+
+All additions and modifications included in code commits thereafter are licensed under the GNU Public License v3 or later, the text of which can be found under LICENSES/GPL-3.0-or-later.txt.
 
 ## How To Help
 
