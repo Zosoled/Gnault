@@ -72,8 +72,9 @@ export class MultisigComponent implements OnInit {
 		this.createdMultisig = '' // invalidate previous multisig to avoid mistakes
 	}
 
-	generateMultisig () {
-		this.createdMultisig = this.musigService.runAggregate(this.storedAccounts, null)?.multisig
+	async generateMultisig () {
+		const aggregate = await this.musigService.runAggregate(this.storedAccounts, null)
+		this.createdMultisig = aggregate?.multisig
 	}
 
 	reset () {

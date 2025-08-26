@@ -15,9 +15,11 @@ We love your input! We want to make contributing to this project as easy and tra
 4. Sharing responsibility: The project should be seen as *our* wallet and be self maintained by the community
 
 ## We Develop with GitHub
+
 We use GitHub to host code, track issues, request features, and accept pull requests.
 
 ## We Use [GitHub Flow](https://guides.github.com/introduction/flow/index.html), So All Code Changes Happen Through Pull Requests
+
 Pull requests are the best way to propose changes to the codebase (we use [GitHub Flow](https://guides.github.com/introduction/flow/index.html)). We actively welcome your pull requests:
 
 1. Fork the repo and create your branch from `main`.

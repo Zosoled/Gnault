@@ -46,7 +46,7 @@ export class DeeplinkService {
 				this.router.navigate(['send'], {
 					queryParams: {
 						to: url.pathname,
-						amount: amount ? this.util.nano.rawToMnano(amount) : null
+						amount: this.util.nano.rawToMnano(amount) ?? null
 					}
 				})
 

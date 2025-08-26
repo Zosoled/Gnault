@@ -359,11 +359,11 @@ function getApplicationMenu () {
 				},
 				{
 					label: 'Submit a bug report',
-					click () {loadExternal('https://github.com/Zosoled/Gnault/issues/new') }
+					click () { loadExternal('https://github.com/Zosoled/Gnault/issues/new') }
 				},
 				{
 					label: 'Release notes',
-					click () {loadExternal('https://github.com/Zosoled/Gnault/releases') }
+					click () { loadExternal('https://github.com/Zosoled/Gnault/releases') }
 				},
 				{ type: 'separator' },
 				{
