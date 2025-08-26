@@ -105,21 +105,21 @@
 				"serve": {
 					"builder": "@angular-devkit/build-angular:dev-server",
 					"options": {
-						"browserTarget": "gnault:build"
+						"buildTarget": "gnault:build"
 					},
 					"configurations": {
 						"production": {
-							"browserTarget": "gnault:build:production"
+							"buildTarget": "gnault:build:production"
 						},
 						"desktop": {
-							"browserTarget": "gnault:build:desktop"
+							"buildTarget": "gnault:build:desktop"
 						}
 					}
 				},
 				"extract-i18n": {
 					"builder": "@angular-devkit/build-angular:extract-i18n",
 					"options": {
-						"browserTarget": "gnault:build"
+						"buildTarget": "gnault:build"
 					}
 				},
 				"test": {
@@ -165,7 +165,6 @@
 			}
 		}
 	},
-	"defaultProject": "gnault",
 	"schematics": {
 		"@schematics/angular:component": {
 			"prefix": "app",
@@ -176,6 +175,11 @@
 		}
 	},
 	"cli": {
-		"defaultCollection": "@angular-eslint/schematics"
+		"schematicCollections": [
+			"@cypress/schematic",
+			"@angular-eslint/schematics",
+			"@schematics/angular"
+		],
+		"analytics": false
 	}
 }
