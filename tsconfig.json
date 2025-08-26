@@ -2,6 +2,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "downlevelIteration": true,
+    "skipLibCheck": true,
     "importHelpers": true,
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
