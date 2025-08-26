@@ -10,16 +10,15 @@
 		"moduleResolution": "node",
 		"experimentalDecorators": true,
 		"allowSyntheticDefaultImports": true,
-		"target": "es2017",
+		"target": "ESNext",
 		"typeRoots": [
 			"node_modules/@types",
 			"./src/typings"
 		],
 		"lib": [
-			"es2020",
-			"dom"
+			"DOM"
 		],
-		"module": "es2020",
+		"module": "esnext",
 		"baseUrl": "./",
 		"paths": {
 			"stream": [
