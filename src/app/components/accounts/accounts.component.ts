@@ -11,7 +11,7 @@ import {
 	RepresentativeService,
 	WalletService
 } from '../../services'
-import { TranslocoService } from '@ngneat/transloco'
+import { TranslocoService } from '@jsverse/transloco'
 
 @Component({
 	selector: 'app-accounts',
@@ -19,9 +19,9 @@ import { TranslocoService } from '@ngneat/transloco'
 	styleUrls: ['./accounts.component.css']
 })
 export class AccountsComponent implements OnInit {
-	accounts = this.walletService.wallet.accounts;
-	isLedgerWallet = this.walletService.isLedgerWallet();
-	isSingleKeyWallet = this.walletService.isSingleKeyWallet();
+	accounts
+	isLedgerWallet
+	isSingleKeyWallet
 	viewAdvanced = false;
 	newAccountIndex = null;
 
@@ -37,7 +37,11 @@ export class AccountsComponent implements OnInit {
 		private representatives: RepresentativeService,
 		private router: Router,
 		private ledger: LedgerService,
-		private translocoService: TranslocoService) { }
+		private translocoService: TranslocoService) {
+		this.accounts = this.walletService.wallet.accounts
+		this.isLedgerWallet = this.walletService.isLedgerWallet()
+		this.isSingleKeyWallet = this.walletService.isSingleKeyWallet()
+	}
 
 	async ngOnInit () {
 		this.reloadRepWarning$.subscribe(a => {
@@ -109,7 +113,7 @@ export class AccountsComponent implements OnInit {
 		const isSmallViewport = (window.innerWidth < 940)
 
 		if (isSmallViewport === true) {
-			this.walletService.wallet.selectedAccountId = account ? account.id : null
+			this.walletService.wallet.selectedAccountId = account?.id ?? null
 			this.walletService.wallet.selectedAccount = account
 			this.walletService.wallet.selectedAccount$.next(account)
 			this.walletService.saveWalletExport()

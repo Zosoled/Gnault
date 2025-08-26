@@ -9,7 +9,7 @@
 		>
 			<div class="uk-width-expand@s uk-width-1-1">
 				<h2 class="uk-heading-divider uk-text-truncate">
-					{{ 'general.accounts' | transloco }}
+					{{ 'nav.accounts' | transloco }}
 					<a
 						(click)="viewAdvanced = !viewAdvanced"
 						class="uk-text-truncate"
@@ -60,13 +60,13 @@
 						<th
 							scope="col"
 							[class]="{
-            'account-actions-column': true,
-            'table-header-delete-account': true,
-            'uk-width-1-5@m': true,
-            'uk-width-1-4': true,
-            'uk-text-right': true,
-            'hidden-column': ( isSingleKeyWallet || !viewAdvanced )
-          }"
+								'account-actions-column': true,
+								'table-header-delete-account': true,
+								'uk-width-1-5@m': true,
+								'uk-width-1-4': true,
+								'uk-text-right': true,
+								'hidden-column': ( isSingleKeyWallet || !viewAdvanced )
+							}"
 						></th>
 					</tr>
 				</thead>
@@ -79,11 +79,11 @@
 							<ng-container *ngIf="(walletService.wallet.updatingBalance === false) else balanceLoading">
 								<div class="account-amounts-primary uk-width-1-1">
 									<div
-										*ngIf="account.pending.gt(0)"
+										*ngIf="account.receivable.gt(0)"
 										class="incoming-label"
 									>
 										<div class="text-snippet">{{ 'general.new' | transloco }}</div>
-										<div class="text-full"> +{{ account.pending | rai: 'mnano,true' | amountsplit: 0 }}{{ account.pending | rai: 'mnano,true' | amountsplit: 1 }} XNO</div>
+										<div class="text-full">+{{ account.receivable | rai: 'mnano,true' | amountsplit: 0 }}{{ account.receivable | rai: 'mnano,true' | amountsplit: 1 }} XNO</div>
 									</div>
 									<span
 										class="amounts"
@@ -148,14 +148,16 @@
 													class="account-index"
 													*ngIf="viewAdvanced"
 												><span>#</span>{{ account.index }}</div>
-												<div class="account-label">{{ account.addressBookName
-                        ? account.addressBookName
-                        : (
-                            viewAdvanced
-                          ? ('general.account' | transloco)
-                          : ('general.account' | transloco) + ' #' + account.index
-                        )
-                      }}</div>
+												<div class="account-label">
+													{{ account.addressBookName
+														? account.addressBookName
+														: (
+															viewAdvanced
+																? ('general.account' | transloco)
+																: ('general.account' | transloco) + ' #' + account.index
+															)
+													}}
+												</div>
 											</div>
 											<div class="nano-address-clickable nano-address-monospace uk-text-truncate">
 												<app-nano-account-id
@@ -199,10 +201,10 @@
 							<ng-template [ngTemplateOutlet]="accountAmounts"></ng-template>
 						</td>
 						<td [class]="{
-            'account-actions-column': true,
-            'uk-text-right': true,
-            'hidden-column': ( isSingleKeyWallet || !viewAdvanced )
-          }">
+							'account-actions-column': true,
+							'uk-text-right': true,
+							'hidden-column': ( isSingleKeyWallet || !viewAdvanced )
+						}">
 							<div class="uk-float-right">
 								<ng-template [ngTemplateOutlet]="accountActions"></ng-template>
 							</div>
@@ -212,8 +214,8 @@
 						<td
 							colspan="4"
 							style="text-align: center;"
-						>{{ 'accounts.you-dont-have-any-accounts-yet.1' | transloco }} <a (click)="createAccount()">{{ 'accounts.you-dont-have-any-accounts-yet.2-link' | transloco }}</a>
-							{{ 'accounts.you-dont-have-any-accounts-yet.3' | transloco }}
+						>
+							{{ 'accounts.you-dont-have-any-accounts-yet.1' | transloco }} <a (click)="createAccount()">{{ 'accounts.you-dont-have-any-accounts-yet.2-link' | transloco }}</a> {{ 'accounts.you-dont-have-any-accounts-yet.3' | transloco }}
 						</td>
 					</tr>
 				</tbody>
