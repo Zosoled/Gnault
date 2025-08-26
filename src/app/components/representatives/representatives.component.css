@@ -6,7 +6,8 @@
 	vertical-align: 2px;
 }
 
-.representative-health-column-header, .representative-health-column {
+.representative-health-column-header,
+.representative-health-column {
 	min-width: 120px;
 }
 

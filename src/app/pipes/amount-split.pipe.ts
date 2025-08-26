@@ -1,29 +1,29 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core'
 
 @Pipe({
-  name: 'amountsplit'
+	name: 'amountsplit'
 })
 export class AmountSplitPipe implements PipeTransform {
-  transform(input: string, idx: number): string {
-    const splitAmount = input.split('.')[idx];
+	transform (input: string, idx: number): string {
+		const splitAmount = input.split('.')[idx]
 
-    if (idx === 0) {
-      // Integer
-      return splitAmount.replace('BTC ', '');
-    }
+		if (idx === 0) {
+			// Integer
+			return splitAmount.replace('BTC ', '')
+		}
 
-    // Fractional
+		// Fractional
 
-    if (splitAmount == null) {
-      return '';
-    }
+		if (splitAmount == null) {
+			return ''
+		}
 
-    const fractionalAmount = splitAmount.replace(/0+$/g, '');
+		const fractionalAmount = splitAmount.replace(/0+$/g, '')
 
-    if (fractionalAmount === '') {
-      return '';
-    }
+		if (fractionalAmount === '') {
+			return ''
+		}
 
-    return ( '.' + fractionalAmount );
-  }
+		return ('.' + fractionalAmount)
+	}
 }

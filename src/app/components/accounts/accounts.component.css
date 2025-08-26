@@ -3,7 +3,8 @@
 	min-width: 50px;
 }
 
-th.hidden-column, td.hidden-column {
+th.hidden-column,
+td.hidden-column {
 	display: none;
 }
 

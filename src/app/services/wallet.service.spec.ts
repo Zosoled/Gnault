@@ -1,15 +1,15 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { TestBed, inject } from '@angular/core/testing'
 
-import { WalletService } from './wallet.service';
+import { WalletService } from './wallet.service'
 
 describe('WalletService', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [WalletService]
-    });
-  });
+	beforeEach(() => {
+		TestBed.configureTestingModule({
+			providers: [WalletService]
+		})
+	})
 
-  it('should be created', inject([WalletService], (service: WalletService) => {
-    expect(service).toBeTruthy();
-  }));
-});
+	it('should be created', inject([WalletService], (service: WalletService) => {
+		expect(service).toBeTruthy()
+	}))
+})

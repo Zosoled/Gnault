@@ -2,7 +2,7 @@
 	display: flex;
 	flex-direction: row;
 
-	> .column {
+	>.column {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
@@ -16,6 +16,7 @@
 
 			flex-basis: 40px;
 			max-width: 40px;
+
 			&.identicons-enabled {
 				flex-basis: 50px;
 				max-width: 50px;
@@ -60,7 +61,7 @@
 						left: 3px;
 					}
 
-					> .type-icon {
+					>.type-icon {
 						position: absolute;
 
 						.vertical-line {
@@ -97,7 +98,8 @@
 				}
 			}
 
-			.type-icon.rep-change, .type-icon-container.rep-change {
+			.type-icon.rep-change,
+			.type-icon-container.rep-change {
 				color: #A478E3;
 			}
 		}
@@ -111,7 +113,7 @@
 				color: #A478E3;
 			}
 
-			> .action {
+			>.action {
 				font-weight: 500;
 				font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 				font-size: 16px;
@@ -124,27 +126,29 @@
 			}
 
 			/* Space between */
-			> .action + .amount {
+			>.action+.amount {
 				margin-top: 5px;
 			}
 
-			> .amount {
+			>.amount {
 				line-height: 1;
 
-				> .amount-integer, > .amount-fractional, > .currency-name {
+				>.amount-integer,
+				>.amount-fractional,
+				>.currency-name {
 					font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 					font-size: 13px;
 				}
 
-				> .amount-integer {
+				>.amount-integer {
 					font-weight: 700;
 				}
 
-				> .amount-fractional {
+				>.amount-fractional {
 					font-weight: 500;
 				}
 
-				> .currency-name {
+				>.currency-name {
 					font-weight: 400;
 					margin-left: 5px;
 				}
@@ -156,7 +160,7 @@
 			flex-shrink: 0;
 			align-items: flex-end;
 
-			> .account {
+			>.account {
 				font-weight: 500;
 				font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 				font-size: 14px;
@@ -165,11 +169,11 @@
 			}
 
 			/* Space between */
-			> .account + .date {
+			>.account+.date {
 				margin-top: 7px;
 			}
 
-			> .date {
+			>.date {
 				font-size: 14px;
 				line-height: 1;
 			}

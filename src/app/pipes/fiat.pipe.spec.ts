@@ -1,8 +1,8 @@
-import { FiatPipe } from './fiat.pipe';
+import { FiatPipe } from './fiat.pipe'
 
 describe('FiatPipe', () => {
-  it('create an instance', () => {
-    const pipe = new FiatPipe();
-    expect(pipe).toBeTruthy();
-  });
-});
+	it('create an instance', () => {
+		const pipe = new FiatPipe()
+		expect(pipe).toBeTruthy()
+	})
+})

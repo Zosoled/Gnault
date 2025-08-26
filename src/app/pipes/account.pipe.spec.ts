@@ -1,8 +1,8 @@
-import { AccountPipe } from './account.pipe';
+import { AccountPipe } from './account.pipe'
 
 describe('AccountPipe', () => {
-  it('create an instance', () => {
-    const pipe = new AccountPipe();
-    expect(pipe).toBeTruthy();
-  });
-});
+	it('create an instance', () => {
+		const pipe = new AccountPipe()
+		expect(pipe).toBeTruthy()
+	})
+})

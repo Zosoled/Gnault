@@ -1,8 +1,8 @@
-import { CurrencySymbolPipe } from './currency-symbol.pipe';
+import { CurrencySymbolPipe } from './currency-symbol.pipe'
 
 describe('CurrencySymbolPipe', () => {
-  it('create an instance', () => {
-    const pipe = new CurrencySymbolPipe();
-    expect(pipe).toBeTruthy();
-  });
-});
+	it('create an instance', () => {
+		const pipe = new CurrencySymbolPipe()
+		expect(pipe).toBeTruthy()
+	})
+})

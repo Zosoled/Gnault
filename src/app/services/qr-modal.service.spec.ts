@@ -1,16 +1,16 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing'
 
-import { QrModalService } from './qr-modal.service';
+import { QrModalService } from './qr-modal.service'
 
 describe('QrModalService', () => {
-  let service: QrModalService;
+	let service: QrModalService
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(QrModalService);
-  });
+	beforeEach(() => {
+		TestBed.configureTestingModule({})
+		service = TestBed.inject(QrModalService)
+	})
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-});
+	it('should be created', () => {
+		expect(service).toBeTruthy()
+	})
+})

@@ -1,15 +1,15 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { TestBed, inject } from '@angular/core/testing'
 
-import { DeeplinkService } from './deeplink.service';
+import { DeeplinkService } from './deeplink.service'
 
 describe('DeeplinkService', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [DeeplinkService]
-    });
-  });
+	beforeEach(() => {
+		TestBed.configureTestingModule({
+			providers: [DeeplinkService]
+		})
+	})
 
-  it('should be created', inject([DeeplinkService], (service: DeeplinkService) => {
-    expect(service).toBeTruthy();
-  }));
-});
+	it('should be created', inject([DeeplinkService], (service: DeeplinkService) => {
+		expect(service).toBeTruthy()
+	}))
+})
