@@ -66,7 +66,7 @@ export class PowService {
 			hash,
 			work: null,
 			promise: this.getDeferredPromise(),
-			multiplier,
+			multiplier: multiplier,
 		}
 		this.PoWPool.push(queueItem)
 		this.processQueue()
@@ -95,14 +95,24 @@ export class PowService {
 		this.powAlert$.next(false) // extra safety to ensure the alert is always reset
 
 		let powSource = this.appSettings.settings.powSource
+		const multiplierSource: number = this.appSettings.settings.multiplierSource
+		let localMultiplier: number = 1
+
+		if (powSource === 'client' || powSource === 'custom') {
+			if (multiplierSource > 1) { // use manual difficulty
+				localMultiplier = multiplierSource
+			} else { // use default requested difficulty
+				localMultiplier = queueItem.multiplier
+			}
+		}
 
 		const result = { state: null, work: '' }
-		let workServer
+		let workServer, multiplier
 		switch (powSource) {
 			// generate work locally
 			case 'client': {
 				try {
-					result.work = await this.getPowFromClient(queueItem.hash, queueItem.multiplier)
+					result.work = await this.getPowFromClient(queueItem.hash, localMultiplier)
 					result.state = workState.success
 				} catch (state) {
 					result.state = state
@@ -112,12 +122,17 @@ export class PowService {
 			// generate work remotely after setting up server settings and falling through to default case
 			case 'server': {
 				workServer ??= ''
+				multiplier ??= queueItem.multiplier
 			}
 			case 'custom': {
 				workServer ??= this.appSettings.settings.customWorkServer
+				// Check all known APIs and return true if there is no match. Then allow local PoW mutliplier
+				multiplier ??= this.appSettings.knownApiEndpoints.every(endpointUrl => !workServer.includes(endpointUrl))
+					? localMultiplier
+					: queueItem.multiplier
 			}
 			default: {
-				const work = await this.getPowFromServer(queueItem.hash, queueItem.multiplier, workServer)
+				const work = await this.getPowFromServer(queueItem.hash, multiplier, workServer)
 				if (work) {
 					result.work = work
 					result.state = workState.success
@@ -152,9 +167,10 @@ export class PowService {
 	 */
 	async getPowFromServer (hash, multiplier, workServer = '') {
 		const newThreshold = this.util.nano.difficultyFromMultiplier(multiplier, baseThreshold)
-		const serverString = workServer === '' ? 'external' : 'custom'
-		console.log('Generating work with multiplier ' + multiplier + ' at threshold ' +
-			newThreshold + ' using ' + serverString + ' server for hash: ', hash)
+		const serverString = workServer === ''
+			? 'external'
+			: 'custom'
+		console.log(`Generating work with multiplier ${multiplier} at threshold ${newThreshold} using ${serverString} server for hash: `, hash)
 		return await this.api.workGenerate(hash, newThreshold, workServer)
 			.then(result => result.work)
 			.catch(async err => {

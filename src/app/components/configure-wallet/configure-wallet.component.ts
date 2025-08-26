@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core'
 import { WalletService, NotificationService, RepresentativeService } from '../../services'
 import { ActivatedRoute, Router } from '@angular/router'
-import * as bip39 from 'bip39'
 import { LedgerService, LedgerStatus } from '../../services/ledger.service'
 import { QrModalService } from '../../services/qr-modal.service'
 import { UtilService } from '../../services/util.service'
-import { wallet } from 'nanocurrency-web'
-import { TranslocoService } from '@ngneat/transloco'
+import { Wallet } from 'libnemo'
+import { TranslocoService } from '@jsverse/transloco'
 
 enum panels {
 	'landing',
@@ -16,6 +15,7 @@ enum panels {
 	'backup',
 	'final',
 }
+
 
 const INDEX_MAX = 4294967295 // seed index
 
@@ -27,8 +27,8 @@ const INDEX_MAX = 4294967295 // seed index
 export class ConfigureWalletComponent implements OnInit {
 	panels = panels;
 	activePanel = panels.landing;
-	wallet = this.walletService.wallet;
-	isConfigured = this.walletService.isConfigured;
+	wallet
+	isConfigured
 	isNewWallet = true;
 	hasConfirmedBackup = false;
 	importSeed = '';
@@ -54,13 +54,15 @@ export class ConfigureWalletComponent implements OnInit {
 	importSeedBip39MnemonicPasswordModel = '';
 	walletPasswordModel = '';
 	walletPasswordConfirmModel = '';
+	validatePassword = false;
+	validatePasswordConfirm = false;
 	validIndex = true;
 	indexMax = INDEX_MAX;
 
 	selectedImportOption = 'seed';
 
 	ledgerStatus = LedgerStatus;
-	ledger = this.ledgerService.ledger;
+	ledger
 
 	constructor (
 		private router: ActivatedRoute,
@@ -71,6 +73,9 @@ export class ConfigureWalletComponent implements OnInit {
 		private ledgerService: LedgerService,
 		private util: UtilService,
 		private translocoService: TranslocoService) {
+		this.wallet = this.walletService.wallet
+		this.isConfigured = this.walletService.isConfigured
+		this.ledger = this.ledgerService.ledger
 		if (this.route.getCurrentNavigation().extras.state && this.route.getCurrentNavigation().extras.state.seed) {
 			this.activePanel = panels.import
 			this.importSeedModel = this.route.getCurrentNavigation().extras.state.seed
@@ -84,7 +89,7 @@ export class ConfigureWalletComponent implements OnInit {
 	}
 
 	async ngOnInit () {
-		const exampleSeedBytes = this.util.account.generateSeedBytes()
+		const exampleSeedBytes = globalThis.crypto.getRandomValues(new Uint8Array(32))
 		const exampleSeedFull = this.util.hex.fromUint8(exampleSeedBytes)
 
 		let exampleSeedTrimmed = ''
@@ -93,8 +98,8 @@ export class ConfigureWalletComponent implements OnInit {
 			exampleSeedTrimmed = exampleSeedFull.slice(trimIdx, trimIdx + 6)
 			trimIdx += 2
 		} while (
-			(trimIdx < 30)
-			&& (exampleSeedTrimmed.match(/^([0-9]+|[A-F]+)$/g) !== null)
+			trimIdx < 30
+			&& exampleSeedTrimmed.match(/^([0-9]+|[A-F]+)$/g) !== null
 		)
 
 		// must have both letters and numbers
@@ -105,13 +110,15 @@ export class ConfigureWalletComponent implements OnInit {
 		this.exampleExpandedPrivateKey = exampleSeedFull.slice(trimIdx + 12, trimIdx + 18) + '...'
 
 		// array of mnemonic words
-		this.exampleMnemonicWords = bip39.entropyToMnemonic(exampleSeedFull).split(' ')
+		const exampleWallet = await Wallet.load('BIP-44', '', exampleSeedFull)
+		await exampleWallet.unlock('')
+		this.exampleMnemonicWords = exampleWallet.mnemonic.split(' ')
 	}
 
 	async importExistingWallet () {
 		this.notifications.sendInfo(`Starting to scan the first 20 accounts and importing them if they have been used...`, { length: 7000 })
 		this.route.navigate(['accounts']) // load accounts and watch them update in real-time
-		await this.walletService.createWalletFromSeed(this.importSeed)
+		await this.walletService.createWalletFromSeed(this.newPassword, this.importSeed)
 		this.importSeed = ''
 		this.storePassword()
 
@@ -220,7 +227,9 @@ export class ConfigureWalletComponent implements OnInit {
 
 					// Try and decode the mnemonic
 					try {
-						const newSeed = bip39.mnemonicToEntropy(mnemonic)
+						const newWallet = await Wallet.load('BLAKE2b', '', mnemonic)
+						await newWallet.unlock('')
+						const newSeed = newWallet.seed
 						if (!newSeed || newSeed.length !== 64 || !this.util.nano.isValidSeed(newSeed)) return this.notifications.sendError(`Mnemonic is invalid, double check it!`)
 						this.importSeed = newSeed.toUpperCase() // Force uppercase, for consistency
 					} catch (err) {
@@ -238,7 +247,9 @@ export class ConfigureWalletComponent implements OnInit {
 					return this.notifications.sendError(`Invalid import option`)
 				}
 
-				this.keyString = this.isExpanded ? this.importExpandedKeyModel : this.importPrivateKeyModel
+				this.keyString = this.isExpanded
+					? this.importExpandedKeyModel
+					: this.importPrivateKeyModel
 				this.keyString = this.keyString.trim()
 				if (this.isExpanded && this.keyString.length === 128) {
 					// includes deterministic R value material which we ignore
@@ -251,21 +262,27 @@ export class ConfigureWalletComponent implements OnInit {
 				}
 			} else if (this.selectedImportOption === 'bip39-mnemonic') {
 				// If bip39, import wallet as a single private key
-				if (!bip39.validateMnemonic(this.importSeedBip39MnemonicModel)) {
-					return this.notifications.sendError(`Mnemonic is invalid, double check it!`)
+				let bipWallet
+				try {
+					bipWallet = await Wallet.load('BIP-44', '', this.importSeedBip39MnemonicModel)
+					await bipWallet.unlock('')
+				} catch (err) {
+					return this.notifications.sendError(err.message)
 				}
 				if (!this.validIndex) {
 					return this.notifications.sendError(`The account index is invalid, double check it!`)
 				}
 
 				// convert mnemonic to bip39 seed
-				const bip39Seed = this.importSeedBip39MnemonicPasswordModel !== ''
-					? this.util.string.mnemonicToSeedSync(this.importSeedBip39MnemonicModel, this.importSeedBip39MnemonicPasswordModel).toString('hex')
-					: this.util.string.mnemonicToSeedSync(this.importSeedBip39MnemonicModel).toString('hex')
+				const bip39Seed = this.importSeedBip39MnemonicPasswordModel !== '' ?
+					this.util.string.mnemonicToSeedSync(this.importSeedBip39MnemonicModel, this.importSeedBip39MnemonicPasswordModel).toString('hex') :
+					this.util.string.mnemonicToSeedSync(this.importSeedBip39MnemonicModel).toString('hex')
 
 				// derive private key from bip39 seed using the account index provided
-				const accounts = wallet.accounts(bip39Seed, Number(this.importSeedBip39MnemonicIndexModel),
-					Number(this.importSeedBip39MnemonicIndexModel))
+				const accounts = await bipWallet.accounts(
+					Number(this.importSeedBip39MnemonicIndexModel),
+					Number(this.importSeedBip39MnemonicIndexModel)
+				)
 				this.keyString = accounts[0].privateKey
 				this.isExpanded = false
 			}
@@ -278,9 +295,10 @@ export class ConfigureWalletComponent implements OnInit {
 	}
 
 	async createNewWallet () {
-		const seedBytes = this.util.account.generateSeedBytes()
-		this.newWalletSeed = this.util.hex.fromUint8(seedBytes)
-		this.newWalletMnemonic = bip39.entropyToMnemonic(this.newWalletSeed)
+		const newWallet = await Wallet.load('BIP-44', '', this.newWalletSeed)
+		await newWallet.unlock('')
+		this.newWalletSeed = newWallet.seed
+		this.newWalletMnemonic = newWallet.mnemonic
 
 		// Split the seed up so we can show 4 per line
 		const words = this.newWalletMnemonic.split(' ')
@@ -301,7 +319,7 @@ export class ConfigureWalletComponent implements OnInit {
 		if (!this.hasConfirmedBackup) {
 			return this.notifications.sendWarning(`Please confirm you have saved a wallet backup!`)
 		}
-		this.walletService.createNewWallet(this.newWalletSeed)
+		this.walletService.createNewWallet(this.newPassword)
 		this.storePassword()
 		this.newWalletSeed = ''
 		this.newWalletMnemonicLines = []
@@ -311,11 +329,11 @@ export class ConfigureWalletComponent implements OnInit {
 	}
 
 	saveWalletPassword () {
-		if (this.walletPasswordConfirmModel !== this.walletPasswordModel) {
-			return this.notifications.sendError(`Password confirmation does not match, try again!`)
-		}
 		if (this.walletPasswordModel.length < 6) {
-			return this.notifications.sendWarning(`Password length must be at least 6`)
+			return this.notifications.sendWarning(this.translocoService.translate('configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long', { minCharacters: 6 }))
+		}
+		if (this.walletPasswordConfirmModel !== this.walletPasswordModel) {
+			return this.notifications.sendError(this.translocoService.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match'))
 		}
 		this.newPassword = this.walletPasswordModel
 		this.walletPasswordModel = ''
@@ -332,7 +350,6 @@ export class ConfigureWalletComponent implements OnInit {
 	}
 
 	storePassword () {
-		this.walletService.wallet.password = this.newPassword
 		this.newPassword = ''
 	}
 

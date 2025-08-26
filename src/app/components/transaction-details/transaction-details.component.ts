@@ -6,7 +6,7 @@ import { NotificationService } from '../../services/notification.service'
 import { AppSettingsService } from '../../services/app-settings.service'
 import BigNumber from 'bignumber.js'
 import { AddressBookService } from '../../services/address-book.service'
-import { TranslocoService } from '@ngneat/transloco'
+import { TranslocoService } from '@jsverse/transloco'
 
 @Component({
 	selector: 'app-transaction-details',
@@ -50,8 +50,7 @@ export class TransactionDetailsComponent implements OnInit {
 	async ngOnInit () {
 		this.routerSub = this.router.events.subscribe(event => {
 			if (event instanceof ChildActivationEnd) {
-				// Reload the state when navigating to itself from the transactions page
-				this.loadTransaction()
+				this.loadTransaction() // Reload the state when navigating to itself from the transactions page
 			}
 		})
 
@@ -90,7 +89,7 @@ export class TransactionDetailsComponent implements OnInit {
 
 		this.transactionJSON = JSON.stringify(hashData.contents, null, 4)
 
-		this.isUnconfirmedBlock = (hashData.confirmed === 'false') ? true : false
+		this.isUnconfirmedBlock = hashData.confirmed === 'false'
 		this.blockHeight = hashData.height
 
 		const HASH_ONLY_ZEROES = '0000000000000000000000000000000000000000000000000000000000000000'
@@ -131,10 +130,7 @@ export class TransactionDetailsComponent implements OnInit {
 			this.amountRaw = new BigNumber(hashData.amount).mod(this.nano)
 		}
 
-		if (
-			(hashData.successor != null)
-			&& (hashData.successor !== HASH_ONLY_ZEROES)
-		) {
+		if (hashData.successor != null && hashData.successor !== HASH_ONLY_ZEROES) {
 			this.successorHash = hashData.successor
 		}
 

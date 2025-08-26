@@ -45,8 +45,10 @@
 		"the-account-at-this-index-is-already-loaded": "The account at this index is already loaded",
 		"unable-to-add-new-account": "Unable to add new account: {{ error }}",
 		"unable-to-delete-account": "Unable to delete account: {{ error }}",
-		"wallet-is-locked": "Wallet is locked",
+		"wallet-locked": "Wallet locked",
 		"wallet-is-not-configured": "Wallet is not configured",
+		"wallet-unlocked": "Wallet unlocked",
+		"wrong-password": "Wrong password. Please try again.",
 		"you-can-only-track-up-to-x-accounts-at-a-time": "You can only track up to {{ accounts }} accounts at a time.",
 		"you-dont-have-any-accounts-yet": {
 			"1": "You don't have any accounts yet,",
@@ -72,7 +74,7 @@
 		"export-address-book": "Export Address Book",
 		"export-all-address-book-entries-to-a-file-or-qr-code-url": "Export all address book entries to a file or QR Code/URL.",
 		"export-as-file": "Export As File",
-		"if-you-need-a-qr-use-fewer-entries-or-shorter-aliases": "If you need a QR, use fewer entries or shorter aliases.",
+		"if-you-need-a-qr-use-fewer-entries-or-shorter-names": "If you need a QR, use fewer entries or shorter names.",
 		"import-address-book": "Import Address Book",
 		"import-address-book-entries-from-a-file": "Import address book entries from a file.",
 		"import-export": "Import / Export",
@@ -84,7 +86,6 @@
 		"the-balance-will-be-displayed-in-the-address-book": "The balance will be displayed in the address book.",
 		"this-name-is-already-in-use-please-use-a-unique-name": "This name is already in use! Please use a unique name",
 		"this-name-is-reserved-for-wallet-accounts-without-a-label": "This name is reserved for wallet accounts without a label",
-		"this-name-is-reserved-for-decentralized-aliases": "Names starting with @ are reserved for decentralized aliases",
 		"track-balance": "Track Balance",
 		"track-transactions": "Track Transactions",
 		"unable-to-delete-entry": "Unable to delete entry: {{ message }}",
@@ -160,12 +161,6 @@
 		},
 		"custom-api-server-has-an-invalid-address": "Custom API Server has an invalid address.",
 		"custom-update-server-has-an-invalid-address": "Custom Update Server has an invalid address.",
-		"decentralized-aliases": "Decentralized Aliases",
-		"decentralized-aliases-options": {
-			"disabled": "Disabled",
-			"enabled": "Enabled - Allow External Requests to Alias Domains"
-		},
-		"decentralized-aliases-require-external-requests": "Decentralized aliases require external requests to alias domains. When you try to lookup the address of @madeline@example.com, the domain example.com may record your IP address.",
 		"default-representative": "Default Representative",
 		"default-representative-is-not-a-valid-account": "Default representative is not a valid account",
 		"delete-all-data": "Delete ALL Data",
@@ -191,6 +186,9 @@
 		"lock-after-inactivity": "Lock After Inactivity",
 		"min-receive-amount": "Min. Receive Amount",
 		"minimum-nano-amount-to-receive-transactions-below-this": "Minimum XNO amount to receive. Transactions below this amount will be ignored by the wallet both for receiving and in the transactions list.  Set to blank or 0 to accept all transactions.",
+		"multiplier-options": {
+			"default-1x-or-1-64x": "Default (1x or 1/64x)"
+		},
 		"night-mode": "Night Mode",
 		"night-mode-options": {
 			"disabled": "Disabled",
@@ -199,11 +197,12 @@
 		"node-stats": "Node Stats",
 		"note-since-this-server-only-notifies-about-new-transactions": "Note: Since this server only notifies about new transactions, most of the wallet functions fine without it.",
 		"optional-increased-work-for-transaction-priority-during": "Deprecated since v22.0",
-		"pending-options": {
+		"receivable-options": {
 			"automatic-largest-amount-first": "Automatic - Largest Amount First",
 			"automatic-oldest-transaction-first": "Automatic - Oldest Transaction First",
 			"manual": "Manual"
 		},
+		"pow-multiplier": "PoW Multiplier",
 		"pow-options": {
 			"external-custom-server": "External - Use custom work server",
 			"external-selected-server": "External - Use selected node",
@@ -259,6 +258,7 @@
 	},
 	"configure-wallet": {
 		"new-wallet": {
+			"configure-new-wallet": "Configure New Wallet",
 			"copy-secret-recovery-mnemonic": "Copy Secret Recovery Mnemonic",
 			"copy-secret-recovery-seed": "Copy Secret Recovery Seed",
 			"create-wallet": "Create Wallet",
@@ -291,10 +291,10 @@
 	},
 	"general": {
 		"account": "Account",
-		"accounts": "Accounts",
 		"actions": "Actions",
 		"address": "Address",
 		"address-book": "Address Book",
+		"advanced-tools": "Advanced Tools",
 		"amount": "Amount",
 		"app-settings": "App Settings",
 		"avoid": "Avoid",
@@ -314,11 +314,13 @@
 		"date": "Date",
 		"edit": "Edit",
 		"loading": "Loading...",
+		"manage-wallet": "Manage Wallet",
 		"name": "Name",
 		"network": "Network",
 		"new": "New",
 		"no": "No",
 		"node-version": "Node Version",
+		"optional": "optional",
 		"peers-stake-required": "Peers Stake Required",
 		"peers-stake-total": "Peers Stake Total",
 		"receive": "Receive",
@@ -327,7 +329,6 @@
 		"representatives": "Representatives",
 		"save": "Save",
 		"scan-qr-code": "Scan QR Code",
-		"send": "Send",
 		"server": "Server",
 		"settings": "Settings",
 		"show-more": "Show More",
@@ -335,9 +336,36 @@
 		"successfully-copied-to-clipboard": "Successfully copied to clipboard!",
 		"uncemented-blocks": "Uncemented Blocks",
 		"unknown": "Unknown",
+		"unlock": "Unlock",
 		"view-details": "View Details",
 		"view-on-network-explorer": "View on Network Explorer",
+		"wallet-must-be-unlocked": "Wallet must be unlocked",
 		"yes": "Yes"
+	},
+	"nav": {
+		"accounts": "Accounts",
+		"receive": "Receive",
+		"send": "Send"
+	},
+	"receive": {
+		"all-accounts": "All Accounts",
+		"amount-of-x": "Amount of {{ currency }}",
+		"copied": "Copied!",
+		"copy-address": "Copy address",
+		"incoming-transactions": "Incoming Transactions",
+		"minimum-receive-is-set-to": {
+			"1": "Minimum Receive is set to",
+			"2": ", transactions below this amount will be hidden."
+		},
+		"nano-received": "Nano Received",
+		"receive-nano": "Receive Nano",
+		"received": "Received!",
+		"receiving": "Receiving...",
+		"requested-amount": "Requested Amount",
+		"select-an-account-to-view-qr-code": "Select an account to view QR code",
+		"successfully-received-nano": "Successfully received nano!",
+		"there-was-a-problem-receiving-the-transaction-try-manually": "There was a problem receiving the transaction, try manually!",
+		"unable-to-find-receiving-account": "Unable to find receiving account in wallet"
 	},
 	"representative-search": {
 		"representative-list-results": "Representative List Results"

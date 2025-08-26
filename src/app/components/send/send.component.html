@@ -3,9 +3,7 @@
 	uk-grid
 >
 	<div class="uk-width-1-1">
-		<h2 class="uk-heading-divider">
-			{{ (sendDestinationType === 'own-address') ? 'Transfer Nano Between Own Accounts' : 'Send Nano' }}
-		</h2>
+		<h2 class="uk-heading-divider">{{ (sendDestinationType === 'own-address') ? 'Transfer Nano Between Own Accounts' : 'Send Nano' }}</h2>
 		<!-- Send Panel -->
 		<div
 			uk-grid
@@ -45,9 +43,7 @@
 										<option
 											*ngFor="let account of accounts"
 											[value]="account.id"
-										>{{account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
-											{{ account.id | squeeze }} ({{ account.balance | rai: 'mnano,true' | amountsplit: 0 }}{{ account.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO)
-										</option>
+										>{{account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }} {{ account.id | squeeze }} ({{ account.balance | rai: 'mnano,true' | amountsplit: 0 }}{{ account.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO)</option>
 									</select>
 								</div>
 							</div>
@@ -71,52 +67,22 @@
 										<input
 											(blur)="validateDestination()"
 											(input)="onDestinationAddressInput()"
-											(keydown.enter)="lookupAlias()"
 											(focus)="searchAddressBook()"
 											[(ngModel)]="toAccountID"
 											[ngClass]="{ 'uk-form-success': toAccountStatus === 2, 'uk-form-danger': toAccountStatus === 0 }"
 											class="uk-input"
 											id="form-horizontal-text2"
 											type="text"
-											placeholder="Address to send to / Alias / nano:.."
+											placeholder="Address to send to / nano:.."
 											autocomplete="off"
 										>
 										<div
-											*ngIf="(aliasResults$ | async).length || (addressBookResults$ | async).length"
-											[hidden]="!showAddressBook && !isDestinationAccountAlias"
+											*ngIf="(addressBookResults$ | async).length"
+											[hidden]="!showAddressBook"
 											class="nlt-dropdown uk-animation-slide-down-small uk-width-1-1 uk-card uk-card-default uk-card-body uk-position-absolute"
 											style="z-index: 15000"
 										>
 											<ul class="uk-nav uk-nav-default">
-												<ng-container *ngIf="(aliasResults$ | async).length">
-													<li class="uk-nav-header">Alias Lookup</li>
-													<li class="uk-nav-divider"></li>
-													<li *ngIf="(aliasLookupInProgress.domain !== '')">
-														<a>
-															<span
-																class="spinner uk-margin-small-right"
-																uk-spinner="ratio: 0.5;"
-															></span><span class="text-half-muted">Looking up {{ aliasLookupInProgress.fullText }}...</span>
-														</a>
-													</li>
-													<ng-container *ngIf="(aliasLookupInProgress.domain === '')">
-														<li *ngFor="let alias of aliasResults$ | async">
-															<a
-																(click)="lookupAlias()"
-																class="uk-padding-remove-bottom"
-															>
-																<span class="text-half-muted">Press Enter or click here to request alias from</span>
-															</a>
-															<a (click)="lookupAlias()">
-																<span class="uk-text-primary">{{ alias.domain }}</span>
-															</a>
-														</li>
-													</ng-container>
-													<li
-														class="uk-nav-divider"
-														*ngIf="(addressBookResults$ | async).length"
-													></li>
-												</ng-container>
 												<ng-container *ngIf="(addressBookResults$ | async).length">
 													<li class="uk-nav-header">Address Book Results</li>
 													<li class="uk-nav-divider"></li>
@@ -130,19 +96,13 @@
 								</div>
 								<div
 									class="uk-form-controls"
-									*ngIf="addressBookMatch || addressAliasMatch"
+									*ngIf="addressBookMatch"
 								>
 									<div
 										class="uk-inline uk-width-auto uk-margin-small-right"
 										*ngIf="addressBookMatch"
 									>
 										<span class="account-label blue uk-margin-small-top">{{ addressBookMatch }}</span>
-									</div>
-									<div
-										class="uk-inline uk-width-auto"
-										*ngIf="addressAliasMatch"
-									>
-										<span class="account-label alias uk-margin-small-top">{{ addressAliasMatch }}</span>
 									</div>
 								</div>
 							</div>
@@ -171,9 +131,7 @@
 											<option
 												[value]="account.id"
 												*ngIf="account.id !== fromAccountID"
-											>{{account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
-												{{ account.id | squeeze }} ({{ account.balance | rai: 'mnano,true' | amountsplit: 0 }}{{ account.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO)
-											</option>
+											>{{account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }} {{ account.id | squeeze }} ({{ account.balance | rai: 'mnano,true' | amountsplit: 0 }}{{ account.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO)</option>
 										</ng-container>
 									</select>
 								</div>
@@ -207,7 +165,7 @@
 														(input)="syncFiatPrice()"
 														type="number"
 														step="any"
-														placeholder="Amount of {{ selectedAmount.name }}"
+														placeholder="Amount of XNO"
 														maxlength="40"
 													>
 												</div>
@@ -274,14 +232,14 @@
 								<span
 									class="spinner"
 									uk-spinner="ratio: 0.5;"
-								></span>Preparing transaction</button>
+								></span> Preparing transaction </button>
 							<button
 								class="only-on-small-viewports uk-button uk-button-secondary uk-width-1-1@s uk-width-auto@m uk-float-right nlt-icon-button"
 								[class.uk-disabled]="preparingTransaction"
 								type="button"
 								(click)="preparingTransaction ? return : openQR('account1','account')"
 								*ngIf="(sendDestinationType !== 'own-address')"
-							>Scan QR code</button>
+							> Scan QR code </button>
 						</div>
 					</div>
 				</div>

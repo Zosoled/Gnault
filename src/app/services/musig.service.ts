@@ -3,8 +3,8 @@ import { UtilService } from './util.service'
 import { NotificationService } from './notification.service'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { Observable } from 'rxjs'
-import * as nanocurrency from 'nanocurrency'
-import { environment } from 'environments/environment'
+import { Account } from 'libnemo'
+import { environment } from '../../environments/environment'
 const base32 = require('nano-base32')
 
 @Injectable({
@@ -128,11 +128,12 @@ export class MusigService {
 		}
 	}
 
-	aggregate (storedAccounts, runWithPubkeys = null) {
+	async aggregate (storedAccounts, runWithPubkeys = null) {
 		let addresses = []
 		if (runWithPubkeys && this.savedPublicKeys?.length > 1) {
 			for (const pubKey of this.savedPublicKeys) {
-				addresses.push(nanocurrency.deriveAddress(pubKey, { useNanoPrefix: true }))
+				const account = await Account.fromPublicKey(pubKey)
+				addresses.push(account.address)
 			}
 		} else {
 			addresses = storedAccounts
@@ -197,7 +198,7 @@ export class MusigService {
 		return { 'multisig': fullAddressFinal, 'pubkey': aggPubkey }
 	}
 
-	multiSign (privateKey, blockHash, inputMultisigData) {
+	async multiSign (privateKey, blockHash, inputMultisigData) {
 		let multisigAccount = ''
 		// Stage 0 (init)
 		if (!this.musigStagePtr) {
@@ -267,7 +268,8 @@ export class MusigService {
 					this.savedPublicKeys.push(input.substring(66, 130).toLowerCase())
 				}
 				// Add the public key from self
-				const pub = nanocurrency.derivePublicKey(privateKey)
+				const account = await Account.fromPrivateKey(privateKey)
+				const pub = account.publicKey
 				if (this.savedPublicKeys.includes(pub.toLowerCase())) {
 					throw new Error('You must use different private keys for each participant!')
 				}
@@ -275,7 +277,7 @@ export class MusigService {
 
 				const blockhash = this.util.hex.toUint8(blockHash)
 				const blockhashPtr = this.copyToWasm(blockhash)
-				const result = this.aggregate('', (pubkeys, pubkeysLen) => {
+				const result = await this.aggregate('', (pubkeys, pubkeysLen) => {
 					const flags = 0 // Set to 1 if private key is a raw/expanded scalar (unusual)
 					newStagePtr = this.wasm.musig_stage1(this.musigStagePtr, privateKeyPtr, pubkeys, pubkeysLen, flags,
 						blockhashPtr, blockhash.length, protocolInputPtrs, protocolInputs.length, outPtr, null, outPtr + 1)

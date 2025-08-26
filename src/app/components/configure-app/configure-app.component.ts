@@ -1,4 +1,6 @@
 import { Component, OnInit, Renderer2 } from '@angular/core'
+import { BehaviorSubject } from 'rxjs'
+import { TranslocoService } from '@jsverse/transloco'
 import { WalletService } from '../../services/wallet.service'
 import { NotificationService } from '../../services/notification.service'
 import { AppSettingsService, PoWSource } from '../../services/app-settings.service'
@@ -10,11 +12,9 @@ import { ApiService } from '../../services/api.service'
 import { WebsocketService } from '../../services/websocket.service'
 import { NodeService } from '../../services/node.service'
 import { UtilService } from '../../services/util.service'
-import { BehaviorSubject } from 'rxjs'
 import { RepresentativeService } from '../../services/representative.service'
 import { NinjaService } from '../../services/ninja.service'
 import { QrModalService } from '../../services/qr-modal.service'
-import { TranslocoService } from '@ngneat/transloco'
 
 @Component({
 	selector: 'app-configure-app',
@@ -23,6 +23,27 @@ import { TranslocoService } from '@ngneat/transloco'
 })
 
 export class ConfigureAppComponent implements OnInit {
+	wallet
+	languages
+	selectedLanguage
+	denominations
+	selectedDenomination
+	storageOptions
+	selectedStorage
+	currencies
+	selectedCurrency
+	nightModeOptions
+	selectedNightModeOption
+	identiconOptions
+	selectedIdenticonOption
+	inactivityOptions
+	selectedInactivityMinutes
+	powOptions: { name: string, value: PoWSource }[]
+	selectedPoWOption
+	multiplierOptions
+	selectedMultiplierOption: number
+	receivableOptions
+	selectedReceivableOption
 
 	constructor (
 		private walletService: WalletService,
@@ -40,144 +61,138 @@ export class ConfigureAppComponent implements OnInit {
 		private ninja: NinjaService,
 		private renderer: Renderer2,
 		private qrModalService: QrModalService,
-		private translocoService: TranslocoService) { }
-	wallet = this.walletService.wallet;
+		private translocoService: TranslocoService) {
+		this.wallet = this.walletService.wallet
 
-	languages = this.translocoService.getAvailableLangs() as [{ id: string, label: string }];
-	selectedLanguage = this.languages[0].id;
+		this.languages = this.translocoService.getAvailableLangs() as [{ id: string, label: string }]
+		this.selectedLanguage = this.languages[0].id
 
-	denominations = [
-		{ name: 'XNO', value: 'mnano' },
-		{ name: 'knano', value: 'knano' },
-		{ name: 'nano', value: 'nano' },
-	];
-	selectedDenomination = this.denominations[0].value;
+		this.denominations = [
+			{ name: 'XNO', value: 'mnano' },
+			{ name: 'knano', value: 'knano' },
+			{ name: 'nano', value: 'nano' },
+		]
+		this.selectedDenomination = this.denominations[0].value
 
-	storageOptions = [
-		{ name: this.translocoService.translate('configure-app.storage-options.browser-local-storage'), value: 'localStorage' },
-		{ name: this.translocoService.translate('configure-app.storage-options.none'), value: 'none' },
-	];
-	selectedStorage = this.storageOptions[0].value;
+		this.storageOptions = [
+			{ name: this.translocoService.translate('configure-app.storage-options.browser-local-storage'), value: 'localStorage' },
+			{ name: this.translocoService.translate('configure-app.storage-options.none'), value: 'none' },
+		]
+		this.selectedStorage = this.storageOptions[0].value
 
-	currencies = [
-		{ name: this.translocoService.translate('configure-app.currencies.none'), value: '' },
-		{ name: 'USD - US Dollar', value: 'USD' },
-		{ name: 'BTC - Bitcoin', value: 'BTC' },
-		{ name: 'AUD - Australian Dollar', value: 'AUD' },
-		{ name: 'BRL - Brazilian Real', value: 'BRL' },
-		{ name: 'CAD - Canadian Dollar', value: 'CAD' },
-		{ name: 'CHF - Swiss Franc', value: 'CHF' },
-		{ name: 'CLP - Chilean Peso', value: 'CLP' },
-		{ name: 'CNY - Chinese Yuan', value: 'CNY' },
-		{ name: 'CZK - Czech Koruna', value: 'CZK' },
-		{ name: 'DKK - Danish Krown', value: 'DKK' },
-		{ name: 'EUR - Euro', value: 'EUR' },
-		{ name: 'GBP - British Pound', value: 'GBP' },
-		{ name: 'HKD - Hong Kong Dollar', value: 'HKD' },
-		{ name: 'HUF - Hungarian Forint', value: 'HUF' },
-		{ name: 'IDR - Indonesian Rupiah', value: 'IDR' },
-		{ name: 'ILS - Israeli New Shekel', value: 'ILS' },
-		{ name: 'INR - Indian Rupee', value: 'INR' },
-		{ name: 'JPY - Japanese Yen', value: 'JPY' },
-		{ name: 'KRW - South Korean Won', value: 'KRW' },
-		{ name: 'MXN - Mexican Peso', value: 'MXN' },
-		{ name: 'MYR - Malaysian Ringgit', value: 'MYR' },
-		{ name: 'NOK - Norwegian Krone', value: 'NOK' },
-		{ name: 'NZD - New Zealand Dollar', value: 'NZD' },
-		{ name: 'PHP - Philippine Piso', value: 'PHP' },
-		{ name: 'PKR - Pakistani Rupee', value: 'PKR' },
-		{ name: 'PLN - Polish Zloty', value: 'PLN' },
-		{ name: 'RUB - Russian Ruble', value: 'RUB' },
-		{ name: 'SEK - Swedish Krona', value: 'SEK' },
-		{ name: 'SGD - Singapore Dollar', value: 'SGD' },
-		{ name: 'THB - Thai Baht', value: 'THB' },
-		{ name: 'TRY - Turkish Lira', value: 'TRY' },
-		{ name: 'TWD - New Taiwan Dollar', value: 'TWD' },
-		{ name: 'ZAR - South African Rand', value: 'ZAR' },
-	];
-	selectedCurrency = this.currencies[0].value;
+		this.currencies = [
+			{ name: this.translocoService.translate('configure-app.currencies.none'), value: '' },
+			{ name: 'USD - US Dollar', value: 'USD' },
+			{ name: 'BTC - Bitcoin', value: 'BTC' },
+			{ name: 'AUD - Australian Dollar', value: 'AUD' },
+			{ name: 'BRL - Brazilian Real', value: 'BRL' },
+			{ name: 'CAD - Canadian Dollar', value: 'CAD' },
+			{ name: 'CHF - Swiss Franc', value: 'CHF' },
+			{ name: 'CLP - Chilean Peso', value: 'CLP' },
+			{ name: 'CNY - Chinese Yuan', value: 'CNY' },
+			{ name: 'CZK - Czech Koruna', value: 'CZK' },
+			{ name: 'DKK - Danish Krown', value: 'DKK' },
+			{ name: 'EUR - Euro', value: 'EUR' },
+			{ name: 'GBP - British Pound', value: 'GBP' },
+			{ name: 'HKD - Hong Kong Dollar', value: 'HKD' },
+			{ name: 'HUF - Hungarian Forint', value: 'HUF' },
+			{ name: 'IDR - Indonesian Rupiah', value: 'IDR' },
+			{ name: 'ILS - Israeli New Shekel', value: 'ILS' },
+			{ name: 'INR - Indian Rupee', value: 'INR' },
+			{ name: 'JPY - Japanese Yen', value: 'JPY' },
+			{ name: 'KRW - South Korean Won', value: 'KRW' },
+			{ name: 'MXN - Mexican Peso', value: 'MXN' },
+			{ name: 'MYR - Malaysian Ringgit', value: 'MYR' },
+			{ name: 'NOK - Norwegian Krone', value: 'NOK' },
+			{ name: 'NZD - New Zealand Dollar', value: 'NZD' },
+			{ name: 'PHP - Philippine Piso', value: 'PHP' },
+			{ name: 'PKR - Pakistani Rupee', value: 'PKR' },
+			{ name: 'PLN - Polish Zloty', value: 'PLN' },
+			{ name: 'RUB - Russian Ruble', value: 'RUB' },
+			{ name: 'SEK - Swedish Krona', value: 'SEK' },
+			{ name: 'SGD - Singapore Dollar', value: 'SGD' },
+			{ name: 'THB - Thai Baht', value: 'THB' },
+			{ name: 'TRY - Turkish Lira', value: 'TRY' },
+			{ name: 'TWD - New Taiwan Dollar', value: 'TWD' },
+			{ name: 'ZAR - South African Rand', value: 'ZAR' },
+		]
+		this.selectedCurrency = this.currencies[0].value
 
-	nightModeOptions = [
-		{ name: this.translocoService.translate('configure-app.night-mode-options.enabled'), value: 'enabled' },
-		{ name: this.translocoService.translate('configure-app.night-mode-options.disabled'), value: 'disabled' },
-	];
-	selectedNightModeOption = this.nightModeOptions[0].value;
+		this.nightModeOptions = [
+			{ name: this.translocoService.translate('configure-app.night-mode-options.enabled'), value: 'enabled' },
+			{ name: this.translocoService.translate('configure-app.night-mode-options.disabled'), value: 'disabled' },
+		]
+		this.selectedNightModeOption = this.nightModeOptions[0].value
 
-	identiconOptions = [
-		{ name: this.translocoService.translate('configure-app.identicon-options.none'), value: 'none' },
-		{ name: this.translocoService.translate('configure-app.identicon-options.nanoidenticons-by-keerifox'), value: 'nanoidenticons' },
-		{ name: this.translocoService.translate('configure-app.identicon-options.natricon-by-appditto'), value: 'natricon' },
-	];
-	selectedIdenticonOption = this.identiconOptions[0].value;
+		this.identiconOptions = [
+			{ name: this.translocoService.translate('configure-app.identicon-options.none'), value: 'none' },
+			{ name: this.translocoService.translate('configure-app.identicon-options.nanoidenticons-by-keerifox'), value: 'nanoidenticons' },
+			{ name: this.translocoService.translate('configure-app.identicon-options.natricon-by-appditto'), value: 'natricon' },
+		]
+		this.selectedIdenticonOption = this.identiconOptions[0].value
 
-	inactivityOptions = [
-		{ name: this.translocoService.translate('configure-app.identicon-options.never'), value: 0 },
-		{ name: this.translocoService.translate('configure-app.identicon-options.1-minute'), value: 1 },
-		{ name: this.translocoService.translate('configure-app.identicon-options.x-minutes', { minutes: 5 }), value: 5 },
-		{ name: this.translocoService.translate('configure-app.identicon-options.x-minutes', { minutes: 15 }), value: 15 },
-		{ name: this.translocoService.translate('configure-app.identicon-options.x-minutes', { minutes: 30 }), value: 30 },
-		{ name: this.translocoService.translate('configure-app.identicon-options.1-hour'), value: 60 },
-		{ name: this.translocoService.translate('configure-app.identicon-options.x-hours', { hours: 6 }), value: 360 },
-	];
-	selectedInactivityMinutes = this.inactivityOptions[4].value;
+		this.inactivityOptions = [
+			{ name: this.translocoService.translate('configure-app.identicon-options.never'), value: 0 },
+			{ name: this.translocoService.translate('configure-app.identicon-options.1-minute'), value: 1 },
+			{ name: this.translocoService.translate('configure-app.identicon-options.x-minutes', { minutes: 5 }), value: 5 },
+			{ name: this.translocoService.translate('configure-app.identicon-options.x-minutes', { minutes: 15 }), value: 15 },
+			{ name: this.translocoService.translate('configure-app.identicon-options.x-minutes', { minutes: 30 }), value: 30 },
+			{ name: this.translocoService.translate('configure-app.identicon-options.1-hour'), value: 60 },
+			{ name: this.translocoService.translate('configure-app.identicon-options.x-hours', { hours: 6 }), value: 360 },
+		]
+		this.selectedInactivityMinutes = this.inactivityOptions[4].values
 
-	powOptions: { name: string, value: PoWSource }[] = [
-		{ name: this.translocoService.translate('configure-app.pow-options.external-selected-server'), value: 'server' },
-		{ name: this.translocoService.translate('configure-app.pow-options.external-custom-server'), value: 'custom' },
-		{ name: this.translocoService.translate('configure-app.pow-options.internal-client'), value: 'client' },
-	];
-	selectedPoWOption = this.powOptions[0].value;
+		this.powOptions = [
+			{ name: this.translocoService.translate('configure-app.pow-options.external-selected-server'), value: 'server' },
+			{ name: this.translocoService.translate('configure-app.pow-options.external-custom-server'), value: 'custom' },
+			{ name: this.translocoService.translate('configure-app.pow-options.internal-client'), value: 'client' },
+		]
+		this.selectedPoWOption = this.powOptions[0].value
 
-	pendingOptions = [
-		{ name: this.translocoService.translate('configure-app.pending-options.automatic-largest-amount-first'), value: 'amount' },
-		{ name: this.translocoService.translate('configure-app.pending-options.automatic-oldest-transaction-first'), value: 'date' },
-		{ name: this.translocoService.translate('configure-app.pending-options.manual'), value: 'manual' },
-	];
-	selectedPendingOption = this.pendingOptions[0].value;
+		this.multiplierOptions = [
+			{ name: this.translocoService.translate('configure-app.multiplier-options.default-1x-or-1-64x'), value: 1 }
+		]
+		this.selectedMultiplierOption = this.multiplierOptions[0].value
 
-	decentralizedAliasesOptions = [
-		{ name: this.translocoService.translate('configure-app.decentralized-aliases-options.disabled'), value: 'disabled' },
-		{ name: this.translocoService.translate('configure-app.decentralized-aliases-options.enabled'), value: 'enabled' },
-	];
-	selectedDecentralizedAliasesOption = this.decentralizedAliasesOptions[0].value;
+		this.receivableOptions = [
+			{ name: this.translocoService.translate('configure-app.receivable-options.automatic-largest-amount-first'), value: 'amount' },
+			{ name: this.translocoService.translate('configure-app.receivable-options.automatic-oldest-transaction-first'), value: 'date' },
+			{ name: this.translocoService.translate('configure-app.receivable-options.manual'), value: 'manual' },
+		]
+		this.selectedReceivableOption = this.receivableOptions[0].value
+	}
 
-	// prefixOptions = [
-	//   { name: 'xrb_', value: 'xrb' },
-	//   { name: 'nano_', value: 'nano' },
-	// ];
-	// selectedPrefix = this.prefixOptions[0].value;
+	serverOptions = []
+	selectedServer = null
 
-	serverOptions = [];
-	selectedServer = null;
+	defaultRepresentative = null
+	representativeResults$ = new BehaviorSubject([])
+	showRepresentatives = false
+	representativeListMatch = ''
+	repStatus = null
+	representativeList = []
 
-	defaultRepresentative = null;
-	representativeResults$ = new BehaviorSubject([]);
-	showRepresentatives = false;
-	representativeListMatch = '';
-	repStatus = null;
-	representativeList = [];
+	serverAPI = null
+	serverAPIUpdated = null
+	serverWS = null
+	serverAuth = null
+	minimumReceive = null
 
-	serverAPI = null;
-	serverAPIUpdated = null;
-	serverWS = null;
-	serverAuth = null;
-	minimumReceive = null;
+	nodeBlockCount = null
+	nodeUnchecked = null
+	nodeCemented = null
+	nodeUncemented = null
+	peersStakeReq = null
+	peersStakeTotal = null
+	nodeVendor = null
+	nodeNetwork = null
+	statsRefreshEnabled = true
+	shouldRandom = null
 
-	nodeBlockCount = null;
-	nodeUnchecked = null;
-	nodeCemented = null;
-	nodeUncemented = null;
-	peersStakeReq = null;
-	peersStakeTotal = null;
-	nodeVendor = null;
-	nodeNetwork = null;
-	statsRefreshEnabled = true;
-	shouldRandom = null;
+	customWorkServer = ''
 
-	customWorkServer = '';
-
-	showServerValues = () => this.selectedServer && this.selectedServer !== 'random' && this.selectedServer !== 'offline';
-	showStatValues = () => this.selectedServer && this.selectedServer !== 'offline';
+	showServerValues = () => this.selectedServer && this.selectedServer !== 'random' && this.selectedServer !== 'offline'
+	showStatValues = () => this.selectedServer && this.selectedServer !== 'offline'
 	showServerConfigs = () => this.selectedServer && this.selectedServer === 'custom';
 
 	async ngOnInit () {
@@ -229,8 +244,8 @@ export class ConfigureAppComponent implements OnInit {
 
 		try {
 			const quorumData = await this.api.confirmationQuorum()
-			this.peersStakeReq = quorumData ? Number(this.util.nano.rawToMnano(quorumData.quorum_delta)).toLocaleString('en-US') : null
-			this.peersStakeTotal = quorumData ? Number(this.util.nano.rawToMnano(quorumData.peers_stake_total)).toLocaleString('en-US') : null
+			this.peersStakeReq = Number(this.util.nano.rawToMnano(quorumData?.quorum_delta)).toLocaleString('en-US') ?? null
+			this.peersStakeTotal = Number(this.util.nano.rawToMnano(quorumData?.peers_stake_total)).toLocaleString('en-US') ?? null
 		} catch { console.warn('Failed to get node stats: confirmation quorum') }
 
 		try {
@@ -246,12 +261,14 @@ export class ConfigureAppComponent implements OnInit {
 		const settings = this.appSettings.settings
 
 		const matchingLanguage = this.languages.find(language => language.id === settings.language)
-		this.selectedLanguage = matchingLanguage.id || this.languages[0].id
+		this.selectedLanguage = matchingLanguage?.id || this.languages[0].id
 
 		const matchingCurrency = this.currencies.find(d => d.value === settings.displayCurrency)
 		this.selectedCurrency = matchingCurrency.value || this.currencies[0].value
 
-		const nightModeOptionString = (settings.lightModeEnabled === true) ? 'disabled' : 'enabled'
+		const nightModeOptionString = settings.lightModeEnabled
+			? 'disabled'
+			: 'enabled'
 		const matchingNightModeOption = this.nightModeOptions.find(d => d.value === nightModeOptionString)
 		this.selectedNightModeOption = matchingNightModeOption.value || this.nightModeOptions[0].value
 
@@ -262,18 +279,18 @@ export class ConfigureAppComponent implements OnInit {
 		this.selectedStorage = matchingStorage.value || this.storageOptions[0].value
 
 		const matchingInactivityMinutes = this.inactivityOptions.find(d => d.value === settings.lockInactivityMinutes)
-		this.selectedInactivityMinutes = matchingInactivityMinutes ? matchingInactivityMinutes.value : this.inactivityOptions[4].value
+		this.selectedInactivityMinutes = matchingInactivityMinutes?.value ?? this.inactivityOptions[4].value
 
 		const matchingPowOption = this.powOptions.find(d => d.value === settings.powSource)
-		this.selectedPoWOption = matchingPowOption ? matchingPowOption.value : this.powOptions[0].value
+		this.selectedPoWOption = matchingPowOption?.value ?? this.powOptions[0].value
+
+		const matchingMultiplierOption = this.multiplierOptions.find(d => d.value === settings.multiplierSource)
+		this.selectedMultiplierOption = matchingMultiplierOption?.value ?? this.multiplierOptions[0].value
 
 		this.customWorkServer = settings.customWorkServer
 
-		const matchingPendingOption = this.pendingOptions.find(d => d.value === settings.pendingOption)
-		this.selectedPendingOption = matchingPendingOption ? matchingPendingOption.value : this.pendingOptions[0].value
-
-		const matchingDecentralizedAliasesOption = this.decentralizedAliasesOptions.find(d => d.value === settings.decentralizedAliasesOption)
-		this.selectedDecentralizedAliasesOption = matchingDecentralizedAliasesOption ? matchingDecentralizedAliasesOption.value : this.decentralizedAliasesOptions[0].value
+		const matchingReceivableOption = this.receivableOptions.find(d => d.value === settings.receivableOption)
+		this.selectedReceivableOption = matchingReceivableOption?.value ?? this.receivableOptions[0].value
 
 		this.serverOptions = this.appSettings.serverOptions
 		this.selectedServer = settings.serverName
@@ -340,13 +357,14 @@ export class ConfigureAppComponent implements OnInit {
 		// ask for user confirmation before clearing the wallet cache
 		if (resaveWallet && newStorage === this.storageOptions[1].value) {
 			const UIkit = window['UIkit']
+			const saveSeedWarning = `<br><b style="font-size: 18px;">${this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed')}</b><br><br><span style="font-size: 18px;"><b>${this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup')}</b></span></p><br>`
 			try {
 				await UIkit.modal.confirm(
 					`<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span>
-          <span style="font-size: 18px;">
-          ${this.translocoService.translate('configure-app.you-are-about-to-disable-storage-of-all-wallet-data-which')}
-          </span><br>
-          ${this.walletService.isConfigured() ? '<br><b style="font-size: 18px;">' + this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') + '</b><br><br><span style="font-size: 18px;"><b>' + this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') + '</b></span></p><br>' : ''}`
+					<span style="font-size: 18px;">
+					${this.translocoService.translate('configure-app.you-are-about-to-disable-storage-of-all-wallet-data-which')}
+					</span><br>
+					${this.walletService.isConfigured() ? saveSeedWarning : ''}`
 				)
 			} catch (err) {
 				// pressing cancel, reset storage setting and interrupt
@@ -357,17 +375,16 @@ export class ConfigureAppComponent implements OnInit {
 		}
 
 		let newPoW = this.selectedPoWOption
-		const pendingOption = this.selectedPendingOption
+		const newMultiplier = this.selectedMultiplierOption
+		const receivableOption = this.selectedReceivableOption
 		let minReceive = null
 		if (this.util.account.isValidNanoAmount(this.minimumReceive)) {
 			minReceive = this.minimumReceive
 		}
 
-		const decentralizedAliasesOption = this.selectedDecentralizedAliasesOption
-
-		// reload pending if threshold changes or if receive priority changes from manual to auto
-		let reloadPending = this.appSettings.settings.minimumReceive !== this.minimumReceive
-			|| (pendingOption !== 'manual' && pendingOption !== this.appSettings.settings.pendingOption)
+		// reload receivable if threshold changes or if receive priority changes from manual to auto
+		let reloadReceivable = this.appSettings.settings.minimumReceive !== this.minimumReceive
+			|| (receivableOption !== 'manual' && receivableOption !== this.appSettings.settings.receivableOption)
 
 		if (this.defaultRepresentative && this.defaultRepresentative.length) {
 			const valid = this.util.account.isValidAccount(this.defaultRepresentative)
@@ -379,20 +396,29 @@ export class ConfigureAppComponent implements OnInit {
 		}
 
 		if (this.appSettings.settings.powSource !== newPoW) {
+			// reset multiplier when not using it to avoid user mistake
+			if (newPoW !== 'client' && newPoW !== 'custom') {
+				this.selectedMultiplierOption = this.multiplierOptions[0].value
+			}
 			// Cancel ongoing PoW if the old method was local PoW
 			if (this.appSettings.settings.powSource === 'client') {
 				// Check if work is ongoing, and cancel it
 				if (this.pow.cancelAllPow(false)) {
-					reloadPending = true // force reload balance => re-work pow
+					reloadReceivable = true // force reload balance => re-work pow
 				}
+			}
+		} else if (newPoW === 'client' && newMultiplier < this.appSettings.settings.multiplierSource) {
+			// Cancel pow and re-work if multiplier is lower than earlier
+			if (this.pow.cancelAllPow(false)) {
+				reloadReceivable = true
 			}
 		}
 
 		// reset work cache so that the new PoW will be used but only if larger than before
-		if (newPoW === 'client') {
+		if (newPoW === 'client' && newMultiplier > this.appSettings.settings.multiplierSource) {
 			// if user accept to reset cache
 			if (await this.clearWorkCache()) {
-				reloadPending = true // force reload balance => re-work pow
+				reloadReceivable = true // force reload balance => re-work pow
 			}
 		}
 
@@ -400,9 +426,9 @@ export class ConfigureAppComponent implements OnInit {
 			walletStore: newStorage,
 			lockInactivityMinutes: Number(this.selectedInactivityMinutes),
 			powSource: newPoW,
+			multiplierSource: Number(this.selectedMultiplierOption),
 			customWorkServer: this.customWorkServer,
-			pendingOption: pendingOption,
-			decentralizedAliasesOption: decentralizedAliasesOption,
+			receivableOption: receivableOption,
 			minimumReceive: minReceive,
 			defaultRepresentative: this.defaultRepresentative || null,
 		}
@@ -413,7 +439,7 @@ export class ConfigureAppComponent implements OnInit {
 		if (resaveWallet) {
 			this.walletService.saveWalletExport() // If swapping the storage engine, resave the wallet
 		}
-		if (reloadPending) {
+		if (reloadReceivable) {
 			this.walletService.reloadBalances()
 		}
 	}
@@ -516,7 +542,9 @@ export class ConfigureAppComponent implements OnInit {
 			this.serverAPIUpdated = null
 			this.serverWS = custom.ws
 			this.serverAuth = custom.auth
-			this.shouldRandom = custom.shouldRandom ? this.translocoService.translate('general.yes') : this.translocoService.translate('general.no')
+			this.shouldRandom = custom.shouldRandom
+				? this.translocoService.translate('general.yes')
+				: this.translocoService.translate('general.no')
 		}
 
 		// reset server stats until updated
@@ -528,7 +556,7 @@ export class ConfigureAppComponent implements OnInit {
 		this.peersStakeTotal = null
 		this.nodeVendor = null
 		this.nodeNetwork = null
-		this.statsRefreshEnabled = newServer === 'random' ? false : true
+		this.statsRefreshEnabled = newServer !== 'random'
 	}
 
 	getRemotePoWOptionName () {
@@ -554,9 +582,7 @@ export class ConfigureAppComponent implements OnInit {
 			this.workPool.clearCache()
 			this.notifications.sendSuccess(this.translocoService.translate('configure-app.successfully-cleared-the-work-cache'))
 			return true
-		} catch (err) {
-			return false
-		}
+		} catch (err) { return false }
 	}
 
 	async clearWalletData () {

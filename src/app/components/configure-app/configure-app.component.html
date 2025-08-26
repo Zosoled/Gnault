@@ -41,7 +41,8 @@
 								<label
 									class="uk-form-label"
 									for="form-horizontal-select"
-								>{{ 'configure-app.fiat-currency' | transloco }} <span
+								>{{ 'configure-app.fiat-currency' | transloco
+									}} <span
 										uk-icon="icon: info;"
 										uk-tooltip
 										[title]="t('configure-app.change-the-currency-pair-used-when-showing-fiat-values')"
@@ -67,7 +68,8 @@
 								<label
 									class="uk-form-label"
 									for="form-horizontal-select"
-								>{{ 'configure-app.night-mode' | transloco }}</label>
+								>{{ 'configure-app.night-mode' | transloco
+									}}</label>
 								<div class="uk-form-controls">
 									<select
 										class="uk-select"
@@ -89,7 +91,8 @@
 								<label
 									class="uk-form-label"
 									for="form-horizontal-select"
-								>{{ 'configure-app.identicons' | transloco }}</label>
+								>{{ 'configure-app.identicons' | transloco
+									}}</label>
 								<div class="uk-form-controls">
 									<select
 										class="uk-select"
@@ -202,14 +205,36 @@
 										placeholder="http://my-work-server:port"
 									>
 									<span class="uk-text-meta">
-										{{ 'configure-app.this-has-to-be-a-valid-work.1' | transloco }}
-										<a
+										{{ 'configure-app.this-has-to-be-a-valid-work.1' | transloco }} <a
 											href="https://docs.nault.cc/2021/02/13/custom-work-server.html"
 											target="_blank"
 											rel="noopener noreferrer"
-										>{{ 'configure-app.this-has-to-be-a-valid-work.2-link-work' | transloco }}</a>
-										{{ 'configure-app.this-has-to-be-a-valid-work.3' | transloco }}
+										>{{ 'configure-app.this-has-to-be-a-valid-work.2-link-work' | transloco }}</a> {{ 'configure-app.this-has-to-be-a-valid-work.3' | transloco }}
 									</span>
+								</div>
+							</div>
+							<div
+								class="uk-margin"
+								*ngIf="selectedPoWOption === 'client' || selectedPoWOption === 'custom'"
+							>
+								<label class="uk-form-label">{{ 'configure-app.pow-multiplier' | transloco }} <span
+										uk-icon="icon: info;"
+										uk-tooltip
+										[title]="t('configure-app.optional-increased-work-for-transaction-priority-during')"
+									></span></label>
+								<div class="uk-form-controls">
+									<div class="uk-inline uk-width-1-1">
+										<select
+											class="uk-select"
+											[(ngModel)]="selectedMultiplierOption"
+										>
+											<option
+												*ngFor="let multiplier of multiplierOptions"
+												[value]="multiplier.value"
+											>{{ multiplier.name
+												}}</option>
+										</select>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -226,12 +251,13 @@
 									<div class="uk-inline uk-width-1-1">
 										<select
 											class="uk-select"
-											[(ngModel)]="selectedPendingOption"
+											[(ngModel)]="selectedReceivableOption"
 										>
 											<option
-												*ngFor="let pending of pendingOptions"
-												[value]="pending.value"
-											>{{ pending.name }}</option>
+												*ngFor="let receivable of receivableOptions"
+												[value]="receivable.value"
+											>{{ receivable.name
+												}}</option>
 										</select>
 									</div>
 								</div>
@@ -264,30 +290,6 @@
 												>
 											</div>
 										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="uk-width-1-1">
-						<div class="uk-form-horizontal">
-							<div class="uk-margin">
-								<label class="uk-form-label">{{ 'configure-app.decentralized-aliases' | transloco }} <span
-										uk-icon="icon: info;"
-										uk-tooltip
-										[title]="t('configure-app.decentralized-aliases-require-external-requests')"
-									></span></label>
-								<div class="uk-form-controls">
-									<div class="uk-inline uk-width-1-1">
-										<select
-											class="uk-select"
-											[(ngModel)]="selectedDecentralizedAliasesOption"
-										>
-											<option
-												*ngFor="let decentralizedAliasesOption of decentralizedAliasesOptions"
-												[value]="decentralizedAliasesOption.value"
-											>{{ decentralizedAliasesOption.name }}</option>
-										</select>
 									</div>
 								</div>
 							</div>
@@ -329,9 +331,7 @@
 											style="z-index: 15000"
 										>
 											<ul class="uk-nav uk-nav-default">
-												<li class="uk-nav-header">
-													{{ 'representative-search.representative-list-results' | transloco }}
-												</li>
+												<li class="uk-nav-header">{{ 'representative-search.representative-list-results' | transloco }}</li>
 												<li class="uk-nav-divider"></li>
 												<li *ngFor="let rep of representativeResults$ | async">
 													<a (click)="selectRepresentative(rep.id)">
@@ -387,7 +387,8 @@
 								<label
 									class="uk-form-label"
 									for="form-horizontal-select"
-								>{{ 'configure-app.server-configuration' | transloco }} <span
+								>{{ 'configure-app.server-configuration' |
+									transloco }} <span
 										uk-icon="icon: info;"
 										uk-tooltip
 										[title]="t('configure-app.change-which-server-is-used-to-communicate-with-the-nano')"
@@ -437,13 +438,11 @@
 											placeholder="https://domain.com/path"
 										>
 										<span class="uk-text-meta">
-											{{ 'configure-app.this-has-to-be-a-valid-rpc.1' | transloco }}
-											<a
+											{{ 'configure-app.this-has-to-be-a-valid-rpc.1' | transloco }} <a
 												href="https://docs.nano.org/commands/rpc-protocol/"
 												target="_blank"
 												rel="noopener noreferrer"
-											>{{ 'configure-app.this-has-to-be-a-valid-rpc.2-link-rpc' | transloco }}</a>
-											{{ 'configure-app.this-has-to-be-a-valid-rpc.3' | transloco }}
+											>{{ 'configure-app.this-has-to-be-a-valid-rpc.2-link-rpc' | transloco }}</a> {{ 'configure-app.this-has-to-be-a-valid-rpc.3' | transloco }}
 										</span>
 									</div>
 								</div>
@@ -480,14 +479,14 @@
 											placeholder="wss://domain.com/path"
 										>
 										<span class="uk-text-meta">
-											{{ 'configure-app.this-has-to-be-a-valid-websocket.1' | transloco }}
-											<a
+											{{ 'configure-app.this-has-to-be-a-valid-websocket.1' | transloco }} <a
 												href="https://docs.nano.org/integration-guides/websockets/#configuration"
 												target="_blank"
 												rel="noopener noreferrer"
-											>{{ 'configure-app.this-has-to-be-a-valid-websocket.2-link-websocket' | transloco }}</a>
-											{{ 'configure-app.this-has-to-be-a-valid-websocket.3' | transloco }}<br>
-											<i>{{ 'configure-app.note-since-this-server-only-notifies-about-new-transactions' | transloco }}</i>
+											>{{ 'configure-app.this-has-to-be-a-valid-websocket.2-link-websocket' |
+												transloco }}</a> {{ 'configure-app.this-has-to-be-a-valid-websocket.3' | transloco }}<br>
+											<i>{{ 'configure-app.note-since-this-server-only-notifies-about-new-transactions' | transloco
+												}}</i>
 										</span>
 									</div>
 								</div>

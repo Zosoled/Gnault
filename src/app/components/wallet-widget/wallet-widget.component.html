@@ -82,7 +82,7 @@
 			></span>
 		</div>
 		<div class="status-labels">
-			<div class="label primary half-muted">Wallet Locked</div>
+			<div class="label primary half-muted">{{ 'accounts.wallet-locked' | transloco }}</div>
 		</div>
 	</div>
 	<div
@@ -132,27 +132,35 @@
 		</div>
 		<div class="uk-modal-body">
 			<input
-				#passwordInput
-				autofocus
 				type="password"
+				minlength="6"
+				id="passwordInput"
+				name="unlockPassword"
+				autofocus
 				[(ngModel)]="unlockPassword"
-				(keyup.enter)="unlockWallet()"
-				[class]="{ 'uk-input': true, 'password-input': true, 'uk-form-danger': !mayAttemptUnlock }"
+				[class]="{ 'form-control': true, 'uk-input': true, 'password-input': true, 'uk-form-danger': !mayAttemptUnlock }"
 				[placeholder]="( mayAttemptUnlock ? 'Enter wallet password' : 'Incorrect password' )"
 				[disabled]="!mayAttemptUnlock"
+				(keyup.enter)="unlockWallet()"
+				(input)="validatePassword=false;"
+				(focusout)="validatePassword=true;"
 			>
+			<span
+				class="password-helper"
+				*ngIf="validatePassword && unlockPassword.length > 0 && unlockPassword.length < 6"
+			>{{ 'configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long' | transloco: { minCharacters: 6 } }}</span>
 		</div>
 		<div class="uk-modal-footer uk-text-right nlt-button-group">
 			<button
 				class="uk-button uk-button-default uk-modal-close"
 				type="button"
-			>Cancel</button>
+			>{{ 'general.cancel' | transloco }}</button>
 			<button
 				class="uk-button uk-button-primary"
 				type="button"
 				(click)="unlockWallet()"
-				[disabled]="!mayAttemptUnlock"
-			>Unlock</button>
+				[disabled]="!mayAttemptUnlock || unlockPassword.length < 6"
+			>{{ 'general.unlock' | transloco }}</button>
 		</div>
 	</div>
 </div>

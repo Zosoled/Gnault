@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { NotificationService } from '../../services/notification.service'
-import * as CryptoJS from 'crypto-js'
-import { WalletService, WalletType } from '../../services/wallet.service'
+import { WalletService, WalletKeyType } from '../../services/wallet.service'
 import { UtilService } from '../../services/util.service'
 
 @Component({
@@ -25,7 +24,7 @@ export class ImportWalletComponent implements OnInit {
 		const importData = this.route.snapshot.fragment
 		const queryData = this.route.snapshot.queryParams
 		if (!importData || !importData.length) {
-			return this.importDataError(`No import data found. Check your link and try again.`)
+			return this.importDataError(`No import data found.  Check your link and try again.`)
 		}
 
 		if ('hostname' in queryData) this.hostname = queryData.hostname
@@ -34,13 +33,13 @@ export class ImportWalletComponent implements OnInit {
 		try {
 			const importBlob = JSON.parse(decodedData)
 			if (!importBlob || (!importBlob.seed && !importBlob.privateKey && !importBlob.expandedKey)) {
-				return this.importDataError(`Bad import data. Check your link and try again.`)
+				return this.importDataError(`Bad import data.  Check your link and try again.`)
 			}
 			this.validImportData = true
 			this.importData = importBlob
 			this.activePanel = 'import'
 		} catch (err) {
-			return this.importDataError(`Unable to decode import data. Check your link and try again.`)
+			return this.importDataError(`Unable to decode import data.  Check your link and try again.`)
 		}
 	}
 
@@ -53,7 +52,7 @@ export class ImportWalletComponent implements OnInit {
 		// Attempt to decrypt the seed value using the password
 		try {
 			await new Promise(resolve => setTimeout(resolve, 500)) // brute force delay
-			let walletType: WalletType
+			let walletType: WalletKeyType
 			let secret = ''
 			if (this.importData.seed) {
 				secret = this.importData.seed

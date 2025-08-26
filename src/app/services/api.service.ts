@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core'
-import { HttpClient } from '@angular/common/http'
-import { HttpHeaders } from '@angular/common/http'
+import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { NodeService } from './node.service'
 import { AppSettingsService } from './app-settings.service'
 import { TxType } from './util.service'
@@ -12,7 +11,7 @@ export class ApiService {
 
 	private async request (action, data, skipError, url = '', validateResponse?): Promise<any> {
 		data.action = action
-		const apiUrl = url === '' ? this.appSettings.settings.serverAPI : url
+		const apiUrl = url || this.appSettings.settings.serverAPI
 		if (!apiUrl) {
 			this.node.setOffline(null) // offline mode
 			return
@@ -36,6 +35,7 @@ export class ApiService {
 					}
 				)
 		}
+		console.log(data)
 		return await this.http.post(apiUrl, data, options).toPromise()
 			.then(res => {
 				if (typeof validateResponse === 'function') {
@@ -91,19 +91,19 @@ export class ApiService {
 	async accountsFrontiers (accounts: string[]): Promise<{ frontiers: any }> {
 		return await this.request('accounts_frontiers', { accounts }, false)
 	}
-	async accountsPending (accounts: string[], count: number = 50): Promise<{ blocks: any }> {
-		return await this.request('accounts_pending', { accounts, count, source: true, include_only_confirmed: true }, false)
+	async accountsReceivable (accounts: string[], count: number = 50): Promise<{ blocks: any }> {
+		return await this.request('accounts_receivable', { accounts, count, source: true, include_only_confirmed: true }, false)
 	}
-	async accountsPendingLimit (accounts: string[], threshold: string, count: number = 50): Promise<{ blocks: any }> {
-		return await this.request('accounts_pending', { accounts, count, threshold, source: true, include_only_confirmed: true }, false)
+	async accountsReceivableLimit (accounts: string[], threshold: string, count: number = 50): Promise<{ blocks: any }> {
+		return await this.request('accounts_receivable', { accounts, count, threshold, source: true, include_only_confirmed: true }, false)
 	}
-	async accountsPendingSorted (accounts: string[], count: number = 50): Promise<{ blocks: any }> {
-		return await this.request('accounts_pending',
+	async accountsReceivableSorted (accounts: string[], count: number = 50): Promise<{ blocks: any }> {
+		return await this.request('accounts_receivable',
 			{ accounts, count, source: true, include_only_confirmed: true, sorting: true }, false
 		)
 	}
-	async accountsPendingLimitSorted (accounts: string[], threshold: string, count: number = 50): Promise<{ blocks: any }> {
-		return await this.request('accounts_pending',
+	async accountsReceivableLimitSorted (accounts: string[], threshold: string, count: number = 50): Promise<{ blocks: any }> {
+		return await this.request('accounts_receivable',
 			{ accounts, count, threshold, source: true, include_only_confirmed: true, sorting: true }, false
 		)
 	}
@@ -115,7 +115,7 @@ export class ApiService {
 	}
 
 	async blocksInfo (blocks): Promise<{ blocks: any, error?: string }> {
-		return await this.request('blocks_info', { hashes: blocks, pending: true, source: true }, false)
+		return await this.request('blocks_info', { hashes: blocks, receivable: true, source: true }, false)
 	}
 	async blockInfo (hash): Promise<any> {
 		return await this.request('block_info', { hash: hash }, false)
@@ -168,19 +168,19 @@ export class ApiService {
 		}
 	}
 	async accountInfo (account): Promise<any> {
-		return await this.request('account_info', { account, pending: true, representative: true, weight: true }, false)
+		return await this.request('account_info', { account, receivable: true, representative: true, weight: true }, false)
 	}
-	async pending (account, count): Promise<any> {
-		return await this.request('pending', { account, count, source: true, include_only_confirmed: true }, false)
+	async receivable (account, count): Promise<any> {
+		return await this.request('receivable', { account, count, source: true, include_only_confirmed: true }, false)
 	}
-	async pendingLimit (account, count, threshold): Promise<any> {
-		return await this.request('pending', { account, count, threshold, source: true, include_only_confirmed: true }, false)
+	async receivableLimit (account, count, threshold): Promise<any> {
+		return await this.request('receivable', { account, count, threshold, source: true, include_only_confirmed: true }, false)
 	}
-	async pendingSorted (account, count): Promise<any> {
-		return await this.request('pending', { account, count, source: true, include_only_confirmed: true, sorting: true }, false)
+	async receivableSorted (account, count): Promise<any> {
+		return await this.request('receivable', { account, count, source: true, include_only_confirmed: true, sorting: true }, false)
 	}
-	async pendingLimitSorted (account, count, threshold): Promise<any> {
-		return await this.request('pending', { account, count, threshold, source: true, include_only_confirmed: true, sorting: true }, false)
+	async receivableLimitSorted (account, count, threshold): Promise<any> {
+		return await this.request('receivable', { account, count, threshold, source: true, include_only_confirmed: true, sorting: true }, false)
 	}
 	async version (): Promise<{
 		rpc_version: number, store_version: number, protocol_version: number, node_vendor: string, network: string,

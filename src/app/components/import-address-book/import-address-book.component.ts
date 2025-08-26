@@ -84,9 +84,9 @@ export class ImportAddressBookComponent implements OnInit {
 				if (!importEntry.originalName) {
 					this.newEntries++
 				} else if (
-					(importEntry.originalName === entryName)
-					&& (importEntry.originalTrackBalance === importEntry.trackBalance)
-					&& (importEntry.originalTrackTransactions === importEntry.trackTransactions)
+					importEntry.originalName === entryName
+					&& importEntry.originalTrackBalance === importEntry.trackBalance
+					&& importEntry.originalTrackTransactions === importEntry.trackTransactions
 				) {
 					this.existingEntries++
 				} else {
@@ -121,10 +121,12 @@ export class ImportAddressBookComponent implements OnInit {
 		// If new entry or any of name, trackTransactions or trackBalance has changed
 		let importedCount = 0
 		for (const entry of this.importData) {
-			if (!entry.originalName || (entry.originalName && (entry.originalName !== entry.name ||
-				entry.originalTrackBalance !== entry.trackBalance || entry.originalTrackTransactions !== entry.trackTransactions))) {
-				await this.addressBook.saveAddress(entry.account, entry.name,
-					entry.trackBalance ? entry.trackBalance : false, entry.trackTransactions ? entry.trackTransactions : false)
+			if (
+				entry.originalName !== entry.name
+				|| entry.originalTrackBalance !== entry.trackBalance
+				|| entry.originalTrackTransactions !== entry.trackTransactions
+			) {
+				await this.addressBook.saveAddress(entry.account, entry.name, entry.trackBalance ?? false, entry.trackTransactions ?? false)
 				importedCount++
 			}
 		}

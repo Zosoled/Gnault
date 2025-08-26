@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core'
-import * as blake from 'blakejs'
-import { BigNumber } from 'bignumber.js'
-import * as nanocurrency from 'nanocurrency'
+import { Account, Blake2b, Tools } from 'libnemo'
+import NanoPow from 'nano-pow'
 
 const nacl = window['nacl']
 const STATE_BLOCK_PREAMBLE = '0000000000000000000000000000000000000000000000000000000000000006'
@@ -46,9 +45,6 @@ export class UtilService {
 	dec = {
 		toHex: decToHex,
 	};
-	big = {
-		add: bigAdd,
-	};
 	string = {
 		isNumeric: isNumeric,
 		mnemonicToSeedSync: mnemonicToSeedSync,
@@ -56,9 +52,6 @@ export class UtilService {
 	account = {
 		generateAccountSecretKeyBytes: generateAccountSecretKeyBytes,
 		generateAccountKeyPair: generateAccountKeyPair,
-		getPublicAccountID: getPublicAccountID,
-		generateSeedBytes: generateSeedBytes,
-		getAccountPublicKey: getAccountPublicKey,
 		getAccountChecksum: getAccountChecksum,
 		setPrefix: setPrefix,
 		isValidAccount: isValidAccount,
@@ -236,13 +229,6 @@ function decToHex (decValue, bytes = null) {
 	return hex
 }
 
-// BigNumber functions
-function bigAdd (input, value) {
-	const insert = new BigNumber(input)
-	const val = new BigNumber(value)
-	return insert.plus(val).toString(10)
-}
-
 /** String Functions **/
 function stringToUint5 (string) {
 	const letter_list = '13456789abcdefghijkmnopqrstuwxyz'.split('')
@@ -274,18 +260,12 @@ function mnemonicToSeedSync (mnemonic, password = null) {
 /** Account Functions **/
 function generateAccountSecretKeyBytes (seedBytes, accountIndex) {
 	const accountBytes = hexToUint8(decToHex(accountIndex, 4))
-	const context = blake.blake2bInit(32)
-	blake.blake2bUpdate(context, seedBytes)
-	blake.blake2bUpdate(context, accountBytes)
-	const newKey = blake.blake2bFinal(context)
-
+	const newKey = new Blake2b(32).update(seedBytes).update(accountBytes).digest()
 	return newKey
 }
 
 function getAccountChecksum (pubkey) {
-	const context = blake.blake2bInit(5)
-	blake.blake2bUpdate(context, pubkey)
-	const out = blake.blake2bFinal(context)
+	const out = new Blake2b(5).update(pubkey).digest()
 	return out.reverse()
 }
 
@@ -293,17 +273,13 @@ function generateAccountKeyPair (accountSecretKeyBytes, expanded = false) {
 	return nacl.sign.keyPair.fromSecretKey(accountSecretKeyBytes, expanded)
 }
 
-function getPublicAccountID (accountPublicKeyBytes, prefix = 'nano') {
-	const accountHex = util.uint8.toHex(accountPublicKeyBytes)
-	const keyBytes = util.uint4.toUint8(util.hex.toUint4(accountHex)) // For some reason here we go from u, to hex, to 4, to 8??
-	const checksum = util.uint5.toString(util.uint4.toUint5(util.uint8.toUint4(blake.blake2b(keyBytes, null, 5).reverse())))
-	const account = util.uint5.toString(util.uint4.toUint5(util.hex.toUint4(`0${accountHex}`)))
-
-	return `${prefix}_${account}${checksum}`
-}
-
 function isValidAccount (account: string): boolean {
-	return nanocurrency.checkAddress(account)
+	try {
+		Account.validate(account)
+		return true
+	} catch (err) {
+		return false
+	}
 }
 
 // Check if a string is a numeric and larger than 0 but less than nano supply
@@ -311,7 +287,7 @@ function isValidNanoAmount (val: string) {
 	// numerics and last character is not a dot and number of dots is 0 or 1
 	const isnum = /^-?\d*\.?\d*$/.test(val)
 	if (isnum && String(val).slice(-1) !== '.') {
-		if (val !== '' && mnanoToRaw(val).gte(1) && nanocurrency.checkAmount(mnanoToRaw(val).toString(10))) {
+		if (val !== '' && isValidAmount(val)) {
 			return true
 		} else {
 			return false
@@ -323,25 +299,7 @@ function isValidNanoAmount (val: string) {
 
 // Check if valid raw amount
 function isValidAmount (val: string) {
-	return nanocurrency.checkAmount(val)
-}
-
-function getAccountPublicKey (account) {
-	if (!isValidAccount(account)) {
-		throw new Error(`Invalid nano account`)
-	}
-	const account_crop = account.length === 64 ? account.substring(4, 64) : account.substring(5, 65)
-	const isValid = /^[13456789abcdefghijkmnopqrstuwxyz]+$/.test(account_crop)
-	if (!isValid) throw new Error(`Invalid nano account`)
-
-	const key_uint4 = array_crop(uint5ToUint4(stringToUint5(account_crop.substring(0, 52))))
-	const hash_uint4 = uint5ToUint4(stringToUint5(account_crop.substring(52, 60)))
-	const key_array = uint4ToUint8(key_uint4)
-	const blake_hash = blake.blake2b(key_array, null, 5).reverse()
-
-	if (!equalArrays(hash_uint4, uint8ToUint4(blake_hash))) throw new Error(`Incorrect checksum`)
-
-	return uint4ToHex(key_uint4)
+	return BigInt(val) > 0n && BigInt(val) < 0xffffffffffffffffffffffffffffffffn
 }
 
 function setPrefix (account, prefix = 'xrb') {
@@ -359,82 +317,83 @@ const mnano = 1000000000000000000000000000000
 const knano = 1000000000000000000000000000
 const nano = 1000000000000000000000000
 function mnanoToRaw (value) {
-	return new BigNumber(value).times(mnano)
+	return Tools.convert(value, 'mnano', 'raw')
 }
 function knanoToRaw (value) {
-	return new BigNumber(value).times(knano)
+	return Tools.convert(value, 'knano', 'raw')
 }
 function nanoToRaw (value) {
-	return new BigNumber(value).times(nano)
+	return Tools.convert(value, 'nano', 'raw')
 }
 function rawToMnano (value) {
-	return new BigNumber(value).div(mnano)
+	return Tools.convert(value, 'raw', 'mnano')
 }
 function rawToKnano (value) {
-	return new BigNumber(value).div(knano)
+	return Tools.convert(value, 'raw', 'knano')
 }
 function rawToNano (value) {
-	return new BigNumber(value).div(nano)
+	return Tools.convert(value, 'raw', 'nano')
 }
 
 /**
  * Nano functions
  */
 function isValidSeed (val: string) {
-	return nanocurrency.checkSeed(val)
+	return /^[A-F0-9]{64}$/i.test(val)
 }
 
 function isValidHash (val: string) {
-	return nanocurrency.checkHash(val)
+	return /^[A-F0-9]{64}$/i.test(val)
 }
 
 function isValidIndex (val: number) {
-	return nanocurrency.checkIndex(val)
+	return val > 0 && val < 2 ** 32 - 1
 }
 
 function isValidSignature (val: string) {
-	return nanocurrency.checkSignature(val)
+	return /^[A-F0-9]{128}$/i.test(val)
 }
 
 function isValidWork (val: string) {
-	return nanocurrency.checkWork(val)
+	return /^[A-F0-9]{16}$/i.test(val)
 }
 
 function validateWork (blockHash: string, threshold: string, work: string) {
-	return nanocurrency.validateWork({ blockHash: blockHash, threshold: threshold, work: work })
+	return NanoPow.work_validate(work, blockHash, { difficulty: threshold })
 }
 
 function hashStateBlock (block: StateBlock) {
-	const balance = new BigNumber(block.balance)
-	if (balance.isNegative() || balance.isNaN()) {
-		throw new Error(`Negative or NaN balance`)
+	const balance = BigInt(block.balance)
+	if (balance < 0n) {
+		throw new Error(`Negative balance`)
 	}
 	let balancePadded = balance.toString(16)
 	while (balancePadded.length < 32) balancePadded = '0' + balancePadded // Left pad with 0's
-	const context = blake.blake2bInit(32, null)
-	blake.blake2bUpdate(context, hexToUint8(STATE_BLOCK_PREAMBLE))
-	blake.blake2bUpdate(context, hexToUint8(getAccountPublicKey(block.account)))
-	blake.blake2bUpdate(context, hexToUint8(block.previous))
-	blake.blake2bUpdate(context, hexToUint8(getAccountPublicKey(block.representative)))
-	blake.blake2bUpdate(context, hexToUint8(balancePadded))
-	blake.blake2bUpdate(context, hexToUint8(block.link))
-	return blake.blake2bFinal(context)
+	return new Blake2b(32)
+		.update(hexToUint8(STATE_BLOCK_PREAMBLE))
+		.update(hexToUint8(Account.load(block.account).publicKey))
+		.update(hexToUint8(block.previous))
+		.update(hexToUint8(Account.load(block.representative).publicKey))
+		.update(hexToUint8(balancePadded))
+		.update(hexToUint8(block.link))
+		.digest()
 }
 
 // Determine new difficulty from base difficulty (hexadecimal string) and a multiplier (float). Returns hex string
 export function difficultyFromMultiplier (multiplier, base_difficulty) {
-	const big64 = new BigNumber(2).pow(64)
-	const big_multiplier = new BigNumber(multiplier)
-	const big_base = new BigNumber(base_difficulty, 16)
-	return big64.minus((big64.minus(big_base).dividedToIntegerBy(big_multiplier))).toString(16)
+	const big64 = 2n ** 64n
+	const big_multiplier = BigInt(multiplier)
+	const big_base = BigInt(`0x${base_difficulty}`)
+	const result = big64 - ((big64 - big_base) / big_multiplier)
+	return result.toString(16)
 }
 
 // Determine new multiplier from base difficulty (hexadecimal string) and target difficulty (hexadecimal string). Returns Number
 export function multiplierFromDifficulty (difficulty, base_difficulty) {
-	const big64 = new BigNumber(2).pow(64)
-	const big_diff = new BigNumber(difficulty, 16)
-	const big_base = new BigNumber(base_difficulty, 16)
-	return big64.minus(big_base).dividedBy(big64.minus(big_diff)).toNumber()
+	const big64 = 2n ** 64n
+	const big_diff = BigInt(`0x${difficulty}`)
+	const big_base = BigInt(`0x${base_difficulty}`)
+	return Number(big64 - big_base) / Number(big64 - big_diff)
 }
 
 // shuffle any array
@@ -457,15 +416,6 @@ function shuffle (array) {
 	return array
 }
 
-function array_crop (array) {
-	const length = array.length - 1
-	const cropped_array = new Uint8Array(length)
-	for (let i = 0; i < length; i++) {
-		cropped_array[i] = array[i + 1]
-	}
-	return cropped_array
-}
-
 function equalArrays (array1, array2) {
 	if (array1.length !== array2.length) {
 		return false
@@ -484,10 +434,6 @@ function findWithAttr (array, attr, value) {
 		}
 	}
 	return -1
-}
-
-function generateSeedBytes () {
-	return nacl.randomBytes(32)
 }
 
 const util = {
@@ -512,9 +458,6 @@ const util = {
 	dec: {
 		toHex: decToHex,
 	},
-	big: {
-		add: bigAdd,
-	},
 	string: {
 		isNumeric: isNumeric,
 		mnemonicToSeedSync: mnemonicToSeedSync,
@@ -522,9 +465,6 @@ const util = {
 	account: {
 		generateAccountSecretKeyBytes: generateAccountSecretKeyBytes,
 		generateAccountKeyPair: generateAccountKeyPair,
-		getPublicAccountID: getPublicAccountID,
-		generateSeedBytes: generateSeedBytes,
-		getAccountPublicKey: getAccountPublicKey,
 		getAccountChecksum: getAccountChecksum,
 		setPrefix: setPrefix,
 		isValidAccount: isValidAccount,

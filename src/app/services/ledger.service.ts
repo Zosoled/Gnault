@@ -10,6 +10,7 @@ import { NotificationService } from './notification.service'
 import { environment } from '../../environments/environment'
 import { DesktopService } from './desktop.service'
 import { AppSettingsService } from './app-settings.service'
+import { Wallet } from 'libnemo'
 
 export const STATUS_CODES = {
 	SECURITY_STATUS_NOT_SATISFIED: 0x6982,
@@ -65,8 +66,8 @@ export class LedgerService {
 	supportsBluetooth = false;
 	supportsUSB = false;
 
-	transportMode: 'USB' | 'HID' | 'Bluetooth' = 'USB';
-	DynamicTransport: typeof TransportUSB | typeof TransportHID | typeof TransportBLE = TransportUSB;
+	transportMode: 'USB' | 'HID' | 'Bluetooth'
+	DynamicTransport: typeof TransportUSB | typeof TransportHID | typeof TransportBLE
 
 	ledgerStatus$: Subject<{ status: string, statusText: string }> = new Subject();
 	desktopMessage$ = new Subject();
@@ -192,8 +193,6 @@ export class LedgerService {
 
 	}
 
-
-
 	async getLedgerAccountDesktop (accountIndex, showOnScreen) {
 		if (this.queryingDesktopLedger) {
 			throw new Error(`Already querying desktop device, please wait`)
@@ -266,130 +265,144 @@ export class LedgerService {
 
 
 	/**
-	 * Main ledger loading function.  Can be called multiple times to attempt a reconnect.
+	 * Main ledger loading function. Can be called multiple times to attempt a reconnect.
 	 * @param {boolean} hideNotifications
 	 * @returns {Promise<any>}
 	 */
 	async loadLedger (hideNotifications = false) {
-		return new Promise(async (resolve, reject) => {
-
-			// Desktop is handled completely differently.  Send a message for status instead of setting anything up
-			if (this.isDesktop) {
-				if (!this.desktop.send('ledger', { event: 'get-ledger-status', data: { bluetooth: this.transportMode === 'Bluetooth' } })) {
-					reject(new Error(`Electron\'s IPC was not loaded`))
-				}
-
-				// Any response will be handled by the configureDesktop() function, which pipes responses into this observable
-				const sub = this.ledgerStatus$.subscribe(newStatus => {
-					if (newStatus.status === LedgerStatus.READY) {
-						resolve(true)
-					} else if (newStatus.statusText.includes('No compatible USB Bluetooth 4.0 device found') || newStatus.statusText.includes('Could not start scanning')) {
-						this.supportsBluetooth = false
-						reject(newStatus.statusText)
-					} else {
-						reject(new Error(newStatus.statusText || `Unable to load desktop Ledger device`))
-					}
-					sub.unsubscribe()
-				}, reject)
-				return
-			}
-
-			if (!this.ledger.transport) {
-
-				// If in USB mode, detect best transport option
-				if (this.transportMode !== 'Bluetooth') {
-					this.detectUsbTransport()
-					this.appSettings.setAppSetting('ledgerReconnect', 'usb')
-				} else {
-					this.appSettings.setAppSetting('ledgerReconnect', 'bluetooth')
-				}
-
-				try {
-					await this.loadTransport()
-				} catch (err) {
-					if (err.name !== 'TransportOpenUserCancelled') {
-						console.log(`Error loading ${this.transportMode} transport `, err)
-						this.ledger.status = LedgerStatus.NOT_CONNECTED
-						this.ledgerStatus$.next({ status: this.ledger.status, statusText: `Unable to load Ledger transport: ${err.message || err}` })
-						if (!hideNotifications) {
-							this.notifications.sendWarning(`Ledger connection failed. Make sure your Ledger is unlocked.  Restart the nano app on your Ledger if the error persists`)
-						}
-					}
-					this.resetLedger()
-					resolve(false)
-				}
-			}
-
-			if (!this.ledger.transport || !this.ledger.nano) {
-				return resolve(false)
-			}
-
-			let resolved = false
-
-			// Set up a timeout when things are not ready
-			setTimeout(() => {
-				if (resolved) return
-				console.log(`Timeout expired, sending not connected`)
-				this.ledger.status = LedgerStatus.NOT_CONNECTED
-				this.ledgerStatus$.next({ status: this.ledger.status, statusText: `Unable to detect Nano Ledger application (Timeout)` })
-				if (!hideNotifications) {
-					this.notifications.sendWarning(`Unable to connect to the Ledger device.  Make sure it is unlocked and the nano application is open`)
-				}
-				resolved = true
-				return resolve(false)
-			}, 10000)
-
-			// Try to load the app config
-			try {
-				const ledgerConfig = await this.ledger.nano.getAppConfiguration()
-				resolved = true
-
-				if (!ledgerConfig) return resolve(false)
-			} catch (err) {
-				console.log(`App config error: `, err)
-				this.ledger.status = LedgerStatus.NOT_CONNECTED
-				this.ledgerStatus$.next({ status: this.ledger.status, statusText: `Unable to load Nano App configuration: ${err.message || err}` })
-				if (err.statusText === 'HALTED') {
-					this.resetLedger()
-				}
-				if (!hideNotifications && !resolved) {
-					this.notifications.sendWarning(`Unable to connect to the Ledger device.  Make sure your Ledger is unlocked.  Restart the nano app on your Ledger if the error persists`)
-				}
-				resolved = true
-				return resolve(false)
-			}
-
-			// Attempt to load account 0 - which confirms the app is unlocked and ready
-			try {
-				const accountDetails = await this.getLedgerAccount(0)
-				this.ledger.status = LedgerStatus.READY
-				this.ledgerStatus$.next({ status: this.ledger.status, statusText: `Nano Ledger application connected` })
-
-				if (!this.pollingLedger) {
-					this.pollingLedger = true
-					this.pollLedgerStatus()
-				}
-			} catch (err) {
-				console.log(`Error on account details: `, err)
-				if (err.statusCode === STATUS_CODES.SECURITY_STATUS_NOT_SATISFIED) {
-					this.ledger.status = LedgerStatus.LOCKED
-					if (!hideNotifications) {
-						this.notifications.sendWarning(`Ledger device locked.  Unlock and open the nano application`)
-					}
-				}
-			}
-
-			resolve(true)
-		}).catch(err => {
-			console.log(`error when loading ledger `, err)
-			if (!hideNotifications) {
-				this.notifications.sendWarning(`Error loading Ledger device: ${typeof err === 'string' ? err : err.message}`, { length: 6000 })
-			}
-
-			return null
-		})
-
+		try {
+			const wallet = await LedgerWallet.create()
+			const result = await wallet.ledger.connect()
+			this.ledgerStatus$.next({ status: result, statusText: result.toLowerCase() })
+		} catch (err) {
+			console.warn(err)
+		}
 	}
+	// async loadLedger(hideNotifications = false) {
+
+
+	//   return new Promise(async (resolve, reject) => {
+
+	//     // Desktop is handled completely differently.  Send a message for status instead of setting anything up
+	//     if (this.isDesktop) {
+	//       if (!this.desktop.send('ledger', { event: 'get-ledger-status', data: { bluetooth: this.transportMode === 'Bluetooth' } })) {
+	//         reject(new Error(`Electron\'s IPC was not loaded`));
+	//       }
+
+	//       // Any response will be handled by the configureDesktop() function, which pipes responses into this observable
+	//       const sub = this.ledgerStatus$.subscribe(newStatus => {
+	//         if (newStatus.status === LedgerStatus.READY) {
+	//           resolve(true);
+	//         } else if (newStatus.statusText.includes('No compatible USB Bluetooth 4.0 device found') || newStatus.statusText.includes('Could not start scanning')) {
+	//           this.supportsBluetooth = false;
+	//           reject(newStatus.statusText);
+	//         } else {
+	//           reject(new Error(newStatus.statusText || `Unable to load desktop Ledger device`));
+	//         }
+	//         sub.unsubscribe();
+	//       }, reject);
+	//       return;
+	//     }
+
+	//     if (!this.ledger.transport) {
+
+	//       // If in USB mode, detect best transport option
+	//       if (this.transportMode !== 'Bluetooth') {
+	//         this.detectUsbTransport();
+	//         this.appSettings.setAppSetting('ledgerReconnect', 'usb');
+	//       } else {
+	//         this.appSettings.setAppSetting('ledgerReconnect', 'bluetooth');
+	//       }
+
+	//       try {
+	//         await this.loadTransport();
+	//       } catch (err) {
+	//         if (err.name !== 'TransportOpenUserCancelled') {
+	//           console.log(`Error loading ${this.transportMode} transport `, err);
+	//           this.ledger.status = LedgerStatus.NOT_CONNECTED;
+	//           this.ledgerStatus$.next({ status: this.ledger.status, statusText: `Unable to load Ledger transport: ${err.message || err}` });
+	//           if (!hideNotifications) {
+	//             this.notifications.sendWarning(`Ledger connection failed. Make sure your Ledger is unlocked.  Restart the nano app on your Ledger if the error persists`);
+	//           }
+	//         }
+	//         this.resetLedger();
+	//         resolve(false);
+	//       }
+	//     }
+
+	//     if (!this.ledger.transport || !this.ledger.nano) {
+	//       return resolve(false);
+	//     }
+
+	//     let resolved = false;
+
+	//     // Set up a timeout when things are not ready
+	//     setTimeout(() => {
+	//       if (resolved) return;
+	//       console.log(`Timeout expired, sending not connected`);
+	//       this.ledger.status = LedgerStatus.NOT_CONNECTED;
+	//       this.ledgerStatus$.next({ status: this.ledger.status, statusText: `Unable to detect Nano Ledger application (Timeout)` });
+	//       if (!hideNotifications) {
+	//         this.notifications.sendWarning(`Unable to connect to the Ledger device.  Make sure it is unlocked and the nano application is open`);
+	//       }
+	//       resolved = true;
+	//       return resolve(false);
+	//     }, 10000);
+
+	//     // Try to load the app config
+	//     try {
+	//       const ledgerConfig = await this.ledger.nano.getAppConfiguration();
+	//       resolved = true;
+
+	//       if (!ledgerConfig) return resolve(false);
+	//     } catch (err) {
+	//       console.log(`App config error: `, err);
+	//       this.ledger.status = LedgerStatus.NOT_CONNECTED;
+	//       this.ledgerStatus$.next({ status: this.ledger.status, statusText: `Unable to load Nano App configuration: ${err.message || err}` });
+	//       if (err.statusText === 'HALTED') {
+	//         this.resetLedger();
+	//       }
+	//       if (!hideNotifications && !resolved) {
+	//         this.notifications.sendWarning(`Unable to connect to the Ledger device.  Make sure your Ledger is unlocked.  Restart the nano app on your Ledger if the error persists`);
+	//       }
+	//       resolved = true;
+	//       return resolve(false);
+	//     }
+
+	//     // Attempt to load account 0 - which confirms the app is unlocked and ready
+	//     try {
+	//       const accountDetails = await this.getLedgerAccount(0);
+	//       this.ledger.status = LedgerStatus.READY;
+	//       this.ledgerStatus$.next({ status: this.ledger.status, statusText: `Nano Ledger application connected` });
+
+	//       if (!this.pollingLedger) {
+	//         this.pollingLedger = true;
+	//         this.pollLedgerStatus();
+	//       }
+	//     } catch (err) {
+	//       console.log(`Error on account details: `, err);
+	//       if (err.statusCode === STATUS_CODES.SECURITY_STATUS_NOT_SATISFIED) {
+	//         this.ledger.status = LedgerStatus.LOCKED;
+	//         if (!hideNotifications) {
+	//           this.notifications.sendWarning(`Ledger device locked.  Unlock and open the nano application`);
+	//         }
+	//       }
+	//     }
+
+	//     resolve(true);
+	//   }).catch(err => {
+	//     console.log(`error when loading ledger `, err);
+	//     if (!hideNotifications) {
+	//       const errmsg = typeof err === 'string'
+	//         ? err
+	//         : err.message;
+	//       this.notifications.sendWarning(`Error loading Ledger device: ${errmsg}`, { length: 6000 });
+	//     }
+
+	//     return null;
+	//   });
+
+	// }
 
 	async updateCache (accountIndex, blockHash) {
 		if (this.ledger.status !== LedgerStatus.READY) {
@@ -403,7 +416,9 @@ export class LedgerService {
 		const cacheData = {
 			representative: blockData.contents.representative,
 			balance: blockData.contents.balance,
-			previousBlock: blockData.contents.previous === zeroBlock ? null : blockData.contents.previous,
+			previousBlock: blockData.contents.previous === zeroBlock
+				? null
+				: blockData.contents.previous,
 			sourceBlock: blockData.contents.link,
 		}
 
@@ -422,7 +437,9 @@ export class LedgerService {
 		const cacheData = {
 			representative: blockData.representative,
 			balance: blockData.balance,
-			previousBlock: blockData.previous === zeroBlock ? null : blockData.previous,
+			previousBlock: blockData.previous === zeroBlock
+				? null
+				: blockData.previous,
 			sourceBlock: blockData.link,
 		}
 
