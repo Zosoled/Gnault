@@ -1,4 +1,3 @@
-import 'babel-polyfill'
 import { app, BrowserWindow, shell, Menu, screen, dialog, ipcMain } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import * as url from 'url'
@@ -101,10 +100,10 @@ class AppUpdater {
 		autoUpdater.autoDownload = false
 		autoUpdater.logger = log
 
-		autoUpdater.on('update-available', (event, releaseNotes, releaseName) => {
+		autoUpdater.on('update-available', () => {
 			if (isDownloading) return
 			const dialogOpts = {
-				type: 'info',
+				type: 'info' as const,
 				buttons: ['Update', 'Ask Later'],
 				title: 'New Version',
 				message: 'An update for Gnault is available!',
@@ -122,7 +121,7 @@ class AppUpdater {
 			})
 		})
 
-		autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+		autoUpdater.on('update-downloaded', () => {
 			autoUpdater.quitAndInstall(true, true)
 		})
 
@@ -141,7 +140,7 @@ class AppUpdater {
 			mainWindow.setTitle(`Gnault - ${autoUpdater.currentVersion}`) // reset title
 			showUpdateErrors = false // disable errors
 			const dialogOpts = {
-				type: 'error',
+				type: 'error' as const,
 				buttons: ['OK'],
 				title: 'Update Error',
 				message: 'Something went wrong while downloading Gnault.',
@@ -180,9 +179,10 @@ function createWindow () {
 		width: mainWindowStateKeeper.width,
 		height: mainWindowStateKeeper.height,
 		webPreferences: {
-			webSecurity: false,
+			webSecurity: true,
 			devTools: true,
-			nodeIntegration: true
+			nodeIntegration: true,
+			contextIsolation: false
 		}
 	})
 
@@ -202,10 +202,10 @@ function createWindow () {
 	})
 
 	// Detect link clicks to new windows and open them in the default browser
-	mainWindow.webContents.on('new-window', function (e, externalurl) {
-		e.preventDefault()
-		shell.openExternal(externalurl)
-	});
+	mainWindow.webContents.setWindowOpenHandler(details => {
+		shell.openExternal(details.url)
+		return { action: 'deny' }
+	})
 
 	mainWindow.webContents.on('did-finish-load', function () {
 		mainWindow.setTitle(`Gnault - ${autoUpdater.currentVersion}`)

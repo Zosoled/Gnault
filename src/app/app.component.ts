@@ -1,4 +1,5 @@
 import { Component, ElementRef, HostListener, OnInit, ViewChild, Renderer2 } from '@angular/core'
+import { TranslocoService } from '@jsverse/transloco'
 import { WalletService } from './services/wallet.service'
 import { AddressBookService } from './services/address-book.service'
 import { AppSettingsService } from './services/app-settings.service'
@@ -12,9 +13,8 @@ import { SwUpdate } from '@angular/service-worker'
 import { RepresentativeService } from './services/representative.service'
 import { NodeService } from './services/node.service'
 import { DesktopService, LedgerService } from './services'
-import { environment } from 'environments/environment'
+import { environment } from '../environments/environment'
 import { DeeplinkService } from './services/deeplink.service'
-import { TranslocoService } from '@ngneat/transloco';
 
 
 @Component({
@@ -23,36 +23,42 @@ import { TranslocoService } from '@ngneat/transloco';
 	styleUrls: ['./app.component.less']
 })
 export class AppComponent implements OnInit {
+	wallet
+	node
+	nanoPrice
+	isConfigured
 
 	constructor (
-		public walletService: WalletService,
 		private addressBook: AddressBookService,
-		public settings: AppSettingsService,
 		private websocket: WebsocketService,
 		private notifications: NotificationService,
-		public nodeService: NodeService,
 		private representative: RepresentativeService,
 		private router: Router,
-		public updates: SwUpdate,
 		private workPool: WorkPoolService,
-		public price: PriceService,
 		private util: UtilService,
 		private desktop: DesktopService,
 		private ledger: LedgerService,
 		private renderer: Renderer2,
 		private deeplinkService: DeeplinkService,
-		private translate: TranslocoService) {
+		private translate: TranslocoService,
+		public walletService: WalletService,
+		public settings: AppSettingsService,
+		public nodeService: NodeService,
+		public updates: SwUpdate,
+		public price: PriceService) {
 		router.events.subscribe(() => {
 			this.closeNav()
 		})
+
+		this.wallet = this.walletService.wallet
+		this.node = this.nodeService.node
+		this.nanoPrice = this.price.price
+		this.isConfigured = this.walletService.isConfigured
 	}
 
 	@ViewChild('selectButton') selectButton: ElementRef
 	@ViewChild('accountsDropdown') accountsDropdown: ElementRef
 
-	wallet = this.walletService.wallet;
-	node = this.nodeService.node;
-	nanoPrice = this.price.price;
 	fiatTimeout = 5 * 60 * 1000; // Update fiat prices every 5 minutes
 	inactiveSeconds = 0;
 	innerWidth = 0;
@@ -63,7 +69,6 @@ export class AppComponent implements OnInit {
 	showAccountsDropdown = false;
 	canToggleLightMode = true;
 	searchData = '';
-	isConfigured = this.walletService.isConfigured;
 	donationAccount = environment.donationAddress;
 
 	@HostListener('window:resize', ['$event']) onResize (e) {
@@ -111,9 +116,9 @@ export class AppComponent implements OnInit {
 			}
 		}
 
-		// update selected account object with the latest balance, pending, etc
+		// update selected account object with the latest balance, receivable, etc
 		if (this.wallet.selectedAccountId) {
-			const currentUpdatedAccount = this.wallet.accounts.find(a => a.id === this.wallet.selectedAccountId) ?? null
+			const currentUpdatedAccount = this.wallet.accounts.find(a => a.id === this.wallet.selectedAccountId)
 			this.wallet.selectedAccount = currentUpdatedAccount
 		}
 
@@ -148,12 +153,12 @@ export class AppComponent implements OnInit {
 
 		this.representative.loadRepresentativeList()
 
-		// If the wallet is locked and there is a pending balance, show a warning to unlock the wallet
+		// If the wallet is locked and there is a receivable balance, show a warning to unlock the wallet
 		// (if not receive priority is set to manual)
-		if (this.wallet.locked && this.walletService.hasPendingTransactions() && this.settings.settings.pendingOption !== 'manual') {
-			this.notifications.sendWarning(`New incoming transaction(s) - Unlock the wallet to receive`, { length: 10000, identifier: 'pending-locked' })
-		} else if (this.walletService.hasPendingTransactions() && this.settings.settings.pendingOption === 'manual') {
-			this.notifications.sendWarning(`Incoming transaction(s) found - Set to be received manually`, { length: 10000, identifier: 'pending-locked' })
+		if (this.wallet.locked && this.walletService.hasReceivableTransactions() && this.settings.settings.receivableOption !== 'manual') {
+			this.notifications.sendWarning(`New incoming transaction(s) - Unlock the wallet to receive`, { length: 10000, identifier: 'receivable-locked' })
+		} else if (this.walletService.hasReceivableTransactions() && this.settings.settings.receivableOption === 'manual') {
+			this.notifications.sendWarning(`Incoming transaction(s) found - Set to be received manually`, { length: 10000, identifier: 'receivable-locked' })
 		}
 
 		// When the page closes, determine if we should lock the wallet
@@ -172,20 +177,24 @@ export class AppComponent implements OnInit {
 		})
 		this.desktop.send('deeplink-ready')
 
-    // Notify user if service worker update is available
-    this.updates.available.subscribe((event) => {
-      console.log(`SW update available. Current: ${event.current.hash}. New: ${event.available.hash}`);
-      this.notifications.sendInfo(
-        'An update was installed in the background and will be applied on next launch. <a href="#" (click)="applySwUpdate()">Apply immediately</a>',
-        {length: 10000}
-      );
-    });
+		// Notify user if service worker update is available
+		this.updates.versionUpdates.subscribe((event) => {
+			if (event.type === 'VERSION_READY') {
+				console.log(`SW update available. Current: ${event.currentVersion.hash}. New: ${event.latestVersion.hash}`)
+				this.notifications.sendInfo(
+					'An update was installed in the background and will be applied on next launch. <a href="#" (click)="applySwUpdate()">Apply immediately</a>',
+					{ length: 10000 }
+				)
+			}
+		})
 
+		/* DEPRECATED
 		// Notify user after service worker was updated
 		this.updates.activated.subscribe((event) => {
-			console.log(`SW update successful. Current: ${event.current.hash}`)
-			this.notifications.sendSuccess('Gnault was updated successfully.')
+			console.log(`SW update successful. Current: ${event.current.hash}`);
+			this.notifications.sendSuccess('Gnault was updated successfully.');
 		});
+		*/
 
 		// Check how long the wallet has been inactive, and lock it if it's been too long
 		setInterval(() => {

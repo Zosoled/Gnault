@@ -93,10 +93,10 @@
 							<div class="balance primary">
 								<span
 									class="incoming-label"
-									*ngIf="account.pending.gt(0)"
+									*ngIf="account.receivable.gt(0)"
 								>
 									<span class="text-snippet">{{ 'general.new' | transloco }}</span>
-									<span class="text-full">+{{ account.pending | rai: 'mnano,true' | amountsplit: 0 }}{{account.pending | rai: 'mnano,true' | amountsplit: 1 }} XNO</span>
+									<span class="text-full">+{{ account.receivable | rai: 'mnano,true' | amountsplit: 0 }}{{account.receivable | rai: 'mnano,true' | amountsplit: 1 }} XNO</span>
 								</span>
 								{{ account.balance | rai: 'mnano,true' | amountsplit: 0 }}{{ account.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO
 							</div>
@@ -136,14 +136,16 @@
 											)"
 											[queryParams]="{ compact: '1' }"
 											class="name"
-										>{{ (wallet.selectedAccount !== null)
+										>
+											{{ wallet.selectedAccount !== null
 												? (
 													wallet.selectedAccount.addressBookName
 														? wallet.selectedAccount.addressBookName
 														: (('general.account' | transloco) + ' #' + wallet.selectedAccount.index)
 													)
 												: 'Total Balance'
-										}}</a>
+											}}
+										</a>
 										<div
 											#selectButton
 											[class]="[ 'select-button', showAccountsDropdown ? 'open' : 'closed' ]"
@@ -159,14 +161,18 @@
 											<div class="balance-container primary">
 												<div class="currency-name">Ӿ</div>
 												<div class="amount-container">
-													<div class="amount-integer">{{ (wallet.selectedAccount !== null
+													<div class="amount-integer">
+														{{ (wallet.selectedAccount !== null
 															? wallet.selectedAccount.balance
 															: wallet.balance) | rai: 'mnano,true' | amountsplit: 0
-													}}</div>
-													<div class="amount-fractional">{{ (wallet.selectedAccount !== null
+														}}
+													</div>
+													<div class="amount-fractional">
+														{{ (wallet.selectedAccount !== null
 															? wallet.selectedAccount.balance
 															: wallet.balance) | rai: 'mnano,true' | amountsplit: 1
-													}}</div>
+														}}
+													</div>
 													<div
 														class="amount-updating"
 														*ngIf="wallet.updatingBalance && isConfigured()"
@@ -184,16 +190,18 @@
 													{{ settings.settings.displayCurrency }}
 												</div>
 												<div class="amount-container">
-													<div class="amount-integer">{{ (wallet.selectedAccount !== null
+													<div class="amount-integer">
+														{{ (wallet.selectedAccount !== null
 															? wallet.selectedAccount.balanceFiat
-															: wallet.balanceFiat) | fiat:
-																settings.settings.displayCurrency | amountsplit: 0
-													}}</div>
-													<div class="amount-fractional">{{ (wallet.selectedAccount !== null
+															: wallet.balanceFiat) | fiat: settings.settings.displayCurrency | amountsplit: 0
+														}}
+													</div>
+													<div class="amount-fractional">
+														{{ (wallet.selectedAccount !== null
 															? wallet.selectedAccount.balanceFiat
-															: wallet.balanceFiat) | fiat:
-																settings.settings.displayCurrency | amountsplit: 1
-													}}</div>
+															: wallet.balanceFiat) | fiat: settings.settings.displayCurrency | amountsplit: 1
+														}}
+													</div>
 												</div>
 											</div>
 										</ng-container>
@@ -208,23 +216,23 @@
 									</div>
 								</div>
 							</div>
-							<ng-container *ngIf="(wallet.selectedAccount !== null) ? wallet.selectedAccount.pending.gt(0) : walletService.hasPendingTransactions()">
-								<ng-container *ngIf="walletService.processingPending else notProcessingPending">
+							<ng-container *ngIf="(wallet.selectedAccount !== null) ? wallet.selectedAccount.receivable.gt(0) : walletService.hasReceivableTransactions()">
+								<ng-container *ngIf="walletService.processingReceivable else notProcessingReceivable">
 									<div
 										class="nav-action-receive"
-										*ngIf="walletService.processingPending"
+										*ngIf="walletService.processingReceivable"
 									>
 										<div
 											class="icon"
 											uk-icon="icon: chevron-up; ratio: 1.2;"
 										></div>
 										<div class="label">
-											<span uk-spinner="ratio: 0.5;"></span> Processing Transactions...
+											<span uk-spinner="ratio: 0.5;"></span>Processing Transactions...
 										</div>
 									</div>
 								</ng-container>
-								<ng-template #notProcessingPending>
-									<ng-container *ngIf=" (settings.settings.pendingOption !== 'manual') else manuallyReceivingPending ">
+								<ng-template #notProcessingReceivable>
+									<ng-container *ngIf=" (settings.settings.receivableOption !== 'manual') else manuallyReceivingReceivable ">
 										<div
 											class="nav-action-receive user-action-required uk-animation-slide-left"
 											*ngIf="walletService.isLocked()"
@@ -236,7 +244,7 @@
 											<div class="label">Unlock Wallet to Receive</div>
 										</div>
 									</ng-container>
-									<ng-template #manuallyReceivingPending>
+									<ng-template #manuallyReceivingReceivable>
 										<div class="nav-action-receive uk-animation-slide-left">
 											<div
 												class="icon"
@@ -258,8 +266,18 @@
 											<div class="balance-container primary">
 												<div class="currency-name">XNO</div>
 												<div class="amount-container">
-													<div class="amount-integer">{{ (wallet.selectedAccount ? wallet.selectedAccount.pending : wallet.pending) | rai: 'mnano,true' | amountsplit: 0 }}</div>
-													<div class="amount-fractional">{{ (wallet.selectedAccount ? wallet.selectedAccount.pending : wallet.pending) | rai: 'mnano,true' | amountsplit: 1 }}</div>
+													<div class="amount-integer">
+														{{ (wallet.selectedAccount
+															? wallet.selectedAccount.receivable
+															: wallet.receivable) | rai: 'mnano,true' | amountsplit: 0
+														}}
+													</div>
+													<div class="amount-fractional">
+														{{ (wallet.selectedAccount
+															? wallet.selectedAccount.receivable
+															: wallet.receivable) | rai: 'mnano,true' | amountsplit: 1
+														}}
+													</div>
 												</div>
 											</div>
 											<div
@@ -268,8 +286,18 @@
 											>
 												<div class="currency-name"><span class="estimate-symbol">~</span>{{ settings.settings.displayCurrency }}</div>
 												<div class="amount-container">
-													<div class="amount-integer">{{ (wallet.selectedAccount ? wallet.selectedAccount.pendingFiat : wallet.pendingFiat) | fiat: settings.settings.displayCurrency | amountsplit: 0 }}</div>
-													<div class="amount-fractional">{{ (wallet.selectedAccount ? wallet.selectedAccount.pendingFiat : wallet.pendingFiat) | fiat: settings.settings.displayCurrency | amountsplit: 1 }}</div>
+													<div class="amount-integer">
+														{{ (wallet.selectedAccount
+															? wallet.selectedAccount.receivableFiat
+															: wallet.receivableFiat) | fiat: settings.settings.displayCurrency | amountsplit: 0
+														}}
+													</div>
+													<div class="amount-fractional">
+														{{ (wallet.selectedAccount
+															? wallet.selectedAccount.receivableFiat
+															: wallet.receivableFiat) | fiat: settings.settings.displayCurrency | amountsplit: 1
+														}}
+													</div>
 												</div>
 											</div>
 										</div>
@@ -310,7 +338,7 @@
 				<ul
 					role="navigation"
 					aria-label="Main"
-					class="uk-nav uk-nav-default uk-nav-parent-icon left-nav"
+					class="uk-nav uk-nav-default left-nav"
 					uk-nav
 				>
 					<li>
@@ -318,7 +346,7 @@
 							routerLink="/accounts"
 							routerLinkActive="active"
 						>
-							<div class="label">{{ 'general.accounts' | transloco }}</div>
+							<div class="label">{{ 'nav.accounts' | transloco }}</div>
 						</a>
 					</li>
 					<li>
@@ -326,7 +354,7 @@
 							routerLink="/send"
 							routerLinkActive="active"
 						>
-							<div class="label">{{ 'general.send' | transloco }}</div>
+							<div class="label">{{ 'nav.send' | transloco }}</div>
 						</a>
 					</li>
 					<li>
@@ -336,11 +364,11 @@
 						>
 							<div uk-grid>
 								<div class="uk-width-3-4">
-									<div class="label">{{ 'general.receive' | transloco }}</div>
+									<div class="label">{{ 'nav.receive' | transloco }}</div>
 								</div>
 								<div class="uk-width-1-4 uk-text-center label-new">
 									<span
-										*ngIf="walletService.hasPendingTransactions()"
+										*ngIf="walletService.hasReceivableTransactions()"
 										class="uk-badge uk-text-top uk-align-center"
 									>
 										<div class="label">{{ 'general.new' | transloco }}</div>
@@ -368,67 +396,86 @@
 					<li class="uk-parent">
 						<a href="#">{{ 'general.settings' | transloco }}</a>
 						<ul class="uk-nav-sub">
-							<li><a
+							<li>
+								<a
 									routerLink="/representatives"
 									[queryParams]=""
 									routerLinkActive="active"
 								>
 									<div class="label">{{ 'general.representatives' | transloco }}</div>
-								</a></li>
-							<li><a
+								</a>
+							</li>
+							<li>
+								<a
 									routerLink="/configure-app"
 									routerLinkActive="active"
 								>
 									<div class="label">{{ 'general.app-settings' | transloco }}</div>
-								</a></li>
-							<li *ngIf="isConfigured()"><a
+								</a>
+							</li>
+							<li *ngIf="isConfigured()">
+								<a
 									routerLink="/manage-wallet"
 									routerLinkActive="active"
 								>
 									<div class="label">{{ 'general.manage-wallet' | transloco }}</div>
-								</a></li>
-							<li><a
+								</a>
+							</li>
+							<li>
+								<a
 									routerLink="/configure-wallet"
 									routerLinkActive="active"
 								>
 									<div class="label">{{ 'configure-wallet.new-wallet.configure-new-wallet' | transloco }}</div>
-								</a></li>
+								</a>
+							</li>
 						</ul>
 					</li>
 					<li class="uk-parent">
 						<a href="#">{{ 'general.advanced-tools' | transloco }}</a>
 						<ul class="uk-nav-sub">
-							<li><a
+							<li>
+								<a
 									routerLink="/sweeper"
 									routerLinkActive="active"
 								>
 									<div class="label">Wallet Sweeper</div>
-								</a></li>
-							<li><a
+								</a>
+							</li>
+							<li>
+								<a
 									routerLink="/remote-signing"
 									routerLinkActive="active"
 								>
 									<div class="label">Remote Signing</div>
-								</a></li>
-							<li><a
+								</a>
+							</li>
+							<li>
+								<a
 									routerLink="/multisig"
 									routerLinkActive="active"
 								>
 									<div class="label">Multi Signature</div>
-								</a></li>
-							<li><a
+								</a>
+							</li>
+							<li>
+								<a
 									routerLink="/keygenerator"
 									routerLinkActive="active"
 								>
 									<div class="label">Keypair Generator</div>
-								</a></li>
-							<li><a
+								</a>
+							</li>
+							<li>
+								<a
 									routerLink="/converter"
 									routerLinkActive="active"
 								>
 									<div class="label">Unit Converter</div>
-								</a></li>
-							<li><a
+								</a>
+							</li>
+							<li>
+								<a
 									routerLink="/qr-generator"
 									routerLinkActive="active"
 								>
