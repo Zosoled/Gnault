@@ -14,7 +14,10 @@
 			<div class="card-contents">
 				<div class="account-name-container">
 					<div class="name">
-						{{ addressBookEntry ? addressBookEntry : (('general.account' | transloco) + ' #' + walletAccount.index) }}
+						{{ addressBookEntry
+							? addressBookEntry
+							: (('general.account' | transloco) + ' #' + walletAccount.index)
+						}}
 					</div>
 					<div
 						#selectButton
@@ -32,10 +35,16 @@
 							<div class="currency-name">XNO</div>
 							<div class="amount-container">
 								<div class="amount-integer">
-									{{ !account ? 0 : (account.balance || 0 | rai: 'mnano,true') | amountsplit: 0 }}
+									{{ !account
+										? 0
+										: (account.balance || 0 | rai: 'mnano,true') | amountsplit: 0
+									}}
 								</div>
 								<div class="amount-fractional">
-									{{ !account ? 0 : (account.balance || 0 | rai: 'mnano,true') | amountsplit: 1 }}
+									{{ !account
+										? 0
+										: (account.balance || 0 | rai: 'mnano,true') | amountsplit: 1
+									}}
 								</div>
 								<div
 									class="amount-updating"
@@ -74,7 +83,10 @@
 			class="uk-heading-divider"
 			[class.hide-on-small-viewports]="walletAccount && (showFullDetailsOnSmallViewports === false)"
 		>
-			{{ walletAccount ? ('account-details.account-details' | transloco) : ('account-details.network-explorer' | transloco) }}
+			{{ walletAccount
+				? ('account-details.account-details' | transloco)
+				: ('account-details.network-explorer' | transloco)
+			}}
 		</h2>
 		<div
 			class="uk-card uk-card-default uk-margin"
@@ -149,12 +161,12 @@
 											style="max-width: calc(100% - 35px);"
 										>
 											{{ addressBookEntry
-												? addressBookEntry
-												: (
-													walletAccount
-														? (('general.account' | transloco) + ' #' + walletAccount.index)
-														: ('account-details.no-label-set' | transloco)
-													)
+											? addressBookEntry
+											: (
+												walletAccount
+													? (('general.account' | transloco) + ' #' + walletAccount.index)
+													: ('account-details.no-label-set' | transloco)
+												)
 											}}
 										</h3>
 										<div
@@ -293,22 +305,24 @@
 										<span class="amount-fractional">{{ !account ? 0 : (account.balance || 0 | rai: 'mnano,true') | amountsplit: 1 }}</span>
 									</div>
 									<div
-										*ngIf="account && account.pending && (account.pending > 0)"
+										*ngIf="account && account.receivable && (account.receivable > 0)"
 										class="incoming-label"
-										[title]="( (account && account.pendingRaw && account.pendingRaw.gt(0) ) ? ( '+' + ( account.pendingRaw.toString(10) ) + ' raw' ) : '' )"
+										[title]="( (account && account.receivableRaw && account.receivableRaw.gt(0) ) ? ( '+' + ( account.receivableRaw.toString(10) ) + ' raw' ) : '' )"
 									>
 										<div class="text-snippet">{{ 'general.new' | transloco }}</div>
 										<div class="text-full">
 											<div class="amount-sign">+</div>
 											<div class="amount-currency-symbol xno-symbol"></div>
-											<div class="amount-integer">{{ account.pending | rai: 'mnano,true' | amountsplit: 0 }}</div>
-											<div class="amount-fractional">{{ account.pending | rai: 'mnano,true' | amountsplit: 1 }}</div>
+											<div class="amount-integer">{{ account.receivable | rai: 'mnano,true' | amountsplit: 0 }}</div>
+											<div class="amount-fractional">{{ account.receivable | rai: 'mnano,true' | amountsplit: 1 }}</div>
 										</div>
 									</div>
 								</div>
 							</div>
 							<div class="account-amounts-converted text-half-muted">
-								<ng-container *ngIf="account">{{ (account.balanceFiat | fiat: settings.settings.displayCurrency) }}</ng-container>
+								<ng-container *ngIf="account">
+									{{ (account.balanceFiat | fiat: settings.settings.displayCurrency) }}
+								</ng-container>
 							</div>
 						</ng-container>
 					</div>
@@ -403,7 +417,7 @@
 		</div>
 		<div class="uk-overflow-hidden">
 			<div class="transactions-list-mobile only-on-small-viewports">
-				<ng-container *ngFor="let transaction of pendingBlocks">
+				<ng-container *ngFor="let transaction of receivableBlocks">
 					<app-nano-transaction-mobile
 						[transaction]="transaction"
 						[isHidden]="transaction.received"
@@ -424,22 +438,16 @@
 				<ng-container *ngFor="let transaction of accountHistory; let transactionIdx = index;">
 					<div
 						class="date-header text-half-muted"
-						*ngIf="(
-                ( accountHistory[transactionIdx - 1] == null )
-              || (
-                  transaction.local_date_string
-                !== accountHistory[transactionIdx - 1].local_date_string
-              )
-            )"
+						*ngIf="accountHistory[transactionIdx - 1] == null || transaction.local_date_string !== accountHistory[transactionIdx - 1].local_date_string"
 					>
-						{{ (transaction.local_date_string === dateStringToday)
-            	? 'Today'
-            	: (
-            		transaction.local_date_string === dateStringYesterday
-            			? 'Yesterday'
-            			: transaction.local_date_string
-            		)
-            }}
+						{{ transaction.local_date_string === dateStringToday
+							? 'Today'
+							: (
+								transaction.local_date_string === dateStringYesterday
+									? 'Yesterday'
+									: transaction.local_date_string
+								)
+						}}
 					</div>
 					<app-nano-transaction-mobile
 						[transaction]="transaction"
@@ -459,7 +467,7 @@
 				<ng-template #notLoadingTransactionsMobile>
 					<div
 						class="rounded-area interactable"
-						*ngIf="!accountHistory.length && !pendingBlocks.length"
+						*ngIf="!accountHistory.length && !receivableBlocks.length"
 					>
 						<div style="text-align: center;">{{ 'account-details.no-transactions' | transloco }}</div>
 					</div>
@@ -499,8 +507,8 @@
 				</thead>
 				<tbody>
 					<tr
-						*ngFor="let pending of pendingBlocks"
-						[class]="{ 'uk-text-muted': true, 'uk-hidden': pending.received }"
+						*ngFor="let receivable of receivableBlocks"
+						[class]="{ 'uk-text-muted': true, 'uk-hidden': receivable.received }"
 					>
 						<td class="type-column">
 							<span
@@ -518,7 +526,7 @@
 									style="max-width: calc(100% - 35px);"
 								>
 									<a
-										[routerLink]="'/account/' + pending.account"
+										[routerLink]="'/account/' + receivable.account"
 										class="account-container uk-text-truncate"
 										[title]="'general.view-details' | transloco"
 										uk-tooltip
@@ -526,19 +534,21 @@
 										<div class="identicon-name-row uk-text-truncate">
 											<app-nano-identicon
 												scale="6"
-												[accountID]="pending.account"
+												[accountID]="receivable.account"
 												[settingIdenticonsStyle]="settings.settings.identiconsStyle"
 												class="nano-identicon"
 												*ngIf="(settings.settings.identiconsStyle !== 'none')"
 											></app-nano-identicon>
 											<div
 												class="account-label uk-text-truncate"
-												*ngIf="pending.addressBookName"
-											>{{ pending.addressBookName }}</div>
+												*ngIf="receivable.addressBookName"
+											>
+												{{ receivable.addressBookName }}
+											</div>
 										</div>
 										<div class="nano-address-clickable nano-address-monospace uk-text-truncate">
 											<app-nano-account-id
-												[accountID]="pending.account"
+												[accountID]="receivable.account"
 												middle="auto"
 											></app-nano-account-id>
 										</div>
@@ -548,7 +558,7 @@
 									<ul class="uk-iconnav">
 										<li><a
 												ngxClipboard
-												[cbContent]="pending.account"
+												[cbContent]="receivable.account"
 												(cbOnSuccess)="copied()"
 												uk-icon="icon: copy"
 												[title]="'general.copy' | transloco"
@@ -558,11 +568,11 @@
 								</div>
 							</div>
 							<a
-								[routerLink]="'/transaction/' + pending.hash"
+								[routerLink]="'/transaction/' + receivable.hash"
 								class="uk-link-text uk-text-small uk-text-muted uk-text-truncate block-hash block-hash-monospace"
 								[title]="'general.view-details' | transloco"
 								uk-tooltip
-							>{{ pending.hash }}</a>
+							>{{ receivable.hash }}</a>
 						</td>
 						<ng-template #transactionActionsOrDate>
 							<ng-container *ngIf="(walletAccount || remoteVisible) else noActionsAvailable">
@@ -571,13 +581,13 @@
 									*ngIf="walletAccount"
 								>
 									<button
-										*ngIf="!pending.loading"
+										*ngIf="!receivable.loading"
 										class="uk-button uk-button-primary uk-text-center uk-width-auto"
 										type="button"
-										(click)="receiveReceivableBlock(pending)"
+										(click)="receiveReceivableBlock(receivable)"
 									>RECEIVE</button>
 									<button
-										*ngIf="pending.loading"
+										*ngIf="receivable.loading"
 										class="uk-button uk-button-secondary uk-disabled uk-button-small nlt-icon-button nlt-icon-button-inline"
 									><span
 											class="spinner"
@@ -591,28 +601,28 @@
 									<button
 										class="uk-button uk-button-primary uk-text-center uk-width-auto remote-sign"
 										type="button"
-										(click)="generateReceive(pending.hash)"
+										(click)="generateReceive(receivable.hash)"
 									>SIGN BLOCK</button>
 								</div>
 							</ng-container>
 							<ng-template #noActionsAvailable>
 								<span
 									class="transaction-date"
-									[class.uk-text-muted]="!pending.local_timestamp"
-									[class.date-unknown]="!pending.local_timestamp"
+									[class.uk-text-muted]="!receivable.local_timestamp"
+									[class.date-unknown]="!receivable.local_timestamp"
 								>
-									<span class="date">{{ pending.local_date_string }}</span>
-									<span class="time">{{ pending.local_time_string }}</span>
+									<span class="date">{{ receivable.local_date_string }}</span>
+									<span class="time">{{ receivable.local_time_string }}</span>
 								</span>
 							</ng-template>
 						</ng-template>
 						<td
 							class="amount-column uk-text-middle uk-text-muted"
-							[title]="('Incoming Transaction') + ( (pending.amountRaw && (pending.amountRaw > 0) ) ? ( ', +' + ( pending.amountRaw.toString(10) ) + ' raw' ) : '' )"
+							[title]="('Incoming Transaction') + ( (receivable.amountRaw && (receivable.amountRaw > 0) ) ? ( ', +' + ( receivable.amountRaw.toString(10) ) + ' raw' ) : '' )"
 						>
 							<span class="uk-text-small">{{ 'general.blockactions.ready-to-receive' | transloco }}</span><br>
-							<span class="amount-integer">{{ pending.amount | rai: 'mnano,true' | amountsplit: 0 }}</span>
-							<span class="amount-fractional">{{ pending.amount | rai: 'mnano,true' | amountsplit: 1 }}</span>
+							<span class="amount-integer">{{ receivable.amount | rai: 'mnano,true' | amountsplit: 0 }}</span>
+							<span class="amount-fractional">{{ receivable.amount | rai: 'mnano,true' | amountsplit: 1 }}</span>
 							<span class="currency-name">XNO</span>
 							<div class="compact-actions-date">
 								<ng-template [ngTemplateOutlet]="transactionActionsOrDate"></ng-template>
@@ -726,12 +736,12 @@
 							</div>
 						</ng-template>
 						<td [ngClass]="{
-            'amount-column': true,
-            'uk-text-middle': true,
-            'uk-text-success': (history.type == 'receive' || history.subtype == 'receive' || history.type == 'open' || history.subtype == 'open'),
-            'uk-text-danger': (history.type == 'send' || history.subtype == 'send'),
-            'rep-change': (history.type == 'change' || history.subtype == 'change')
-          }">
+							'amount-column': true,
+							'uk-text-middle': true,
+							'uk-text-success': (history.type == 'receive' || history.subtype == 'receive' || history.type == 'open' || history.subtype == 'open'),
+							'uk-text-danger': (history.type == 'send' || history.subtype == 'send'),
+							'rep-change': (history.type == 'change' || history.subtype == 'change')
+							}">
 							<span *ngIf="isNaN(history.amount)">
 								<span
 									class="uk-text-small"
@@ -800,7 +810,7 @@
 							></span> {{ 'account-details.loading-transactions' | transloco }}</td>
 					</tr>
 					<ng-template #notLoadingTransactions>
-						<tr *ngIf="!accountHistory.length && !pendingBlocks.length">
+						<tr *ngIf="!accountHistory.length && !receivableBlocks.length">
 							<td
 								colspan="4"
 								style="text-align: center;"
@@ -1036,7 +1046,7 @@
 											id="form-horizontal-text"
 											(input)="syncFiatPrice()"
 											type="text"
-											placeholder="Amount of {{ selectedAmount.name }} to send"
+											placeholder="Amount of XNO to send"
 											maxlength="40"
 										>
 									</div>
@@ -1228,8 +1238,8 @@
 	*ngIf="walletAccount && (showFullDetailsOnSmallViewports === false)"
 >
 	<div class="actions-area">
-		<button routerLink="/receive">{{ 'general.receive' | transloco }}</button>
-		<button routerLink="/send">{{ 'general.send' | transloco }}</button>
+		<button routerLink="/receive">{{ 'nav.receive' | transloco }}</button>
+		<button routerLink="/send">{{ 'nav.send' | transloco }}</button>
 	</div>
 </div>
 <div
@@ -1260,12 +1270,11 @@
 					{{ addressBookEntry
 						? addressBookEntry
 						: (
-								walletAccount
-									? (('general.account' | transloco) + ' #' + walletAccount.index)
-									: ( 'account-details.external-address' | transloco
+							walletAccount
+								? (('general.account' | transloco) + ' #' + walletAccount.index)
+								: ('account-details.external-address' | transloco)
 							)
-          	)
-          }}
+					}}
 				</div>
 				<div class="uk-width-1-1">
 					<div
@@ -1311,9 +1320,9 @@
 					{{ addressBookEntry
 						? addressBookEntry
 						: (
-								walletAccount
-									? (('general.account' | transloco) + ' #' + walletAccount.index)
-									: ( 'account-details.external-address' | transloco )
+							walletAccount
+								? (('general.account' | transloco) + ' #' + walletAccount.index)
+								: ('account-details.external-address' | transloco)
 							)
 					}}
 				</h3>
@@ -1405,19 +1414,19 @@
 						class="menu-option"
 						routerLink="/send"
 						[queryParams]="{
-              to: mobileTransactionData.account,
-              amount: util.nano.rawToMnano(mobileTransactionData.amount)
-            }"
+							to: mobileTransactionData.account,
+							amount: util.nano.rawToMnano(mobileTransactionData.amount)
+						}"
 						(click)="mobileTransactionMenuModal.hide()"
 						*ngIf="(
-                walletAccount
-              && !isNaN(mobileTransactionData.amount)
-              && (
-                  mobileTransactionData.type === 'receive'
-                || mobileTransactionData.subtype === 'receive'
-                || mobileTransactionData.type === 'open'
-              )
-            )"
+							walletAccount
+							&& !isNaN(mobileTransactionData.amount)
+							&& (
+								mobileTransactionData.type === 'receive'
+								|| mobileTransactionData.subtype === 'receive'
+								|| mobileTransactionData.type === 'open'
+							)
+						)"
 					>
 						<span
 							class="icon"
@@ -1462,16 +1471,16 @@
 						</ng-container>
 						<ng-container *ngIf="!isNaN(mobileTransactionData.amount)">
 							<ng-container *ngIf="(
-                  mobileTransactionData.type === 'receive'
-                || mobileTransactionData.subtype === 'receive'
-                || mobileTransactionData.type === 'open'
-              )">
+								mobileTransactionData.type === 'receive'
+								|| mobileTransactionData.subtype === 'receive'
+								|| mobileTransactionData.type === 'open'
+							)">
 								<span>{{ 'account-details.copy-senders-address' | transloco }}</span>
 							</ng-container>
 							<ng-container *ngIf="(
-                  mobileTransactionData.type === 'send'
-                || mobileTransactionData.subtype === 'send'
-              )">
+								mobileTransactionData.type === 'send'
+								|| mobileTransactionData.subtype === 'send'
+							)">
 								<span>{{ 'account-details.copy-recipients-address' | transloco }}</span>
 							</ng-container>
 						</ng-container>
