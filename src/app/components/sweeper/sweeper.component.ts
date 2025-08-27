@@ -21,52 +21,53 @@ const SWEEP_MAX_RECEIVABLE = 100 // max receivable blocks to process per run
 })
 
 export class SweeperComponent implements OnInit {
+	private walletService = inject(WalletService)
+	private notificationService = inject(NotificationService)
+	private appSettings = inject(AppSettingsService)
+	modal = inject(ModalService)
+	private api = inject(ApiService)
+	private workPool = inject(WorkPoolService)
+	settings = inject(AppSettingsService)
+	private nanoBlock = inject(NanoBlockService)
+	private util = inject(UtilService)
+	private route = inject(Router)
+
 	accounts
-	indexMax = INDEX_MAX;
-	incomingMax = SWEEP_MAX_RECEIVABLE;
+	indexMax = INDEX_MAX
+	incomingMax = SWEEP_MAX_RECEIVABLE
 
 	myAccountModel
-	sourceWallet = '';
+	sourceWallet = ''
 	destinationAccount
-	startIndex = '0';
-	endIndex = '5';
-	maxIncoming = SWEEP_MAX_RECEIVABLE.toString();
+	startIndex = '0'
+	endIndex = '5'
+	maxIncoming = SWEEP_MAX_RECEIVABLE.toString()
 
-	output = '';
-	sweeping = false;
-	pubKey = '';
-	adjustedBalance = '0';
-	representative = '';
-	privKey = '';
-	previous = '';
-	subType = '';
-	blocks = [];
-	keys = [];
-	keyCount = 0;
-	pendingCallback = null;
-	totalSwept = '0';
+	output = ''
+	sweeping = false
+	pubKey = ''
+	adjustedBalance = '0'
+	representative = ''
+	privKey = ''
+	previous = ''
+	subType = ''
+	blocks = []
+	keys = []
+	keyCount = 0
+	pendingCallback = null
+	totalSwept = '0'
 	customAccountSelected
 
-	validSeed = false;
+	validSeed = false
 	validDestination
-	validStartIndex = true;
-	validEndIndex = true;
-	validMaxIncoming = true;
-	selAccountInit = false;
+	validStartIndex = true
+	validEndIndex = true
+	validMaxIncoming = true
+	selAccountInit = false
 
 	@ViewChild('outputarea') logArea: ElementRef
 
-	constructor (
-		private walletService: WalletService,
-		private notificationService: NotificationService,
-		private appSettings: AppSettingsService,
-		public modal: ModalService,
-		private api: ApiService,
-		private workPool: WorkPoolService,
-		public settings: AppSettingsService,
-		private nanoBlock: NanoBlockService,
-		private util: UtilService,
-		private route: Router) {
+	constructor () {
 		this.accounts = this.walletService.wallet.accounts
 		this.myAccountModel = this.accounts[0]?.id ?? '0'
 		this.destinationAccount = this.accounts[0]?.id ?? ''

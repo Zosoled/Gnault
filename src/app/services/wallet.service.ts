@@ -85,18 +85,18 @@ export interface WalletApiAccount extends BaseApiAccount {
 
 @Injectable()
 export class WalletService {
-	private util = inject(UtilService);
-	private api = inject(ApiService);
-	private appSettings = inject(AppSettingsService);
-	private addressBook = inject(AddressBookService);
-	private price = inject(PriceService);
-	private workPool = inject(WorkPoolService);
-	private websocket = inject(WebsocketService);
-	private nanoBlock = inject(NanoBlockService);
-	private notifications = inject(NotificationService);
+	private util = inject(UtilService)
+	private api = inject(ApiService)
+	private appSettings = inject(AppSettingsService)
+	private addressBook = inject(AddressBookService)
+	private price = inject(PriceService)
+	private workPool = inject(WorkPoolService)
+	private websocket = inject(WebsocketService)
+	private nanoBlock = inject(NanoBlockService)
+	private notifications = inject(NotificationService)
 
-	nano = 1000000000000000000000000;
-	storeKey = `nanovault-wallet`;
+	nano = 1000000000000000000000000
+	storeKey = `nanovault-wallet`
 
 	wallet: FullWallet = {
 		type: 'seed',
@@ -118,23 +118,13 @@ export class WalletService {
 		receivableBlocksUpdate$: new BehaviorSubject(null),
 		newWallet$: new BehaviorSubject(false),
 		refresh$: new BehaviorSubject(false),
-	};
+	}
 
-	processingReceivable = false;
-	successfulBlocks = [];
-	trackedHashes = [];
+	processingReceivable = false
+	successfulBlocks = []
+	trackedHashes = []
 
-	constructor (
-		private util: UtilService,
-		private api: ApiService,
-		private appSettings: AppSettingsService,
-		private addressBook: AddressBookService,
-		private price: PriceService,
-		private workPool: WorkPoolService,
-		private websocket: WebsocketService,
-		private nanoBlock: NanoBlockService,
-		private ledgerService: LedgerService,
-		private notifications: NotificationService) {
+	constructor () {
 		this.websocket.newTransactions$.subscribe(async (transaction) => {
 			if (!transaction) return // Not really a new transaction
 			console.log('New Transaction', transaction)
@@ -607,9 +597,9 @@ export class WalletService {
 	hasReceivableTransactions () {
 		return this.wallet.hasReceivable
 		// if (this.appSettings.settings.minimumReceive) {
-		//   return this.wallet.hasReceivable;
+		//   return this.wallet.hasReceivable
 		// } else {
-		//   return this.wallet.receivableRaw.gt(0);
+		//   return this.wallet.receivableRaw.gt(0)
 		// }
 	}
 
@@ -643,11 +633,11 @@ export class WalletService {
 		const accountIDs = this.wallet.accounts.map(a => a.id)
 		const accounts = await this.api.accountsBalances(accountIDs)
 		const frontiers = await this.api.accountsFrontiers(accountIDs)
-		// const allFrontiers = [];
+		// const allFrontiers = []
 		// for (const account in frontiers.frontiers) {
-		//   allFrontiers.push({ account, frontier: frontiers.frontiers[account] });
+		//   allFrontiers.push({ account, frontier: frontiers.frontiers[account] })
 		// }
-		// const frontierBlocks = await this.api.blocksInfo(allFrontiers.map(f => f.frontier));
+		// const frontierBlocks = await this.api.blocksInfo(allFrontiers.map(f => f.frontier))
 
 		let walletBalance = 0n
 		let walletReceivableInclUnconfirmed = 0n
@@ -799,7 +789,7 @@ export class WalletService {
 	}
 
 	async addWalletAccount (accountIndex: number | null = null, reloadBalances: boolean = true) {
-		// if (!this.wallet.seedBytes) return;
+		// if (!this.wallet.seedBytes) return
 		let index = accountIndex
 		if (index === null) {
 			index = 0 // Use the existing number, then increment it
@@ -818,7 +808,7 @@ export class WalletService {
 			try {
 				newAccount = await this.createLedgerAccount(index)
 			} catch (err) {
-				// this.notifications.sendWarning(`Unable to load account from ledger.  Make sure it is connected`);
+				// this.notifications.sendWarning(`Unable to load account from ledger.  Make sure it is connected`)
 				throw err
 			}
 

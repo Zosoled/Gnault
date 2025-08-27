@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
+import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core'
 import { TranslocoService } from '@jsverse/transloco'
 import { WalletService } from '../../services/wallet.service'
 import { NotificationService } from '../../services/notification.service'
@@ -12,28 +12,28 @@ import { PowService } from '../../services/pow.service'
 	styleUrls: ['./wallet-widget.component.css']
 })
 export class WalletWidgetComponent implements OnInit {
+	private notificationService = inject(NotificationService)
+	private powService = inject(PowService)
+	private translocoService = inject(TranslocoService)
+	walletService = inject(WalletService)
+	ledgerService = inject(LedgerService)
+	settings = inject(AppSettingsService)
+
 	wallet
 	ledgerStatus = {
 		status: 'not-connected',
 		statusText: '',
-	};
-	powAlert = false;
+	}
+	powAlert = false
 
-	unlockPassword = '';
-	validatePassword = false;
+	unlockPassword = ''
+	validatePassword = false
 
-	modal: any = null;
-	mayAttemptUnlock = true;
-	timeoutIdAllowingUnlock: any = null;
+	modal: any = null
+	mayAttemptUnlock = true
+	timeoutIdAllowingUnlock: any = null
 
-	constructor (
-		private notificationService: NotificationService,
-		private powService: PowService,
-		private translocoService: TranslocoService,
-		public walletService: WalletService,
-		public ledgerService: LedgerService,
-		public settings: AppSettingsService,
-	) {
+	constructor () {
 		this.wallet = this.walletService.wallet
 	}
 
@@ -105,7 +105,7 @@ export class WalletWidgetComponent implements OnInit {
 		} catch (err) {
 			console.log(`Got error when loading ledger! `, err)
 			this.notificationService.removeNotification('ledger-status')
-			// this.notificationService.sendError(`Unable to load Ledger Device: ${err.message}`);
+			// this.notificationService.sendError(`Unable to load Ledger Device: ${err.message}`)
 		}
 	}
 

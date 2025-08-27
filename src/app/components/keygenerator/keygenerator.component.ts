@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import { NotificationService } from '../../services/notification.service'
 import { Wallet } from 'libnemo'
 
@@ -8,18 +8,13 @@ import { Wallet } from 'libnemo'
 	styleUrls: ['./keygenerator.component.css']
 })
 export class KeygeneratorComponent implements OnInit {
-	private util = inject(UtilService);
-	private notificationService = inject(NotificationService);
+	private notificationService = inject(NotificationService)
 
 	seed = '';
 	mnemonic = '';
 	privateKey = '';
 	account = '';
 	newWalletMnemonicLines = [];
-
-	constructor (
-		private notificationService: NotificationService
-	) { }
 
 	ngOnInit (): void {
 	}

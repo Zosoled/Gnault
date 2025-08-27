@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http'
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { TranslocoService } from '@jsverse/transloco'
 import { Tools } from 'libnemo'
@@ -22,45 +22,46 @@ import { environment } from '../../../environments/environment'
 	styleUrls: ['./send.component.css']
 })
 export class SendComponent implements OnInit {
-	nano = 1000000000000000000000000;
-	activePanel = 'send';
-	sendDestinationType = 'external-address';
+	private route = inject(ActivatedRoute)
+	private walletService = inject(WalletService)
+	private addressBookService = inject(AddressBookService)
+	private notificationService = inject(NotificationService)
+	private nodeApi = inject(ApiService)
+	private nanoBlock = inject(NanoBlockService)
+	price = inject(PriceService)
+	private workPool = inject(WorkPoolService)
+	settings = inject(AppSettingsService)
+	private util = inject(UtilService)
+	private qrModalService = inject(QrModalService)
+	private http = inject(HttpClient)
+	private translocoService = inject(TranslocoService)
+
+	nano = 1000000000000000000000000
+	activePanel = 'send'
+	sendDestinationType = 'external-address'
 	accounts
-	addressBookResults$ = new BehaviorSubject([]);
-	showAddressBook = false;
-	addressBookMatch = '';
+	addressBookResults$ = new BehaviorSubject([])
+	showAddressBook = false
+	addressBookMatch = ''
 
-	amount = null;
+	amount = null
 	amountExtraRaw: bigint = 0n
-	amountFiat: number | null = null;
+	amountFiat: number | null = null
 	rawAmount: bigint = 0n
-	fromAccount: any = {};
-	fromAccountID: any = '';
-	fromAddressBook = '';
-	toAccount: any = false;
-	toAccountID = '';
-	toOwnAccountID: any = '';
-	toAddressBook = '';
-	toAccountStatus = null;
-	amountStatus = null;
-	preparingTransaction = false;
-	confirmingTransaction = false;
-	selAccountInit = false;
+	fromAccount: any = {}
+	fromAccountID: any = ''
+	fromAddressBook = ''
+	toAccount: any = false
+	toAccountID = ''
+	toOwnAccountID: any = ''
+	toAddressBook = ''
+	toAccountStatus = null
+	amountStatus = null
+	preparingTransaction = false
+	confirmingTransaction = false
+	selAccountInit = false
 
-	constructor (
-		private route: ActivatedRoute,
-		private walletService: WalletService,
-		private addressBookService: AddressBookService,
-		private notificationService: NotificationService,
-		private nodeApi: ApiService,
-		private nanoBlock: NanoBlockService,
-		public price: PriceService,
-		private workPool: WorkPoolService,
-		public settings: AppSettingsService,
-		private util: UtilService,
-		private qrModalService: QrModalService,
-		private http: HttpClient,
-		private translocoService: TranslocoService) {
+	constructor () {
 		this.accounts = this.walletService.wallet.accounts
 	}
 
@@ -259,7 +260,7 @@ export class SendComponent implements OnInit {
 			this.addressBookMatch = 'Gnault Donations'
 		}
 
-		// const accountInfo = await this.walletService.walletApi.accountInfo(this.toAccountID);
+		// const accountInfo = await this.walletService.walletApi.accountInfo(this.toAccountID)
 		this.toAccountStatus = null
 		if (this.util.account.isValidAccount(this.toAccountID)) {
 			const accountInfo = await this.nodeApi.accountInfo(this.toAccountID)

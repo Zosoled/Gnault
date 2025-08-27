@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { Account, Block, Wallet } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
 import { ApiService } from './api.service'
@@ -11,12 +11,12 @@ import { WorkPoolService } from './work-pool.service'
 
 @Injectable()
 export class NanoBlockService {
-	private api = inject(ApiService);
-	private util = inject(UtilService);
-	private workPool = inject(WorkPoolService);
-	private notifications = inject(NotificationService);
-	private ledgerService = inject(LedgerService);
-	settings = inject(AppSettingsService);
+	private api = inject(ApiService)
+	private util = inject(UtilService)
+	private workPool = inject(WorkPoolService)
+	private notifications = inject(NotificationService)
+	private ledgerService = inject(LedgerService)
+	settings = inject(AppSettingsService)
 
 	representativeAccounts = [
 		'nano_1x7biz69cem95oo7gxkrw6kzhfywq4x5dupw4z1bdzkb74dk9kpxwzjbdhhs', // NanoCrawler
@@ -30,22 +30,14 @@ export class NanoBlockService {
 		'nano_1xckpezrhg56nuokqh6t1stjca67h37jmrp9qnejjkfgimx1msm9ehuaieuq', // Flying Amigos
 		'nano_3n7ky76t4g57o9skjawm8pprooz1bminkbeegsyt694xn6d31c6s744fjzzz', // Humble Nano
 		'nano_1wenanoqm7xbypou7x3nue1isaeddamjdnc3z99tekjbfezdbq8fmb659o7t', // WeNano
-	];
+	]
 
-	zeroHash = '0000000000000000000000000000000000000000000000000000000000000000';
+	zeroHash = '0000000000000000000000000000000000000000000000000000000000000000'
 
 	// https://docs.nano.org/releases/network-upgrades/#epoch-blocks
-	epochV2SignerAccount = 'nano_3qb6o6i1tkzr6jwr5s7eehfxwg9x6eemitdinbpi7u8bjjwsgqfj4wzser3x';
+	epochV2SignerAccount = 'nano_3qb6o6i1tkzr6jwr5s7eehfxwg9x6eemitdinbpi7u8bjjwsgqfj4wzser3x'
 
-	newOpenBlock$: BehaviorSubject<boolean | false> = new BehaviorSubject(false);
-
-	constructor (
-		private api: ApiService,
-		private util: UtilService,
-		private workPool: WorkPoolService,
-		private notifications: NotificationService,
-		private ledgerService: LedgerService,
-		public settings: AppSettingsService) { }
+	newOpenBlock$: BehaviorSubject<boolean | false> = new BehaviorSubject(false)
 
 	async generateChange (wallet: Wallet, walletAccount, representativeAccount, ledger = false) {
 		const account = Account.load(walletAccount.id)
@@ -111,54 +103,54 @@ export class NanoBlockService {
 	// This might be used in the future to send state changes on the blocks instead of normal true/false
 	// subscribeSend(walletAccount, toAccountID, rawAmount, ledger = false): Observable {
 	//   const doSend = async (observable) => {
-	//     console.log(`OBS: Promise resolve, running main send logic.`);
-	//     const startTime = Date.now();
+	//     console.log(`OBS: Promise resolve, running main send logic.`)
+	//     const startTime = Date.now()
 	//
-	//     console.log(`Observable: Creation event run`);
-	//     observable.next({ step: 0, startTime: startTime });
+	//     console.log(`Observable: Creation event run`)
+	//     observable.next({ step: 0, startTime: startTime })
 	//
 	//
-	//     const fromAccount = await this.api.accountInfo(walletAccount.id);
-	//     if (!fromAccount) throw new Error(`Unable to get account information for ${walletAccount.id}`);
+	//     const fromAccount = await this.api.accountInfo(walletAccount.id)
+	//     if (!fromAccount) throw new Error(`Unable to get account information for ${walletAccount.id}`)
 	//
-	//     const remaining = new BigNumber(fromAccount.balance).minus(rawAmount);
-	//     const remainingDecimal = remaining.toString(10);
-	//     let remainingPadded = remaining.toString(16);
+	//     const remaining = new BigNumber(fromAccount.balance).minus(rawAmount)
+	//     const remainingDecimal = remaining.toString(10)
+	//     let remainingPadded = remaining.toString(16)
 	//     while (remainingPadded.length < 32) remainingPadded = '0' + remainingPadded; // Left pad with 0's
 	//
-	//     let blockData;
-	//     const representative = fromAccount.representative || (this.settings.settings.defaultRepresentative || this.representativeAccount);
+	//     let blockData
+	//     const representative = fromAccount.representative || (this.settings.settings.defaultRepresentative || this.representativeAccount)
 	//
-	//     observable.next({ step: 1, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) });
+	//     observable.next({ step: 1, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) })
 	//
-	//     let signature = null;
+	//     let signature = null
 	//     if (ledger) {
 	//       const ledgerBlock = {
 	//         previousBlock: fromAccount.frontier,
 	//         representative: representative,
 	//         balance: remainingDecimal,
 	//         recipient: toAccountID,
-	//       };
+	//       }
 	//       try {
-	//         this.sendLedgerNotification();
-	//         await this.ledgerService.updateCache(walletAccount.index, fromAccount.frontier);
-	//         const sig = await this.ledgerService.signBlock(walletAccount.index, ledgerBlock);
-	//         this.clearLedgerNotification();
-	//         signature = sig.signature;
+	//         this.sendLedgerNotification()
+	//         await this.ledgerService.updateCache(walletAccount.index, fromAccount.frontier)
+	//         const sig = await this.ledgerService.signBlock(walletAccount.index, ledgerBlock)
+	//         this.clearLedgerNotification()
+	//         signature = sig.signature
 	//
-	//         observable.next({ step: 2, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) });
+	//         observable.next({ step: 2, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) })
 	//       } catch (err) {
-	//         this.clearLedgerNotification();
-	//         this.sendLedgerDeniedNotification(err);
-	//         return;
+	//         this.clearLedgerNotification()
+	//         this.sendLedgerDeniedNotification(err)
+	//         return
 	//       }
 	//     } else {
-	//       signature = this.signSendBlock(walletAccount, fromAccount, representative, remainingPadded, toAccountID);
-	//       observable.next({ step: 2, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) });
+	//       signature = this.signSendBlock(walletAccount, fromAccount, representative, remainingPadded, toAccountID)
+	//       observable.next({ step: 2, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) })
 	//     }
 	//
 	//     if (!this.workPool.workExists(fromAccount.frontier)) {
-	//       this.notifications.sendInfo(`Generating Proof of Work...`);
+	//       this.notifications.sendInfo(`Generating Proof of Work...`)
 	//     }
 	//
 	//     blockData = {
@@ -170,29 +162,29 @@ export class NanoBlockService {
 	//       link: new Account(toAccountID).publicKey,
 	//       work: await this.workPool.getWork(fromAccount.frontier),
 	//       signature: signature,
-	//     };
+	//     }
 	//
-	//     observable.next({ step: 3, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) });
+	//     observable.next({ step: 3, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) })
 	//
-	//     const processResponse = await this.api.process(blockData);
-	//     if (!processResponse || !processResponse.hash) throw new Error(processResponse.error || `Node returned an error`);
+	//     const processResponse = await this.api.process(blockData)
+	//     if (!processResponse || !processResponse.hash) throw new Error(processResponse.error || `Node returned an error`)
 	//
-	//     observable.next({ step: 4, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) });
+	//     observable.next({ step: 4, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) })
 	//
-	//     walletAccount.frontier = processResponse.hash;
+	//     walletAccount.frontier = processResponse.hash
 	//     this.workPool.addWorkToCache(processResponse.hash); // Add new hash into the work pool
-	//     this.workPool.removeFromCache(fromAccount.frontier);
+	//     this.workPool.removeFromCache(fromAccount.frontier)
 	//
-	//     observable.complete();
-	//   };
+	//     observable.complete()
+	//   }
 	//
 	//
-	//   console.log(`Creating observable... on send...`);
+	//   console.log(`Creating observable... on send...`)
 	//   // Create an observable that can be returned instantly.
 	//   return new Observable(observable => {
 	//
-	//     doSend(observable).then(val => console.log(val));
-	//   });
+	//     doSend(observable).then(val => console.log(val))
+	//   })
 	//
 	// }
 
@@ -335,7 +327,7 @@ export class NanoBlockService {
 			walletAccount.frontier = processResponse.hash
 			// Add new hash into the work pool, high PoW threshold since we don't know what the next one will be
 			// Skip adding new work cache directly, let reloadBalances() check for receivable and decide instead
-			// this.workPool.addWorkToCache(processResponse.hash, 1);
+			// this.workPool.addWorkToCache(processResponse.hash, 1)
 			this.workPool.removeFromCache(workBlock)
 
 			// update the rep view via subscription

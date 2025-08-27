@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import { AppSettingsService } from '../services/app-settings.service'
 import { WalletService } from '../services/wallet.service'
 import { environment } from '../../environments/environment'
@@ -9,15 +9,15 @@ import { environment } from '../../environments/environment'
 	styleUrls: ['./welcome.component.css']
 })
 export class WelcomeComponent implements OnInit {
-	private walletService = inject(WalletService);
-	settingsService = inject(AppSettingsService);
+	private walletService = inject(WalletService)
+	settingsService = inject(AppSettingsService)
 
 
-	donationAccount = environment.donationAddress;
+	donationAccount = environment.donationAddress
 	wallet
 	isConfigured
 
-	constructor (private walletService: WalletService, public settingsService: AppSettingsService) {
+	constructor () {
 		this.wallet = this.walletService.wallet
 		this.isConfigured = this.walletService.isConfigured
 	}

@@ -24,73 +24,60 @@ import { WebsocketService } from '../../services/websocket.service'
 
 
 export class ReceiveComponent implements OnInit, OnDestroy {
-	private route = inject(Router);
-	private walletService = inject(WalletService);
-	private notificationService = inject(NotificationService);
-	private addressBook = inject(AddressBookService);
-	modal = inject(ModalService);
-	private api = inject(ApiService);
-	private workPool = inject(WorkPoolService);
-	settings = inject(AppSettingsService);
-	private nanoBlock = inject(NanoBlockService);
-	price = inject(PriceService);
-	private websocket = inject(WebsocketService);
-	private util = inject(UtilService);
-	private translocoService = inject(TranslocoService);
+	private route = inject(Router)
+	private walletService = inject(WalletService)
+	private notificationService = inject(NotificationService)
+	private addressBook = inject(AddressBookService)
+	modal = inject(ModalService)
+	private api = inject(ApiService)
+	private workPool = inject(WorkPoolService)
+	settings = inject(AppSettingsService)
+	private nanoBlock = inject(NanoBlockService)
+	price = inject(PriceService)
+	private websocket = inject(WebsocketService)
+	private util = inject(UtilService)
+	private translocoService = inject(TranslocoService)
 
-	nano = 1000000000000000000000000;
+	nano = 1000000000000000000000000
 	accounts
-	timeoutIdClearingRecentlyCopiedState: any = null;
-	mobileTransactionMenuModal: any = null;
-	merchantModeModal: any = null;
-	mobileTransactionData: any = null;
+	timeoutIdClearingRecentlyCopiedState: any = null
+	mobileTransactionMenuModal: any = null
+	merchantModeModal: any = null
+	mobileTransactionData: any = null
 
-	selectedAccountAddressBookName = '';
-	receivableAccountModel = '0';
-	receivableBlocks = [];
-	receivableBlocksForSelectedAccount = [];
-	qrCodeUri = null;
-	qrCodeImage = null;
-	qrAccount = '';
-	qrAmount: BigNumber = null;
-	recentlyCopiedAccountAddress = false;
-	recentlyCopiedPaymentUri = false;
-	walletAccount: WalletAccount = null;
-	selAccountInit = false;
-	loadingIncomingTxList = false;
-	amountNano = '';
-	amountFiat = '';
-	validNano = true;
-	validFiat = true;
-	qrSuccessClass = '';
+	selectedAccountAddressBookName = ''
+	receivableAccountModel = '0'
+	receivableBlocks = []
+	receivableBlocksForSelectedAccount = []
+	qrCodeUri = null
+	qrCodeImage = null
+	qrAccount = ''
+	qrAmount: BigNumber = null
+	recentlyCopiedAccountAddress = false
+	recentlyCopiedPaymentUri = false
+	walletAccount: WalletAccount = null
+	selAccountInit = false
+	loadingIncomingTxList = false
+	amountNano = ''
+	amountFiat = ''
+	validNano = true
+	validFiat = true
+	qrSuccessClass = ''
 
-	inMerchantMode = false;
-	inMerchantModeQR = false;
-	inMerchantModePaymentComplete = false;
-	merchantModeRawRequestedQR: BigNumber = null;
-	merchantModeRawRequestedTotal: BigNumber = null;
-	merchantModeRawReceivedTotal: BigNumber = null;
-	merchantModeRawReceivedTotalHiddenRaw: BigNumber = null;
-	merchantModeSeenBlockHashes = {};
-	merchantModePrompts = [];
-	merchantModeTransactionHashes = [];
+	inMerchantMode = false
+	inMerchantModeQR = false
+	inMerchantModePaymentComplete = false
+	merchantModeRawRequestedQR: BigNumber = null
+	merchantModeRawRequestedTotal: BigNumber = null
+	merchantModeRawReceivedTotal: BigNumber = null
+	merchantModeRawReceivedTotalHiddenRaw: BigNumber = null
+	merchantModeSeenBlockHashes = {}
+	merchantModePrompts = []
+	merchantModeTransactionHashes = []
 
-	routerSub = null;
+	routerSub = null
 
-	constructor (
-		private route: Router,
-		private walletService: WalletService,
-		private notificationService: NotificationService,
-		private addressBook: AddressBookService,
-		public modal: ModalService,
-		private api: ApiService,
-		private workPool: WorkPoolService,
-		public settings: AppSettingsService,
-		private nanoBlock: NanoBlockService,
-		public price: PriceService,
-		private websocket: WebsocketService,
-		private util: UtilService,
-		private translocoService: TranslocoService) {
+	constructor () {
 		this.accounts = this.walletService.wallet.accounts
 	}
 

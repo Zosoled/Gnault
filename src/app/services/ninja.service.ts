@@ -5,22 +5,16 @@ import { UtilService } from './util.service'
 
 @Injectable()
 export class NinjaService {
-	private http = inject(HttpClient);
-	private notifications = inject(NotificationService);
-	private util = inject(UtilService);
+	private http = inject(HttpClient)
+	private notifications = inject(NotificationService)
+	private util = inject(UtilService)
 
 	// URL to representative health check API
 	// set to empty string to disable
 	ninjaUrl = 'https://node.somenano.com/proxy'
 
 	// null - loading, false - offline, true - online
-	status = null;
-
-	constructor (private http: HttpClient, private notifications: NotificationService, private util: UtilService) { }
-
-	private randomizeByScore (replist: any) {
-
-	}
+	status = null
 
 	async recommended (): Promise<any> {
 		if (this.ninjaUrl === '') {

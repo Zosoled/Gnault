@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core'
+import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { BehaviorSubject } from 'rxjs'
 import hermes from 'hermes-channel'
@@ -27,114 +27,101 @@ enum navSource { 'remote', 'multisig' }
 })
 
 export class SignComponent implements OnInit {
-	private router = inject(ActivatedRoute);
-	private routerService = inject(Router);
-	private walletService = inject(WalletService);
-	private addressBookService = inject(AddressBookService);
-	private notificationService = inject(NotificationService);
-	private nanoBlock = inject(NanoBlockService);
-	private workPool = inject(WorkPoolService);
-	settings = inject(AppSettingsService);
-	private api = inject(ApiService);
-	private util = inject(UtilService);
-	private qrModalService = inject(QrModalService);
-	private musigService = inject(MusigService);
-	price = inject(PriceService);
+	private router = inject(ActivatedRoute)
+	private routerService = inject(Router)
+	private walletService = inject(WalletService)
+	private addressBookService = inject(AddressBookService)
+	private notificationService = inject(NotificationService)
+	private nanoBlock = inject(NanoBlockService)
+	private workPool = inject(WorkPoolService)
+	settings = inject(AppSettingsService)
+	private api = inject(ApiService)
+	private util = inject(UtilService)
+	private qrModalService = inject(QrModalService)
+	private musigService = inject(MusigService)
+	price = inject(PriceService))
 
-	paramsString = '';
-	activePanel = 'error';
+	paramsString = ''
+	activePanel = 'error'
 	shouldSign: boolean = null; // if a block has been scanned for signing (or if it is a block to process)
 	accounts
-	addressBookResults$ = new BehaviorSubject([]);
-	showAddressBook = false;
-	addressBookMatch = '';
-	amount = null;
-	rawAmount: bigint = 0n;
-	amountFiat: number | null = null;
-	fromAccountID: any = '';
-	fromAccountBalance: bigint = null;
-	fromAddressBook = '';
-	toAccountID = '';
-	toAccountBalance: bigint = null;
-	toAddressBook = '';
-	repAddressBook = '';
-	toAccountStatus = null;
-	currentBlock: StateBlock = null;
-	previousBlock: StateBlock = null;
-	txType: TxType = null;
+	addressBookResults$ = new BehaviorSubject([])
+	showAddressBook = false
+	addressBookMatch = ''
+	amount = null
+	rawAmount: bigint = 0n
+	amountFiat: number | null = null
+	fromAccountID: any = ''
+	fromAccountBalance: bigint = null
+	fromAddressBook = ''
+	toAccountID = ''
+	toAccountBalance: bigint = null
+	toAddressBook = ''
+	repAddressBook = ''
+	toAccountStatus = null
+	currentBlock: StateBlock = null
+	previousBlock: StateBlock = null
+	txType: TxType = null
 	txTypes = TxType; // to access enum in html
-	txTypeMessage = '';
-	confirmingTransaction = false;
-	shouldGenWork = false;
-	signTypes: string[] = ['Internal Wallet or Ledger', 'Seed or Mnemonic+Index', 'Private or Expanded Key', 'Multisig'];
-	signTypeSelected: string = this.signTypes[0];
-	signatureAccount = '';
-	signatureMessage = '';
-	signatureMessageSuccess = '';
-	walletAccount = null;
-	nullBlock = '0000000000000000000000000000000000000000000000000000000000000000';
-	qrString = null;
-	qrCodeImage = null;
-	qrCodeImageBlock = null;
-	validSeed = false;
-	validIndex = true;
-	validPrivkey = false;
-	sourceSecret = '';
-	sourcePriv = '';
-	index = '0';
+	txTypeMessage = ''
+	confirmingTransaction = false
+	shouldGenWork = false
+	signTypes: string[] = ['Internal Wallet or Ledger', 'Seed or Mnemonic+Index', 'Private or Expanded Key', 'Multisig']
+	signTypeSelected: string = this.signTypes[0]
+	signatureAccount = ''
+	signatureMessage = ''
+	signatureMessageSuccess = ''
+	walletAccount = null
+	nullBlock = '0000000000000000000000000000000000000000000000000000000000000000'
+	qrString = null
+	qrCodeImage = null
+	qrCodeImageBlock = null
+	validSeed = false
+	validIndex = true
+	validPrivkey = false
+	sourceSecret = ''
+	sourcePriv = ''
+	index = '0'
 	privateKey = null; // the final private key to sign with if using manual entry
 	privateKeyExpanded = false; // if a private key is provided manually and it's expanded 128 char
-	processedHash: string = null;
-	finalSignature: string = null;
+	processedHash: string = null
+	finalSignature: string = null
 	// With v21 the 1x is the old 8x and max will be 8x due to the webgl threshold is max ffffffff00000000
 	thresholds = [
 		{ name: '1x', value: 1 }
-	];
-	selectedThreshold = this.thresholds[0].value;
-	selectedThresholdOld = this.selectedThreshold;
-	navigationSource = navSource.remote;
+	]
+	selectedThreshold = this.thresholds[0].value
+	selectedThresholdOld = this.selectedThreshold
+	navigationSource = navSource.remote
 
 	/**
 	 MULTISIG
 	 */
 	multisigLink = this.getMultisigLink(); // link to be shared to other multisig participants
-	participants = 2;
-	validParticipants = true;
-	savedParticipants = 0;
-	tabData = [];
-	tabListenerActive = false;
-	tabCount = null;
-	inputMultisigData = [];
-	multisigAccount = '';
-	outputMultisigData = '';
-	activeStep = 1;
-	inputAdd = '';
-	validInputAdd = false;
-	isInputAddDisabled = false;
-	tabMode = false;
+	participants = 2
+	validParticipants = true
+	savedParticipants = 0
+	tabData = []
+	tabListenerActive = false
+	tabCount = null
+	inputMultisigData = []
+	multisigAccount = ''
+	outputMultisigData = ''
+	activeStep = 1
+	inputAdd = ''
+	validInputAdd = false
+	isInputAddDisabled = false
+	tabMode = false
 	tabChecked = false; // if multi-tab mode enabled
-	blockHash = '';
-	remoteTabInit = false;
-	qrModal: any = null;
-	qrCodeImageOutput = null;
-	showAddBox = false;
-	isDesktop = environment.desktop;
+	blockHash = ''
+	remoteTabInit = false
+	qrModal: any = null
+	qrCodeImageOutput = null
+	showAddBox = false
+	isDesktop = environment.desktop
 	// END MULTISIG
 
-	constructor (
-		private router: ActivatedRoute,
-		private routerService: Router,
-		private walletService: WalletService,
-		private addressBookService: AddressBookService,
-		private notificationService: NotificationService,
-		private nanoBlock: NanoBlockService,
-		private workPool: WorkPoolService,
-		public settings: AppSettingsService,
-		private api: ApiService,
-		private util: UtilService,
-		private qrModalService: QrModalService,
-		private musigService: MusigService,
-		public price: PriceService) {
+	constructor () {
 		this.accounts = this.walletService.wallet.accounts
 	}
 
@@ -701,7 +688,7 @@ export class SignComponent implements OnInit {
 		const processResponse = await this.api.process(blockData, this.txType)
 		if (processResponse && processResponse.hash) {
 			// Add new hash into the work pool but does not make much sense for this case
-			// this.workPool.addWorkToCache(processResponse.hash);
+			// this.workPool.addWorkToCache(processResponse.hash)
 			this.workPool.removeFromCache(workBlock)
 			this.processedHash = processResponse.hash
 			this.notificationService.sendSuccess('Successfully processed the block!')

@@ -16,30 +16,25 @@ import { UtilService } from '../../services/util.service'
 	styleUrls: ['./manage-representatives.component.css']
 })
 export class ManageRepresentativesComponent implements OnInit, AfterViewInit {
-	private api = inject(ApiService);
-	private notificationService = inject(NotificationService);
-	modal = inject(ModalService);
-	private repService = inject(RepresentativeService);
-	private util = inject(UtilService);
+	private api = inject(ApiService)
+	private notificationService = inject(NotificationService)
+	modal = inject(ModalService)
+	private repService = inject(RepresentativeService)
+	private util = inject(UtilService)
 
 
-	activePanel = 0;
-	creatingNewEntry = false;
+	activePanel = 0
+	creatingNewEntry = false
 	representatives$
-	previousRepName = '';
-	newRepAccount = '';
-	newRepName = '';
-	newRepTrusted = false;
-	newRepWarn = false;
+	previousRepName = ''
+	newRepAccount = ''
+	newRepName = ''
+	newRepTrusted = false
+	newRepWarn = false
 
-	onlineReps = [];
+	onlineReps = []
 
-	constructor (
-		private api: ApiService,
-		private notificationService: NotificationService,
-		public modal: ModalService,
-		private repService: RepresentativeService,
-		private util: UtilService) {
+	constructor () {
 
 
 		// Set the online status of each representative

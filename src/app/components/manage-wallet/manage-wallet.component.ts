@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import { TranslocoService } from '@jsverse/transloco'
 import { WalletService } from '../../services/wallet.service'
 import { NotificationService } from '../../services/notification.service'
@@ -14,42 +14,42 @@ import { formatDate } from '@angular/common'
 	styleUrls: ['./manage-wallet.component.css']
 })
 export class ManageWalletComponent implements OnInit {
+	walletService = inject(WalletService)
+	notifications = inject(NotificationService)
+	settings = inject(AppSettingsService)
+	private api = inject(ApiService)
+	private util = inject(UtilService)
+	private translocoService = inject(TranslocoService)
+
 	wallet
 	accounts
-	newPassword = '';
-	confirmPassword = '';
-	validateNewPassword = false;
-	validateconfirmPassword = false;
+	newPassword = ''
+	confirmPassword = ''
+	validateNewPassword = false
+	validateconfirmPassword = false
 
-	showQRExport = false;
-	QRExportUrl = '';
-	QRExportImg = '';
+	showQRExport = false
+	QRExportUrl = ''
+	QRExportImg = ''
 
-	csvExportStarted = false;
+	csvExportStarted = false
 	transactionHistoryLimit = 500; // if the backend server limit changes, change this too
-	selAccountInit = false;
-	invalidCsvCount = false;
-	invalidCsvOffset = false;
+	selAccountInit = false
+	invalidCsvCount = false
+	invalidCsvOffset = false
 	csvAccount
-	csvCount = this.transactionHistoryLimit.toString();
-	csvOffset = '';
-	beyondCsvLimit = false;
-	exportingCsv = false;
+	csvCount = this.transactionHistoryLimit.toString()
+	csvOffset = ''
+	beyondCsvLimit = false
+	exportingCsv = false
 	orderOptions = [
 		{ name: 'Newest Transactions First', value: false },
 		{ name: 'Oldest Transactions First', value: true },
-	];
-	selectedOrder = this.orderOptions[0].value;
-	exportEnabled = true;
+	]
+	selectedOrder = this.orderOptions[0].value
+	exportEnabled = true
 
-	constructor (
-		public walletService: WalletService,
-		public notifications: NotificationService,
-		public settings: AppSettingsService,
-		private api: ApiService,
-		private util: UtilService,
-		private translocoService: TranslocoService
-	) {
+	constructor () {
 		this.wallet = this.walletService.wallet
 		this.accounts = this.walletService.wallet.accounts
 		this.csvAccount = this.accounts[0]?.id ?? '0'
