@@ -16,7 +16,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v1
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install APT dependencies
         run: |
