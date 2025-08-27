@@ -48,8 +48,7 @@ export class TransactionDetailsComponent implements OnInit {
 	async ngOnInit () {
 		this.routerSub = this.router.events.subscribe(event => {
 			if (event instanceof ChildActivationEnd) {
-				// Reload the state when navigating to itself from the transactions page
-				this.loadTransaction()
+				this.loadTransaction() // Reload the state when navigating to itself from the transactions page
 			}
 		})
 

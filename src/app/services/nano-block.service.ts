@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core'
+import { Injectable } from '@angular/core'
 import { Account, Block, Wallet } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
 import { ApiService } from './api.service'
@@ -38,6 +38,14 @@ export class NanoBlockService {
 	epochV2SignerAccount = 'nano_3qb6o6i1tkzr6jwr5s7eehfxwg9x6eemitdinbpi7u8bjjwsgqfj4wzser3x';
 
 	newOpenBlock$: BehaviorSubject<boolean | false> = new BehaviorSubject(false);
+
+	constructor (
+		private api: ApiService,
+		private util: UtilService,
+		private workPool: WorkPoolService,
+		private notifications: NotificationService,
+		private ledgerService: LedgerService,
+		public settings: AppSettingsService) { }
 
 	async generateChange (wallet: Wallet, walletAccount, representativeAccount, ledger = false) {
 		const account = Account.load(walletAccount.id)
@@ -403,9 +411,10 @@ export class NanoBlockService {
 			if (!this.workPool.workExists(workBlock)) {
 				this.notifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
 			}
+
 			const difficulty = (type === TxType.receive || type === TxType.open)
 				? 1 / 64
-				: 1
+				: multiplier
 			block.work = await this.workPool.getWork(workBlock, difficulty)
 			this.notifications.removeNotification('pow')
 			this.workPool.removeFromCache(workBlock)

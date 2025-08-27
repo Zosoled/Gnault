@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { BehaviorSubject } from 'rxjs'
 import hermes from 'hermes-channel'
@@ -44,7 +44,7 @@ export class SignComponent implements OnInit {
 	paramsString = '';
 	activePanel = 'error';
 	shouldSign: boolean = null; // if a block has been scanned for signing (or if it is a block to process)
-	accounts = this.walletService.wallet.accounts;
+	accounts
 	addressBookResults$ = new BehaviorSubject([]);
 	showAddressBook = false;
 	addressBookMatch = '';
@@ -87,7 +87,6 @@ export class SignComponent implements OnInit {
 	processedHash: string = null;
 	finalSignature: string = null;
 	// With v21 the 1x is the old 8x and max will be 8x due to the webgl threshold is max ffffffff00000000
-	// Note: with NanoPow integration, max threshold now supports full 64-bit ffffffffffffffff but is limited to network send max to prevent abuse
 	thresholds = [
 		{ name: '1x', value: 1 }
 	];
@@ -120,6 +119,24 @@ export class SignComponent implements OnInit {
 	qrCodeImageOutput = null;
 	showAddBox = false;
 	isDesktop = environment.desktop;
+	// END MULTISIG
+
+	constructor (
+		private router: ActivatedRoute,
+		private routerService: Router,
+		private walletService: WalletService,
+		private addressBookService: AddressBookService,
+		private notificationService: NotificationService,
+		private nanoBlock: NanoBlockService,
+		private workPool: WorkPoolService,
+		public settings: AppSettingsService,
+		private api: ApiService,
+		private util: UtilService,
+		private qrModalService: QrModalService,
+		private musigService: MusigService,
+		public price: PriceService) {
+		this.accounts = this.walletService.wallet.accounts
+	}
 
 	@ViewChild('dataAddFocus') _el: ElementRef
 

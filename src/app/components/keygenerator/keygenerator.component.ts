@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { NotificationService } from '../../services/notification.service'
 import { Wallet } from 'libnemo'
 
@@ -16,6 +16,10 @@ export class KeygeneratorComponent implements OnInit {
 	privateKey = '';
 	account = '';
 	newWalletMnemonicLines = [];
+
+	constructor (
+		private notificationService: NotificationService
+	) { }
 
 	ngOnInit (): void {
 	}

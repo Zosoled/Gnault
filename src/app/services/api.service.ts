@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core'
+import { Injectable } from '@angular/core'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { NodeService } from './node.service'
 import { AppSettingsService } from './app-settings.service'
@@ -38,6 +38,7 @@ export class ApiService {
 					}
 				)
 		}
+		console.log(data)
 		return await this.http.post(apiUrl, data, options).toPromise()
 			.then(res => {
 				if (typeof validateResponse === 'function') {

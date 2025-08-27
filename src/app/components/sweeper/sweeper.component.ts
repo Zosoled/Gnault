@@ -21,18 +21,7 @@ const SWEEP_MAX_RECEIVABLE = 100 // max receivable blocks to process per run
 })
 
 export class SweeperComponent implements OnInit {
-	private walletService = inject(WalletService);
-	private notificationService = inject(NotificationService);
-	private appSettings = inject(AppSettingsService);
-	modal = inject(ModalService);
-	private api = inject(ApiService);
-	private workPool = inject(WorkPoolService);
-	settings = inject(AppSettingsService);
-	private nanoBlock = inject(NanoBlockService);
-	private util = inject(UtilService);
-	private route = inject(Router);
-
-	accounts = this.walletService.wallet.accounts;
+	accounts
 	indexMax = INDEX_MAX;
 	incomingMax = SWEEP_MAX_RECEIVABLE;
 
@@ -56,10 +45,10 @@ export class SweeperComponent implements OnInit {
 	keyCount = 0;
 	pendingCallback = null;
 	totalSwept = '0';
-	customAccountSelected = this.accounts.length === 0;
+	customAccountSelected
 
 	validSeed = false;
-	validDestination = this.myAccountModel !== '0' ? true : false;
+	validDestination
 	validStartIndex = true;
 	validEndIndex = true;
 	validMaxIncoming = true;
@@ -67,7 +56,22 @@ export class SweeperComponent implements OnInit {
 
 	@ViewChild('outputarea') logArea: ElementRef
 
-	constructor () {
+	constructor (
+		private walletService: WalletService,
+		private notificationService: NotificationService,
+		private appSettings: AppSettingsService,
+		public modal: ModalService,
+		private api: ApiService,
+		private workPool: WorkPoolService,
+		public settings: AppSettingsService,
+		private nanoBlock: NanoBlockService,
+		private util: UtilService,
+		private route: Router) {
+		this.accounts = this.walletService.wallet.accounts
+		this.myAccountModel = this.accounts[0]?.id ?? '0'
+		this.destinationAccount = this.accounts[0]?.id ?? ''
+		this.customAccountSelected = this.accounts.length === 0
+		this.validDestination = this.myAccountModel !== '0'
 		if (this.route.getCurrentNavigation().extras.state && this.route.getCurrentNavigation().extras.state.seed) {
 			this.sourceWallet = this.route.getCurrentNavigation().extras.state.seed
 			this.validSeed = true

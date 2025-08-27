@@ -3,9 +3,7 @@
 	uk-grid
 >
 	<div class="uk-width-1-1">
-		<h2 class="uk-heading-divider">
-			{{ (sendDestinationType === 'own-address') ? 'Transfer Nano Between Own Accounts' : 'Send Nano' }}
-		</h2>
+		<h2 class="uk-heading-divider">{{ (sendDestinationType === 'own-address') ? 'Transfer Nano Between Own Accounts' : 'Send Nano' }}</h2>
 		<!-- Send Panel -->
 		<div
 			uk-grid
@@ -234,14 +232,14 @@
 								<span
 									class="spinner"
 									uk-spinner="ratio: 0.5;"
-								></span>Preparing transaction</button>
+								></span> Preparing transaction </button>
 							<button
 								class="only-on-small-viewports uk-button uk-button-secondary uk-width-1-1@s uk-width-auto@m uk-float-right nlt-icon-button"
 								[class.uk-disabled]="preparingTransaction"
 								type="button"
 								(click)="preparingTransaction ? return : openQR('account1','account')"
 								*ngIf="(sendDestinationType !== 'own-address')"
-							>Scan QR code</button>
+							> Scan QR code </button>
 						</div>
 					</div>
 				</div>

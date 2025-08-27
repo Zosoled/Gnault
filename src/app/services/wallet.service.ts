@@ -124,7 +124,17 @@ export class WalletService {
 	successfulBlocks = [];
 	trackedHashes = [];
 
-	constructor () {
+	constructor (
+		private util: UtilService,
+		private api: ApiService,
+		private appSettings: AppSettingsService,
+		private addressBook: AddressBookService,
+		private price: PriceService,
+		private workPool: WorkPoolService,
+		private websocket: WebsocketService,
+		private nanoBlock: NanoBlockService,
+		private ledgerService: LedgerService,
+		private notifications: NotificationService) {
 		this.websocket.newTransactions$.subscribe(async (transaction) => {
 			if (!transaction) return // Not really a new transaction
 			console.log('New Transaction', transaction)

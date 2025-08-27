@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core'
 import { Tools } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
+import BigNumber from 'bignumber.js'
 import { BaseApiAccount, WalletApiAccount, WalletService } from './wallet.service'
 import { ApiService } from './api.service'
 import { UtilService } from './util.service'
@@ -123,9 +124,8 @@ export class RepresentativeService {
 		const onlineReps = await this.getOnlineRepresentatives()
 		const quorum = await this.api.confirmationQuorum()
 
-		this.onlineStakeTotal = quorum
-			? parseFloat(Tools.convert(quorum.online_stake_total, 'raw', 'mnano'))
-			: null
+		const online_stake_total = this.util.nano.rawToMnano(quorum?.online_stake_total) ?? null
+		this.onlineStakeTotal = new BigNumber(online_stake_total) ?? null
 
 		const allReps = []
 
@@ -137,10 +137,8 @@ export class RepresentativeService {
 			console.log('knownRepNinja: ' + Object.getOwnPropertyNames(knownRepNinja))
 			// console.log('knownRepNinja: ' + JSON.stringify(knownRepNinja, null, 4))
 
-			const nanoWeight = Tools.convert(representative.weight || 0n, 'raw', 'mnano')
-			const percent = this.onlineStakeTotal
-				? parseFloat(nanoWeight) / this.onlineStakeTotal * 100
-				: 0
+			const nanoWeight = this.util.nano.rawToMnano(representative.weight || 0)
+			const percent = nanoWeight.div(this.onlineStakeTotal)?.times(100) ?? new BigNumber(0)
 
 			const repStatus: RepresentativeStatus = {
 				online: repOnline,
@@ -206,13 +204,11 @@ export class RepresentativeService {
 					repStatus.changeRequired = true
 				}
 			} else if (knownRepNinja) {
-				if (status === 'none') {
-					status = 'ok'
-				}
+				status = status === 'none'
+					? 'ok'
+					: status
 				label = knownRepNinja.alias
 			}
-
-			const uptimeIntervalDays = 7
 
 			if (knownRepNinja && !repStatus.trusted) {
 				if (knownRepNinja.closing === true) {
@@ -222,25 +218,7 @@ export class RepresentativeService {
 					repStatus.changeRequired = true
 				}
 
-				let uptimeIntervalValue = knownRepNinja.uptime_over.week
-
-				// temporary fix for knownRepNinja.uptime_over.week always returning 0
-				// uptimeIntervalValue = knownRepNinja.uptime_over.month
-				// uptimeIntervalDays = 30
-				// /temporary fix
-
-				// consider uptime value at least 1/<interval days> of daily uptime
-				uptimeIntervalValue = Math.max(
-					uptimeIntervalValue,
-					(knownRepNinja.uptime_over.day / uptimeIntervalDays)
-				)
-
-				if (repOnline === true) {
-					// consider uptime value at least 1% if the rep is currently online
-					uptimeIntervalValue = Math.max(uptimeIntervalValue, 1)
-				}
-
-				repStatus.uptime = uptimeIntervalValue
+				repStatus.uptime = knownRepNinja.uptime
 				repStatus.score = knownRepNinja.score
 
 				if (repStatus.uptime && repStatus.uptime !== 'good') {
@@ -258,9 +236,9 @@ export class RepresentativeService {
 				repStatus.changeRequired = true
 			} else {
 				// any other api error
-				if (status === 'none') {
-					status = 'unknown'
-				}
+				status = status === 'none'
+					? 'unknown'
+					: status
 			}
 
 			const additionalData = {

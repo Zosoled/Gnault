@@ -9,29 +9,29 @@
 				<div class="uk-card uk-card-default">
 					<div class="uk-card-header uk-form-horizontal">
 						<p><strong>Multi-signature approach allows to create addresses where multiple private keys are required to access and transfer the funds. Users can own a subset of private keys, and they are able to sign transactions only if they collectively own all of the participating keys.</strong>
-							<br>A full user guide is found <a
+							<br> A full user guide is found <a
 								href="https://docs.nault.cc/2021/04/20/multisig.html"
 								target="_blank"
 							>here</a>.
 						</p>
 						<h4>1 - Create a Multisig Address</h4>
-						<p>Add 2 or more nano addresses to form a new multisig address.<br>If you (or the participants) don't have any, they can be generated with the <a
+						<p>Add 2 or more nano addresses to form a new multisig address.<br> If you (or the participants) don't have any, they can be generated with the <a
 								routerLink="/keygenerator"
 								class="name"
-							>Keypair Generator</a> and stored safely.</p>
+							>Keypair Generator</a> and stored safely. </p>
 						<div>
 							<div class="uk-alert uk-alert-danger nlt-inline-alert">
 								<div class="icon-column">
 									<div uk-icon="icon: warning; ratio: 2;"></div>
 								</div>
-								<p>Each address MUST have a known corresponding Private Key.<br>This multisig is "m of m", meaning all keys must be available. <strong>Losing one key will invalidate the address!</strong><br>
+								<p> Each address MUST have a known corresponding Private Key.<br> This multisig is "m of m", meaning all keys must be available. <strong>Losing one key will invalidate the address!</strong><br>
 								</p>
 							</div>
 						</div>
 						<div
 							class="details-header advanced-options-link"
 							(click)="showAdvancedOptions = !showAdvancedOptions"
-						>MORE INFO<div [class]="['chevron', ( showAdvancedOptions ? 'chevron-up' : 'chevron-down' )]"></div>
+						> MORE INFO <div [class]="['chevron', ( showAdvancedOptions ? 'chevron-up' : 'chevron-down' )]"></div>
 						</div>
 						<div *ngIf="showAdvancedOptions">
 							<p>To simulate "m of n" for 3 participants the following sharing scheme can be used:</p>
@@ -44,7 +44,7 @@
 						</div>
 						<div class="uk-form-horizontal">
 							<div class="uk-margin">
-								<label class="uk-form-label">Participating Addresses<span
+								<label class="uk-form-label">Participating Addresses <span
 										uk-icon="icon: info;"
 										uk-tooltip
 										title="Addresses to participate in the multisig address"
@@ -77,7 +77,7 @@
 												*ngIf="!showAddBox"
 												class="add-button uk-width-auto"
 												(click)="setFocus()"
-											><span uk-icon="icon: plus"></span>Add address</div>
+											><span uk-icon="icon: plus"></span> Add address</div>
 											<div
 												*ngIf="showAddBox"
 												class="uk-inline uk-width-1-1"
@@ -115,7 +115,7 @@
 						</div>
 						<div class="uk-form-horizontal">
 							<div class="uk-margin">
-								<label class="uk-form-label">Multisig Address<span
+								<label class="uk-form-label">Multisig Address <span
 										uk-icon="icon: info;"
 										uk-tooltip
 										title="Final account to use with multisig transactions"
@@ -154,7 +154,7 @@
 								<div class="icon-column">
 									<div uk-icon="icon: warning; ratio: 2;"></div>
 								</div>
-								<p>Before funding the multisig address, make sure that you added the correct participating addresses above.<br>
+								<p> Before funding the multisig address, make sure that you added the correct participating addresses above.<br>
 								</p>
 							</div>
 						</div>

@@ -39,8 +39,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	private translocoService = inject(TranslocoService);
 
 	nano = 1000000000000000000000000;
-	accounts = this.walletService.wallet.accounts;
-
+	accounts
 	timeoutIdClearingRecentlyCopiedState: any = null;
 	mobileTransactionMenuModal: any = null;
 	merchantModeModal: any = null;
@@ -77,6 +76,23 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	merchantModeTransactionHashes = [];
 
 	routerSub = null;
+
+	constructor (
+		private route: Router,
+		private walletService: WalletService,
+		private notificationService: NotificationService,
+		private addressBook: AddressBookService,
+		public modal: ModalService,
+		private api: ApiService,
+		private workPool: WorkPoolService,
+		public settings: AppSettingsService,
+		private nanoBlock: NanoBlockService,
+		public price: PriceService,
+		private websocket: WebsocketService,
+		private util: UtilService,
+		private translocoService: TranslocoService) {
+		this.accounts = this.walletService.wallet.accounts
+	}
 
 	async ngOnInit () {
 		const UIkit = window['UIkit']

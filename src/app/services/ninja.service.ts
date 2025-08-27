@@ -9,7 +9,6 @@ export class NinjaService {
 	private notifications = inject(NotificationService);
 	private util = inject(UtilService);
 
-
 	// URL to representative health check API
 	// set to empty string to disable
 	ninjaUrl = 'https://node.somenano.com/proxy'
@@ -19,7 +18,11 @@ export class NinjaService {
 
 	constructor (private http: HttpClient, private notifications: NotificationService, private util: UtilService) { }
 
-	private async request (action): Promise<any> {
+	private randomizeByScore (replist: any) {
+
+	}
+
+	async recommended (): Promise<any> {
 		if (this.ninjaUrl === '') {
 			return Promise.resolve(null)
 		}

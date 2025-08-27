@@ -6,6 +6,8 @@ import { QrModalService } from '../../services/qr-modal.service'
 import { UtilService } from '../../services/util.service'
 import { Wallet } from 'libnemo'
 import { TranslocoService } from '@jsverse/transloco'
+import { Wallet } from 'libnemo'
+import { TranslocoService } from '@jsverse/transloco'
 
 enum panels {
 	'landing',
@@ -15,6 +17,7 @@ enum panels {
 	'backup',
 	'final',
 }
+
 
 const INDEX_MAX = 4294967295 // seed index
 
@@ -35,8 +38,8 @@ export class ConfigureWalletComponent implements OnInit {
 
 	panels = panels;
 	activePanel = panels.landing;
-	wallet = this.walletService.wallet;
-	isConfigured = this.walletService.isConfigured;
+	wallet
+	isConfigured
 	isNewWallet = true;
 	hasConfirmedBackup = false;
 	importSeed = '';
@@ -62,13 +65,15 @@ export class ConfigureWalletComponent implements OnInit {
 	importSeedBip39MnemonicPasswordModel = '';
 	walletPasswordModel = '';
 	walletPasswordConfirmModel = '';
+	validatePassword = false;
+	validatePasswordConfirm = false;
 	validIndex = true;
 	indexMax = INDEX_MAX;
 
 	selectedImportOption = 'seed';
 
 	ledgerStatus = LedgerStatus;
-	ledger = this.ledgerService.ledger;
+	ledger
 
 	constructor () {
 		if (this.route.getCurrentNavigation().extras.state && this.route.getCurrentNavigation().extras.state.seed) {
@@ -84,6 +89,7 @@ export class ConfigureWalletComponent implements OnInit {
 	}
 
 	async ngOnInit () {
+		const exampleSeedBytes = globalThis.crypto.getRandomValues(new Uint8Array(32))
 		const exampleSeedBytes = globalThis.crypto.getRandomValues(new Uint8Array(32))
 		const exampleSeedFull = this.util.hex.fromUint8(exampleSeedBytes)
 
@@ -107,11 +113,15 @@ export class ConfigureWalletComponent implements OnInit {
 		const exampleWallet = await Wallet.load('BIP-44', '', exampleSeedFull)
 		await exampleWallet.unlock('')
 		this.exampleMnemonicWords = exampleWallet.mnemonic.split(' ')
+		const exampleWallet = await Wallet.load('BIP-44', '', exampleSeedFull)
+		await exampleWallet.unlock('')
+		this.exampleMnemonicWords = exampleWallet.mnemonic.split(' ')
 	}
 
 	async importExistingWallet () {
 		this.notifications.sendInfo(`Starting to scan the first 20 accounts and importing them if they have been used...`, { length: 7000 })
 		this.route.navigate(['accounts']) // load accounts and watch them update in real-time
+		await this.walletService.createWalletFromSeed(this.newPassword, this.importSeed)
 		await this.walletService.createWalletFromSeed(this.newPassword, this.importSeed)
 		this.importSeed = ''
 		this.storePassword()
@@ -224,6 +234,9 @@ export class ConfigureWalletComponent implements OnInit {
 						const newWallet = await Wallet.load('BLAKE2b', '', mnemonic)
 						await newWallet.unlock('')
 						const newSeed = newWallet.seed
+						const newWallet = await Wallet.load('BLAKE2b', '', mnemonic)
+						await newWallet.unlock('')
+						const newSeed = newWallet.seed
 						if (!newSeed || newSeed.length !== 64 || !this.util.nano.isValidSeed(newSeed)) return this.notifications.sendError(`Mnemonic is invalid, double check it!`)
 						this.importSeed = newSeed.toUpperCase() // Force uppercase, for consistency
 					} catch (err) {
@@ -241,6 +254,9 @@ export class ConfigureWalletComponent implements OnInit {
 					return this.notifications.sendError(`Invalid import option`)
 				}
 
+				this.keyString = this.isExpanded
+					? this.importExpandedKeyModel
+					: this.importPrivateKeyModel
 				this.keyString = this.isExpanded
 					? this.importExpandedKeyModel
 					: this.importPrivateKeyModel
@@ -262,186 +278,205 @@ export class ConfigureWalletComponent implements OnInit {
 					await bipWallet.unlock('')
 				} catch (err) {
 					return this.notifications.sendError(err.message)
-				}
-				if (!this.validIndex) {
-					return this.notifications.sendError(`The account index is invalid, double check it!`)
-				}
+					let bipWallet
+					try {
+						bipWallet = await Wallet.load('BIP-44', '', this.importSeedBip39MnemonicModel)
+						await bipWallet.unlock('')
+					} catch (err) {
+						return this.notifications.sendError(err.message)
+					}
+					if (!this.validIndex) {
+						return this.notifications.sendError(`The account index is invalid, double check it!`)
+					}
 
-				// convert mnemonic to bip39 seed
-				const bip39Seed = this.importSeedBip39MnemonicPasswordModel !== ''
-					? this.util.string.mnemonicToSeedSync(this.importSeedBip39MnemonicModel, this.importSeedBip39MnemonicPasswordModel).toString('hex')
-					: this.util.string.mnemonicToSeedSync(this.importSeedBip39MnemonicModel).toString('hex')
+					// convert mnemonic to bip39 seed
+					const bip39Seed = this.importSeedBip39MnemonicPasswordModel !== '' ?
+						this.util.string.mnemonicToSeedSync(this.importSeedBip39MnemonicModel, this.importSeedBip39MnemonicPasswordModel).toString('hex') :
+						this.util.string.mnemonicToSeedSync(this.importSeedBip39MnemonicModel).toString('hex')
 
-				// derive private key from bip39 seed using the account index provided
-				const accounts = await bipWallet.accounts(
-					Number(this.importSeedBip39MnemonicIndexModel),
-					Number(this.importSeedBip39MnemonicIndexModel)
-				)
-				this.keyString = accounts[0].privateKey
-				this.isExpanded = false
+					// derive private key from bip39 seed using the account index provided
+					const accounts = await bipWallet.accounts(
+						Number(this.importSeedBip39MnemonicIndexModel),
+						Number(this.importSeedBip39MnemonicIndexModel)
+					)
+					const accounts = await bipWallet.accounts(
+						Number(this.importSeedBip39MnemonicIndexModel),
+						Number(this.importSeedBip39MnemonicIndexModel)
+					)
+					this.keyString = accounts[0].privateKey
+					this.isExpanded = false
+				}
+			}
+
+			// If a wallet already exists, confirm that the seed is saved
+			const confirmed = await this.confirmWalletOverwrite()
+			if (!confirmed) return
+			this.activePanel = panels.password
+		}
+
+	async createNewWallet() {
+			const newWallet = await Wallet.load('BIP-44', '', this.newWalletSeed)
+			await newWallet.unlock('')
+			this.newWalletSeed = newWallet.seed
+			this.newWalletMnemonic = newWallet.mnemonic
+			const newWallet = await Wallet.load('BIP-44', '', this.newWalletSeed)
+			await newWallet.unlock('')
+			this.newWalletSeed = newWallet.seed
+			this.newWalletMnemonic = newWallet.mnemonic
+
+			// Split the seed up so we can show 4 per line
+			const words = this.newWalletMnemonic.split(' ')
+			const lines = [
+				words.slice(0, 4),
+				words.slice(4, 8),
+				words.slice(8, 12),
+				words.slice(12, 16),
+				words.slice(16, 20),
+				words.slice(20, 24),
+			]
+			this.newWalletMnemonicLines = lines
+
+			this.activePanel = panels.backup
+		}
+
+		confirmNewSeed() {
+			if (!this.hasConfirmedBackup) {
+				return this.notifications.sendWarning(`Please confirm you have saved a wallet backup!`)
+			}
+			this.walletService.createNewWallet(this.newPassword)
+			this.walletService.createNewWallet(this.newPassword)
+			this.storePassword()
+			this.newWalletSeed = ''
+			this.newWalletMnemonicLines = []
+			this.saveNewWallet()
+
+			this.activePanel = panels.final
+		}
+
+		saveWalletPassword() {
+			if (this.walletPasswordModel.length < 6) {
+				return this.notifications.sendWarning(this.translocoService.translate('configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long', { minCharacters: 6 }))
+			}
+			if (this.walletPasswordModel.length < 6) {
+				return this.notifications.sendWarning(this.translocoService.translate('configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long', { minCharacters: 6 }))
+			}
+			if (this.walletPasswordConfirmModel !== this.walletPasswordModel) {
+				return this.notifications.sendError(this.translocoService.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match'))
+				return this.notifications.sendError(this.translocoService.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match'))
+			}
+			this.newPassword = this.walletPasswordModel
+			this.walletPasswordModel = ''
+			this.walletPasswordConfirmModel = ''
+
+			if (this.isNewWallet) {
+				this.createNewWallet()
+			} else if (this.selectedImportOption === 'mnemonic' || this.selectedImportOption === 'seed') {
+				this.importExistingWallet()
+			} else if (this.selectedImportOption === 'privateKey' || this.selectedImportOption === 'expandedKey'
+				|| this.selectedImportOption === 'bip39-mnemonic') {
+				this.importSingleKeyWallet()
 			}
 		}
 
-		// If a wallet already exists, confirm that the seed is saved
-		const confirmed = await this.confirmWalletOverwrite()
-		if (!confirmed) return
-		this.activePanel = panels.password
-	}
-
-	async createNewWallet () {
-		const newWallet = await Wallet.load('BIP-44', '', this.newWalletSeed)
-		await newWallet.unlock('')
-		this.newWalletSeed = newWallet.seed
-		this.newWalletMnemonic = newWallet.mnemonic
-
-		// Split the seed up so we can show 4 per line
-		const words = this.newWalletMnemonic.split(' ')
-		const lines = [
-			words.slice(0, 4),
-			words.slice(4, 8),
-			words.slice(8, 12),
-			words.slice(12, 16),
-			words.slice(16, 20),
-			words.slice(20, 24),
-		]
-		this.newWalletMnemonicLines = lines
-
-		this.activePanel = panels.backup
-	}
-
-	confirmNewSeed () {
-		if (!this.hasConfirmedBackup) {
-			return this.notifications.sendWarning(`Please confirm you have saved a wallet backup!`)
+		storePassword() {
+			this.newPassword = ''
 		}
-		this.walletService.createNewWallet(this.newPassword)
-		this.storePassword()
-		this.newWalletSeed = ''
-		this.newWalletMnemonicLines = []
-		this.saveNewWallet()
 
-		this.activePanel = panels.final
-	}
+		saveNewWallet() {
+			this.walletService.saveWalletExport()
+			this.walletService.informNewWallet()
 
-	saveWalletPassword () {
-		if (this.walletPasswordModel.length < 6) {
-			return this.notifications.sendWarning(this.translocoService.translate('configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long', { minCharacters: 6 }))
+			this.notifications.sendSuccess(`Successfully created new wallet! Do not lose the secret recovery seed/mnemonic!`)
 		}
-		if (this.walletPasswordConfirmModel !== this.walletPasswordModel) {
-			return this.notifications.sendError(this.translocoService.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match'))
+
+		setPanel(panel) {
+			this.activePanel = panel
+			if (panel === panels.landing) {
+				this.isNewWallet = true
+			} else if (panel === panels.import) {
+				this.isNewWallet = false
+			}
 		}
-		this.newPassword = this.walletPasswordModel
-		this.walletPasswordModel = ''
-		this.walletPasswordConfirmModel = ''
 
-		if (this.isNewWallet) {
-			this.createNewWallet()
-		} else if (this.selectedImportOption === 'mnemonic' || this.selectedImportOption === 'seed') {
-			this.importExistingWallet()
-		} else if (this.selectedImportOption === 'privateKey' || this.selectedImportOption === 'expandedKey'
-			|| this.selectedImportOption === 'bip39-mnemonic') {
-			this.importSingleKeyWallet()
+		copiedNewWalletSeed() {
+			this.notifications.removeNotification('success-copied')
+			this.notifications.sendSuccess(
+				this.translocoService.translate('configure-wallet.new-wallet.successfully-copied-secret-recovery-seed'),
+				{ identifier: 'success-copied' }
+			)
 		}
-	}
 
-	storePassword () {
-		this.newPassword = ''
-	}
-
-	saveNewWallet () {
-		this.walletService.saveWalletExport()
-		this.walletService.informNewWallet()
-
-		this.notifications.sendSuccess(`Successfully created new wallet! Do not lose the secret recovery seed/mnemonic!`)
-	}
-
-	setPanel (panel) {
-		this.activePanel = panel
-		if (panel === panels.landing) {
-			this.isNewWallet = true
-		} else if (panel === panels.import) {
-			this.isNewWallet = false
+		copiedNewWalletMnemonic() {
+			this.notifications.removeNotification('success-copied')
+			this.notifications.sendSuccess(
+				this.translocoService.translate('configure-wallet.new-wallet.successfully-copied-secret-recovery-mnemonic'),
+				{ identifier: 'success-copied' }
+			)
 		}
-	}
 
-	copiedNewWalletSeed () {
-		this.notifications.removeNotification('success-copied')
-		this.notifications.sendSuccess(
-			this.translocoService.translate('configure-wallet.new-wallet.successfully-copied-secret-recovery-seed'),
-			{ identifier: 'success-copied' }
-		)
-	}
+		importFromFile(files) {
+			if (!files.length) return
 
-	copiedNewWalletMnemonic () {
-		this.notifications.removeNotification('success-copied')
-		this.notifications.sendSuccess(
-			this.translocoService.translate('configure-wallet.new-wallet.successfully-copied-secret-recovery-mnemonic'),
-			{ identifier: 'success-copied' }
-		)
-	}
+			const file = files[0]
+			const reader = new FileReader()
+			reader.onload = (event) => {
+				const fileData = event.target['result'] as string
+				try {
+					const importData = JSON.parse(fileData)
+					if ((!importData.seed && !importData.privateKey && !importData.expandedKey) ||
+						(!importData.hasOwnProperty('accountsIndex') && !importData.hasOwnProperty('indexes'))) {
+						return this.notifications.sendError(`Bad import data `)
+					}
 
-	importFromFile (files) {
-		if (!files.length) return
-
-		const file = files[0]
-		const reader = new FileReader()
-		reader.onload = (event) => {
-			const fileData = event.target['result'] as string
-			try {
-				const importData = JSON.parse(fileData)
-				if ((!importData.seed && !importData.privateKey && !importData.expandedKey) ||
-					(!importData.hasOwnProperty('accountsIndex') && !importData.hasOwnProperty('indexes'))) {
-					return this.notifications.sendError(`Bad import data `)
+					const walletEncrypted = btoa(JSON.stringify(importData))
+					this.route.navigate(['import-wallet'], { fragment: walletEncrypted })
+				} catch (err) {
+					this.notifications.sendError(`Unable to parse import data, make sure you selected the right file!`)
 				}
-
-				const walletEncrypted = btoa(JSON.stringify(importData))
-				this.route.navigate(['import-wallet'], { fragment: walletEncrypted })
-			} catch (err) {
-				this.notifications.sendError(`Unable to parse import data, make sure you selected the right file!`)
 			}
+
+			reader.readAsText(file)
 		}
 
-		reader.readAsText(file)
-	}
+		// open qr reader modal
+		openQR(reference, type) {
+			const qrResult = this.qrModalService.openQR(reference, type)
+			qrResult.then((data) => {
+				switch (data.reference) {
+					case 'seed1':
+						this.importSeedModel = data.content
+						break
+					case 'mnemo1':
+						this.importSeedMnemonicModel = data.content
+						break
+					case 'mnemo2':
+						this.importSeedBip39MnemonicModel = data.content
+						break
+					case 'priv1':
+						this.importPrivateKeyModel = data.content
+						break
+					case 'expanded1':
+						this.importExpandedKeyModel = data.content
+						break
+				}
+			}, () => { }
+			)
+		}
 
-	// open qr reader modal
-	openQR (reference, type) {
-		const qrResult = this.qrModalService.openQR(reference, type)
-		qrResult.then((data) => {
-			switch (data.reference) {
-				case 'seed1':
-					this.importSeedModel = data.content
-					break
-				case 'mnemo1':
-					this.importSeedMnemonicModel = data.content
-					break
-				case 'mnemo2':
-					this.importSeedBip39MnemonicModel = data.content
-					break
-				case 'priv1':
-					this.importPrivateKeyModel = data.content
-					break
-				case 'expanded1':
-					this.importExpandedKeyModel = data.content
-					break
-			}
-		}, () => { }
-		)
-	}
-
-	accountIndexChange (index) {
-		let invalid = false
-		if (this.util.string.isNumeric(index) && index % 1 === 0) {
-			index = parseInt(index, 10)
-			if (!this.util.nano.isValidIndex(index)) {
+		accountIndexChange(index) {
+			let invalid = false
+			if (this.util.string.isNumeric(index) && index % 1 === 0) {
+				index = parseInt(index, 10)
+				if (!this.util.nano.isValidIndex(index)) {
+					invalid = true
+				}
+				if (index > INDEX_MAX) {
+					invalid = true
+				}
+			} else {
 				invalid = true
 			}
-			if (index > INDEX_MAX) {
-				invalid = true
-			}
-		} else {
-			invalid = true
+			this.validIndex = !invalid
 		}
-		this.validIndex = !invalid
-	}
 
-}
+	}

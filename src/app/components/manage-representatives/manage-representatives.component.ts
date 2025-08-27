@@ -25,15 +25,7 @@ export class ManageRepresentativesComponent implements OnInit, AfterViewInit {
 
 	activePanel = 0;
 	creatingNewEntry = false;
-
-	// Set the online status of each representative
-	representatives$ = this.repService.representatives$.pipe(map(reps => {
-		return reps.map(rep => {
-			rep.online = this.onlineReps.indexOf(rep.id) !== -1
-			return rep
-		})
-	}));
-
+	representatives$
 	previousRepName = '';
 	newRepAccount = '';
 	newRepName = '';
@@ -41,6 +33,23 @@ export class ManageRepresentativesComponent implements OnInit, AfterViewInit {
 	newRepWarn = false;
 
 	onlineReps = [];
+
+	constructor (
+		private api: ApiService,
+		private notificationService: NotificationService,
+		public modal: ModalService,
+		private repService: RepresentativeService,
+		private util: UtilService) {
+
+
+		// Set the online status of each representative
+		this.representatives$ = this.repService.representatives$.pipe(map(reps => {
+			return reps.map(rep => {
+				rep.online = this.onlineReps.indexOf(rep.id) !== -1
+				return rep
+			})
+		}))
+	}
 
 	async ngOnInit () {
 		this.repService.loadRepresentativeList()

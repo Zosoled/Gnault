@@ -1,5 +1,5 @@
-import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core'
-import { translate } from '@jsverse/transloco'
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
+import { TranslocoService } from '@jsverse/transloco'
 import { WalletService } from '../../services/wallet.service'
 import { NotificationService } from '../../services/notification.service'
 import { LedgerService, LedgerStatus } from '../../services/ledger.service'
@@ -12,14 +12,7 @@ import { PowService } from '../../services/pow.service'
 	styleUrls: ['./wallet-widget.component.css']
 })
 export class WalletWidgetComponent implements OnInit {
-	walletService = inject(WalletService);
-	private notificationService = inject(NotificationService);
-	ledgerService = inject(LedgerService);
-	settings = inject(AppSettingsService);
-	private powService = inject(PowService);
-
-	wallet = this.walletService.wallet;
-
+	wallet
 	ledgerStatus = {
 		status: 'not-connected',
 		statusText: '',
@@ -32,6 +25,17 @@ export class WalletWidgetComponent implements OnInit {
 	modal: any = null;
 	mayAttemptUnlock = true;
 	timeoutIdAllowingUnlock: any = null;
+
+	constructor (
+		private notificationService: NotificationService,
+		private powService: PowService,
+		private translocoService: TranslocoService,
+		public walletService: WalletService,
+		public ledgerService: LedgerService,
+		public settings: AppSettingsService,
+	) {
+		this.wallet = this.walletService.wallet
+	}
 
 	@ViewChild('passwordInput') passwordInput: ElementRef
 
@@ -82,7 +86,7 @@ export class WalletWidgetComponent implements OnInit {
 		}
 		const locked = await this.walletService.lockWallet()
 		if (locked) {
-			this.notificationService.sendSuccess(translate('accounts.wallet-locked'))
+			this.notificationService.sendSuccess(this.translocoService.translate('accounts.wallet-locked'))
 		} else {
 			this.notificationService.sendError(`Unable to lock wallet`)
 		}
@@ -136,7 +140,7 @@ export class WalletWidgetComponent implements OnInit {
 		const unlocked = await this.walletService.unlockWallet(this.unlockPassword)
 
 		if (unlocked) {
-			this.notificationService.sendSuccess(translate('accounts.wallet-unlocked'))
+			this.notificationService.sendSuccess(this.translocoService.translate('accounts.wallet-unlocked'))
 			this.modal.hide()
 
 			if (this.timeoutIdAllowingUnlock !== null) {
@@ -146,7 +150,7 @@ export class WalletWidgetComponent implements OnInit {
 
 			this.allowUnlock({ focusInputElement: false })
 		} else {
-			this.notificationService.sendError(translate('accounts.wrong-password'))
+			this.notificationService.sendError(this.translocoService.translate('accounts.wrong-password'))
 		}
 	}
 

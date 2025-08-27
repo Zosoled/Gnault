@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core'
+import { Injectable } from '@angular/core'
 import { TranslocoService, getBrowserCultureLang, getBrowserLang } from '@jsverse/transloco'
 
 export type WalletStore = 'localStorage' | 'none'
@@ -16,6 +16,7 @@ interface AppSettings {
 	lockInactivityMinutes: number
 	ledgerReconnect: LedgerConnectionType
 	powSource: PoWSource
+	multiplierSource: number
 	customWorkServer: string
 	receivableOption: string
 	serverName: string
@@ -45,6 +46,7 @@ export class AppSettingsService {
 		lockInactivityMinutes: 30,
 		ledgerReconnect: 'usb',
 		powSource: 'server',
+		multiplierSource: 1,
 		customWorkServer: '',
 		receivableOption: 'amount',
 		serverName: 'random',
@@ -216,6 +218,7 @@ export class AppSettingsService {
 			lockInactivityMinutes: 30,
 			ledgerReconnect: 'usb',
 			powSource: 'server',
+			multiplierSource: 1,
 			customWorkServer: '',
 			receivableOption: 'amount',
 			serverName: 'random',

@@ -1,5 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core'
-import { translate } from '@jsverse/transloco'
+import { Component, OnInit } from '@angular/core'
+import { TranslocoService } from '@jsverse/transloco'
 import { WalletService } from '../../services/wallet.service'
 import { NotificationService } from '../../services/notification.service'
 import { ApiService } from '../../services/api.service'
@@ -14,16 +14,8 @@ import { formatDate } from '@angular/common'
 	styleUrls: ['./manage-wallet.component.css']
 })
 export class ManageWalletComponent implements OnInit {
-	walletService = inject(WalletService);
-	notifications = inject(NotificationService);
-	private api = inject(ApiService);
-	private util = inject(UtilService);
-	settings = inject(AppSettingsService);
-
-
-	wallet = this.walletService.wallet;
-	accounts = this.walletService.wallet.accounts;
-
+	wallet
+	accounts
 	newPassword = '';
 	confirmPassword = '';
 	validateNewPassword = false;
@@ -50,6 +42,19 @@ export class ManageWalletComponent implements OnInit {
 	selectedOrder = this.orderOptions[0].value;
 	exportEnabled = true;
 
+	constructor (
+		public walletService: WalletService,
+		public notifications: NotificationService,
+		public settings: AppSettingsService,
+		private api: ApiService,
+		private util: UtilService,
+		private translocoService: TranslocoService
+	) {
+		this.wallet = this.walletService.wallet
+		this.accounts = this.walletService.wallet.accounts
+		this.csvAccount = this.accounts[0]?.id ?? '0'
+	}
+
 	async ngOnInit () {
 		this.wallet = this.walletService.wallet
 
@@ -69,10 +74,10 @@ export class ManageWalletComponent implements OnInit {
 
 	async changePassword () {
 		if (this.newPassword.length < 6) {
-			return this.notifications.sendError(translate('configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long', { minCharacters: 6 }))
+			return this.notifications.sendError(this.translocoService.translate('configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long', { minCharacters: 6 }))
 		}
 		if (this.newPassword !== this.confirmPassword) {
-			return this.notifications.sendError(translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match'))
+			return this.notifications.sendError(this.translocoService.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match'))
 		}
 		if (this.walletService.isLocked()) {
 			const wasUnlocked = await this.walletService.requestWalletUnlock()

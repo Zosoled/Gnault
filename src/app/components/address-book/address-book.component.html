@@ -18,7 +18,8 @@
 						*ngIf="activePanel !== 1"
 						(click)="activePanel =  activePanel === 0 ? 2 : 0; addressBookShowFileExport = false;"
 						style="font-size: 12px; margin-left: 25px;"
-					>{{ activePanel === 2 ? ('address-book.back-to-address-book' | transloco | uppercase) : ('address-book.import-export' | transloco | uppercase) }}</a>
+					>{{ activePanel === 2 ? ('address-book.back-to-address-book' |
+						transloco | uppercase) : ('address-book.import-export' | transloco | uppercase) }}</a>
 				</h2>
 			</div>
 			<div class="uk-width-auto@s uk-width-1-1 uk-text-right">
@@ -181,8 +182,10 @@
 											<ng-container *ngIf="(walletService.wallet.updatingBalance === false) else balanceLoading">
 												<div class="account-amounts-primary uk-width-1-1">
 													<span [title]="( accounts[addressBook.account]?.balanceRaw.gt(0) ? ( '+' + ( accounts[addressBook.account]?.balanceRaw.toString(10) ) + ' raw' ) : '' )">
-														<span class="amount-integer">{{ accounts[addressBook.account]?.balance | rai: 'mnano,true' | amountsplit: 0 }}</span>
-														<span class="amount-fractional">{{ accounts[addressBook.account]?.balance | rai: 'mnano,true' | amountsplit: 1 }}</span>
+														<span class="amount-integer">{{ accounts[addressBook.account]?.balance | rai: 'mnano,true' |
+															amountsplit: 0 }}</span>
+														<span class="amount-fractional">{{ accounts[addressBook.account]?.balance | rai:
+															'mnano,true' | amountsplit: 1 }}</span>
 														<span class="currency-name">XNO</span>
 													</span>
 													<div
@@ -222,7 +225,8 @@
 							*ngIf="!(addressBook$ | async).length"
 							class="uk-text-center"
 						>
-							{{ 'address-book.you-do-not-have-any-address-book-entries-saved-yet.1' | transloco }} <a (click)="addEntry()">{{ 'address-book.you-do-not-have-any-address-book-entries-saved-yet.2-link' | transloco }}</a>{{ 'address-book.you-do-not-have-any-address-book-entries-saved-yet.3' | transloco }}
+							{{ 'address-book.you-do-not-have-any-address-book-entries-saved-yet.1' | transloco }} <a (click)="addEntry()">{{ 'address-book.you-do-not-have-any-address-book-entries-saved-yet.2-link' |
+								transloco }}</a>{{ 'address-book.you-do-not-have-any-address-book-entries-saved-yet.3' | transloco }}
 						</li>
 					</ul>
 				</div>
@@ -236,9 +240,8 @@
 			<div class="uk-width-1-1">
 				<div class="uk-card uk-card-default">
 					<div class="uk-card-header">
-						<h2 class="uk-card-title">
-							{{ creatingNewEntry ? ( 'address-book.add-new-entry' | transloco ) : ( 'address-book.edit-entry' | transloco ) }}
-						</h2>
+						<h2 class="uk-card-title">{{ creatingNewEntry ? ( 'address-book.add-new-entry' | transloco ) : (
+							'address-book.edit-entry' | transloco ) }}</h2>
 					</div>
 					<div class="uk-card-body">
 						<div class="uk-form-horizontal">
@@ -309,7 +312,8 @@
 								<label
 									class="uk-form-label"
 									for="new-track-transactions"
-								>{{ 'address-book.track-transactions' | transloco }} <span
+								>{{ 'address-book.track-transactions' |
+									transloco }} <span
 										uk-icon="icon: info;"
 										uk-tooltip
 										[title]="t('address-book.a-notification-will-be-shown-whenever-the-address-has-a-new')"

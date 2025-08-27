@@ -27,7 +27,7 @@ export class ImportWalletComponent implements OnInit {
 		const importData = this.route.snapshot.fragment
 		const queryData = this.route.snapshot.queryParams
 		if (!importData || !importData.length) {
-			return this.importDataError(`No import data found. Check your link and try again.`)
+			return this.importDataError(`No import data found.  Check your link and try again.`)
 		}
 
 		if ('hostname' in queryData) this.hostname = queryData.hostname
@@ -36,13 +36,13 @@ export class ImportWalletComponent implements OnInit {
 		try {
 			const importBlob = JSON.parse(decodedData)
 			if (!importBlob || (!importBlob.seed && !importBlob.privateKey && !importBlob.expandedKey)) {
-				return this.importDataError(`Bad import data. Check your link and try again.`)
+				return this.importDataError(`Bad import data.  Check your link and try again.`)
 			}
 			this.validImportData = true
 			this.importData = importBlob
 			this.activePanel = 'import'
 		} catch (err) {
-			return this.importDataError(`Unable to decode import data. Check your link and try again.`)
+			return this.importDataError(`Unable to decode import data.  Check your link and try again.`)
 		}
 	}
 
