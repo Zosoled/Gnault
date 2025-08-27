@@ -1,10 +1,10 @@
-import { Pipe, PipeTransform } from '@angular/core'
 import { CurrencyPipe } from '@angular/common'
-import { BigNumber } from 'bignumber.js'
+import { Pipe, PipeTransform } from '@angular/core'
 
 @Pipe({
 	name: 'fiat'
 })
+
 export class FiatPipe extends CurrencyPipe implements PipeTransform {
 	transform (
 		value: any,
@@ -17,9 +17,8 @@ export class FiatPipe extends CurrencyPipe implements PipeTransform {
 			return ``
 		}
 		if (currencyCode === 'BTC') {
-			return `BTC ${new BigNumber(Number(value).toFixed(4) || 0).toFixed(6)}`
+			return `BTC ${Number(value || 0).toFixed(6)}`
 		}
 		return super.transform(value, currencyCode, 'symbol-narrow', digits, locale)
 	}
-
 }

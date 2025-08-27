@@ -6,18 +6,15 @@ import { createIcon } from '../../../../assets/lib/nanoidenticons.min.js'
 	templateUrl: './nano-identicon.component.html',
 	styleUrls: ['./nano-identicon.component.css'],
 })
-export class NanoIdenticonComponent implements OnChanges, AfterViewInit {
 
+export class NanoIdenticonComponent implements OnChanges, AfterViewInit {
 	@Input() accountID: string
 	@Input() scale: number
 	@Input() settingIdenticonsStyle: string
-
-	renderedIdenticon = '';
-	imageLoadErrorOccurred = false;
-
-	constructor () { }
-
 	@ViewChild('canvasContainer') canvasContainer: ElementRef
+
+	renderedIdenticon = ''
+	imageLoadErrorOccurred = false
 
 	ngOnChanges () {
 		this.renderNanoidenticon()
@@ -28,34 +25,26 @@ export class NanoIdenticonComponent implements OnChanges, AfterViewInit {
 	}
 
 	renderNanoidenticon () {
-		if (
-			(this.canvasContainer == null)
-			|| (this.settingIdenticonsStyle !== 'nanoidenticons')
-			|| (this.renderedIdenticon === this.accountID)
+		if (this.canvasContainer == null
+			|| this.settingIdenticonsStyle !== 'nanoidenticons'
+			|| this.renderedIdenticon === this.accountID
 		) {
 			return
 		}
-
 		this.renderedIdenticon = this.accountID
-
 		const scale =
 			Math.max(
 				Math.ceil(this.scale * window.devicePixelRatio),
 				this.scale
 			)
-
 		const canvas = createIcon({
 			seed: this.accountID,
 			scale,
 		})
-
 		const canvasContainerNative = this.canvasContainer.nativeElement
-
 		while (canvasContainerNative.firstChild) {
 			canvasContainerNative.removeChild(canvasContainerNative.lastChild)
 		}
-
 		canvasContainerNative.appendChild(canvas)
 	}
-
 }

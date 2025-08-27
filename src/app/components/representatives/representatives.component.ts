@@ -1,9 +1,8 @@
 import { Component, OnInit, ViewChild, inject } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
-import BigNumber from 'bignumber.js'
+import { TranslocoService } from '@jsverse/transloco'
 import { BehaviorSubject } from 'rxjs'
 import { QrModalService } from '../../services/qr-modal.service'
-
 import {
 	ApiService,
 	AppSettingsService,
@@ -15,54 +14,55 @@ import {
 	WalletService,
 	NinjaService
 } from '../../services'
-import { TranslocoService } from '@jsverse/transloco'
+import { Tools } from 'libnemo'
 
 @Component({
 	selector: 'app-representatives',
 	templateUrl: './representatives.component.html',
 	styleUrls: ['./representatives.component.css']
 })
+
 export class RepresentativesComponent implements OnInit {
-	private router = inject(ActivatedRoute);
-	walletService = inject(WalletService);
-	private api = inject(ApiService);
-	private notifications = inject(NotificationService);
-	private nanoBlock = inject(NanoBlockService);
-	private util = inject(UtilService);
-	private representativeService = inject(RepresentativeService);
-	settings = inject(AppSettingsService);
-	private ninja = inject(NinjaService);
-	private qrModalService = inject(QrModalService);
-	private translocoService = inject(TranslocoService);
+	private router = inject(ActivatedRoute)
+	walletService = inject(WalletService)
+	private api = inject(ApiService)
+	private notifications = inject(NotificationService)
+	private nanoBlock = inject(NanoBlockService)
+	private util = inject(UtilService)
+	private representativeService = inject(RepresentativeService)
+	settings = inject(AppSettingsService)
+	private ninja = inject(NinjaService)
+	private qrModalService = inject(QrModalService)
+	private translocoService = inject(TranslocoService)
 
 	@ViewChild('repInput') repInput
 
-	changeAccountID: any = null;
-	toRepresentativeID = '';
+	changeAccountID: any = null
+	toRepresentativeID = ''
 
-	representativeResults$ = new BehaviorSubject([]);
-	showRepresentatives = false;
-	representativeListMatch = '';
+	representativeResults$ = new BehaviorSubject([])
+	showRepresentatives = false
+	representativeListMatch = ''
 
-	representativeOverview = [];
-	changingRepresentatives = false;
+	representativeOverview = []
+	changingRepresentatives = false
 
-	selectedAccounts = [];
-	fullAccounts = [];
+	selectedAccounts = []
+	fullAccounts = []
 
-	recommendedReps = [];
-	recommendedRepsPaginated = [];
-	recommendedRepsLoading = false;
-	selectedRecommendedRep = null;
-	showRecommendedReps = false;
-	loadingRepresentatives = false;
+	recommendedReps = []
+	recommendedRepsPaginated = []
+	recommendedRepsLoading = false
+	selectedRecommendedRep = null
+	showRecommendedReps = false
+	loadingRepresentatives = false
 
-	repsPerPage = 5;
-	currentRepPage = 0;
+	repsPerPage = 5
+	currentRepPage = 0
 
-	hideOverview = false;
+	hideOverview = false
 
-	representativeList = [];
+	representativeList = []
 
 	async ngOnInit () {
 		this.representativeService.loadRepresentativeList()
@@ -87,9 +87,9 @@ export class RepresentativesComponent implements OnInit {
 		this.loadingRepresentatives = true
 		let repOverview = await this.representativeService.getRepresentativesOverview()
 		// Sort by weight delegated
-		repOverview = repOverview.sort(
-			(a: FullRepresentativeOverview, b: FullRepresentativeOverview) => b.delegatedWeight.toNumber() - a.delegatedWeight.toNumber()
-		)
+		repOverview = repOverview.sort((a: FullRepresentativeOverview, b: FullRepresentativeOverview) => {
+			return a.delegatedWeight < b.delegatedWeight ? -1 : 1
+		})
 		this.representativeOverview = repOverview
 		repOverview.forEach(o => this.fullAccounts.push(...o.accounts))
 		this.loadingRepresentatives = false
@@ -227,13 +227,13 @@ export class RepresentativesComponent implements OnInit {
 		this.recommendedRepsLoading = true
 		try {
 			const scores = await this.ninja.recommended() as any[]
-			const totalSupply = new BigNumber(133248289)
+			const totalSupply = 133248289
 
 			const reps = scores.map(rep => {
-				const nanoWeight = this.util.nano.rawToMnano(rep.votingweight.toString() || 0)
-				const percent = nanoWeight.div(totalSupply).times(100)
+				const nanoWeight = parseFloat(Tools.convert(BigInt(rep.weight ?? 0n), 'raw', 'mnano'))
+				const percent = nanoWeight / totalSupply * 100
 
-				// rep.weight = nanoWeight.toString(10);
+				// rep.weight = nanoWeight.toString(10)
 				rep.weight = this.util.nano.mnanoToRaw(nanoWeight)
 				rep.percent = percent.toFixed(3)
 
@@ -328,6 +328,8 @@ export class RepresentativesComponent implements OnInit {
 			return this.notifications.sendInfo(`None of the accounts selected need to be updated`)
 		}
 
+		const wallet = this.walletService.wallet.wallet
+
 		// Now loop and change them
 		for (const account of accountsNeedingChange) {
 			const walletAccount = this.walletService.getWalletAccount(account.id)
@@ -336,7 +338,7 @@ export class RepresentativesComponent implements OnInit {
 			}
 
 			try {
-				const changed = await this.nanoBlock.generateChange(walletAccount, newRep, this.walletService.isLedgerWallet())
+				const changed = await this.nanoBlock.generateChange(wallet, walletAccount, newRep, this.walletService.isLedgerWallet())
 				if (!changed) {
 					this.notifications.sendError(`Error changing representative for ${account.id}, please try again`)
 				}

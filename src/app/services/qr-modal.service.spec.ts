@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing'
-
 import { QrModalService } from './qr-modal.service'
 
 describe('QrModalService', () => {

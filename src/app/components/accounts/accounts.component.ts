@@ -1,7 +1,9 @@
+import { UpperCasePipe } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
+import { Router, RouterModule } from '@angular/router'
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import { Subject, timer } from 'rxjs'
 import { debounce } from 'rxjs/operators'
-import { Router } from '@angular/router'
 import {
 	AppSettingsService,
 	LedgerService,
@@ -11,33 +13,34 @@ import {
 	RepresentativeService,
 	WalletService
 } from '../../services'
-import { TranslocoService } from '@jsverse/transloco'
 
 @Component({
 	selector: 'app-accounts',
 	templateUrl: './accounts.component.html',
-	styleUrls: ['./accounts.component.css']
+	styleUrls: ['./accounts.component.css'],
+	imports: [
+		TranslocoPipe,
+		UpperCasePipe
+	]
 })
-export class AccountsComponent implements OnInit {
-	private walletService = inject(WalletService);
-	private notificationService = inject(NotificationService);
-	modal = inject(ModalService);
-	settings = inject(AppSettingsService);
-	private representatives = inject(RepresentativeService);
-	private router = inject(Router);
-	private ledger = inject(LedgerService);
-	private translocoService = inject(TranslocoService);
 
+export class AccountsComponent implements OnInit {
+	private walletService = inject(WalletService)
+	private notificationService = inject(NotificationService)
+	modal = inject(ModalService)
+	settings = inject(AppSettingsService)
+	private representatives = inject(RepresentativeService)
+	private router = inject(Router)
+	private ledger = inject(LedgerService)
+	private translocoService = inject(TranslocoService)
 	accounts
 	isLedgerWallet
 	isSingleKeyWallet
-	viewAdvanced = false;
-	newAccountIndex = null;
-
+	viewAdvanced = false
+	newAccountIndex = null
 	// When we change the accounts, redetect changable reps (Debounce by 5 seconds)
-	accountsChanged$ = new Subject();
-	reloadRepWarning$ = this.accountsChanged$.pipe(debounce(() => timer(5000)));
-
+	accountsChanged$ = new Subject()
+	reloadRepWarning$ = this.accountsChanged$.pipe(debounce(() => timer(5000)))
 	constructor () {
 		this.accounts = this.walletService.wallet.accounts
 		this.isLedgerWallet = this.walletService.isLedgerWallet()
@@ -97,17 +100,19 @@ export class AccountsComponent implements OnInit {
 	}
 
 	sortAccounts () {
-		// if (this.walletService.isLocked()) return this.notificationService.sendError(`Wallet is locked.`);
-		// if (!this.walletService.isConfigured()) return this.notificationService.sendError(`Wallet is not configured`);
+		// if (this.walletService.isLocked()) return this.notificationService.sendError(`Wallet is locked.`)
+		// if (!this.walletService.isConfigured()) return this.notificationService.sendError(`Wallet is not configured`)
 		// if (this.walletService.wallet.accounts.length <= 1) {
-		// return this.notificationService.sendWarning(`You need at least 2 accounts to sort them`);
+		// return this.notificationService.sendWarning(`You need at least 2 accounts to sort them`)
 		// }
-		if (this.walletService.isLocked() || !this.walletService.isConfigured() ||
-			this.walletService.wallet.accounts.length <= 1) return
+		if (this.walletService.isLocked() || !this.walletService.isConfigured() || this.walletService.wallet.accounts.length <= 1) {
+			return
+		}
 		this.walletService.wallet.accounts = this.walletService.wallet.accounts.sort((a, b) => a.index - b.index)
-		// this.accounts = this.walletService.wallet.accounts;
-		this.walletService.saveWalletExport() // Save new sorted accounts list
-		// this.notificationService.sendSuccess(`Successfully sorted accounts by index!`);
+		// this.accounts = this.walletService.wallet.accounts
+		// Save new sorted accounts list
+		this.walletService.saveWalletExport()
+		// this.notificationService.sendSuccess(`Successfully sorted accounts by index!`)
 	}
 
 	navigateToAccount (account) {
@@ -120,7 +125,7 @@ export class AccountsComponent implements OnInit {
 			this.walletService.saveWalletExport()
 		}
 
-		this.router.navigate([`account/${account.id}`], { queryParams: { 'compact': 1 } })
+		this.router.navigate([`accounts/${account.id}`], { queryParams: { 'compact': 1 } })
 	}
 
 	copied () {

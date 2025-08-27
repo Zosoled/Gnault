@@ -6,18 +6,17 @@ import { NotificationService } from '../../services/notification.service'
 	templateUrl: './notifications.component.html',
 	styleUrls: ['./notifications.component.css']
 })
+
 export class NotificationsComponent implements OnInit {
-	private notificationService = inject(NotificationService);
+	private notificationService = inject(NotificationService)
 
-
-	notificationLength = 5000;
-
-	notifications: any[] = [];
-
+	notificationLength = 5000
+	notifications: any[] = []
 	ngOnInit () {
 		this.notificationService.notifications$.subscribe(notification => {
 			if (!notification) {
-				return // Default value
+				// Default value
+				return
 			}
 
 			// Check the options
@@ -74,5 +73,4 @@ export class NotificationsComponent implements OnInit {
 			case 'error': return 'uk-alert-danger'
 		}
 	}
-
 }

@@ -82,7 +82,9 @@
 			></span>
 		</div>
 		<div class="status-labels">
-			<div class="label primary half-muted">{{ 'accounts.wallet-locked' | transloco }}</div>
+			<div class="label primary half-muted">
+				{{ 'accounts.wallet-locked' | transloco }}
+			</div>
 		</div>
 	</div>
 	<div
@@ -97,7 +99,7 @@
 			></span>
 		</div>
 		<div class="status-labels">
-			<div class="label primary half-muted">Wallet Unlocked</div>
+			<div class="label primary half-muted">{{ 'accounts.wallet-unlocked' | transloco }}</div>
 		</div>
 	</div>
 </ng-container>
@@ -113,7 +115,7 @@
 		></span>
 	</div>
 	<div class="status-labels">
-		<div class="label primary uk-text-warning">Configure Wallet</div>
+		<div class="label primary uk-text-warning">{{ 'configure-wallet.new-wallet.configure-new-wallet' | transloco }}</div>
 	</div>
 </a>
 <div
@@ -128,7 +130,7 @@
 			uk-close
 		></button>
 		<div class="uk-modal-header">
-			<h2 class="uk-modal-title">Unlock Wallet</h2>
+			<h2 class="uk-modal-title">{{ 'general.unlock' | transloco}}</h2>
 		</div>
 		<div class="uk-modal-body">
 			<input
@@ -154,13 +156,17 @@
 			<button
 				class="uk-button uk-button-default uk-modal-close"
 				type="button"
-			>{{ 'general.cancel' | transloco }}</button>
+			>
+				{{ 'general.cancel' | transloco }}
+			</button>
 			<button
 				class="uk-button uk-button-primary"
 				type="button"
 				(click)="unlockWallet()"
 				[disabled]="!mayAttemptUnlock || unlockPassword.length < 6"
-			>{{ 'general.unlock' | transloco }}</button>
+			>
+				{{ 'general.unlock' | transloco }}
+			</button>
 		</div>
 	</div>
 </div>

@@ -1,17 +1,15 @@
-import { Injectable } from '@angular/core'
+import { inject } from '@angular/core'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { NodeService } from './node.service'
 import { AppSettingsService } from './app-settings.service'
 import { TxType } from './util.service'
 
-@Injectable()
 export class ApiService {
-	private http = inject(HttpClient);
-	private node = inject(NodeService);
-	private appSettings = inject(AppSettingsService);
+	private http = inject(HttpClient)
+	private node = inject(NodeService)
+	private appSettings = inject(AppSettingsService)
 
-	storeKey = `nanovault-active-difficulty`;
-
+	storeKey = `nanovault-active-difficulty`
 	private async request (action, data, skipError, url = '', validateResponse?): Promise<any> {
 		data.action = action
 		const apiUrl = url || this.appSettings.settings.serverAPI
@@ -38,7 +36,7 @@ export class ApiService {
 					}
 				)
 		}
-		console.log(data)
+
 		return await this.http.post(apiUrl, data, options).toPromise()
 			.then(res => {
 				if (typeof validateResponse === 'function') {
@@ -52,9 +50,8 @@ export class ApiService {
 							reason: err,
 							res,
 						}
-					};
-				};
-
+					}
+				}
 				this.node.setOnline()
 				return res
 			})
@@ -132,26 +129,22 @@ export class ApiService {
 				return {
 					err: `Missing field "work".`,
 				}
-			};
-
+			}
 			if (typeof res.work !== 'string') {
 				return {
 					err: `Invalid type of field "work", expected "string", got "${typeof res.work}".`,
 				}
-			};
-
+			}
 			if (res.work.length !== 16) {
 				return {
 					err: `Invalid length of field "work", expected 16, got ${res.work.length}.`,
 				}
-			};
-
+			}
 			if (/^[0-9A-F]+$/i.test(res.work) === false) {
 				return {
 					err: `Invalid contents of field "work", expected hex characters.`,
 				}
-			};
-
+			}
 			return {
 				err: null,
 			}

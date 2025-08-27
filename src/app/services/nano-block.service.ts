@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core'
+import { inject } from '@angular/core'
 import { Account, Block, Wallet } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
 import { ApiService } from './api.service'
@@ -9,7 +9,6 @@ import { UtilService, StateBlock, TxType } from './util.service'
 import { WalletAccount } from './wallet.service'
 import { WorkPoolService } from './work-pool.service'
 
-@Injectable()
 export class NanoBlockService {
 	private api = inject(ApiService)
 	private util = inject(UtilService)
@@ -341,8 +340,7 @@ export class NanoBlockService {
 	}
 
 	// for signing block when offline
-	async signOfflineBlock (wallet: Wallet, walletAccount: WalletAccount, block: StateBlock, prevBlock: StateBlock,
-		type: TxType, genWork: boolean, multiplier: number, ledger = false) {
+	async signOfflineBlock (wallet: Wallet, walletAccount: WalletAccount, block: StateBlock, prevBlock: StateBlock, type: TxType, genWork: boolean, ledger = false) {
 		// special treatment if open block
 		const openEquiv = type === TxType.open
 		console.log('Signing block of subtype: ' + TxType[type])
@@ -403,10 +401,9 @@ export class NanoBlockService {
 			if (!this.workPool.workExists(workBlock)) {
 				this.notifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
 			}
-
 			const difficulty = (type === TxType.receive || type === TxType.open)
 				? 1 / 64
-				: multiplier
+				: 1
 			block.work = await this.workPool.getWork(workBlock, difficulty)
 			this.notifications.removeNotification('pow')
 			this.workPool.removeFromCache(workBlock)
@@ -460,9 +457,11 @@ export class NanoBlockService {
 	sendLedgerDeniedNotification (err = null) {
 		this.notifications.sendWarning(err && err.message || `Transaction denied on Ledger device`)
 	}
+
 	sendLedgerNotification () {
 		this.notifications.sendInfo(`Waiting for confirmation on Ledger Device...`, { identifier: 'ledger-sign', length: 0 })
 	}
+
 	clearLedgerNotification () {
 		this.notifications.removeNotification('ledger-sign')
 	}

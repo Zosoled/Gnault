@@ -1,5 +1,4 @@
 import { TestBed, inject } from '@angular/core/testing'
-
 import { WorkPoolService } from './work-pool.service'
 
 describe('WorkPoolService', () => {

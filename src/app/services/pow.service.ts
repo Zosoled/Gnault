@@ -1,10 +1,10 @@
-import { Injectable, inject } from '@angular/core'
+import { inject } from '@angular/core'
+import { NanoPow } from 'nano-pow'
+import { BehaviorSubject } from 'rxjs'
 import { AppSettingsService } from './app-settings.service'
 import { ApiService } from './api.service'
 import { NotificationService } from './notification.service'
-import { NanoPow } from 'nano-pow'
 import { UtilService } from './util.service'
-import { BehaviorSubject } from 'rxjs'
 
 type DeferredPromise = {
 	promise: Promise<any>
@@ -17,27 +17,26 @@ type PowQueueItem = {
 	promise: DeferredPromise,
 	multiplier: number,
 }
-const mod = window['Module']
+
 export const baseThreshold = 'fffffff800000000' // threshold since v21 epoch update
 const hardwareConcurrency = window.navigator.hardwareConcurrency || 2
 const workerCount = Math.max(hardwareConcurrency - 1, 1)
 export enum workState { 'success', 'cancelled', 'error' }
 
-@Injectable()
 export class PowService {
-	private appSettings = inject(AppSettingsService);
-	private api = inject(ApiService);
-	private notifications = inject(NotificationService);
-	private util = inject(UtilService);
+	private appSettings = inject(AppSettingsService)
+	private api = inject(ApiService)
+	private notifications = inject(NotificationService)
+	private util = inject(UtilService)
 
 	powAlertLimit = 60; // alert long pow after X sec
-	PoWPool = [];
-	parallelQueue = false;
-	processingQueueItem = false;
+	PoWPool = []
+	parallelQueue = false
+	processingQueueItem = false
 	currentProcessTime = 0; // start timestamp for PoW
-	powAlert$: BehaviorSubject<boolean | false> = new BehaviorSubject(false);
+	powAlert$: BehaviorSubject<boolean | false> = new BehaviorSubject(false)
 	public shouldContinueQueue = true; // set to false to disable further processing
-	shouldAbortGpuPow = false;
+	shouldAbortGpuPow = false
 
 	/**
 	 * Get PoW for a hash.  If it's already being processed, return the promise.
@@ -64,7 +63,7 @@ export class PowService {
 			hash,
 			work: null,
 			promise: this.getDeferredPromise(),
-			multiplier: multiplier,
+			multiplier,
 		}
 		this.PoWPool.push(queueItem)
 		this.processQueue()
@@ -93,24 +92,14 @@ export class PowService {
 		this.powAlert$.next(false) // extra safety to ensure the alert is always reset
 
 		let powSource = this.appSettings.settings.powSource
-		const multiplierSource: number = this.appSettings.settings.multiplierSource
-		let localMultiplier: number = 1
-
-		if (powSource === 'client' || powSource === 'custom') {
-			if (multiplierSource > 1) { // use manual difficulty
-				localMultiplier = multiplierSource
-			} else { // use default requested difficulty
-				localMultiplier = queueItem.multiplier
-			}
-		}
 
 		const result = { state: null, work: '' }
-		let workServer, multiplier
+		let workServer
 		switch (powSource) {
 			// generate work locally
 			case 'client': {
 				try {
-					result.work = await this.getPowFromClient(queueItem.hash, localMultiplier)
+					result.work = await this.getPowFromClient(queueItem.hash, queueItem.multiplier)
 					result.state = workState.success
 				} catch (state) {
 					result.state = state
@@ -120,17 +109,12 @@ export class PowService {
 			// generate work remotely after setting up server settings and falling through to default case
 			case 'server': {
 				workServer ??= ''
-				multiplier ??= queueItem.multiplier
 			}
 			case 'custom': {
 				workServer ??= this.appSettings.settings.customWorkServer
-				// Check all known APIs and return true if there is no match. Then allow local PoW mutliplier
-				multiplier ??= this.appSettings.knownApiEndpoints.every(endpointUrl => !workServer.includes(endpointUrl))
-					? localMultiplier
-					: queueItem.multiplier
 			}
 			default: {
-				const work = await this.getPowFromServer(queueItem.hash, multiplier, workServer)
+				const work = await this.getPowFromServer(queueItem.hash, queueItem.multiplier, workServer)
 				if (work) {
 					result.work = work
 					result.state = workState.success
@@ -149,7 +133,7 @@ export class PowService {
 			queueItem.work = result.work
 			queueItem.promise.resolve(result)
 		} else {
-			// this.notifications.sendError(`Unable to generate work for ${queueItem.hash} using ${powSource}`);
+			// this.notifications.sendError(`Unable to generate work for ${queueItem.hash} using ${powSource}`)
 			queueItem.promise.reject(result)
 		}
 

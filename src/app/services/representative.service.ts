@@ -1,7 +1,6 @@
-import { Injectable, inject } from '@angular/core'
+import { inject } from '@angular/core'
 import { Tools } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
-import BigNumber from 'bignumber.js'
 import { BaseApiAccount, WalletApiAccount, WalletService } from './wallet.service'
 import { ApiService } from './api.service'
 import { UtilService } from './util.service'
@@ -53,8 +52,6 @@ export interface FullRepresentativeOverview extends RepresentativeApiOverview {
 	donationAddress?: string
 }
 
-
-@Injectable()
 export class RepresentativeService {
 	private wallet = inject(WalletService)
 	private api = inject(ApiService)
@@ -63,8 +60,11 @@ export class RepresentativeService {
 
 	storeKey = `nanovault-representatives`
 
+	// Default representatives list
+	defaultRepresentatives = []
+
 	representatives$ = new BehaviorSubject([])
-	representatives = []
+	representatives = this.defaultRepresentatives
 
 	walletReps$ = new BehaviorSubject([null])
 	walletReps = []
@@ -75,10 +75,6 @@ export class RepresentativeService {
 	onlineStakeTotal = 115202418
 
 	loaded = false
-
-	constructor () {
-		this.representatives = this.defaultRepresentatives
-	}
 
 	/**
 	 * Determine if any accounts in the wallet need a rep change
@@ -124,8 +120,9 @@ export class RepresentativeService {
 		const onlineReps = await this.getOnlineRepresentatives()
 		const quorum = await this.api.confirmationQuorum()
 
-		const online_stake_total = this.util.nano.rawToMnano(quorum?.online_stake_total) ?? null
-		this.onlineStakeTotal = new BigNumber(online_stake_total) ?? null
+		this.onlineStakeTotal = quorum
+			? parseFloat(Tools.convert(quorum.online_stake_total, 'raw', 'mnano'))
+			: null
 
 		const allReps = []
 
@@ -137,8 +134,10 @@ export class RepresentativeService {
 			console.log('knownRepNinja: ' + Object.getOwnPropertyNames(knownRepNinja))
 			// console.log('knownRepNinja: ' + JSON.stringify(knownRepNinja, null, 4))
 
-			const nanoWeight = this.util.nano.rawToMnano(representative.weight || 0)
-			const percent = nanoWeight.div(this.onlineStakeTotal)?.times(100) ?? new BigNumber(0)
+			const nanoWeight = Tools.convert(representative.weight || 0n, 'raw', 'mnano')
+			const percent = this.onlineStakeTotal
+				? parseFloat(nanoWeight) / this.onlineStakeTotal * 100
+				: 0
 
 			const repStatus: RepresentativeStatus = {
 				online: repOnline,
@@ -204,11 +203,13 @@ export class RepresentativeService {
 					repStatus.changeRequired = true
 				}
 			} else if (knownRepNinja) {
-				status = status === 'none'
-					? 'ok'
-					: status
+				if (status === 'none') {
+					status = 'ok'
+				}
 				label = knownRepNinja.alias
 			}
+
+			const uptimeIntervalDays = 7
 
 			if (knownRepNinja && !repStatus.trusted) {
 				if (knownRepNinja.closing === true) {
@@ -218,7 +219,25 @@ export class RepresentativeService {
 					repStatus.changeRequired = true
 				}
 
-				repStatus.uptime = knownRepNinja.uptime
+				let uptimeIntervalValue = knownRepNinja.uptime_over.week
+
+				// temporary fix for knownRepNinja.uptime_over.week always returning 0
+				// uptimeIntervalValue = knownRepNinja.uptime_over.month
+				// uptimeIntervalDays = 30
+				// /temporary fix
+
+				// consider uptime value at least 1/<interval days> of daily uptime
+				uptimeIntervalValue = Math.max(
+					uptimeIntervalValue,
+					(knownRepNinja.uptime_over.day / uptimeIntervalDays)
+				)
+
+				if (repOnline === true) {
+					// consider uptime value at least 1% if the rep is currently online
+					uptimeIntervalValue = Math.max(uptimeIntervalValue, 1)
+				}
+
+				repStatus.uptime = uptimeIntervalValue
 				repStatus.score = knownRepNinja.score
 
 				if (repStatus.uptime && repStatus.uptime !== 'good') {
@@ -236,9 +255,9 @@ export class RepresentativeService {
 				repStatus.changeRequired = true
 			} else {
 				// any other api error
-				status = status === 'none'
-					? 'unknown'
-					: status
+				if (status === 'none') {
+					status = 'unknown'
+				}
 			}
 
 			const additionalData = {
@@ -428,9 +447,6 @@ export class RepresentativeService {
 	nameExists (name: string): boolean {
 		return this.representatives.findIndex(a => a.name.toLowerCase() === name.toLowerCase()) !== -1
 	}
-
-	// Default representatives list
-	defaultRepresentatives = []
 
 	// Bad representatives hardcoded to be avoided. Not visible in the user rep list
 	nfReps = [

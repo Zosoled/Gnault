@@ -1,23 +1,27 @@
 import { Component, OnInit, inject } from '@angular/core'
-import { NotificationService } from '../../services/notification.service'
+import { TranslocoPipe } from '@jsverse/transloco'
 import { Wallet } from 'libnemo'
+import { NotificationService } from '../../services/notification.service'
 
 @Component({
 	selector: 'app-keygenerator',
 	templateUrl: './keygenerator.component.html',
-	styleUrls: ['./keygenerator.component.css']
+	styleUrls: ['./keygenerator.component.css'],
+	imports: [
+		TranslocoPipe
+	]
 })
+
 export class KeygeneratorComponent implements OnInit {
 	private notificationService = inject(NotificationService)
 
-	seed = '';
-	mnemonic = '';
-	privateKey = '';
-	account = '';
-	newWalletMnemonicLines = [];
+	seed = ''
+	mnemonic = ''
+	privateKey = ''
+	account = ''
+	newWalletMnemonicLines = []
 
-	ngOnInit (): void {
-	}
+	ngOnInit (): void { }
 
 	async generate () {
 		// generate random bytes and create seed/mnemonic

@@ -5,20 +5,18 @@ import { Component, Input, OnInit, OnChanges } from '@angular/core'
 	templateUrl: './nano-transaction-mobile.component.html',
 	styleUrls: ['./nano-transaction-mobile.component.less']
 })
-export class NanoTransactionMobileComponent implements OnInit, OnChanges {
 
+export class NanoTransactionMobileComponent implements OnInit, OnChanges {
 	@Input() transaction: any
-	@Input() isInteractable = true;
+	@Input() isInteractable = true
 	@Input() isHidden: boolean
 	@Input() settingIdenticonsStyle: string
 
-	isNaN = isNaN;
-	isReceivableTransaction = false;
-	isRepresentativeChange = false;
-	isSendTransaction = false;
-	isReceiveTransaction = false;
-
-	constructor () { }
+	isNaN = isNaN
+	isReceivableTransaction = false
+	isRepresentativeChange = false
+	isSendTransaction = false
+	isReceiveTransaction = false
 
 	ngOnInit (): void {
 		this.updateType()
@@ -42,18 +40,14 @@ export class NanoTransactionMobileComponent implements OnInit, OnChanges {
 			this.isRepresentativeChange = true
 			this.isSendTransaction = false
 			this.isReceiveTransaction = false
-		} else if (
-			(this.transaction.type === 'send')
-			|| (this.transaction.subtype === 'send')
-		) {
+		} else if (this.transaction.type === 'send' || this.transaction.subtype === 'send') {
 			this.isReceivableTransaction = false
 			this.isRepresentativeChange = false
 			this.isSendTransaction = true
 			this.isReceiveTransaction = false
-		} else if (
-			(this.transaction.type === 'receive')
-			|| (this.transaction.subtype === 'receive')
-			|| (this.transaction.type === 'open')
+		} else if (this.transaction.type === 'receive'
+			|| this.transaction.subtype === 'receive'
+			|| this.transaction.type === 'open'
 		) {
 			this.isReceivableTransaction = false
 			this.isRepresentativeChange = false

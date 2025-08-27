@@ -21,6 +21,7 @@ import { environment } from '../../../environments/environment'
 	templateUrl: './send.component.html',
 	styleUrls: ['./send.component.css']
 })
+
 export class SendComponent implements OnInit {
 	private route = inject(ActivatedRoute)
 	private walletService = inject(WalletService)
@@ -39,7 +40,7 @@ export class SendComponent implements OnInit {
 	nano = 1000000000000000000000000
 	activePanel = 'send'
 	sendDestinationType = 'external-address'
-	accounts
+	accounts = this.walletService.wallet.accounts
 	addressBookResults$ = new BehaviorSubject([])
 	showAddressBook = false
 	addressBookMatch = ''
@@ -60,10 +61,6 @@ export class SendComponent implements OnInit {
 	preparingTransaction = false
 	confirmingTransaction = false
 	selAccountInit = false
-
-	constructor () {
-		this.accounts = this.walletService.wallet.accounts
-	}
 
 	async ngOnInit () {
 		const params = this.route.snapshot.queryParams
@@ -132,7 +129,7 @@ export class SendComponent implements OnInit {
 		// Look for the first account that has a balance
 		const accountIDWithBalance = this.accounts.reduce((previous, current) => {
 			if (previous) return previous
-			if (current.balance.gt(0)) return current.id
+			if (current.balance > 0n) return current.id
 			return null
 		}, null)
 

@@ -17,6 +17,7 @@ pre.mnemonic span.mnemonic-word {
 pre.mnemonic span.mnemonic-word::before {
 	content: counter(listing) ". ";
 	display: inline-block;
+	/* doesn't work */
 	width: 8em;
 	/* doesn't work */
 	padding-left: auto;
@@ -24,7 +25,6 @@ pre.mnemonic span.mnemonic-word::before {
 	margin-left: auto;
 	/* doesn't work */
 	text-align: right;
-	/* doesn't work */
 }
 
 .mne-num {
@@ -33,18 +33,18 @@ pre.mnemonic span.mnemonic-word::before {
 	width: 13px;
 	font-size: 10px;
 	text-align: left;
-	-webkit-touch-callout: none;
 	/* iOS Safari */
-	-webkit-user-select: none;
+	-webkit-touch-callout: none;
 	/* Safari */
-	-khtml-user-select: none;
+	-webkit-user-select: none;
 	/* Konqueror HTML */
-	-moz-user-select: none;
+	-khtml-user-select: none;
 	/* Firefox */
-	-ms-user-select: none;
+	-moz-user-select: none;
 	/* Internet Explorer/Edge */
-	user-select: none;
+	-ms-user-select: none;
 	/* Non-prefixed version, currently supported by Chrome and Opera */
+	user-select: none;
 }
 
 .mne-box {

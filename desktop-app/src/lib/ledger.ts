@@ -32,22 +32,18 @@ export interface LedgerData {
  * talks to the USB device directly and relays messages over Electron IPC
  */
 export class LedgerService {
-	walletPrefix = `44'/165'/`;
-	waitTimeout = 30000;
-	pollInterval = 5000;
-
-	pollingLedger = false;
-	queryingLedger = false;
-
-	ledgerStatus$ = new rx.Subject();
-	ledgerMessage$ = new rx.Subject();
-
+	walletPrefix = `44'/165'/`
+	waitTimeout = 30000
+	pollInterval = 5000
+	pollingLedger = false
+	queryingLedger = false
+	ledgerStatus$ = new rx.Subject()
+	ledgerMessage$ = new rx.Subject()
 	ledger: LedgerData = {
 		status: LedgerStatus.NOT_CONNECTED,
 		nano: null,
 		transport: null,
-	};
-
+	}
 	constructor () {
 	}
 

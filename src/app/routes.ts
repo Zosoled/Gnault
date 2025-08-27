@@ -1,0 +1,48 @@
+import { Routes } from '@angular/router'
+import { AccountDetailsComponent } from './components/account-details/account-details.component'
+import { AccountsComponent } from './components/accounts/accounts.component'
+import { AddressBookComponent } from './components/address-book/address-book.component'
+import { ConfigureAppComponent } from './components/configure-app/configure-app.component'
+import { ConfigureWalletComponent } from './components/configure-wallet/configure-wallet.component'
+import { ConverterComponent } from './components/converter/converter.component'
+import { ImportAddressBookComponent } from './components/import-address-book/import-address-book.component'
+import { ImportWalletComponent } from './components/import-wallet/import-wallet.component'
+import { KeygeneratorComponent } from './components/keygenerator/keygenerator.component'
+import { ManageRepresentativesComponent } from './components/manage-representatives/manage-representatives.component'
+import { ManageWalletComponent } from './components/manage-wallet/manage-wallet.component'
+import { MultisigComponent } from './components/multisig/multisig.component'
+import { QrGeneratorComponent } from './components/qr-generator/qr-generator.component'
+import { QrScanComponent } from './components/qr-scan/qr-scan.component'
+import { ReceiveComponent } from './components/receive/receive.component'
+import { RemoteSigningComponent } from './components/remote-signing/remote-signing.component'
+import { RepresentativesComponent } from './components/representatives/representatives.component'
+import { SendComponent } from './components/send/send.component'
+import { SignComponent } from './components/sign/sign.component'
+import { SweeperComponent } from './components/sweeper/sweeper.component'
+import { TransactionDetailsComponent } from './components/transaction-details/transaction-details.component'
+import { WelcomeComponent } from './components/welcome/welcome.component'
+
+export const routes: Routes = [
+	{ path: '', component: WelcomeComponent },
+	{ path: 'accounts', component: AccountsComponent },
+	{ path: 'accounts/:account', component: AccountDetailsComponent },
+	{ path: 'address-book', component: AddressBookComponent },
+	{ path: 'configure-app', component: ConfigureAppComponent },
+	{ path: 'configure-wallet', component: ConfigureWalletComponent },
+	{ path: 'converter', component: ConverterComponent },
+	{ path: 'import-address-book', component: ImportAddressBookComponent },
+	{ path: 'import-wallet', component: ImportWalletComponent },
+	{ path: 'keygenerator', component: KeygeneratorComponent },
+	{ path: 'manage-representatives', component: ManageRepresentativesComponent },
+	{ path: 'manage-wallet', component: ManageWalletComponent },
+	{ path: 'multisig', component: MultisigComponent },
+	{ path: 'qr-generator', component: QrGeneratorComponent },
+	{ path: 'qr-scan', component: QrScanComponent },
+	{ path: 'receive', component: ReceiveComponent },
+	{ path: 'remote-signing', component: RemoteSigningComponent },
+	{ path: 'representatives', component: RepresentativesComponent },
+	{ path: 'send', component: SendComponent },
+	{ path: 'sign', component: SignComponent },
+	{ path: 'sweeper', component: SweeperComponent },
+	{ path: 'transaction/:transaction', component: TransactionDetailsComponent },
+]

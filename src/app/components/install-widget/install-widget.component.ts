@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core'
-import { NotificationService } from 'app/services/notification.service'
+import { NotificationService } from '../../services/notification.service'
 
 interface InstallEvent extends Event {
 	userChoice: Promise<{ outcome: 'accepted' | 'dismissed', platform: string }>
@@ -11,14 +11,14 @@ interface InstallEvent extends Event {
 	templateUrl: './install-widget.component.html',
 	styleUrls: ['./install-widget.component.less'],
 })
-export class InstallWidgetComponent implements OnInit {
-	private notifications = inject(NotificationService);
 
+export class InstallWidgetComponent implements OnInit {
+	private notifications = inject(NotificationService)
 
 	installEvent: InstallEvent
-	showInstallPromotion = false;
-	platform = this.getPlatform();
-	promotablePlatforms = ['Android', 'iOS', 'iPadOS', 'Chrome OS'];
+	showInstallPromotion = false
+	platform = this.getPlatform()
+	promotablePlatforms = ['Android', 'iOS', 'iPadOS', 'Chrome OS']
 
 	ngOnInit () {
 		if (!this.isPromotable()) {

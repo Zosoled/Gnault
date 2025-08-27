@@ -29,7 +29,9 @@
 										*ngFor="let device of availableDevices"
 										[value]="device.deviceId"
 										[selected]="currentDevice && device.deviceId === currentDevice.deviceId"
-									>{{device.label}}</option>
+									>
+										{{device.label}}
+									</option>
 								</select>
 							</div>
 						</div>
@@ -56,28 +58,28 @@
 <div *ngIf="hasPermission === undefined && hasDevices === undefined">
 	<div class="uk-alert uk-alert-info nlt-inline-alert">
 		<p>
-			<b>Waiting for permissions.</b><br> If your device does not has cameras, no permissions will be asked.
+			<b>Waiting for permissions.</b><br>If your device does not has cameras, no permissions will be asked.
 		</p>
 	</div>
 </div>
 <div *ngIf="hasPermission === false">
 	<div class="uk-alert uk-alert-danger nlt-inline-alert">
 		<p>
-			<b>You denied the camera permission.</b><br> We can't scan anything without it. 😪
+			<b>You denied the camera permission.</b><br>We can't scan anything without it. 😪
 		</p>
 	</div>
 </div>
 <div *ngIf="hasDevices === null || hasPermission === null">
 	<div class="uk-alert uk-alert-danger nlt-inline-alert">
 		<p>
-			<b>Couldn't check for devices.</b><br> This may be caused by some security error.
+			<b>Couldn't check for devices.</b><br>This may be caused by some security error.
 		</p>
 	</div>
 </div>
 <div *ngIf="hasDevices === false">
 	<div class="uk-alert uk-alert-danger nlt-inline-alert">
 		<p>
-			<b>No devices were found.</b><br> I believe your device has no media devices attached to.
+			<b>No devices were found.</b><br>I believe your device has no media devices attached to.
 		</p>
 	</div>
 </div>

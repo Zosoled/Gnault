@@ -1,16 +1,15 @@
-import { Injectable, inject } from '@angular/core'
+import { inject } from '@angular/core'
+import { Account, Tools, Wallet, WalletType } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
-import { UtilService } from './util.service'
-import { ApiService } from './api.service'
 import { AddressBookService } from './address-book.service'
-import { WorkPoolService } from './work-pool.service'
-import { WebsocketService } from './websocket.service'
+import { ApiService } from './api.service'
+import { AppSettingsService } from './app-settings.service'
 import { NanoBlockService } from './nano-block.service'
 import { NotificationService } from './notification.service'
-import { AppSettingsService } from './app-settings.service'
 import { PriceService } from './price.service'
-import { LedgerService } from './ledger.service'
-import { Account, Tools, Wallet, WalletType } from 'libnemo'
+import { UtilService } from './util.service'
+import { WebsocketService } from './websocket.service'
+import { WorkPoolService } from './work-pool.service'
 
 export type WalletKeyType = 'seed' | 'ledger' | 'privateKey' | 'expandedKey'
 
@@ -64,6 +63,7 @@ export interface FullWallet {
 	newWallet$: BehaviorSubject<boolean | false>
 	refresh$: BehaviorSubject<boolean | false>
 }
+
 export interface BaseApiAccount {
 	account_version: string
 	balance: string
@@ -83,7 +83,6 @@ export interface WalletApiAccount extends BaseApiAccount {
 	error?: string
 }
 
-@Injectable()
 export class WalletService {
 	private util = inject(UtilService)
 	private api = inject(ApiService)
@@ -194,8 +193,8 @@ export class WalletService {
 					const addressLink = transaction.block.link_as_account
 					const address = transaction.block.account
 					const rep = transaction.block.representative
-					const accountHrefLink = `<a href="/account/${addressLink}">${this.addressBook.getAccountName(addressLink)}</a>`
-					const accountHref = `<a href="/account/${address}">${this.addressBook.getAccountName(address)}</a>`
+					const accountHrefLink = `<a href="/accounts/${addressLink}">${this.addressBook.getAccountName(addressLink)}</a>`
+					const accountHref = `<a href="/accounts/${address}">${this.addressBook.getAccountName(address)}</a>`
 
 					if (transaction.block.subtype === 'send') {
 						// Incoming transaction
@@ -269,7 +268,7 @@ export class WalletService {
 
 				if (isNewBlock === true) {
 					this.wallet.receivable += txAmount
-					this.wallet.receivableFiat += this.util.nano.rawToMnano(txAmount).times(this.price.price.lastPrice).toNumber()
+					this.wallet.receivableFiat += parseFloat(Tools.convert(txAmount, 'raw', 'mnano')) * this.price.price.lastPrice
 					this.wallet.hasReceivable = true
 				}
 			}
@@ -341,10 +340,10 @@ export class WalletService {
 	// Using full list of indexes is the latest standard with back compatability with accountsIndex
 	async loadImportedWallet (type: WalletType, seed: string, password: string, accountsIndex: number, indexes: Array<number>, walletType: WalletKeyType) {
 		this.resetWallet()
-
-		if (type === 'BIP-44' || type === 'BLAKE2b') {
-			this.wallet.wallet = await Wallet.load(type, password, seed)
+		if (type === 'Ledger') {
+			return
 		}
+		this.wallet.wallet = await Wallet.load(type, password, seed)
 		this.wallet.type = walletType
 
 		if (walletType === 'seed') {
@@ -381,7 +380,10 @@ export class WalletService {
 			indexes: this.wallet.accounts.map(a => a.index),
 		}
 		const backup = await Wallet.backup()
-		const secret = backup.find(wallet => wallet.id === this.wallet.wallet.id)
+		const secret = backup.find(wallet => wallet.id === this.wallet.wallet.id) as { id: string, type: WalletType, iv: ArrayBuffer, salt: ArrayBuffer, encrypted: ArrayBuffer }
+		if (secret == null) {
+			throw new Error('Failed to generate export')
+		}
 		Object.assign(exportData, secret)
 
 		return exportData
@@ -395,21 +397,26 @@ export class WalletService {
 	}
 
 	lockWallet () {
-		this.wallet.wallet.lock()
+		try {
+			this.wallet.wallet.lock()
 
-		// Remove secrets from accounts
-		this.wallet.accounts.forEach(a => {
-			a.keyPair = null
-			a.secret = null
-		})
+			// Remove secrets from accounts
+			this.wallet.accounts.forEach(a => {
+				a.keyPair = null
+				a.secret = null
+			})
 
-		this.wallet.locked = true
-		this.wallet.locked$.next(true)
+			this.wallet.locked = true
+			this.wallet.locked$.next(true)
 
-		this.saveWalletExport() // Save so that a refresh gives you a locked wallet
+			this.saveWalletExport() // Save so that a refresh gives you a locked wallet
 
-		return true
+			return true
+		} catch (err) {
+			return false
+		}
 	}
+
 	async unlockWallet (password: string) {
 		try {
 			await this.wallet.wallet.unlock(password)
@@ -522,11 +529,11 @@ export class WalletService {
 	}
 
 	createKeyedAccount (index, accountBytes, accountKeyPair) {
-		const accountName = this.util.account.getPublicAccountID(accountKeyPair.publicKey)
-		const addressBookName = this.addressBook.getAccountName(accountName)
+		const accountAddress = Account.load(accountKeyPair.publicKey).address
+		const addressBookName = this.addressBook.getAccountName(accountAddress)
 
 		const newAccount: WalletAccount = {
-			id: accountName,
+			id: accountAddress,
 			frontier: null,
 			secret: accountBytes,
 			keyPair: accountKeyPair,
@@ -682,7 +689,7 @@ export class WalletService {
 
 			if (this.appSettings.settings.minimumReceive) {
 				const minAmount = this.util.nano.mnanoToRaw(this.appSettings.settings.minimumReceive)
-				receivable = await this.api.accountsReceivableLimitSorted(this.wallet.accounts.map(a => a.id), minAmount.toString(10))
+				receivable = await this.api.accountsReceivableLimitSorted(this.wallet.accounts.map(a => a.id), minAmount)
 			} else {
 				receivable = await this.api.accountsReceivableSorted(this.wallet.accounts.map(a => a.id))
 			}
@@ -718,7 +725,7 @@ export class WalletService {
 						}
 
 						walletAccount.receivable = accountReceivable
-						walletAccount.receivableFiat = this.util.nano.rawToMnano(accountReceivable).times(fiatPrice).toNumber()
+						walletAccount.receivableFiat = parseFloat(Tools.convert(accountReceivable, 'raw', 'mnano')) * fiatPrice
 
 						// If there is a receivable, it means we want to add to work cache as receive-threshold
 						if (walletAccount.receivableNano > 0n) {
@@ -763,8 +770,8 @@ export class WalletService {
 		this.wallet.balance = walletBalance
 		this.wallet.receivable = walletReceivableAboveThresholdConfirmed
 
-		this.wallet.balanceFiat = this.util.nano.rawToMnano(walletBalance).times(fiatPrice).toNumber()
-		this.wallet.receivableFiat = this.util.nano.rawToMnano(walletReceivableAboveThresholdConfirmed).times(fiatPrice).toNumber()
+		this.wallet.balanceFiat = parseFloat(Tools.convert(walletBalance, 'raw', 'mnano')) * fiatPrice
+		this.wallet.receivableFiat = parseFloat(Tools.convert(walletReceivableAboveThresholdConfirmed, 'raw', 'mnano')) * fiatPrice
 
 		// eslint-disable-next-line
 		this.wallet.hasReceivable = walletReceivableAboveThresholdConfirmed > 0n
@@ -808,7 +815,7 @@ export class WalletService {
 			try {
 				newAccount = await this.createLedgerAccount(index)
 			} catch (err) {
-				// this.notifications.sendWarning(`Unable to load account from ledger.  Make sure it is connected`)
+				// this.notifications.sendWarning(`Unable to load account from ledger. Make sure it is connected`)
 				throw err
 			}
 

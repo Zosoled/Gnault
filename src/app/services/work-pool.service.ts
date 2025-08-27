@@ -1,20 +1,18 @@
 import { Injectable, inject } from '@angular/core'
-import { PowService, baseThreshold, workState } from './pow.service'
 import { NotificationService } from './notification.service'
+import { PowService, baseThreshold, workState } from './pow.service'
 import { UtilService } from './util.service'
 
 @Injectable()
 export class WorkPoolService {
-	private pow = inject(PowService);
-	private notifications = inject(NotificationService);
-	private util = inject(UtilService);
+	private pow = inject(PowService)
+	private notifications = inject(NotificationService)
+	private util = inject(UtilService)
 
-	storeKey = `nanovault-workcache`;
-
-	cacheLength = 25;
-	workCache = [];
-
-	currentlyProcessingHashes = {};
+	storeKey = `nanovault-workcache`
+	cacheLength = 25
+	workCache = []
+	currentlyProcessingHashes = {}
 
 	sleep (ms) {
 		return new Promise(resolve => setTimeout(resolve, ms))
@@ -33,7 +31,6 @@ export class WorkPoolService {
 	public removeFromCache (hash) {
 		const cachedIndex = this.workCache.findIndex(p => p.hash === hash)
 		if (cachedIndex === -1) return
-
 		this.workCache.splice(cachedIndex, 1)
 		this.saveWorkCache()
 	}
@@ -42,7 +39,6 @@ export class WorkPoolService {
 		localStorage.removeItem('NanoPowCache')
 		this.workCache = []
 		this.saveWorkCache()
-
 		return true
 	}
 
@@ -60,7 +56,9 @@ export class WorkPoolService {
 		}
 
 		// cancel any additional work that's coming from the wait loop above if user aborted during that loop
-		if (!this.pow.shouldContinueQueue) return null
+		if (!this.pow.shouldContinueQueue) {
+			return null
+		}
 
 		const cached = this.workCache.find(p => p.hash === hash)
 
@@ -102,7 +100,8 @@ export class WorkPoolService {
 		this.workCache.push({ hash, work: work.work })
 		delete this.currentlyProcessingHashes[hash]
 
-		if (this.workCache.length >= this.cacheLength) this.workCache.shift() // Prune if we are at max length
+		// Prune if we are at max length
+		if (this.workCache.length >= this.cacheLength) this.workCache.shift()
 		this.saveWorkCache()
 
 		return work.work

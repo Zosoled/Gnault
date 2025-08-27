@@ -5,20 +5,18 @@ import { Component, Input, OnChanges, HostBinding } from '@angular/core'
 	templateUrl: './nano-account-id.component.html',
 	styleUrls: ['./nano-account-id.component.css'],
 })
-export class NanoAccountIdComponent implements OnChanges {
 
+export class NanoAccountIdComponent implements OnChanges {
 	@HostBinding('class') classes: string
 	@Input() accountID: string
-	@Input() middle: 'on' | 'off' | 'auto' | 'break' = 'auto';
+	@Input() middle: 'on' | 'off' | 'auto' | 'break' = 'auto'
 
-	prefix = 'nano_';
-	firstCharacters = '';
-	middleCharacters = '';
-	lastCharacters = '';
-	openingChars = 10;
-	closingChars = 5;
-
-	constructor () { }
+	prefix = 'nano_'
+	firstCharacters = ''
+	middleCharacters = ''
+	lastCharacters = ''
+	openingChars = 10
+	closingChars = 5
 
 	ngOnChanges () {
 		this.firstCharacters = this.accountID?.slice(0, this.openingChars).replace('nano_', '')

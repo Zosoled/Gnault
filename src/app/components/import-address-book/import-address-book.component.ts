@@ -1,29 +1,27 @@
 import { Component, OnInit, inject } from '@angular/core'
+import { ActivatedRoute, Router } from '@angular/router'
 import { NotificationService } from '../../services/notification.service'
-import { ActivatedRoute } from '@angular/router'
 import { AddressBookService } from '../../services/address-book.service'
-import { Router } from '@angular/router'
 
 @Component({
 	selector: 'app-import-address-book',
 	templateUrl: './import-address-book.component.html',
 	styleUrls: ['./import-address-book.component.css']
 })
+
 export class ImportAddressBookComponent implements OnInit {
-	private route = inject(ActivatedRoute);
-	private notifications = inject(NotificationService);
-	private addressBook = inject(AddressBookService);
-	private router = inject(Router);
+	private route = inject(ActivatedRoute)
+	private notifications = inject(NotificationService)
+	private addressBook = inject(AddressBookService)
+	private router = inject(Router)
 
-	activePanel = 'error';
-
-	validImportData = false;
-	importData: any = null;
-
-	conflictingEntries = 0;
-	newEntries = 0;
-	existingEntries = 0;
-	hostname = '';
+	activePanel = 'error'
+	validImportData = false
+	importData: any = null
+	conflictingEntries = 0
+	newEntries = 0
+	existingEntries = 0
+	hostname = ''
 
 	ngOnInit () {
 		const importData = this.route.snapshot.fragment

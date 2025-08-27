@@ -1,38 +1,43 @@
 import { Component, OnInit, inject } from '@angular/core'
 import { BarcodeFormat } from '@zxing/library'
-import { NotificationService } from 'app/services'
+import { ZXingScannerModule } from '@zxing/ngx-scanner'
 import { BehaviorSubject } from 'rxjs'
+import { NotificationService } from '../../services'
 import { DeeplinkService } from '../../services/deeplink.service'
 
 @Component({
 	selector: 'app-qr-scan',
 	templateUrl: './qr-scan.component.html',
-	styleUrls: ['./qr-scan.component.css']
+	styleUrls: ['./qr-scan.component.css'],
+	imports: [
+		ZXingScannerModule
+	]
 })
+
 export class QrScanComponent implements OnInit {
-	private deeplinkService = inject(DeeplinkService);
+	[key: string]: any
+
+	private deeplinkService = inject(DeeplinkService)
 	private notificationService = inject(NotificationService);
 
-	[x: string]: any
-
 	availableDevices: MediaDeviceInfo[]
-	currentDevice: MediaDeviceInfo = null;
+	currentDevice: MediaDeviceInfo = null
 
 	formatsEnabled: BarcodeFormat[] = [
 		BarcodeFormat.CODE_128,
 		BarcodeFormat.DATA_MATRIX,
 		BarcodeFormat.EAN_13,
 		BarcodeFormat.QR_CODE,
-	];
+	]
 
 	hasDevices: boolean
 	hasPermission: boolean
 
 	qrResultString: string
 
-	torchEnabled = false;
-	torchAvailable$ = new BehaviorSubject<boolean>(false);
-	tryHarder = false;
+	torchEnabled = false
+	torchAvailable$ = new BehaviorSubject<boolean>(false)
+	tryHarder = false
 
 	ngOnInit (): void { }
 

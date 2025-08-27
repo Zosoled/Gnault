@@ -1,33 +1,34 @@
 import { Component, OnInit, inject } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { NotificationService } from '../../services/notification.service'
-import { WalletService, WalletKeyType } from '../../services/wallet.service'
 import { UtilService } from '../../services/util.service'
+import { WalletService, WalletKeyType } from '../../services/wallet.service'
 
 @Component({
 	selector: 'app-import-wallet',
 	templateUrl: './import-wallet.component.html',
 	styleUrls: ['./import-wallet.component.css']
 })
+
 export class ImportWalletComponent implements OnInit {
-	private route = inject(ActivatedRoute);
-	private notifications = inject(NotificationService);
-	private walletService = inject(WalletService);
-	private router = inject(Router);
-	private util = inject(UtilService);
+	private route = inject(ActivatedRoute)
+	private notifications = inject(NotificationService)
+	private walletService = inject(WalletService)
+	private router = inject(Router)
+	private util = inject(UtilService)
 
-	activePanel = 'error';
+	activePanel = 'error'
 
-	walletPassword = '';
-	validImportData = false;
-	importData: any = null;
-	hostname = '';
+	walletPassword = ''
+	validImportData = false
+	importData: any = null
+	hostname = ''
 
 	ngOnInit () {
 		const importData = this.route.snapshot.fragment
 		const queryData = this.route.snapshot.queryParams
 		if (!importData || !importData.length) {
-			return this.importDataError(`No import data found.  Check your link and try again.`)
+			return this.importDataError(`No import data found. Check your link and try again.`)
 		}
 
 		if ('hostname' in queryData) this.hostname = queryData.hostname
@@ -36,13 +37,13 @@ export class ImportWalletComponent implements OnInit {
 		try {
 			const importBlob = JSON.parse(decodedData)
 			if (!importBlob || (!importBlob.seed && !importBlob.privateKey && !importBlob.expandedKey)) {
-				return this.importDataError(`Bad import data.  Check your link and try again.`)
+				return this.importDataError(`Bad import data. Check your link and try again.`)
 			}
 			this.validImportData = true
 			this.importData = importBlob
 			this.activePanel = 'import'
 		} catch (err) {
-			return this.importDataError(`Unable to decode import data.  Check your link and try again.`)
+			return this.importDataError(`Unable to decode import data. Check your link and try again.`)
 		}
 	}
 
@@ -67,29 +68,47 @@ export class ImportWalletComponent implements OnInit {
 				secret = this.importData.expandedKey
 				walletType = 'expandedKey'
 			}
-			const decryptedBytes = CryptoJS.AES.decrypt(secret, this.walletPassword)
-			const decryptedSecret = decryptedBytes?.toString(CryptoJS.enc.Utf8)
-			if (!decryptedSecret || decryptedSecret.length !== 64) {
-				this.walletPassword = ''
+
+			const { id, type, iv, salt, encrypted } = JSON.parse(secret)
+
+			const derivationKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(this.walletPassword), 'PBKDF2', false, ['deriveKey'])
+			const derivationAlgorithm: Pbkdf2Params = {
+				name: 'PBKDF2',
+				hash: 'SHA-512',
+				iterations: 210000,
+				salt
+			}
+			const decryptionKey = await crypto.subtle.deriveKey(derivationAlgorithm, derivationKey, { name: 'AES-GCM', length: 256 }, false, ['decrypt'])
+			const decryptedBytes = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, decryptionKey, encrypted)
+			const decryptedSecret = new TextDecoder().decode(decryptedBytes)
+
+			if (decryptedSecret?.length !== 64) {
 				return this.notifications.sendError(`Invalid password, please try again`)
 			}
 			if (!this.util.nano.isValidSeed(decryptedSecret)) {
-				this.walletPassword = ''
 				return this.notifications.sendError(`Invalid seed format (non HEX characters)`)
 			}
 
 			this.router.navigate(['accounts']) // load accounts and watch them update in real-time
 			this.notifications.sendInfo(`Loading all accounts for the wallet...`)
-			if (await this.walletService.loadImportedWallet(decryptedSecret, this.walletPassword,
-				this.importData.accountsIndex || 0, this.importData.indexes || null, walletType)) {
+			const isImported = await this.walletService.loadImportedWallet(
+				type,
+				decryptedSecret,
+				this.walletPassword,
+				this.importData.accountsIndex || 0,
+				this.importData.indexes || null,
+				walletType
+			)
+			if (isImported) {
 				this.notifications.sendSuccess(`Successfully imported the wallet!`, { length: 10000 })
 			} else {
 				return this.notifications.sendError(`Failed importing the wallet. Invalid data!`)
 			}
 
 		} catch (err) {
-			this.walletPassword = ''
 			return this.notifications.sendError(`Invalid password, please try again`)
+		} finally {
+			this.walletPassword = ''
 		}
 	}
 

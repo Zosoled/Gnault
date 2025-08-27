@@ -1,47 +1,49 @@
 import { Component, Input, OnInit, inject } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
-import { NotificationService } from '../../services/notification.service'
 import { BarcodeFormat } from '@zxing/library'
-import { BehaviorSubject } from 'rxjs'
-import { UtilService } from '../../services/util.service'
+import { ZXingScannerModule } from '@zxing/ngx-scanner'
 import { Wallet } from 'libnemo'
+import { BehaviorSubject } from 'rxjs'
+import { NotificationService } from '../../services/notification.service'
+import { UtilService } from '../../services/util.service'
 
 export type QRType = 'account' | 'hash' | 'mnemonic' | 'generic'
 
 @Component({
 	selector: 'app-qr-modal',
 	templateUrl: './qr-modal.component.html',
-	styleUrls: ['./qr-modal.component.css']
+	styleUrls: ['./qr-modal.component.css'],
+	imports: [
+		ZXingScannerModule
+	]
 })
+
 export class QrModalComponent implements OnInit {
-	activeModal = inject(NgbActiveModal);
-	private notifcationService = inject(NotificationService);
-	private util = inject(UtilService);
-
-
-	@Input() title = 'QR Scanner';
+	@Input() title = 'QR Scanner'
 	@Input() reference: string
 	@Input() type: QRType
-	availableDevices: MediaDeviceInfo[]
-	currentDevice: MediaDeviceInfo = null;
-	nano_scheme = /^(xrb|nano|nanorep|nanoseed|nanokey):.+$/g;
 
+	activeModal = inject(NgbActiveModal)
+	private notifcationService = inject(NotificationService)
+	private util = inject(UtilService)
+
+	availableDevices: MediaDeviceInfo[]
+	currentDevice: MediaDeviceInfo = null
+	nano_scheme = /^(xrb|nano|nanorep|nanoseed|nanokey):.+$/g
 	formatsEnabled: BarcodeFormat[] = [
 		BarcodeFormat.CODE_128,
 		BarcodeFormat.DATA_MATRIX,
 		BarcodeFormat.EAN_13,
 		BarcodeFormat.QR_CODE,
-	];
-
+	]
 	hasDevices: boolean
 	hasPermission: boolean
 
-	torchEnabled = false;
-	torchAvailable$ = new BehaviorSubject<boolean>(false);
-	tryHarder = false;
+	torchEnabled = false
+	torchAvailable$ = new BehaviorSubject<boolean>(false)
+	tryHarder = false
 
-	ngOnInit (): void {
-	}
+	ngOnInit (): void { }
 
 	onCamerasFound (devices: MediaDeviceInfo[]): void {
 		this.availableDevices = devices

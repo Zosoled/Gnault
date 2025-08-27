@@ -1,4 +1,3 @@
-import { Injectable } from '@angular/core'
 import { Account, Blake2b, Tools } from 'libnemo'
 import NanoPow from 'nano-pow'
 
@@ -18,37 +17,32 @@ export interface StateBlock {
 
 export enum TxType { 'send', 'receive', 'open', 'change' }
 
-@Injectable()
 export class UtilService {
-
-	constructor () {
-	}
-
 	hex = {
 		toUint4: hexToUint4,
 		fromUint8: uint8ToHex,
 		toUint8: hexToUint8,
 		isHex: isHex,
-	};
+	}
 	uint4 = {
 		toUint5: uint4ToUint5,
 		toUint8: uint4ToUint8,
-	};
+	}
 	uint5 = {
 		toString: uint5ToString,
-	};
+	}
 	uint8 = {
 		toUint4: uint8ToUint4,
 		fromHex: hexToUint8,
 		toHex: uint8ToHex,
-	};
+	}
 	dec = {
 		toHex: decToHex,
-	};
+	}
 	string = {
 		isNumeric: isNumeric,
 		mnemonicToSeedSync: mnemonicToSeedSync,
-	};
+	}
 	account = {
 		generateAccountSecretKeyBytes: generateAccountSecretKeyBytes,
 		generateAccountKeyPair: generateAccountKeyPair,
@@ -57,7 +51,7 @@ export class UtilService {
 		isValidAccount: isValidAccount,
 		isValidNanoAmount: isValidNanoAmount,
 		isValidAmount: isValidAmount,
-	};
+	}
 	nano = {
 		mnanoToRaw: mnanoToRaw,
 		knanoToRaw: knanoToRaw,
@@ -74,30 +68,26 @@ export class UtilService {
 		validateWork: validateWork,
 		difficultyFromMultiplier: difficultyFromMultiplier,
 		multiplierFromDifficulty: multiplierFromDifficulty,
-	};
+	}
 	array = {
 		shuffle: shuffle,
 		findWithAttr: findWithAttr,
 		equalArrays: equalArrays
-	};
-
+	}
 }
-
-
 
 /** Hex Functions **/
 function hexToUint4 (hexValue) {
 	const uint4 = new Uint8Array(hexValue.length)
 	for (let i = 0; i < hexValue.length; i++) uint4[i] = parseInt(hexValue.substr(i, 1), 16)
-
 	return uint4
 }
+
 function hexToUint8 (hexValue) {
 	// eslint-disable-next-line no-bitwise
 	const length = (hexValue.length / 2) | 0
 	const uint8 = new Uint8Array(length)
 	for (let i = 0; i < length; i++) uint8[i] = parseInt(hexValue.substr(i * 2, 2), 16)
-
 	return uint8
 }
 
@@ -107,13 +97,11 @@ function isHex (h) {
 	return re.test(h)
 }
 
-
 /** Uint4 Functions **/
 function uint4ToUint8 (uintValue) {
 	const length = uintValue.length / 2
 	const uint8 = new Uint8Array(length)
 	for (let i = 0; i < length; i++)	uint8[i] = uintValue[i * 2] * 16 + uintValue[i * 2 + 1]
-
 	return uint8
 }
 
@@ -141,13 +129,11 @@ function uint4ToHex (uint4) {
 	return hex
 }
 
-
 /** Uint5 Functions **/
 function uint5ToString (uint5) {
 	const letter_list = '13456789abcdefghijkmnopqrstuwxyz'.split('')
 	let string = ''
 	for (let i = 0; i < uint5.length; i++)	string += letter_list[uint5[i]]
-
 	return string
 }
 
@@ -167,7 +153,6 @@ function uint5ToUint4 (uint5) {
 }
 /* eslint-enable no-bitwise */
 
-
 /** Uint8 Functions **/
 function uint8ToHex (uintValue) {
 	let hex = ''
@@ -180,7 +165,6 @@ function uint8ToHex (uintValue) {
 		hex += aux
 		aux = ''
 	}
-
 	return (hex)
 }
 
@@ -191,11 +175,9 @@ function uint8ToUint4 (uintValue) {
 		uint4[i * 2] = uintValue[i] / 16 | 0
 		uint4[i * 2 + 1] = uintValue[i] % 16
 	}
-
 	return uint4
 }
 /* eslint-enable no-bitwise */
-
 
 /** Dec Functions **/
 function decToHex (decValue, bytes = null) {
@@ -212,31 +194,17 @@ function decToHex (decValue, bytes = null) {
 	while (sum.length) {
 		hexArray.push(sum.pop().toString(16))
 	}
-
 	hex = hexArray.join('')
-
 	if (hex.length % 2 !== 0) {
 		hex = '0' + hex
 	}
-
 	if (bytes > hex.length / 2) {
 		const diff = bytes - hex.length / 2
 		for (let j = 0; j < diff; j++) {
 			hex = '00' + hex
 		}
 	}
-
 	return hex
-}
-
-/** String Functions **/
-function stringToUint5 (string) {
-	const letter_list = '13456789abcdefghijkmnopqrstuwxyz'.split('')
-	const length = string.length
-	const string_array = string.split('')
-	const uint5 = new Uint8Array(length)
-	for (let i = 0; i < length; i++)	uint5[i] = letter_list.indexOf(string_array[i])
-	return uint5
 }
 
 function isNumeric (val) {
@@ -246,8 +214,8 @@ function isNumeric (val) {
 }
 
 function mnemonicToSeedSync (mnemonic, password = null) {
-	// const mnemonicBuffer = Buffer.from((mnemonic || '').normalize('NFKD'), 'utf8');
-	// const saltBuffer = Buffer.from(this.salt((password || '').normalize('NFKD')), 'utf8');
+	// const mnemonicBuffer = Buffer.from((mnemonic || '').normalize('NFKD'), 'utf8')
+	// const saltBuffer = Buffer.from(this.salt((password || '').normalize('NFKD')), 'utf8')
 	// Using textencoder here instead ensures it returns an Uint8Array when using the desktop app
 	// and not a Buffer object that messes up the bip39 seed
 	const enc = new TextEncoder()
@@ -255,7 +223,6 @@ function mnemonicToSeedSync (mnemonic, password = null) {
 	const saltBuffer = enc.encode('mnemonic' + (password || ''))
 	return pbkdf2_1.pbkdf2Sync(mnemonicBuffer, saltBuffer, 2048, 64, 'sha512')
 }
-
 
 /** Account Functions **/
 function generateAccountSecretKeyBytes (seedBytes, accountIndex) {
@@ -298,7 +265,7 @@ function isValidNanoAmount (val: string) {
 }
 
 // Check if valid raw amount
-function isValidAmount (val: string) {
+function isValidAmount (val: bigint | string) {
 	return BigInt(val) > 0n && BigInt(val) < 0xffffffffffffffffffffffffffffffffn
 }
 
@@ -313,9 +280,6 @@ function setPrefix (account, prefix = 'xrb') {
 /**
  * Conversion functions
  */
-const mnano = 1000000000000000000000000000000
-const knano = 1000000000000000000000000000
-const nano = 1000000000000000000000000
 function mnanoToRaw (value) {
 	return Tools.convert(value, 'mnano', 'raw')
 }
@@ -399,20 +363,16 @@ export function multiplierFromDifficulty (difficulty, base_difficulty) {
 // shuffle any array
 function shuffle (array) {
 	let currentIndex = array.length, temporaryValue, randomIndex
-
 	// While there remain elements to shuffle...
 	while (0 !== currentIndex) {
-
 		// Pick a remaining element...
 		randomIndex = Math.floor(Math.random() * currentIndex)
 		currentIndex -= 1
-
 		// And swap it with the current element.
 		temporaryValue = array[currentIndex]
 		array[currentIndex] = array[randomIndex]
 		array[randomIndex] = temporaryValue
 	}
-
 	return array
 }
 

@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
+import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
 import { BehaviorSubject } from 'rxjs'
 import { AddressBookService } from '../../services/address-book.service'
@@ -6,29 +7,35 @@ import { NotificationService } from '../../services/notification.service'
 import { QrModalService } from '../../services/qr-modal.service'
 import { RemoteSignService } from '../../services/remote-sign.service'
 import { UtilService } from '../../services/util.service'
+import { CommonModule } from '@angular/common'
 
 @Component({
 	selector: 'app-send',
 	templateUrl: './remote-signing.component.html',
-	styleUrls: ['./remote-signing.component.css']
+	styleUrls: ['./remote-signing.component.css'],
+	imports: [
+		CommonModule,
+		FormsModule
+	]
 })
-export class RemoteSigningComponent implements OnInit {
-	private util = inject(UtilService);
-	private router = inject(Router);
-	private notificationService = inject(NotificationService);
-	private remoteSignService = inject(RemoteSignService);
-	private qrModalService = inject(QrModalService);
-	private addressBookService = inject(AddressBookService);
 
-	toAccountID = '';
-	toAccountStatus: number = null;
-	unsignedBlock = '';
-	signedBlock = '';
-	unsignedStatus: number = null;
-	signedStatus: number = null;
-	addressBookResults$ = new BehaviorSubject([]);
-	showAddressBook = false;
-	addressBookMatch = '';
+export class RemoteSigningComponent implements OnInit {
+	private util = inject(UtilService)
+	private router = inject(Router)
+	private notificationService = inject(NotificationService)
+	private remoteSignService = inject(RemoteSignService)
+	private qrModalService = inject(QrModalService)
+	private addressBookService = inject(AddressBookService)
+
+	toAccountID = ''
+	toAccountStatus: number = null
+	unsignedBlock = ''
+	signedBlock = ''
+	unsignedStatus: number = null
+	signedStatus: number = null
+	addressBookResults$ = new BehaviorSubject([])
+	showAddressBook = false
+	addressBookMatch = ''
 
 	async ngOnInit () {
 		this.addressBookService.loadAddressBook()
@@ -131,15 +138,10 @@ export class RemoteSigningComponent implements OnInit {
 	}
 
 	// open qr reader modal
-	openQR (reference, type) {
-		const qrResult = this.qrModalService.openQR(reference, type)
-		qrResult.then((data) => {
-			switch (data.reference) {
-				case 'account1':
-					this.toAccountID = data.content
-					break
-			}
-		}, () => { }
-		)
+	async openQR (reference, type): Promise<void> {
+		const data = await this.qrModalService.openQR(reference, type)
+		if (data.reference === 'account1') {
+			this.toAccountID = data.content
+		}
 	}
 }

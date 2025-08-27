@@ -1,40 +1,48 @@
+import { CommonModule } from '@angular/common'
 import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
-import { UtilService } from '../../services/util.service'
 import { Router } from '@angular/router'
-import { NotificationService } from '../../services/notification.service'
-import { RemoteSignService } from '../../services/remote-sign.service'
-import { QrModalService } from '../../services/qr-modal.service'
 import { MusigService } from '../../services/musig.service'
+import { NotificationService } from '../../services/notification.service'
+import { QrModalService } from '../../services/qr-modal.service'
+import { RemoteSignService } from '../../services/remote-sign.service'
+import { UtilService } from '../../services/util.service'
+import { FormsModule } from '@angular/forms'
 
 @Component({
 	selector: 'app-multisig',
 	templateUrl: './multisig.component.html',
-	styleUrls: ['./multisig.component.css']
+	styleUrls: ['./multisig.component.css'],
+	imports: [
+		CommonModule,
+		FormsModule
+	]
 })
+
 export class MultisigComponent implements OnInit {
-	private util = inject(UtilService);
-	private router = inject(Router);
-	private notificationService = inject(NotificationService);
-	private remoteSignService = inject(RemoteSignService);
-	private qrModalService = inject(QrModalService);
-	private musigService = inject(MusigService);
-
-	accountAdd = '';
-	showAddBox = false;
-	storedAccounts = [];
-	accountAddStatus: number = null;
-	createdMultisig = '';
-	multisigAccount = '';
-	multisigAccountStatus: number = null;
-	unsignedBlock = '';
-	unsignedStatus: number = null;
-	showAdvancedOptions = false; // if displaying more info
-	wasmErrors = ['No error', 'Internal error', 'Invalid parameter(s)', 'Invalid Participant Input'];
-
 	@ViewChild('accountAddFocus') _el: ElementRef
 
-	async ngOnInit () {
-	}
+	private util = inject(UtilService)
+	private router = inject(Router)
+	private notificationService = inject(NotificationService)
+	private remoteSignService = inject(RemoteSignService)
+	private qrModalService = inject(QrModalService)
+	private musigService = inject(MusigService)
+
+	accountAdd = ''
+	showAddBox = false
+	storedAccounts = []
+	accountAddStatus: number = null
+	createdMultisig = ''
+	multisigAccount = ''
+	multisigAccountStatus: number = null
+	unsignedBlock = ''
+	unsignedStatus: number = null
+	wasmErrors = ['No error', 'Internal error', 'Invalid parameter(s)', 'Invalid Participant Input']
+
+	// if displaying more info
+	showAdvancedOptions = false
+
+	async ngOnInit () { }
 
 	copied () {
 		this.notificationService.removeNotification('success-copied')
@@ -62,12 +70,14 @@ export class MultisigComponent implements OnInit {
 		this.accountAdd = ''
 		this.accountAddStatus = null
 		this.showAddBox = false
-		this.createdMultisig = '' // invalidate previous multisig to avoid mistakes
+		// invalidate previous multisig to avoid mistakes
+		this.createdMultisig = ''
 	}
 
 	removeSelectedAccount (account) {
 		this.storedAccounts.splice(this.storedAccounts.indexOf(account), 1)
-		this.createdMultisig = '' // invalidate previous multisig to avoid mistakes
+		// invalidate previous multisig to avoid mistakes
+		this.createdMultisig = ''
 	}
 
 	async generateMultisig () {

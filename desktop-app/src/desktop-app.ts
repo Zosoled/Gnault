@@ -78,10 +78,9 @@ function windowStateKeeper () {
 		)
 	}
 	function track (win) {
-		window = win;
-		['resize', 'move'].forEach(event => {
-			win.on(event, saveState)
-		})
+		window = win
+		win.on('move', saveState)
+		win.on('resize', saveState)
 	}
 	setBounds()
 	return ({
@@ -225,8 +224,7 @@ function sendStatusToWindow (progressObj) {
 	log.info(log_message)
 	// sending message to ipcRenderer can be done as well but not sure where and how to display it
 	// using the title bar instead
-	// mainWindow.webContents.send('downloading', Math.round(progressObj.percent));
-	mainWindow.setTitle(`Gnault - ${autoUpdater.currentVersion} - Downloading Update: ${Math.round(progressObj.percent)} %`)
+	// mainWindow.webContents.send('downloading', Math.round(progressObj.percent))	mainWindow.setTitle(`Gnault - ${autoUpdater.currentVersion} - Downloading Update: ${Math.round(progressObj.percent)} %`)
 }
 
 // run only one app

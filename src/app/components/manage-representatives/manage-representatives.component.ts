@@ -1,20 +1,22 @@
 
-import { map } from 'rxjs/operators'
 import { AfterViewInit, Component, OnInit, inject } from '@angular/core'
-import { AddressBookService } from '../../services/address-book.service'
-import { WalletService } from '../../services/wallet.service'
-import { NotificationService } from '../../services/notification.service'
-import { ModalService } from '../../services/modal.service'
+import { RouterModule } from '@angular/router'
+import { map } from 'rxjs/operators'
 import { ApiService } from '../../services/api.service'
-import { Router } from '@angular/router'
+import { ModalService } from '../../services/modal.service'
+import { NotificationService } from '../../services/notification.service'
 import { RepresentativeService } from '../../services/representative.service'
 import { UtilService } from '../../services/util.service'
 
 @Component({
 	selector: 'app-manage-representatives',
 	templateUrl: './manage-representatives.component.html',
-	styleUrls: ['./manage-representatives.component.css']
+	styleUrls: ['./manage-representatives.component.css'],
+	imports: [
+		RouterModule
+	]
 })
+
 export class ManageRepresentativesComponent implements OnInit, AfterViewInit {
 	private api = inject(ApiService)
 	private notificationService = inject(NotificationService)
@@ -22,38 +24,31 @@ export class ManageRepresentativesComponent implements OnInit, AfterViewInit {
 	private repService = inject(RepresentativeService)
 	private util = inject(UtilService)
 
-
 	activePanel = 0
 	creatingNewEntry = false
-	representatives$
 	previousRepName = ''
 	newRepAccount = ''
 	newRepName = ''
 	newRepTrusted = false
 	newRepWarn = false
-
 	onlineReps = []
 
-	constructor () {
-
-
-		// Set the online status of each representative
-		this.representatives$ = this.repService.representatives$.pipe(map(reps => {
-			return reps.map(rep => {
-				rep.online = this.onlineReps.indexOf(rep.id) !== -1
-				return rep
-			})
-		}))
-	}
+	// Set the online status of each representative
+	representatives$ = this.repService.representatives$.pipe(map(reps => {
+		return reps.map(rep => {
+			rep.online = this.onlineReps.indexOf(rep.id) !== -1
+			return rep
+		})
+	}))
 
 	async ngOnInit () {
 		this.repService.loadRepresentativeList()
 		this.onlineReps = await this.getOnlineRepresentatives()
-		this.repService.representatives$.next(this.repService.representatives) // Forcefully repush rep list once we have online status
+		// Forcefully repush rep list once we have online status
+		this.repService.representatives$.next(this.repService.representatives)
 	}
 
-	ngAfterViewInit () {
-	}
+	ngAfterViewInit () { }
 
 	addEntry () {
 		this.previousRepName = ''

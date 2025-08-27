@@ -1,5 +1,4 @@
 import { TestBed, inject } from '@angular/core/testing'
-
 import { RemoteSignService } from './remote-sign.service'
 
 describe('RemoteSignService', () => {

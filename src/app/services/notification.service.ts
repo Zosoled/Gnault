@@ -5,15 +5,11 @@ type NotificationType = 'info' | 'success' | 'warning' | 'error'
 
 @Injectable()
 export class NotificationService {
-
-	notifications$ = new Rx.BehaviorSubject(null);
-	removeNotification$ = new Rx.BehaviorSubject(null);
-
-	constructor () { }
+	notifications$ = new Rx.BehaviorSubject(null)
+	removeNotification$ = new Rx.BehaviorSubject(null)
 
 	// This provides an entry point for all components to send notifications.
 	// It exposes an observable that the actual component uses to grab new notifications
-
 	sendNotification (type: NotificationType, message: string, options = {}) {
 		this.notifications$.next({ type, message, options })
 	}
@@ -25,12 +21,15 @@ export class NotificationService {
 	sendInfo (message: string, options = {}) {
 		this.sendNotification('info', message, options)
 	}
+
 	sendSuccess (message: string, options = {}) {
 		this.sendNotification('success', message, options)
 	}
+
 	sendWarning (message: string, options = {}) {
 		this.sendNotification('warning', message, options)
 	}
+
 	sendError (message: string, options = {}) {
 		this.sendNotification('error', message, options)
 	}
@@ -38,11 +37,10 @@ export class NotificationService {
 	// Custom notification functions - these are re-used in multiple paces through the app
 	sendLedgerChromeWarning () {
 		this.sendWarning(
-			`<b>Notice:</b> You may experience issues using a Ledger device with Google Chrome. ` +
-			`If you do please use Brave/Opera browser or ` +
-			`<a href="https://github.com/Zosoled/Gnault/releases" target="_blank" rel="noopener noreferrer">Gnault Desktop</a>.`,
+			`<b>Notice:</b> You may experience issues using a Ledger device with Google Chrome.
+			If you do please use Brave/Opera browser or
+			<a href="https://github.com/Zosoled/Gnault/releases" target="_blank" rel="noopener noreferrer">Gnault Desktop</a>.`,
 			{ length: 0, identifier: 'chrome-ledger' }
 		)
 	}
-
 }

@@ -1,54 +1,59 @@
 import { Component, OnInit, inject } from '@angular/core'
 import { ActivatedRoute, ChildActivationEnd, Router } from '@angular/router'
-import { WalletService } from '../../services/wallet.service'
-import { ApiService } from '../../services/api.service'
-import { NotificationService } from '../../services/notification.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import BigNumber from 'bignumber.js'
-import { AddressBookService } from '../../services/address-book.service'
 import { TranslocoService } from '@jsverse/transloco'
+import { ClipboardModule } from 'ngx-clipboard'
+import { AddressBookService } from '../../services/address-book.service'
+import { ApiService } from '../../services/api.service'
+import { AppSettingsService } from '../../services/app-settings.service'
+import { NotificationService } from '../../services/notification.service'
+import { WalletService } from '../../services/wallet.service'
 
 @Component({
 	selector: 'app-transaction-details',
 	templateUrl: './transaction-details.component.html',
-	styleUrls: ['./transaction-details.component.css']
+	styleUrls: ['./transaction-details.component.css'],
+	imports: [
+		ClipboardModule
+	]
 })
+
 export class TransactionDetailsComponent implements OnInit {
-	private walletService = inject(WalletService);
-	private route = inject(ActivatedRoute);
-	private router = inject(Router);
-	private addressBook = inject(AddressBookService);
-	private api = inject(ApiService);
-	private notifications = inject(NotificationService);
-	settings = inject(AppSettingsService);
-	private translocoService = inject(TranslocoService);
+	private walletService = inject(WalletService)
+	private route = inject(ActivatedRoute)
+	private router = inject(Router)
+	private addressBook = inject(AddressBookService)
+	private api = inject(ApiService)
+	private notifications = inject(NotificationService)
+	settings = inject(AppSettingsService)
+	private translocoService = inject(TranslocoService)
 
-	nano = 1000000000000000000000000;
+	nano = 1000000000000000000000000
 
-	routerSub = null;
-	transaction: any = {};
-	hashID = '';
-	blockType = '';
-	loadingBlock = false;
-	isStateBlock = true;
-	isUnconfirmedBlock = false;
-	blockHeight = -1;
+	routerSub = null
+	transaction: any = {}
+	hashID = ''
+	blockType = ''
+	loadingBlock = false
+	isStateBlock = true
+	isUnconfirmedBlock = false
+	blockHeight = -1
 
-	toAccountID = '';
-	fromAccountID = '';
-	toAddressBook = '';
-	fromAddressBook = '';
+	toAccountID = ''
+	fromAccountID = ''
+	toAddressBook = ''
+	fromAddressBook = ''
 
-	transactionJSON = '';
-	showBlockData = false;
+	transactionJSON = ''
+	showBlockData = false
 
-	amountRaw = new BigNumber(0);
-	successorHash = '';
+	amountRaw = 0n
+	successorHash = ''
 
 	async ngOnInit () {
 		this.routerSub = this.router.events.subscribe(event => {
 			if (event instanceof ChildActivationEnd) {
-				this.loadTransaction() // Reload the state when navigating to itself from the transactions page
+				// Reload the state when navigating to itself from the transactions page
+				this.loadTransaction()
 			}
 		})
 
@@ -67,7 +72,7 @@ export class TransactionDetailsComponent implements OnInit {
 		this.showBlockData = false
 		let legacyFromAccount = ''
 		this.blockType = ''
-		this.amountRaw = new BigNumber(0)
+		this.amountRaw = 0n
 		this.successorHash = ''
 		const hash = this.route.snapshot.params.transaction
 		this.hashID = hash
@@ -107,12 +112,12 @@ export class TransactionDetailsComponent implements OnInit {
 					this.blockType = prevData.contents.type
 					legacyFromAccount = prevData.source_account
 				} else {
-					const prevBalance = new BigNumber(prevData.contents.balance)
-					const curBalance = new BigNumber(hashData.contents.balance)
-					const balDifference = curBalance.minus(prevBalance)
-					if (balDifference.isNegative()) {
+					const prevBalance = BigInt(prevData.contents.balance)
+					const curBalance = BigInt(hashData.contents.balance)
+					const balDifference = curBalance - prevBalance
+					if (balDifference < 0n) {
 						this.blockType = 'send'
-					} else if (balDifference.isZero()) {
+					} else if (balDifference === 0n) {
 						this.blockType = 'change'
 					} else {
 						this.blockType = 'receive'
@@ -125,7 +130,7 @@ export class TransactionDetailsComponent implements OnInit {
 		}
 
 		if (hashData.amount) {
-			this.amountRaw = new BigNumber(hashData.amount).mod(this.nano)
+			this.amountRaw = BigInt(hashData.amount)
 		}
 
 		if (hashData.successor != null && hashData.successor !== HASH_ONLY_ZEROES) {
@@ -183,11 +188,11 @@ export class TransactionDetailsComponent implements OnInit {
 	}
 
 	getBalanceFromHex (balance) {
-		return new BigNumber(balance, 16)
+		return BigInt(`0x${balance}`)
 	}
 
 	getBalanceFromDec (balance) {
-		return new BigNumber(balance, 10)
+		return BigInt(balance)
 	}
 
 	copied () {

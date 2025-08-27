@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { BehaviorSubject } from 'rxjs'
 import hermes from 'hermes-channel'
-import * as QRCode from 'qrcode'
 import { Account, Tools, Wallet } from 'libnemo'
+import * as QRCode from 'qrcode'
+import { BehaviorSubject } from 'rxjs'
 import { AddressBookService } from '../../services/address-book.service'
 import { WalletService } from '../../services/wallet.service'
 import { NotificationService } from '../../services/notification.service'
@@ -20,6 +20,7 @@ import { environment } from '../../../environments/environment'
 const INDEX_MAX = 4294967295
 // navigation source for cancel command (excluding camera source because too complicated to fix)
 enum navSource { 'remote', 'multisig' }
+
 @Component({
 	selector: 'app-sign',
 	templateUrl: './sign.component.html',
@@ -39,12 +40,12 @@ export class SignComponent implements OnInit {
 	private util = inject(UtilService)
 	private qrModalService = inject(QrModalService)
 	private musigService = inject(MusigService)
-	price = inject(PriceService))
+	price = inject(PriceService)
 
 	paramsString = ''
 	activePanel = 'error'
 	shouldSign: boolean = null; // if a block has been scanned for signing (or if it is a block to process)
-	accounts
+	accounts = this.walletService.wallet.accounts
 	addressBookResults$ = new BehaviorSubject([])
 	showAddressBook = false
 	addressBookMatch = ''
@@ -71,6 +72,7 @@ export class SignComponent implements OnInit {
 	signatureAccount = ''
 	signatureMessage = ''
 	signatureMessageSuccess = ''
+	wallet = this.walletService.wallet.wallet
 	walletAccount = null
 	nullBlock = '0000000000000000000000000000000000000000000000000000000000000000'
 	qrString = null
@@ -87,6 +89,7 @@ export class SignComponent implements OnInit {
 	processedHash: string = null
 	finalSignature: string = null
 	// With v21 the 1x is the old 8x and max will be 8x due to the webgl threshold is max ffffffff00000000
+	// Note: with NanoPow integration, max threshold now supports full 64-bit ffffffffffffffff but is limited to network send max to prevent abuse
 	thresholds = [
 		{ name: '1x', value: 1 }
 	]
@@ -97,7 +100,8 @@ export class SignComponent implements OnInit {
 	/**
 	 MULTISIG
 	 */
-	multisigLink = this.getMultisigLink(); // link to be shared to other multisig participants
+	// link to be shared to other multisig participants
+	multisigLink = this.getMultisigLink()
 	participants = 2
 	validParticipants = true
 	savedParticipants = 0
@@ -120,10 +124,6 @@ export class SignComponent implements OnInit {
 	showAddBox = false
 	isDesktop = environment.desktop
 	// END MULTISIG
-
-	constructor () {
-		this.accounts = this.walletService.wallet.accounts
-	}
 
 	@ViewChild('dataAddFocus') _el: ElementRef
 
@@ -504,6 +504,7 @@ export class SignComponent implements OnInit {
 
 	// Create signature for the block
 	async confirmTransaction (signature = '') {
+		let wallet = this.wallet
 		let walletAccount = this.walletAccount
 		let isLedger = this.walletService.isLedgerWallet()
 
@@ -547,12 +548,12 @@ export class SignComponent implements OnInit {
 		let block: StateBlock
 		if (this.signTypeSelected !== this.signTypes[3]) {
 			block = await this.nanoBlock.signOfflineBlock(
+				wallet,
 				walletAccount,
 				this.currentBlock,
 				this.previousBlock,
 				this.txType,
 				this.shouldGenWork,
-				this.selectedThreshold,
 				isLedger
 			)
 			console.log('Signature: ' + block.signature || 'Error')

@@ -1,30 +1,32 @@
+
+import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core'
+import { Account } from 'libnemo'
+import base32 from 'nano-base32'
+import { Observable } from 'rxjs'
 import { UtilService } from './util.service'
 import { NotificationService } from './notification.service'
-import { HttpClient, HttpHeaders } from '@angular/common/http'
-import { Observable } from 'rxjs'
-import { Account } from 'libnemo'
 import { environment } from '../../environments/environment'
-const base32 = require('nano-base32')
 
 @Injectable({
 	providedIn: 'root'
 })
+
 export class MusigService {
-	private util = inject(UtilService);
-	private notificationService = inject(NotificationService);
-	private http = inject(HttpClient);
+	private util = inject(UtilService)
+	private notificationService = inject(NotificationService)
+	private http = inject(HttpClient)
 
 	// The multisig wasm library can be validated by running build-or-validate_musig_wasm.sh
 	private wasmURL = environment.desktop
 		? '../../../resources/app.asar/dist/assets/lib/musig-nano/musig_nano.wasm.b64'
-		: '../../../assets/lib/musig-nano/musig_nano.wasm.b64';
+		: '../../../assets/lib/musig-nano/musig_nano.wasm.b64'
 
-	wasm = null;
-	wasmErrors = ['No error', 'Internal error', 'Invalid parameter(s)', 'Invalid Participant Input'];
-	musigStagePtr: number = null;
-	musigStageNum: number = null;
-	savedPublicKeys = [];
+	wasm = null
+	wasmErrors = ['No error', 'Internal error', 'Invalid parameter(s)', 'Invalid Participant Input']
+	musigStagePtr: number = null
+	musigStageNum: number = null
+	savedPublicKeys = []
 
 	constructor () {
 		// Read the wasm file for multisig
@@ -132,7 +134,7 @@ export class MusigService {
 		let addresses = []
 		if (runWithPubkeys && this.savedPublicKeys?.length > 1) {
 			for (const pubKey of this.savedPublicKeys) {
-				const account = await Account.fromPublicKey(pubKey)
+				const account = Account.load(pubKey)
 				addresses.push(account.address)
 			}
 		} else {
@@ -268,7 +270,7 @@ export class MusigService {
 					this.savedPublicKeys.push(input.substring(66, 130).toLowerCase())
 				}
 				// Add the public key from self
-				const account = await Account.fromPrivateKey(privateKey)
+				const account = await Account.load(privateKey, 'private')
 				const pub = account.publicKey
 				if (this.savedPublicKeys.includes(pub.toLowerCase())) {
 					throw new Error('You must use different private keys for each participant!')

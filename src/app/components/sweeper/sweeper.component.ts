@@ -1,14 +1,15 @@
 import { Component, OnInit, ElementRef, ViewChild, inject } from '@angular/core'
-import { WalletService } from '../../services/wallet.service'
-import { NotificationService } from '../../services/notification.service'
-import { ModalService } from '../../services/modal.service'
-import { ApiService } from '../../services/api.service'
-import { UtilService, TxType } from '../../services/util.service'
-import { WorkPoolService } from '../../services/work-pool.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { NanoBlockService } from '../../services/nano-block.service'
-import { Account, Block, Tools, Wallet } from 'libnemo'
+import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
+import { Account, Block, Tools, Wallet } from 'libnemo'
+import { ApiService } from '../../services/api.service'
+import { AppSettingsService } from '../../services/app-settings.service'
+import { ModalService } from '../../services/modal.service'
+import { NanoBlockService } from '../../services/nano-block.service'
+import { NotificationService } from '../../services/notification.service'
+import { UtilService, TxType } from '../../services/util.service'
+import { WalletService } from '../../services/wallet.service'
+import { WorkPoolService } from '../../services/work-pool.service'
 
 const INDEX_MAX = 4294967295 // seed index
 const SWEEP_MAX_INDEX = 100 // max index keys to sweep
@@ -18,6 +19,9 @@ const SWEEP_MAX_RECEIVABLE = 100 // max receivable blocks to process per run
 	selector: 'app-sweeper',
 	templateUrl: './sweeper.component.html',
 	styleUrls: ['./sweeper.component.css'],
+	imports: [
+		FormsModule
+	]
 })
 
 export class SweeperComponent implements OnInit {
@@ -32,13 +36,13 @@ export class SweeperComponent implements OnInit {
 	private util = inject(UtilService)
 	private route = inject(Router)
 
-	accounts
+	accounts = this.walletService.wallet.accounts
 	indexMax = INDEX_MAX
 	incomingMax = SWEEP_MAX_RECEIVABLE
 
-	myAccountModel
+	myAccountModel = this.accounts[0]?.id ?? '0'
 	sourceWallet = ''
-	destinationAccount
+	destinationAccount = this.accounts[0]?.id ?? ''
 	startIndex = '0'
 	endIndex = '5'
 	maxIncoming = SWEEP_MAX_RECEIVABLE.toString()
@@ -56,10 +60,10 @@ export class SweeperComponent implements OnInit {
 	keyCount = 0
 	pendingCallback = null
 	totalSwept = '0'
-	customAccountSelected
+	customAccountSelected = this.accounts.length === 0
 
 	validSeed = false
-	validDestination
+	validDestination = this.myAccountModel !== '0'
 	validStartIndex = true
 	validEndIndex = true
 	validMaxIncoming = true
@@ -68,11 +72,6 @@ export class SweeperComponent implements OnInit {
 	@ViewChild('outputarea') logArea: ElementRef
 
 	constructor () {
-		this.accounts = this.walletService.wallet.accounts
-		this.myAccountModel = this.accounts[0]?.id ?? '0'
-		this.destinationAccount = this.accounts[0]?.id ?? ''
-		this.customAccountSelected = this.accounts.length === 0
-		this.validDestination = this.myAccountModel !== '0'
 		if (this.route.getCurrentNavigation().extras.state && this.route.getCurrentNavigation().extras.state.seed) {
 			this.sourceWallet = this.route.getCurrentNavigation().extras.state.seed
 			this.validSeed = true
