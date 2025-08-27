@@ -2,7 +2,17 @@
 # For additional information regarding the format and rule options, please see:
 # https://github.com/browserslist/browserslist#queries
 
+# For Angular's browser support policy, please see:
+# https://angular.dev/reference/versions#browser-support
+
 # You can see what browsers were selected by your queries by running:
 #   npx browserslist
 
-fully supports es6 and fully supports array-includes and not dead
+Chrome >= 107
+ChromeAndroid >= 107
+Edge >= 107
+Firefox >= 104
+FirefoxAndroid >= 104
+Safari >= 16
+iOS >= 16
+
