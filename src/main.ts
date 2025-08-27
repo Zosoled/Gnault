@@ -1,10 +1,12 @@
 import { provideHttpClient } from '@angular/common/http'
-import { enableProdMode } from '@angular/core'
+import { enableProdMode, isDevMode } from '@angular/core'
 import { bootstrapApplication } from '@angular/platform-browser'
 import { PreloadAllModules, provideRouter, withHashLocation, withPreloading } from '@angular/router'
+import { provideTransloco } from '@jsverse/transloco'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 import { AppComponent } from './app/app.component'
 import { routes } from './app/routes'
+import { TranslocoLoader } from './app/transloco-loader.ts'
 import { environment } from './environments/environment'
 
 // Providers
@@ -59,7 +61,27 @@ bootstrapApplication(AppComponent, {
 		WebsocketService,
 		WorkPoolService,
 		provideHttpClient(),
-		provideRouter(routes, withHashLocation(), withPreloading(PreloadAllModules))
+		provideRouter(routes, withHashLocation(), withPreloading(PreloadAllModules)),
+		provideTransloco({
+		  config: {
+		    availableLangs: [
+		      { id: 'en', label: 'English' },
+					{ id: 'de', label: 'Deutsch' },
+					{ id: 'es', label: 'Español' },
+					{ id: 'fr', label: 'Français' },
+					{ id: 'pt-br', label: 'Português (Brasil)' }
+				],
+				defaultLang: 'en',
+				fallbackLang: 'en',
+				missingHandler: {
+					// It will use the first language set in the `fallbackLang` property
+					useFallbackTranslation: true
+        },	
+		    reRenderOnLangChange: true,
+		    prodMode: !isDevMode
+		  },
+		  loader: TranslocoHttpLoader
+    } 
 	]
 })
 	.catch(err => console.error(err))
