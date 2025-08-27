@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import BigNumber from 'bignumber.js'
 import { AddressBookService } from '../../services/address-book.service'
 import { BehaviorSubject } from 'rxjs'
@@ -25,6 +25,20 @@ const nacl = window['nacl']
 	styleUrls: ['./send.component.css']
 })
 export class SendComponent implements OnInit {
+	private route = inject(ActivatedRoute);
+	private walletService = inject(WalletService);
+	private addressBookService = inject(AddressBookService);
+	private notificationService = inject(NotificationService);
+	private nodeApi = inject(ApiService);
+	private nanoBlock = inject(NanoBlockService);
+	price = inject(PriceService);
+	private workPool = inject(WorkPoolService);
+	settings = inject(AppSettingsService);
+	private util = inject(UtilService);
+	private qrModalService = inject(QrModalService);
+	private http = inject(HttpClient);
+	private translocoService = inject(TranslocoService);
+
 	nano = 1000000000000000000000000;
 
 	activePanel = 'send';
@@ -78,21 +92,6 @@ export class SendComponent implements OnInit {
 	preparingTransaction = false;
 	confirmingTransaction = false;
 	selAccountInit = false;
-
-	constructor (
-		private route: ActivatedRoute,
-		private walletService: WalletService,
-		private addressBookService: AddressBookService,
-		private notificationService: NotificationService,
-		private nodeApi: ApiService,
-		private nanoBlock: NanoBlockService,
-		public price: PriceService,
-		private workPool: WorkPoolService,
-		public settings: AppSettingsService,
-		private util: UtilService,
-		private qrModalService: QrModalService,
-		private http: HttpClient,
-		private translocoService: TranslocoService) { }
 
 	async ngOnInit () {
 		const params = this.route.snapshot.queryParams

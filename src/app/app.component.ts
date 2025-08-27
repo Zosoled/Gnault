@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild, Renderer2 } from '@angular/core'
+import { Component, ElementRef, HostListener, OnInit, ViewChild, Renderer2, inject } from '@angular/core'
 import { TranslocoService } from '@jsverse/transloco'
 import { WalletService } from './services/wallet.service'
 import { AddressBookService } from './services/address-book.service'
@@ -23,29 +23,32 @@ import { DeeplinkService } from './services/deeplink.service'
 	styleUrls: ['./app.component.less']
 })
 export class AppComponent implements OnInit {
+	private addressBook = inject(AddressBookService);
+	private websocket = inject(WebsocketService);
+	private notifications = inject(NotificationService);
+	private representative = inject(RepresentativeService);
+	private router = inject(Router);
+	private workPool = inject(WorkPoolService);
+	private util = inject(UtilService);
+	private desktop = inject(DesktopService);
+	private ledger = inject(LedgerService);
+	private renderer = inject(Renderer2);
+	private deeplinkService = inject(DeeplinkService);
+	private translate = inject(TranslocoService);
+	walletService = inject(WalletService);
+	settings = inject(AppSettingsService);
+	nodeService = inject(NodeService);
+	updates = inject(SwUpdate);
+	price = inject(PriceService);
+
 	wallet
 	node
 	nanoPrice
 	isConfigured
 
-	constructor (
-		private addressBook: AddressBookService,
-		private websocket: WebsocketService,
-		private notifications: NotificationService,
-		private representative: RepresentativeService,
-		private router: Router,
-		private workPool: WorkPoolService,
-		private util: UtilService,
-		private desktop: DesktopService,
-		private ledger: LedgerService,
-		private renderer: Renderer2,
-		private deeplinkService: DeeplinkService,
-		private translate: TranslocoService,
-		public walletService: WalletService,
-		public settings: AppSettingsService,
-		public nodeService: NodeService,
-		public updates: SwUpdate,
-		public price: PriceService) {
+	constructor () {
+		const router = this.router;
+
 		router.events.subscribe(() => {
 			this.closeNav()
 		})

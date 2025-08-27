@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { ChildActivationEnd, Router } from '@angular/router'
 import { WalletService, WalletAccount } from '../../services/wallet.service'
 import { NotificationService } from '../../services/notification.service'
@@ -24,6 +24,20 @@ import { TranslocoService } from '@ngneat/transloco'
 
 
 export class ReceiveComponent implements OnInit, OnDestroy {
+	private route = inject(Router);
+	private walletService = inject(WalletService);
+	private notificationService = inject(NotificationService);
+	private addressBook = inject(AddressBookService);
+	modal = inject(ModalService);
+	private api = inject(ApiService);
+	private workPool = inject(WorkPoolService);
+	settings = inject(AppSettingsService);
+	private nanoBlock = inject(NanoBlockService);
+	price = inject(PriceService);
+	private websocket = inject(WebsocketService);
+	private util = inject(UtilService);
+	private translocoService = inject(TranslocoService);
+
 	nano = 1000000000000000000000000;
 	accounts = this.walletService.wallet.accounts;
 
@@ -63,21 +77,6 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	merchantModeTransactionHashes = [];
 
 	routerSub = null;
-
-	constructor (
-		private route: Router,
-		private walletService: WalletService,
-		private notificationService: NotificationService,
-		private addressBook: AddressBookService,
-		public modal: ModalService,
-		private api: ApiService,
-		private workPool: WorkPoolService,
-		public settings: AppSettingsService,
-		private nanoBlock: NanoBlockService,
-		public price: PriceService,
-		private websocket: WebsocketService,
-		private util: UtilService,
-		private translocoService: TranslocoService) { }
 
 	async ngOnInit () {
 		const UIkit = window['UIkit']

@@ -1,6 +1,6 @@
 
 import { map } from 'rxjs/operators'
-import { AfterViewInit, Component, OnInit } from '@angular/core'
+import { AfterViewInit, Component, OnInit, inject } from '@angular/core'
 import { AddressBookService } from '../../services/address-book.service'
 import { WalletService } from '../../services/wallet.service'
 import { NotificationService } from '../../services/notification.service'
@@ -16,6 +16,12 @@ import { UtilService } from '../../services/util.service'
 	styleUrls: ['./manage-representatives.component.css']
 })
 export class ManageRepresentativesComponent implements OnInit, AfterViewInit {
+	private api = inject(ApiService);
+	private notificationService = inject(NotificationService);
+	modal = inject(ModalService);
+	private repService = inject(RepresentativeService);
+	private util = inject(UtilService);
+
 
 	activePanel = 0;
 	creatingNewEntry = false;
@@ -35,13 +41,6 @@ export class ManageRepresentativesComponent implements OnInit, AfterViewInit {
 	newRepWarn = false;
 
 	onlineReps = [];
-
-	constructor (
-		private api: ApiService,
-		private notificationService: NotificationService,
-		public modal: ModalService,
-		private repService: RepresentativeService,
-		private util: UtilService) { }
 
 	async ngOnInit () {
 		this.repService.loadRepresentativeList()

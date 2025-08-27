@@ -1,18 +1,20 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { PowService, baseThreshold, workState } from './pow.service'
 import { NotificationService } from './notification.service'
 import { UtilService } from './util.service'
 
 @Injectable()
 export class WorkPoolService {
+	private pow = inject(PowService);
+	private notifications = inject(NotificationService);
+	private util = inject(UtilService);
+
 	storeKey = `nanovault-workcache`;
 
 	cacheLength = 25;
 	workCache = [];
 
 	currentlyProcessingHashes = {};
-
-	constructor (private pow: PowService, private notifications: NotificationService, private util: UtilService) { }
 
 	sleep (ms) {
 		return new Promise(resolve => setTimeout(resolve, ms))

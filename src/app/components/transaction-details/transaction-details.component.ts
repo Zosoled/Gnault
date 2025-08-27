@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import { ActivatedRoute, ChildActivationEnd, Router } from '@angular/router'
 import { WalletService } from '../../services/wallet.service'
 import { ApiService } from '../../services/api.service'
@@ -14,6 +14,15 @@ import { TranslocoService } from '@ngneat/transloco'
 	styleUrls: ['./transaction-details.component.css']
 })
 export class TransactionDetailsComponent implements OnInit {
+	private walletService = inject(WalletService);
+	private route = inject(ActivatedRoute);
+	private router = inject(Router);
+	private addressBook = inject(AddressBookService);
+	private api = inject(ApiService);
+	private notifications = inject(NotificationService);
+	settings = inject(AppSettingsService);
+	private translocoService = inject(TranslocoService);
+
 	nano = 1000000000000000000000000;
 
 	routerSub = null;
@@ -35,17 +44,6 @@ export class TransactionDetailsComponent implements OnInit {
 
 	amountRaw = new BigNumber(0);
 	successorHash = '';
-
-	constructor (
-		private walletService: WalletService,
-		private route: ActivatedRoute,
-		private router: Router,
-		private addressBook: AddressBookService,
-		private api: ApiService,
-		private notifications: NotificationService,
-		public settings: AppSettingsService,
-		private translocoService: TranslocoService
-	) { }
 
 	async ngOnInit () {
 		this.routerSub = this.router.events.subscribe(event => {

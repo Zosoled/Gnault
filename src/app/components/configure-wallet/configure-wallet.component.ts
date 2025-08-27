@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import { WalletService, NotificationService, RepresentativeService } from '../../services'
 import { ActivatedRoute, Router } from '@angular/router'
 import * as bip39 from 'bip39'
@@ -25,6 +25,15 @@ const INDEX_MAX = 4294967295 // seed index
 	styleUrls: ['./configure-wallet.component.css']
 })
 export class ConfigureWalletComponent implements OnInit {
+	private router = inject(ActivatedRoute);
+	walletService = inject(WalletService);
+	private notifications = inject(NotificationService);
+	private route = inject(Router);
+	private qrModalService = inject(QrModalService);
+	private ledgerService = inject(LedgerService);
+	private util = inject(UtilService);
+	private translocoService = inject(TranslocoService);
+
 	panels = panels;
 	activePanel = panels.landing;
 	wallet = this.walletService.wallet;
@@ -62,15 +71,7 @@ export class ConfigureWalletComponent implements OnInit {
 	ledgerStatus = LedgerStatus;
 	ledger = this.ledgerService.ledger;
 
-	constructor (
-		private router: ActivatedRoute,
-		public walletService: WalletService,
-		private notifications: NotificationService,
-		private route: Router,
-		private qrModalService: QrModalService,
-		private ledgerService: LedgerService,
-		private util: UtilService,
-		private translocoService: TranslocoService) {
+	constructor () {
 		if (this.route.getCurrentNavigation().extras.state && this.route.getCurrentNavigation().extras.state.seed) {
 			this.activePanel = panels.import
 			this.importSeedModel = this.route.getCurrentNavigation().extras.state.seed

@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
+import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core'
 import { WalletService } from '../../services/wallet.service'
 import { NotificationService } from '../../services/notification.service'
 import { LedgerService, LedgerStatus } from '../../services/ledger.service'
@@ -11,6 +11,12 @@ import { PowService } from '../../services/pow.service'
 	styleUrls: ['./wallet-widget.component.css']
 })
 export class WalletWidgetComponent implements OnInit {
+	walletService = inject(WalletService);
+	private notificationService = inject(NotificationService);
+	ledgerService = inject(LedgerService);
+	settings = inject(AppSettingsService);
+	private powService = inject(PowService);
+
 	wallet = this.walletService.wallet;
 
 	ledgerStatus = {
@@ -24,13 +30,6 @@ export class WalletWidgetComponent implements OnInit {
 	modal: any = null;
 	mayAttemptUnlock = true;
 	timeoutIdAllowingUnlock: any = null;
-
-	constructor (
-		public walletService: WalletService,
-		private notificationService: NotificationService,
-		public ledgerService: LedgerService,
-		public settings: AppSettingsService,
-		private powService: PowService) { }
 
 	@ViewChild('passwordInput') passwordInput: ElementRef
 

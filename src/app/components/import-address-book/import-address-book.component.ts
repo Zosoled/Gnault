@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import { NotificationService } from '../../services/notification.service'
 import { ActivatedRoute } from '@angular/router'
 import { AddressBookService } from '../../services/address-book.service'
@@ -10,6 +10,11 @@ import { Router } from '@angular/router'
 	styleUrls: ['./import-address-book.component.css']
 })
 export class ImportAddressBookComponent implements OnInit {
+	private route = inject(ActivatedRoute);
+	private notifications = inject(NotificationService);
+	private addressBook = inject(AddressBookService);
+	private router = inject(Router);
+
 	activePanel = 'error';
 
 	validImportData = false;
@@ -19,12 +24,6 @@ export class ImportAddressBookComponent implements OnInit {
 	newEntries = 0;
 	existingEntries = 0;
 	hostname = '';
-
-	constructor (
-		private route: ActivatedRoute,
-		private notifications: NotificationService,
-		private addressBook: AddressBookService,
-		private router: Router) { }
 
 	ngOnInit () {
 		const importData = this.route.snapshot.fragment

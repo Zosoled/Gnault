@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import { NotificationService } from '../../services/notification.service'
 
 @Component({
@@ -7,11 +7,12 @@ import { NotificationService } from '../../services/notification.service'
 	styleUrls: ['./notifications.component.css']
 })
 export class NotificationsComponent implements OnInit {
+	private notificationService = inject(NotificationService);
+
 
 	notificationLength = 5000;
 
 	notifications: any[] = [];
-	constructor (private notificationService: NotificationService) { }
 
 	ngOnInit () {
 		this.notificationService.notifications$.subscribe(notification => {

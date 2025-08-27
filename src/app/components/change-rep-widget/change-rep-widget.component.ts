@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import { WalletService } from '../../services/wallet.service'
 import { NanoBlockService } from '../../services/nano-block.service'
 import { RepresentativeService } from '../../services/representative.service'
@@ -10,6 +10,11 @@ import { Router } from '@angular/router'
 	styleUrls: ['./change-rep-widget.component.css']
 })
 export class ChangeRepWidgetComponent implements OnInit {
+	private walletService = inject(WalletService);
+	private blockService = inject(NanoBlockService);
+	private repService = inject(RepresentativeService);
+	private router = inject(Router);
+
 
 	changeableRepresentatives = this.repService.changeableReps;
 	displayedRepresentatives = [];
@@ -19,13 +24,6 @@ export class ChangeRepWidgetComponent implements OnInit {
 	selectedAccount = null;
 	selectedAccountHasRep = false;
 	initialLoadComplete = false;
-
-	constructor (
-		private walletService: WalletService,
-		private blockService: NanoBlockService,
-		private repService: RepresentativeService,
-		private router: Router
-	) { }
 
 	async ngOnInit () {
 		this.repService.walletReps$.subscribe(async reps => {

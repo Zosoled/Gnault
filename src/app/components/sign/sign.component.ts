@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core'
+import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
 import BigNumber from 'bignumber.js'
 import { AddressBookService } from '../../services/address-book.service'
 import { BehaviorSubject } from 'rxjs'
@@ -30,6 +30,20 @@ enum navSource { 'remote', 'multisig' }
 })
 
 export class SignComponent implements OnInit {
+	private router = inject(ActivatedRoute);
+	private routerService = inject(Router);
+	private walletService = inject(WalletService);
+	private addressBookService = inject(AddressBookService);
+	private notificationService = inject(NotificationService);
+	private nanoBlock = inject(NanoBlockService);
+	private workPool = inject(WorkPoolService);
+	settings = inject(AppSettingsService);
+	private api = inject(ApiService);
+	private util = inject(UtilService);
+	private qrModalService = inject(QrModalService);
+	private musigService = inject(MusigService);
+	price = inject(PriceService);
+
 	paramsString = '';
 	activePanel = 'error';
 	shouldSign: boolean = null; // if a block has been scanned for signing (or if it is a block to process)
@@ -109,22 +123,6 @@ export class SignComponent implements OnInit {
 	qrCodeImageOutput = null;
 	showAddBox = false;
 	isDesktop = environment.desktop;
-	// END MULTISIG
-
-	constructor (
-		private router: ActivatedRoute,
-		private routerService: Router,
-		private walletService: WalletService,
-		private addressBookService: AddressBookService,
-		private notificationService: NotificationService,
-		private nanoBlock: NanoBlockService,
-		private workPool: WorkPoolService,
-		public settings: AppSettingsService,
-		private api: ApiService,
-		private util: UtilService,
-		private qrModalService: QrModalService,
-		private musigService: MusigService,
-		public price: PriceService) { }
 
 	@ViewChild('dataAddFocus') _el: ElementRef
 

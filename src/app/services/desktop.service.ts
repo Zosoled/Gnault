@@ -1,13 +1,15 @@
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { IpcRenderer } from 'electron'
 import { NotificationService } from './notification.service'
 
 @Injectable()
 export class DesktopService {
+	private notifications = inject(NotificationService);
+
 
 	private _ipc: IpcRenderer | undefined
 
-	constructor (private notifications: NotificationService) {
+	constructor () {
 		if (window.require) {
 			try {
 				this._ipc = window.require('electron').ipcRenderer

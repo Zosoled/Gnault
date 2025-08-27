@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import { WalletService } from '../../services/wallet.service'
 import { NotificationService } from '../../services/notification.service'
 import { ApiService } from '../../services/api.service'
@@ -14,6 +14,12 @@ import { formatDate } from '@angular/common'
 	styleUrls: ['./manage-wallet.component.css']
 })
 export class ManageWalletComponent implements OnInit {
+	walletService = inject(WalletService);
+	notifications = inject(NotificationService);
+	private api = inject(ApiService);
+	private util = inject(UtilService);
+	settings = inject(AppSettingsService);
+
 
 	wallet = this.walletService.wallet;
 	accounts = this.walletService.wallet.accounts;
@@ -41,13 +47,6 @@ export class ManageWalletComponent implements OnInit {
 	];
 	selectedOrder = this.orderOptions[0].value;
 	exportEnabled = true;
-
-	constructor (
-		public walletService: WalletService,
-		public notifications: NotificationService,
-		private api: ApiService,
-		private util: UtilService,
-		public settings: AppSettingsService) { }
 
 	async ngOnInit () {
 		this.wallet = this.walletService.wallet

@@ -1,4 +1,4 @@
-import { Component, OnInit, Renderer2 } from '@angular/core'
+import { Component, OnInit, Renderer2, inject } from '@angular/core'
 import { WalletService } from '../../services/wallet.service'
 import { NotificationService } from '../../services/notification.service'
 import { AppSettingsService, PoWSource } from '../../services/app-settings.service'
@@ -23,24 +23,23 @@ import { TranslocoService } from '@ngneat/transloco'
 })
 
 export class ConfigureAppComponent implements OnInit {
+	private walletService = inject(WalletService);
+	private notifications = inject(NotificationService);
+	private appSettings = inject(AppSettingsService);
+	private addressBook = inject(AddressBookService);
+	private pow = inject(PowService);
+	private api = inject(ApiService);
+	private websocket = inject(WebsocketService);
+	private workPool = inject(WorkPoolService);
+	private repService = inject(RepresentativeService);
+	private node = inject(NodeService);
+	private util = inject(UtilService);
+	private price = inject(PriceService);
+	private ninja = inject(NinjaService);
+	private renderer = inject(Renderer2);
+	private qrModalService = inject(QrModalService);
+	private translocoService = inject(TranslocoService);
 
-	constructor (
-		private walletService: WalletService,
-		private notifications: NotificationService,
-		private appSettings: AppSettingsService,
-		private addressBook: AddressBookService,
-		private pow: PowService,
-		private api: ApiService,
-		private websocket: WebsocketService,
-		private workPool: WorkPoolService,
-		private repService: RepresentativeService,
-		private node: NodeService,
-		private util: UtilService,
-		private price: PriceService,
-		private ninja: NinjaService,
-		private renderer: Renderer2,
-		private qrModalService: QrModalService,
-		private translocoService: TranslocoService) { }
 	wallet = this.walletService.wallet;
 
 	languages = this.translocoService.getAvailableLangs() as [{ id: string, label: string }];

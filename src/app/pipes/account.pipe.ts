@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core'
+import { Pipe, PipeTransform, inject } from '@angular/core'
 import { UtilService } from '../services/util.service'
 import { AppSettingsService } from '../services/app-settings.service'
 
@@ -6,10 +6,8 @@ import { AppSettingsService } from '../services/app-settings.service'
 	name: 'account'
 })
 export class AccountPipe implements PipeTransform {
-
-	constructor (private util: UtilService, private settings: AppSettingsService) {
-
-	}
+	private util = inject(UtilService)
+	private settings = inject(AppSettingsService)
 
 	transform (value: any, args?: any): any {
 		// const val = this.util.account.setPrefix(value, this.settings.settings.displayPrefix);

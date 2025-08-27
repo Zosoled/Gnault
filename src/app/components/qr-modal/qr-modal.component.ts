@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core'
+import { Component, Input, OnInit, inject } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 import { NotificationService } from '../../services/notification.service'
 import { BarcodeFormat } from '@zxing/library'
@@ -14,6 +14,10 @@ export type QRType = 'account' | 'hash' | 'mnemonic' | 'generic'
 	styleUrls: ['./qr-modal.component.css']
 })
 export class QrModalComponent implements OnInit {
+	activeModal = inject(NgbActiveModal);
+	private notifcationService = inject(NotificationService);
+	private util = inject(UtilService);
+
 
 	@Input() title = 'QR Scanner';
 	@Input() reference: string
@@ -35,12 +39,6 @@ export class QrModalComponent implements OnInit {
 	torchEnabled = false;
 	torchAvailable$ = new BehaviorSubject<boolean>(false);
 	tryHarder = false;
-
-	constructor (
-		public activeModal: NgbActiveModal,
-		private notifcationService: NotificationService,
-		private util: UtilService,
-	) { }
 
 	ngOnInit (): void {
 	}

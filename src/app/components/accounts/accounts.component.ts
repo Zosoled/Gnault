@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import { Subject, timer } from 'rxjs'
 import { debounce } from 'rxjs/operators'
 import { Router } from '@angular/router'
@@ -19,6 +19,15 @@ import { TranslocoService } from '@jsverse/transloco'
 	styleUrls: ['./accounts.component.css']
 })
 export class AccountsComponent implements OnInit {
+	private walletService = inject(WalletService);
+	private notificationService = inject(NotificationService);
+	modal = inject(ModalService);
+	settings = inject(AppSettingsService);
+	private representatives = inject(RepresentativeService);
+	private router = inject(Router);
+	private ledger = inject(LedgerService);
+	private translocoService = inject(TranslocoService);
+
 	accounts
 	isLedgerWallet
 	isSingleKeyWallet
@@ -29,15 +38,7 @@ export class AccountsComponent implements OnInit {
 	accountsChanged$ = new Subject();
 	reloadRepWarning$ = this.accountsChanged$.pipe(debounce(() => timer(5000)));
 
-	constructor (
-		private walletService: WalletService,
-		private notificationService: NotificationService,
-		public modal: ModalService,
-		public settings: AppSettingsService,
-		private representatives: RepresentativeService,
-		private router: Router,
-		private ledger: LedgerService,
-		private translocoService: TranslocoService) {
+	constructor () {
 		this.accounts = this.walletService.wallet.accounts
 		this.isLedgerWallet = this.walletService.isLedgerWallet()
 		this.isSingleKeyWallet = this.walletService.isSingleKeyWallet()

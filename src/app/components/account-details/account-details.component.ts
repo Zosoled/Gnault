@@ -1,5 +1,5 @@
 import { formatDate } from '@angular/common'
-import { Component, OnDestroy, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { ActivatedRoute, ChildActivationEnd, Router, NavigationEnd } from '@angular/router'
 import { translate } from '@jsverse/transloco'
 import { Account, Block, Tools } from 'libnemo'
@@ -23,6 +23,20 @@ import { QrModalService } from '../../services/qr-modal.service'
 	styleUrls: ['./account-details.component.css']
 })
 export class AccountDetailsComponent implements OnInit, OnDestroy {
+	private router = inject(ActivatedRoute);
+	private route = inject(Router);
+	private addressBook = inject(AddressBookService);
+	private api = inject(ApiService);
+	private price = inject(PriceService);
+	private repSvc = inject(RepresentativeService);
+	private notify = inject(NotificationService);
+	private wallet = inject(WalletService);
+	private util = inject(UtilService);
+	settings = inject(AppSettingsService);
+	private nanoBlock = inject(NanoBlockService);
+	private qrModalSvc = inject(QrModalService);
+	private ninja = inject(NinjaService);
+
 	nano = 1000000000000000000000000n
 	zeroHash = '0000000000000000000000000000000000000000000000000000000000000000'
 
@@ -103,20 +117,9 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	representativesOverview = []
 	// End remote signing
 
-	constructor (
-		private router: ActivatedRoute,
-		private route: Router,
-		private addressBook: AddressBookService,
-		private api: ApiService,
-		private price: PriceService,
-		private repSvc: RepresentativeService,
-		private notify: NotificationService,
-		private wallet: WalletService,
-		private util: UtilService,
-		public settings: AppSettingsService,
-		private nanoBlock: NanoBlockService,
-		private qrModalSvc: QrModalService,
-		private ninja: NinjaService) {
+	constructor () {
+		const route = this.route;
+
 		// to detect when the account changes if the view is already active
 		route.events.subscribe((val) => {
 			if (val instanceof NavigationEnd) {
