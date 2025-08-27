@@ -81,7 +81,7 @@ bootstrapApplication(AppComponent, {
 		    prodMode: !isDevMode
 		  },
 		  loader: TranslocoHttpLoader
-    } 
-	]
+    })
+  ]  
 })
 	.catch(err => console.error(err))
