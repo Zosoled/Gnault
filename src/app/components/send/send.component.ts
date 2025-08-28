@@ -7,6 +7,7 @@ import { TranslocoService } from '@jsverse/transloco'
 import { Tools } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 import { BehaviorSubject } from 'rxjs'
+import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/helpers'
 import {
 	AmountSplitPipe,
 	CurrencySymbolPipe,
@@ -27,7 +28,6 @@ import {
 	WorkPoolService
 } from 'app/services'
 import { environment } from 'environments/environment'
-import { NanoAccountIdComponent, NanoIdenticonComponent } from '..'
 
 @Component({
 	selector: 'app-send',

@@ -11,7 +11,7 @@ import {
 	NotificationService,
 	WalletService
 } from 'app/services'
-import { NanoAccountIdComponent, NanoIdenticonComponent } from '..'
+import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/helpers'
 
 @Component({
 	selector: 'app-transaction-details',

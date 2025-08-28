@@ -6,7 +6,7 @@ import { Account, Tools, Wallet } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 import * as QRCode from 'qrcode'
 import { BehaviorSubject } from 'rxjs'
-import { NanoIdenticonComponent, NanoAccountIdComponent } from 'app/components'
+import { NanoIdenticonComponent, NanoAccountIdComponent } from 'app/components/helpers'
 import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AddressBookService,

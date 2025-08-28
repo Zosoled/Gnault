@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { ClipboardModule } from 'ngx-clipboard'
 import { map } from 'rxjs/operators'
-import { NanoAccountIdComponent } from 'app/components'
+import { NanoAccountIdComponent } from 'app/components/helpers'
 import {
 	ApiService,
 	ModalService,

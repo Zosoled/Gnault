@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router'
 import { TranslocoService, TranslocoPipe } from '@jsverse/transloco'
 import { Tools } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
-import { NanoAccountIdComponent } from 'app/components'
+import { NanoAccountIdComponent } from 'app/components/helpers'
 import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
 import {
 	ApiService,
