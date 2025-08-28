@@ -1,5 +1,6 @@
+import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
-import { NotificationService } from '../../services/notification.service'
+import { NotificationService } from '../../services'
 
 interface InstallEvent extends Event {
 	userChoice: Promise<{ outcome: 'accepted' | 'dismissed', platform: string }>
@@ -10,6 +11,9 @@ interface InstallEvent extends Event {
 	selector: 'app-install-widget',
 	templateUrl: './install-widget.component.html',
 	styleUrls: ['./install-widget.component.less'],
+	imports: [
+		CommonModule
+	]
 })
 
 export class InstallWidgetComponent implements OnInit {

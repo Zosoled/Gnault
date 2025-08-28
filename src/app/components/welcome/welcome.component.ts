@@ -1,7 +1,7 @@
+import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { TranslocoPipe } from '@jsverse/transloco'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { WalletService } from '../../services/wallet.service'
+import { AppSettingsService, WalletService } from '../../services'
 import { environment } from '../../../environments/environment'
 
 @Component({
@@ -9,6 +9,7 @@ import { environment } from '../../../environments/environment'
 	templateUrl: './welcome.component.html',
 	styleUrls: ['./welcome.component.css'],
 	imports: [
+		CommonModule,
 		TranslocoPipe
 	]
 })

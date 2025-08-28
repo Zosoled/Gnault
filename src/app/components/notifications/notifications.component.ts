@@ -1,10 +1,14 @@
+import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
-import { NotificationService } from '../../services/notification.service'
+import { NotificationService } from '../../services'
 
 @Component({
 	selector: 'app-notifications',
 	templateUrl: './notifications.component.html',
-	styleUrls: ['./notifications.component.css']
+	styleUrls: ['./notifications.component.css'],
+	imports: [
+		CommonModule
+	]
 })
 
 export class NotificationsComponent implements OnInit {
