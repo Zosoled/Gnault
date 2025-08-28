@@ -5,9 +5,17 @@ import { Router, RouterLink, RouterOutlet } from '@angular/router'
 import { SwUpdate } from '@angular/service-worker'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 
-import { InstallWidgetComponent } from './components/install-widget/install-widget.component'
-import { NotificationsComponent } from './components/notifications/notifications.component'
-import { WalletWidgetComponent } from './components/wallet-widget/wallet-widget.component'
+import {
+	InstallWidgetComponent,
+	NotificationsComponent,
+	WalletWidgetComponent
+} from './components'
+
+import {
+	AmountSplitPipe,
+	FiatPipe,
+	RaiPipe
+} from './pipes'
 
 import {
 	AddressBookService, AppSettingsService, DeeplinkService, DesktopService,
@@ -23,10 +31,13 @@ import { environment } from '../environments/environment'
 	templateUrl: './app.component.html',
 	styleUrls: ['./app.component.less'],
 	imports: [
+		AmountSplitPipe,
 		CommonModule,
+		FiatPipe,
 		InstallWidgetComponent,
 		FormsModule,
 		NotificationsComponent,
+		RaiPipe,
 		RouterLink,
 		RouterOutlet,
 		TranslocoPipe,
