@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
+import { RouterLink } from '@angular/router'
 import { TranslocoPipe } from '@jsverse/transloco'
 import { AppSettingsService, WalletService } from '../../services'
 import { environment } from '../../../environments/environment'
@@ -10,6 +11,7 @@ import { environment } from '../../../environments/environment'
 	styleUrls: ['./welcome.component.css'],
 	imports: [
 		CommonModule,
+		RouterLink,
 		TranslocoPipe
 	]
 })
