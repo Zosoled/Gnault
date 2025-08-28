@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { ManageRepresentativesComponent } from './manage-representatives.component'
+import { ManageRepresentativesComponent } from 'app/components'
 
 describe('ManageRepresentativesComponent', () => {
 	let component: ManageRepresentativesComponent

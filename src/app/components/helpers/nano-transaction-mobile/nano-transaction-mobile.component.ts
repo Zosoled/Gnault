@@ -1,9 +1,22 @@
+import { CommonModule } from '@angular/common'
 import { Component, Input, OnInit, OnChanges } from '@angular/core'
+import { TranslocoPipe } from '@jsverse/transloco'
+import { NanoAccountIdComponent } from '../nano-account-id/nano-account-id.component'
+import { NanoIdenticonComponent } from '../nano-identicon/nano-identicon.component'
+import { AmountSplitPipe, RaiPipe } from 'app/pipes'
 
 @Component({
 	selector: 'app-nano-transaction-mobile',
 	templateUrl: './nano-transaction-mobile.component.html',
-	styleUrls: ['./nano-transaction-mobile.component.less']
+	styleUrls: ['./nano-transaction-mobile.component.less'],
+	imports: [
+		AmountSplitPipe,
+		CommonModule,
+		NanoAccountIdComponent,
+		NanoIdenticonComponent,
+		RaiPipe,
+		TranslocoPipe
+	]
 })
 
 export class NanoTransactionMobileComponent implements OnInit, OnChanges {

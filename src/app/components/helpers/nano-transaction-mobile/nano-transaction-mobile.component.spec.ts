@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { NanoTransactionMobileComponent } from './nano-transaction-mobile.component'
+import { NanoTransactionMobileComponent } from 'app/components/helpers'
 
 describe('NanoTransactionMobileComponent', () => {
 	let component: NanoTransactionMobileComponent

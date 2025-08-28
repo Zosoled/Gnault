@@ -1,4 +1,4 @@
-import { CurrencySymbolPipe } from './currency-symbol.pipe'
+import { CurrencySymbolPipe } from 'app/pipes'
 
 describe('CurrencySymbolPipe', () => {
 	it('create an instance', () => {

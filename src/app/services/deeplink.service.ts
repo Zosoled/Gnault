@@ -1,9 +1,11 @@
 import { inject } from '@angular/core'
 import { Router } from '@angular/router'
-import { UtilService } from './util.service'
-import { NotificationService } from './notification.service'
-import { WalletService } from './wallet.service'
-import { RemoteSignService } from './remote-sign.service'
+import {
+	NotificationService,
+	RemoteSignService,
+	UtilService,
+	WalletService
+} from 'app/services'
 
 export class DeeplinkService {
 	private router = inject(Router)

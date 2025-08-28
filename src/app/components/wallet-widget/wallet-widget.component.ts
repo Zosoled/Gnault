@@ -3,11 +3,13 @@ import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { LedgerService } from '../../services/ledger.service'
-import { NotificationService } from '../../services/notification.service'
-import { PowService } from '../../services/pow.service'
-import { WalletService } from '../../services/wallet.service'
+import {
+	AppSettingsService,
+	LedgerService,
+	NotificationService,
+	PowService,
+	WalletService
+} from 'app/services'
 
 @Component({
 	selector: 'app-wallet-widget',

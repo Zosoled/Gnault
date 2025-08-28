@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { TransactionDetailsComponent } from './transaction-details.component'
+import { TransactionDetailsComponent } from 'app/components'
 
 describe('TransactionDetailsComponent', () => {
 	let component: TransactionDetailsComponent

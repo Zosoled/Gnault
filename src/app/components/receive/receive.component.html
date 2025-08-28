@@ -507,9 +507,9 @@
 									class="hint-action"
 									routerLink="/configure-app"
 									routerLinkActive="active"
-									*ngIf="( util.nano.mnanoToRaw(this.settings.settings.minimumReceive).toFixed().length > 24 ) else amountInRaw"
+									*ngIf="util.nano.mnanoToRaw(this.settings.settings.minimumReceive).length > 24 else amountInRaw"
 								>
-									{{ util.nano.mnanoToRaw(this.settings.settings.minimumReceive).toFixed() | rai: 'mnano,true' | amountsplit: 0 }}{{ util.nano.mnanoToRaw(this.settings.settings.minimumReceive).toFixed() | rai: 'mnano,false' | amountsplit: 1 }}
+									{{ util.nano.mnanoToRaw(this.settings.settings.minimumReceive) | rai: 'mnano,true' | amountsplit: 0 }}{{ util.nano.mnanoToRaw(this.settings.settings.minimumReceive) | rai: 'mnano,false' | amountsplit: 1 }}
 								</a>
 								<ng-template #amountInRaw>
 									<a
@@ -798,7 +798,7 @@
 							<span class="merchant-mode-currency-name merchant-mode-currency-margin">XNO</span>
 						</p>
 						<div
-							*ngIf="prompt.amountHiddenRaw.gt(0)"
+							*ngIf="prompt.amountHiddenRaw > 0n"
 							class="uk-text-small text-half-muted block-hash-monospace"
 							style="margin: -22px 0 28px 0;"
 						> +{{ prompt.amountHiddenRaw.toString(10) }} raw </div>
@@ -883,7 +883,7 @@
 					<span class="merchant-mode-currency-name merchant-mode-currency-margin">XNO</span>
 				</p>
 				<div
-					*ngIf="merchantModeRawReceivedTotalHiddenRaw.gt(0)"
+					*ngIf="merchantModeRawReceivedTotalHiddenRaw > 0n"
 					class="uk-text-small text-half-muted block-hash-monospace"
 					style="margin: -22px 0 28px 0;"
 				> +{{ merchantModeRawReceivedTotalHiddenRaw.toString(10) }} raw </div>

@@ -129,11 +129,13 @@
 							class="uk-margin-small-bottom"
 						>...</div>
 						<div *ngIf="account !== ''">
-							<div class="uk-margin-small-bottom"><app-nano-account-id
+							<div class="uk-margin-small-bottom">
+								<app-nano-account-id
 									[accountID]="account"
 									middle="auto"
 									class="nano-address-monospace"
-								></app-nano-account-id></div>
+								></app-nano-account-id>
+							</div>
 							<a
 								title="Copy Address"
 								ngxClipboard

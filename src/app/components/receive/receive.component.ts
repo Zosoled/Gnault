@@ -1,9 +1,23 @@
 import { CommonModule } from '@angular/common'
 import { Component, OnDestroy, OnInit, inject } from '@angular/core'
-import { ChildActivationEnd, Router } from '@angular/router'
-import { TranslocoService } from '@jsverse/transloco'
+import { FormsModule } from '@angular/forms'
+import { ChildActivationEnd, Router, RouterLink } from '@angular/router'
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import { Account, Tools } from 'libnemo'
+import { ClipboardModule } from 'ngx-clipboard'
 import * as QRCode from 'qrcode'
+import {
+	NanoAccountIdComponent,
+	NanoIdenticonComponent,
+	NanoTransactionMobileComponent
+} from 'app/components/helpers'
+import {
+	AmountSplitPipe,
+	CurrencySymbolPipe,
+	FiatPipe,
+	RaiPipe,
+	SqueezePipe
+} from 'app/pipes'
 import {
 	AddressBookService,
 	ApiService,
@@ -16,14 +30,26 @@ import {
 	WalletService,
 	WebsocketService,
 	WorkPoolService
-} from '../../services'
+} from 'app/services'
 
 @Component({
 	selector: 'app-receive',
 	templateUrl: './receive.component.html',
 	styleUrls: ['./receive.component.css'],
 	imports: [
-		CommonModule
+		AmountSplitPipe,
+		ClipboardModule,
+		CommonModule,
+		CurrencySymbolPipe,
+		FiatPipe,
+		FormsModule,
+		NanoAccountIdComponent,
+		NanoIdenticonComponent,
+		NanoTransactionMobileComponent,
+		RaiPipe,
+		RouterLink,
+		SqueezePipe,
+		TranslocoPipe
 	]
 })
 
@@ -39,7 +65,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	private nanoBlock = inject(NanoBlockService)
 	price = inject(PriceService)
 	private websocket = inject(WebsocketService)
-	private util = inject(UtilService)
+	util = inject(UtilService)
 	private translocoService = inject(TranslocoService)
 
 	nano = 1000000000000000000000000

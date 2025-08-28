@@ -1,10 +1,12 @@
 import { inject } from '@angular/core'
 import { NanoPow } from 'nano-pow'
 import { BehaviorSubject } from 'rxjs'
-import { AppSettingsService } from './app-settings.service'
-import { ApiService } from './api.service'
-import { NotificationService } from './notification.service'
-import { UtilService } from './util.service'
+import {
+	AppSettingsService,
+	ApiService,
+	NotificationService,
+	UtilService
+} from 'app/services'
 
 type DeferredPromise = {
 	promise: Promise<any>

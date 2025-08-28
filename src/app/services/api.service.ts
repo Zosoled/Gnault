@@ -1,8 +1,10 @@
 import { inject } from '@angular/core'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
-import { NodeService } from './node.service'
-import { AppSettingsService } from './app-settings.service'
-import { TxType } from './util.service'
+import {
+	AppSettingsService,
+	NodeService,
+	TxType
+} from 'app/services'
 
 export class ApiService {
 	private http = inject(HttpClient)

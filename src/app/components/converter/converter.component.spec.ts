@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { ConverterComponent } from './converter.component'
+import { ConverterComponent } from 'app/components'
 
 describe('ConverterComponent', () => {
 	let component: ConverterComponent

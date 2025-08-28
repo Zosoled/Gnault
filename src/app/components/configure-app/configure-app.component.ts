@@ -1,25 +1,36 @@
-import { Component, OnInit, Renderer2, inject } from '@angular/core'
+
+import { CommonModule } from '@angular/common'
+import { Component, NgModule, OnInit, Renderer2, inject } from '@angular/core'
+import { FormsModule } from '@angular/forms'
 import { BehaviorSubject } from 'rxjs'
-import { TranslocoService } from '@jsverse/transloco'
-import { WalletService } from '../../services/wallet.service'
-import { NotificationService } from '../../services/notification.service'
-import { AppSettingsService, PoWSource } from '../../services/app-settings.service'
-import { PriceService } from '../../services/price.service'
-import { PowService } from '../../services/pow.service'
-import { WorkPoolService } from '../../services/work-pool.service'
-import { AddressBookService } from '../../services/address-book.service'
-import { ApiService } from '../../services/api.service'
-import { WebsocketService } from '../../services/websocket.service'
-import { NodeService } from '../../services/node.service'
-import { UtilService } from '../../services/util.service'
-import { RepresentativeService } from '../../services/representative.service'
-import { NinjaService } from '../../services/ninja.service'
-import { QrModalService } from '../../services/qr-modal.service'
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import {
+	AddressBookService,
+	ApiService,
+	AppSettingsService,
+	NinjaService,
+	NodeService,
+	NotificationService,
+	PowService,
+	PoWSource,
+	PriceService,
+	QrModalService,
+	RepresentativeService,
+	UtilService,
+	WalletService,
+	WebsocketService,
+	WorkPoolService
+} from 'app/services'
 
 @Component({
 	selector: 'app-configure-app',
 	templateUrl: './configure-app.component.html',
-	styleUrls: ['./configure-app.component.css']
+	styleUrls: ['./configure-app.component.css'],
+	imports: [
+		CommonModule,
+		FormsModule,
+		TranslocoPipe
+	]
 })
 
 export class ConfigureAppComponent implements OnInit {

@@ -1,15 +1,17 @@
 import { inject } from '@angular/core'
 import { Account, Tools, Wallet, WalletType } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
-import { AddressBookService } from './address-book.service'
-import { ApiService } from './api.service'
-import { AppSettingsService } from './app-settings.service'
-import { NanoBlockService } from './nano-block.service'
-import { NotificationService } from './notification.service'
-import { PriceService } from './price.service'
-import { UtilService } from './util.service'
-import { WebsocketService } from './websocket.service'
-import { WorkPoolService } from './work-pool.service'
+import {
+	AddressBookService,
+	ApiService,
+	AppSettingsService,
+	NanoBlockService,
+	NotificationService,
+	PriceService,
+	UtilService,
+	WebsocketService,
+	WorkPoolService
+} from 'app/services'
 
 export type WalletKeyType = 'seed' | 'ledger' | 'privateKey' | 'expandedKey'
 

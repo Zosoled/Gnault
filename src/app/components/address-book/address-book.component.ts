@@ -1,17 +1,24 @@
+import { UpperCasePipe } from '@angular/common'
 import { AfterViewInit, Component, OnInit, OnDestroy, inject } from '@angular/core'
-import { Router } from '@angular/router'
-import { TranslocoService } from '@jsverse/transloco'
+import { FormsModule } from '@angular/forms'
+import { Router, RouterLink } from '@angular/router'
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import { Tools } from 'libnemo'
+import { ClipboardModule } from 'ngx-clipboard'
 import * as QRCode from 'qrcode'
-import { AddressBookService } from '../../services/address-book.service'
-import { WalletService } from '../../services/wallet.service'
-import { NotificationService } from '../../services/notification.service'
-import { ModalService } from '../../services/modal.service'
-import { UtilService } from '../../services/util.service'
-import { QrModalService } from '../../services/qr-modal.service'
-import { ApiService } from '../../services/api.service'
-import { PriceService } from '../../services/price.service'
-import { AppSettingsService } from '../../services/app-settings.service'
+import { NanoAccountIdComponent } from 'app/components/helpers'
+import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
+import {
+	AddressBookService,
+	ApiService,
+	AppSettingsService,
+	ModalService,
+	NotificationService,
+	PriceService,
+	QrModalService,
+	UtilService,
+	WalletService
+} from 'app/services'
 
 export interface BalanceAccount {
 	balance: bigint
@@ -22,7 +29,18 @@ export interface BalanceAccount {
 @Component({
 	selector: 'app-address-book',
 	templateUrl: './address-book.component.html',
-	styleUrls: ['./address-book.component.css']
+	styleUrls: ['./address-book.component.css'],
+	imports: [
+		AmountSplitPipe,
+		ClipboardModule,
+		FiatPipe,
+		FormsModule,
+		NanoAccountIdComponent,
+		RaiPipe,
+		RouterLink,
+		TranslocoPipe,
+		UpperCasePipe
+	]
 })
 
 export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -62,6 +80,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	fiatPrice = 0
 	priceSub = null
 	refreshSub = null
+	showAdvancedOptions = false
 	statsRefreshEnabled = true
 	timeoutIdAllowingRefresh: any = null
 	loadingBalances = false

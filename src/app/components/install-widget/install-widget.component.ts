@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
-import { NotificationService } from '../../services'
+import { NotificationService } from 'app/services'
 
 interface InstallEvent extends Event {
 	userChoice: Promise<{ outcome: 'accepted' | 'dismissed', platform: string }>

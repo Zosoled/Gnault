@@ -1,4 +1,4 @@
-import { RaiPipe } from './rai.pipe'
+import { RaiPipe } from 'app/pipes'
 
 describe('RaiPipe', () => {
 	it('create an instance', () => {

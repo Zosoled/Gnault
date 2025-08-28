@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { RemoteSigningComponent } from './remote-signing.component'
+import { RemoteSigningComponent } from 'app/components'
 
 describe('RemoteSigningComponent', () => {
 	let component: RemoteSigningComponent

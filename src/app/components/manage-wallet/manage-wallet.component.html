@@ -20,8 +20,8 @@
 							class="uk-input form-control"
 							[(ngModel)]="newPassword"
 							placeholder="New Password"
-							(input)="validatePassword=false;"
-							(focusout)="validatePassword=true;"
+							(input)="validateNewPassword=false;"
+							(focusout)="validateNewPassword=true;"
 						>
 						<span
 							class="password-helper"
@@ -80,7 +80,7 @@
 				<p *ngIf="!wallet.locked && wallet.type === 'seed'"> To backup your wallet's secret recovery seed, <a
 						[title]="( 'configure-wallet.new-wallet.copy-secret-recovery-seed' | transloco )"
 						ngxClipboard
-						[cbContent]="wallet.seed"
+						[cbContent]="wallet.wallet.seed"
 						(cbOnSuccess)="notifications.sendSuccess('Wallet seed copied to clipboard!')"
 						uk-tooltip
 					>click here</a> to copy it to your clipboard.<br>
@@ -88,7 +88,7 @@
 				<p *ngIf="!wallet.locked && (wallet.type === 'privateKey' || wallet.type === 'expandedKey')"> To backup your wallet account's private key, <a
 						title="Copy Private Key"
 						ngxClipboard
-						[cbContent]="wallet.seed"
+						[cbContent]="wallet.wallet.seed"
 						(cbOnSuccess)="notifications.sendSuccess('Private Key copied to clipboard!')"
 						uk-tooltip
 					>click here</a> to copy it to your clipboard.<br>

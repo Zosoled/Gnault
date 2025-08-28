@@ -1,15 +1,16 @@
+import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { BarcodeFormat } from '@zxing/library'
 import { ZXingScannerModule } from '@zxing/ngx-scanner'
 import { BehaviorSubject } from 'rxjs'
-import { NotificationService } from '../../services'
-import { DeeplinkService } from '../../services/deeplink.service'
+import { DeeplinkService, NotificationService } from 'app/services'
 
 @Component({
 	selector: 'app-qr-scan',
 	templateUrl: './qr-scan.component.html',
 	styleUrls: ['./qr-scan.component.css'],
 	imports: [
+		CommonModule,
 		ZXingScannerModule
 	]
 })
@@ -17,8 +18,8 @@ import { DeeplinkService } from '../../services/deeplink.service'
 export class QrScanComponent implements OnInit {
 	[key: string]: any
 
-	private deeplinkService = inject(DeeplinkService)
-	private notificationService = inject(NotificationService);
+	private svcDeeplink = inject(DeeplinkService)
+	private svcNotification = inject(NotificationService);
 
 	availableDevices: MediaDeviceInfo[]
 	currentDevice: MediaDeviceInfo = null
@@ -52,14 +53,14 @@ export class QrScanComponent implements OnInit {
 
 	onCodeResult (resultString: string) {
 		this.qrResultString = resultString
-
-		if (!this.deeplinkService.navigate(resultString)) {
-			this.notificationService.sendWarning('This QR code is not recognized.', { length: 5000, identifier: 'qr-not-recognized' })
+		if (!this.svcDeeplink.navigate(resultString)) {
+			this.svcNotification.sendWarning('This QR code is not recognized.', { length: 5000, identifier: 'qr-not-recognized' })
 		}
 	}
 
-	onDeviceSelectChange (selected: string) {
-		const device = this.availableDevices.find(x => x.deviceId === selected)
+	onDeviceSelectChange (target: EventTarget) {
+		const { value } = target as HTMLSelectElement
+		const device = this.availableDevices.find(x => x.deviceId === value)
 		this.currentDevice = device || null
 	}
 

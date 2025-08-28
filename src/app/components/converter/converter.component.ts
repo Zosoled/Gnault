@@ -1,12 +1,14 @@
 import { CommonModule } from '@angular/common'
 import { Component, OnInit, OnDestroy, inject } from '@angular/core'
-import { Tools } from 'libnemo'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { NotificationService } from '../../services/notification.service'
-import { PriceService } from '../../services/price.service'
-import { UtilService } from '../../services/util.service'
 import { FormsModule } from '@angular/forms'
+import { Tools } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
+import {
+	AppSettingsService,
+	NotificationService,
+	PriceService,
+	UtilService
+} from 'app/services'
 
 @Component({
 	selector: 'app-converter',

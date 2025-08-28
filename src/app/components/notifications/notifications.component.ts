@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
-import { NotificationService } from '../../services'
+import { NotificationService } from 'app/services'
 
 @Component({
 	selector: 'app-notifications',
@@ -61,7 +61,7 @@ export class NotificationsComponent implements OnInit {
 		})
 	}
 
-	private removeNotification (notification) {
+	removeNotification (notification) {
 		const existingNotification = this.notifications.findIndex(n => n === notification)
 		if (existingNotification !== -1) {
 			this.notifications.splice(existingNotification, 1)

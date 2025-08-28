@@ -210,7 +210,7 @@
 									<select
 										class="uk-select"
 										[(ngModel)]="changeAccountID"
-										(change)="newAccountID()"
+										(change)="newAccountID($event.target)"
 										id="form-horizontal-select"
 									>
 										<option [value]="null">Select Accounts to Change</option>

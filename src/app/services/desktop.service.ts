@@ -1,6 +1,6 @@
 import { inject } from '@angular/core'
 import { IpcRenderer } from 'electron'
-import { NotificationService } from './notification.service'
+import { NotificationService } from 'app/services'
 
 export class DesktopService {
 	private notifications = inject(NotificationService)

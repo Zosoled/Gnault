@@ -4,27 +4,33 @@ import { FormsModule } from '@angular/forms'
 import { Router, RouterLink, RouterOutlet } from '@angular/router'
 import { SwUpdate } from '@angular/service-worker'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
-
 import {
+	ChangeRepWidgetComponent,
 	InstallWidgetComponent,
 	NotificationsComponent,
 	WalletWidgetComponent
-} from './components'
-
+} from 'app/components'
 import {
 	AmountSplitPipe,
 	FiatPipe,
 	RaiPipe
-} from './pipes'
-
+} from 'app/pipes'
 import {
-	AddressBookService, AppSettingsService, DeeplinkService, DesktopService,
-	LedgerService, NodeService, NotificationService, PriceService,
-	RepresentativeService, UtilService, WalletService, WebsocketService,
+	AddressBookService,
+	AppSettingsService,
+	DeeplinkService,
+	DesktopService,
+	LedgerService,
+	NodeService,
+	NotificationService,
+	PriceService,
+	RepresentativeService,
+	UtilService,
+	WalletService,
+	WebsocketService,
 	WorkPoolService
-} from './services'
-
-import { environment } from '../environments/environment'
+} from 'app/services'
+import { environment } from 'environments/environment'
 
 @Component({
 	selector: 'app-root',
@@ -32,6 +38,7 @@ import { environment } from '../environments/environment'
 	styleUrls: ['./app.component.less'],
 	imports: [
 		AmountSplitPipe,
+		ChangeRepWidgetComponent,
 		CommonModule,
 		FiatPipe,
 		InstallWidgetComponent,

@@ -1,14 +1,12 @@
 import { Injectable } from '@angular/core'
 import { BehaviorSubject } from 'rxjs'
 
-
 interface AddressBookEntry {
 	account: string
 	name: string
 	trackBalance: boolean
 	trackTransactions: boolean
 }
-
 
 @Injectable()
 export class AddressBookService {

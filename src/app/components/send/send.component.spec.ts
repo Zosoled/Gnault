@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { SendComponent } from './send.component'
+import { SendComponent } from 'app/components'
 
 describe('SendComponent', () => {
 	let component: SendComponent

@@ -4,8 +4,7 @@ import { BarcodeFormat } from '@zxing/library'
 import { ZXingScannerModule } from '@zxing/ngx-scanner'
 import { Wallet } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
-import { NotificationService } from '../../services/notification.service'
-import { UtilService } from '../../services/util.service'
+import { NotificationService, UtilService } from 'app/services'
 
 export type QRType = 'account' | 'hash' | 'mnemonic' | 'generic'
 
@@ -97,8 +96,9 @@ export class QrModalComponent implements OnInit {
 		}
 	}
 
-	onDeviceSelectChange (selected: string) {
-		const device = this.availableDevices.find(x => x.deviceId === selected)
+	onDeviceSelectChange (target: EventTarget) {
+		const { value } = (target as HTMLSelectElement)
+		const device = this.availableDevices.find(x => x.deviceId === value)
 		this.currentDevice = device || null
 	}
 

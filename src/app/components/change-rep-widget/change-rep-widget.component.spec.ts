@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { ChangeRepWidgetComponent } from './change-rep-widget.component'
+import { ChangeRepWidgetComponent } from 'app/components'
 
 describe('ChangeRepWidgetComponent', () => {
 	let component: ChangeRepWidgetComponent

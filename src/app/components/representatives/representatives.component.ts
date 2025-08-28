@@ -1,25 +1,38 @@
+import { CommonModule } from '@angular/common'
 import { Component, OnInit, ViewChild, inject } from '@angular/core'
+import { FormsModule } from '@angular/forms'
 import { ActivatedRoute } from '@angular/router'
-import { TranslocoService } from '@jsverse/transloco'
+import { TranslocoService, TranslocoPipe } from '@jsverse/transloco'
+import { Tools } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
-import { QrModalService } from '../../services/qr-modal.service'
+import { NanoAccountIdComponent } from 'app/components'
+import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
 import {
 	ApiService,
 	AppSettingsService,
 	FullRepresentativeOverview,
 	NanoBlockService,
+	NinjaService,
 	NotificationService,
+	QrModalService,
 	RepresentativeService,
 	UtilService,
-	WalletService,
-	NinjaService
-} from '../../services'
-import { Tools } from 'libnemo'
+	WalletService
+} from 'app/services'
 
 @Component({
 	selector: 'app-representatives',
 	templateUrl: './representatives.component.html',
-	styleUrls: ['./representatives.component.css']
+	styleUrls: ['./representatives.component.css'],
+	imports: [
+		AmountSplitPipe,
+		CommonModule,
+		FormsModule,
+		NanoAccountIdComponent,
+		RaiPipe,
+		SqueezePipe,
+		TranslocoPipe
+	]
 })
 
 export class RepresentativesComponent implements OnInit {
@@ -148,6 +161,9 @@ export class RepresentativesComponent implements OnInit {
 	}
 
 	newAccountID (accountID) {
+		if (accountID instanceof HTMLSelectElement) {
+			accountID = accountID.value
+		}
 		const newAccount = accountID || this.changeAccountID
 		if (!newAccount) {
 			return // Didn't select anything

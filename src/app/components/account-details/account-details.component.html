@@ -48,7 +48,7 @@
 								</div>
 								<div
 									class="amount-updating"
-									*ngIf="wallet.updatingBalance && isConfigured()"
+									*ngIf="wallet.wallet.updatingBalance && wallet.isConfigured()"
 								>
 									<div uk-spinner="ratio: 0.5;"></div>
 								</div>
@@ -240,7 +240,7 @@
 										<div
 											class="uk-text-small text-half-muted"
 											style="margin-right: 15px"
-											*ngIf="!repVotingWeight.isZero()"
+											*ngIf="repVotingWeight"
 										>{{ repVotingWeight.toFixed(2) }}%</div>
 										<ul class="uk-iconnav">
 											<li *ngIf="repDonationAddress">
@@ -358,7 +358,7 @@
 						<div>
 							<div>{{ 'account-details.confirmed-blocks' | transloco }}:</div>
 							<div>
-								{{ account.confirmation_height | translocoDecimal }} / {{ account.block_count | translocoDecimal }}
+								{{ account.confirmation_height | number }} / {{ account.block_count | number }}
 							</div>
 							<div class="uk-text-small text-half-muted">
 								{{ ( (account.confirmation_height / account.block_count) * 100 ) | number:'1.0-2' }}%
@@ -1051,7 +1051,7 @@
 										>
 									</div>
 									<div
-										*ngIf="amountRaw.gt(0)"
+										*ngIf="amountRaw > 0n"
 										class="uk-width-1-1 uk-width-3-5@m uk-text-small uk-text-muted uk-margin-remove"
 									>
 										<span

@@ -1,13 +1,20 @@
 import { Component, OnInit, inject } from '@angular/core'
+import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
-import { NotificationService } from '../../services/notification.service'
-import { UtilService } from '../../services/util.service'
-import { WalletService, WalletKeyType } from '../../services/wallet.service'
+import {
+	NotificationService,
+	UtilService,
+	WalletService,
+	WalletKeyType
+} from 'app/services'
 
 @Component({
 	selector: 'app-import-wallet',
 	templateUrl: './import-wallet.component.html',
-	styleUrls: ['./import-wallet.component.css']
+	styleUrls: ['./import-wallet.component.css'],
+	imports: [
+		FormsModule
+	]
 })
 
 export class ImportWalletComponent implements OnInit {

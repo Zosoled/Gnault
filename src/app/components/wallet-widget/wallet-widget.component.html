@@ -104,7 +104,7 @@
 	</div>
 </ng-container>
 <a
-	routerLink="/configure-wallet"
+	[routerLink]="['/configure-wallet']"
 	class="nav-status-row interactable"
 	*ngIf="!walletService.isConfigured()"
 >

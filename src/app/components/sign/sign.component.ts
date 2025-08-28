@@ -1,21 +1,29 @@
 import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
-import { ActivatedRoute, Router } from '@angular/router'
+import { FormsModule } from '@angular/forms'
+import { ActivatedRoute, Router, RouterLink } from '@angular/router'
 import hermes from 'hermes-channel'
 import { Account, Tools, Wallet } from 'libnemo'
+import { ClipboardModule } from 'ngx-clipboard'
 import * as QRCode from 'qrcode'
 import { BehaviorSubject } from 'rxjs'
-import { AddressBookService } from '../../services/address-book.service'
-import { WalletService } from '../../services/wallet.service'
-import { NotificationService } from '../../services/notification.service'
-import { UtilService, StateBlock, TxType } from '../../services/util.service'
-import { WorkPoolService } from '../../services/work-pool.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { NanoBlockService } from '../../services/nano-block.service'
-import { ApiService } from '../../services/api.service'
-import { PriceService } from '../../services/price.service'
-import { QrModalService } from '../../services/qr-modal.service'
-import { MusigService } from '../../services/musig.service'
-import { environment } from '../../../environments/environment'
+import { NanoIdenticonComponent, NanoAccountIdComponent } from 'app/components'
+import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
+import {
+	AddressBookService,
+	ApiService,
+	AppSettingsService,
+	MusigService,
+	NanoBlockService,
+	NotificationService,
+	PriceService,
+	QrModalService,
+	StateBlock,
+	TxType,
+	UtilService,
+	WalletService,
+	WorkPoolService
+} from 'app/services'
+import { environment } from 'environments/environment'
 
 const INDEX_MAX = 4294967295
 // navigation source for cancel command (excluding camera source because too complicated to fix)
@@ -24,7 +32,17 @@ enum navSource { 'remote', 'multisig' }
 @Component({
 	selector: 'app-sign',
 	templateUrl: './sign.component.html',
-	styleUrls: ['./sign.component.css']
+	styleUrls: ['./sign.component.css'],
+	imports: [
+		AmountSplitPipe,
+		ClipboardModule,
+		FiatPipe,
+		FormsModule,
+		NanoAccountIdComponent,
+		NanoIdenticonComponent,
+		RaiPipe,
+		RouterLink
+	]
 })
 
 export class SignComponent implements OnInit {

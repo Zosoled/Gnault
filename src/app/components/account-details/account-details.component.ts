@@ -1,11 +1,23 @@
-import { formatDate } from '@angular/common'
+import { CommonModule, DecimalPipe, formatDate } from '@angular/common'
 import { Component, OnDestroy, OnInit, inject } from '@angular/core'
+import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, ChildActivationEnd, NavigationEnd, Router, RouterLink } from '@angular/router'
 import { translate, TranslocoPipe } from '@jsverse/transloco'
 import { Account, Block, Tools } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 import * as QRCode from 'qrcode'
 import { BehaviorSubject } from 'rxjs'
+import {
+	NanoAccountIdComponent,
+	NanoIdenticonComponent,
+	NanoTransactionMobileComponent
+} from 'app/components/helpers'
+import {
+	AmountSplitPipe,
+	CurrencySymbolPipe,
+	FiatPipe,
+	RaiPipe
+} from 'app/pipes'
 import {
 	AddressBookService,
 	ApiService,
@@ -18,18 +30,24 @@ import {
 	RepresentativeService,
 	UtilService,
 	WalletService
-} from '../../services'
-import { NanoAccountIdComponent } from '../helpers/nano-account-id/nano-account-id.component'
-import { FormsModule } from '@angular/forms'
+} from 'app/services'
 
 @Component({
 	selector: 'app-account-details',
 	templateUrl: './account-details.component.html',
 	styleUrls: ['./account-details.component.css'],
 	imports: [
+		AmountSplitPipe,
 		ClipboardModule,
+		CommonModule,
+		CurrencySymbolPipe,
+		DecimalPipe,
+		FiatPipe,
 		FormsModule,
 		NanoAccountIdComponent,
+		NanoIdenticonComponent,
+		NanoTransactionMobileComponent,
+		RaiPipe,
 		RouterLink,
 		TranslocoPipe
 	]
@@ -39,16 +57,16 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	private route = inject(Router)
 	private addressBook = inject(AddressBookService)
 	private api = inject(ApiService)
-	private price = inject(PriceService)
 	private repSvc = inject(RepresentativeService)
 	private notify = inject(NotificationService)
-	private wallet = inject(WalletService)
-	private util = inject(UtilService)
-	settings = inject(AppSettingsService)
 	private nanoBlock = inject(NanoBlockService)
 	private qrModalSvc = inject(QrModalService)
 	private ninja = inject(NinjaService)
-	nano = 1000000000000000000000000n
+
+	price = inject(PriceService)
+	settings = inject(AppSettingsService)
+	util = inject(UtilService)
+	wallet = inject(WalletService)
 	zeroHash = '0000000000000000000000000000000000000000000000000000000000000000'
 
 	accountHistory: any[] = []
@@ -57,7 +75,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	maxPageSize = 200
 
 	repLabel: any = ''
-	repVotingWeight: bigint
+	repVotingWeight: any = ''
 	repDonationAddress: any = ''
 
 	addressBookEntry: any = null
@@ -251,30 +269,21 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		if (!this.account) {
 			return
 		}
-
-		const representativeFromOverview =
-			this.representativesOverview.find(
-				(rep) =>
-					(rep.account === this.account.representative)
-			)
-
+		const representativeFromOverview = this.representativesOverview
+			.find(rep => rep.account === this.account.representative)
 		if (representativeFromOverview != null) {
 			this.repLabel = representativeFromOverview.label
 			this.repVotingWeight = representativeFromOverview.percent
 			this.repDonationAddress = representativeFromOverview.donationAddress
 			return
 		}
-
 		this.repVotingWeight = 0n
 		this.repDonationAddress = null
-
 		const knownRepresentative = this.repSvc.getRepresentative(this.account.representative)
-
 		if (knownRepresentative != null) {
 			this.repLabel = knownRepresentative.name
 			return
 		}
-
 		this.repLabel = null
 	}
 

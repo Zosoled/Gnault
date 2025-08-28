@@ -1,19 +1,31 @@
+import { DatePipe, DecimalPipe } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
-import { ActivatedRoute, ChildActivationEnd, Router } from '@angular/router'
+import { ActivatedRoute, ChildActivationEnd, Router, RouterLink } from '@angular/router'
 import { TranslocoService } from '@jsverse/transloco'
 import { ClipboardModule } from 'ngx-clipboard'
-import { AddressBookService } from '../../services/address-book.service'
-import { ApiService } from '../../services/api.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { NotificationService } from '../../services/notification.service'
-import { WalletService } from '../../services/wallet.service'
+import { AmountSplitPipe, RaiPipe } from 'app/pipes'
+import {
+	AddressBookService,
+	ApiService,
+	AppSettingsService,
+	NotificationService,
+	WalletService
+} from 'app/services'
+import { NanoAccountIdComponent, NanoIdenticonComponent } from '..'
 
 @Component({
 	selector: 'app-transaction-details',
 	templateUrl: './transaction-details.component.html',
 	styleUrls: ['./transaction-details.component.css'],
 	imports: [
-		ClipboardModule
+		AmountSplitPipe,
+		ClipboardModule,
+		DatePipe,
+		DecimalPipe,
+		NanoAccountIdComponent,
+		NanoIdenticonComponent,
+		RaiPipe,
+		RouterLink
 	]
 })
 

@@ -1,6 +1,5 @@
 import { TestBed, inject } from '@angular/core/testing'
-
-import { AddressBookService } from './address-book.service'
+import { AddressBookService } from 'app/services'
 
 describe('AddressBookService', () => {
 	beforeEach(() => {

@@ -2,14 +2,18 @@ import { Component, OnInit, ElementRef, ViewChild, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
 import { Account, Block, Tools, Wallet } from 'libnemo'
-import { ApiService } from '../../services/api.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { ModalService } from '../../services/modal.service'
-import { NanoBlockService } from '../../services/nano-block.service'
-import { NotificationService } from '../../services/notification.service'
-import { UtilService, TxType } from '../../services/util.service'
-import { WalletService } from '../../services/wallet.service'
-import { WorkPoolService } from '../../services/work-pool.service'
+import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
+import {
+	ApiService,
+	AppSettingsService,
+	ModalService,
+	NanoBlockService,
+	NotificationService,
+	TxType,
+	UtilService,
+	WalletService,
+	WorkPoolService
+} from 'app/services'
 
 const INDEX_MAX = 4294967295 // seed index
 const SWEEP_MAX_INDEX = 100 // max index keys to sweep
@@ -20,7 +24,10 @@ const SWEEP_MAX_RECEIVABLE = 100 // max receivable blocks to process per run
 	templateUrl: './sweeper.component.html',
 	styleUrls: ['./sweeper.component.css'],
 	imports: [
-		FormsModule
+		AmountSplitPipe,
+		FormsModule,
+		RaiPipe,
+		SqueezePipe
 	]
 })
 

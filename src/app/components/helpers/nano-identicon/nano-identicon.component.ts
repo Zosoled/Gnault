@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, HostBinding, ViewChild } from '@angular/core'
-import { createIcon } from '../../../../assets/lib/nanoidenticons.min.js'
+import { createIcon } from 'app/../assets/lib/nanoidenticons.min.js'
 
 @Component({
 	selector: 'app-nano-identicon',
@@ -9,7 +9,7 @@ import { createIcon } from '../../../../assets/lib/nanoidenticons.min.js'
 
 export class NanoIdenticonComponent implements OnChanges, AfterViewInit {
 	@Input() accountID: string
-	@Input() scale: number
+	@Input() scale: string
 	@Input() settingIdenticonsStyle: string
 	@ViewChild('canvasContainer') canvasContainer: ElementRef
 
@@ -32,11 +32,7 @@ export class NanoIdenticonComponent implements OnChanges, AfterViewInit {
 			return
 		}
 		this.renderedIdenticon = this.accountID
-		const scale =
-			Math.max(
-				Math.ceil(this.scale * window.devicePixelRatio),
-				this.scale
-			)
+		const scale = parseInt(this.scale) * Math.max(1, window.devicePixelRatio)
 		const canvas = createIcon({
 			seed: this.accountID,
 			scale,

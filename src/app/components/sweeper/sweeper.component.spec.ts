@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { SweeperComponent } from './sweeper.component'
+import { SweeperComponent } from 'app/components'
 
 describe('SweeperComponent', () => {
 	let component: SweeperComponent

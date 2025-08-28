@@ -1,11 +1,19 @@
+import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
+import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
-import { TranslocoService } from '@jsverse/transloco'
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import { Wallet } from 'libnemo'
-import { WalletService, NotificationService, RepresentativeService } from '../../services'
-import { LedgerService, LedgerStatus } from '../../services/ledger.service'
-import { QrModalService } from '../../services/qr-modal.service'
-import { UtilService } from '../../services/util.service'
+import { ClipboardModule } from 'ngx-clipboard'
+import {
+	LedgerService,
+	LedgerStatus,
+	NotificationService,
+	QrModalService,
+	RepresentativeService,
+	UtilService,
+	WalletService
+} from 'app/services'
 
 enum panels {
 	'landing',
@@ -22,18 +30,24 @@ const INDEX_MAX = 4294967295
 @Component({
 	selector: 'app-configure-wallet',
 	templateUrl: './configure-wallet.component.html',
-	styleUrls: ['./configure-wallet.component.css']
+	styleUrls: ['./configure-wallet.component.css'],
+	imports: [
+		ClipboardModule,
+		CommonModule,
+		FormsModule,
+		TranslocoPipe
+	]
 })
 
 export class ConfigureWalletComponent implements OnInit {
 	private router = inject(ActivatedRoute)
-	walletService = inject(WalletService)
 	private notifications = inject(NotificationService)
 	private route = inject(Router)
 	private qrModalService = inject(QrModalService)
-	private ledgerService = inject(LedgerService)
 	private util = inject(UtilService)
 	private translocoService = inject(TranslocoService)
+	ledgerService = inject(LedgerService)
+	walletService = inject(WalletService)
 
 	panels = panels
 	activePanel = panels.landing

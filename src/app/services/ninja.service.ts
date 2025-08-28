@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http'
 import { inject } from '@angular/core'
-import { NotificationService } from './notification.service'
-import { UtilService } from './util.service'
+import { NotificationService, UtilService } from 'app/services'
 
 export class NinjaService {
 	private http = inject(HttpClient)

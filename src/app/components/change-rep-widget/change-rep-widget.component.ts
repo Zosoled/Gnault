@@ -1,13 +1,17 @@
+import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { Router } from '@angular/router'
-import { WalletService } from '../../services/wallet.service'
-import { NanoBlockService } from '../../services/nano-block.service'
-import { RepresentativeService } from '../../services/representative.service'
+import { TranslocoPipe } from '@jsverse/transloco'
+import { NanoBlockService, RepresentativeService, WalletService } from 'app/services'
 
 @Component({
 	selector: 'app-change-rep-widget',
 	templateUrl: './change-rep-widget.component.html',
-	styleUrls: ['./change-rep-widget.component.css']
+	styleUrls: ['./change-rep-widget.component.css'],
+	imports: [
+		CommonModule,
+		TranslocoPipe
+	]
 })
 
 export class ChangeRepWidgetComponent implements OnInit {
@@ -16,14 +20,13 @@ export class ChangeRepWidgetComponent implements OnInit {
 	private repService = inject(RepresentativeService)
 	private router = inject(Router)
 
-
 	changeableRepresentatives = this.repService.changeableReps
 	displayedRepresentatives = []
 	representatives = []
 	showRepChangeRequired = false
 	showRepHelp = false
 	selectedAccount = null
-	selectedAccountHasRep = false
+	selectedAccountHasRepresentative = false
 	initialLoadComplete = false
 
 	async ngOnInit () {
@@ -114,11 +117,11 @@ export class ChangeRepWidgetComponent implements OnInit {
 	updateSelectedAccountHasRep () {
 		if (this.selectedAccount !== null) {
 			if (this.selectedAccount !== null) {
-				this.selectedAccountHasRep = !!this.selectedAccount.frontier
+				this.selectedAccountHasRepresentative = !!this.selectedAccount.frontier
 				return
 			}
 			const accounts = this.walletService.wallet.accounts
-			this.selectedAccountHasRep = accounts.some(a => a.frontier)
+			this.selectedAccountHasRepresentative = accounts.some(a => a.frontier)
 		}
 	}
 

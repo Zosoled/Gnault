@@ -6,11 +6,13 @@ import Transport from '@ledgerhq/hw-transport'
 import Nano from 'hw-app-nano'
 import { Wallet } from 'libnemo'
 import { Subject } from 'rxjs'
-import { ApiService } from './api.service'
-import { AppSettingsService } from './app-settings.service'
-import { DesktopService } from './desktop.service'
-import { NotificationService } from './notification.service'
-import { environment } from '../../environments/environment'
+import {
+	ApiService,
+	AppSettingsService,
+	DesktopService,
+	NotificationService
+} from 'app/services'
+import { environment } from 'environments/environment'
 
 export const STATUS_CODES = {
 	SECURITY_STATUS_NOT_SATISFIED: 0x6982,

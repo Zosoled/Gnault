@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { ImportAddressBookComponent } from './import-address-book.component'
+import { ImportAddressBookComponent } from 'app/components'
 
 describe('ImportAddressBookComponent', () => {
 	let component: ImportAddressBookComponent

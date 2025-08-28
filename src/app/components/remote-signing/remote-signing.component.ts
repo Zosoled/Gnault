@@ -1,13 +1,15 @@
+import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
 import { BehaviorSubject } from 'rxjs'
-import { AddressBookService } from '../../services/address-book.service'
-import { NotificationService } from '../../services/notification.service'
-import { QrModalService } from '../../services/qr-modal.service'
-import { RemoteSignService } from '../../services/remote-sign.service'
-import { UtilService } from '../../services/util.service'
-import { CommonModule } from '@angular/common'
+import {
+	AddressBookService,
+	NotificationService,
+	QrModalService,
+	RemoteSignService,
+	UtilService
+} from 'app/services'
 
 @Component({
 	selector: 'app-send',

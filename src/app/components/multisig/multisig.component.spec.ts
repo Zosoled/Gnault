@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { MultisigComponent } from './multisig.component'
+import { MultisigComponent } from 'app/components'
 
 describe('MultisigComponent', () => {
 	let component: MultisigComponent

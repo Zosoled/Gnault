@@ -1,13 +1,17 @@
 import { Component, OnInit, inject } from '@angular/core'
 import { TranslocoPipe } from '@jsverse/transloco'
 import { Wallet } from 'libnemo'
-import { NotificationService } from '../../services/notification.service'
+import { ClipboardModule } from 'ngx-clipboard'
+import { NanoAccountIdComponent } from 'app/components'
+import { NotificationService } from 'app/services'
 
 @Component({
 	selector: 'app-keygenerator',
 	templateUrl: './keygenerator.component.html',
 	styleUrls: ['./keygenerator.component.css'],
 	imports: [
+		ClipboardModule,
+		NanoAccountIdComponent,
 		TranslocoPipe
 	]
 })

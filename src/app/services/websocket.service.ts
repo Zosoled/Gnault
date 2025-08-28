@@ -1,6 +1,6 @@
 import { inject } from '@angular/core'
 import { BehaviorSubject } from 'rxjs'
-import { AppSettingsService } from './app-settings.service'
+import { AppSettingsService } from 'app/services'
 
 export class WebsocketService {
 	private appSettings = inject(AppSettingsService)

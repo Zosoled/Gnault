@@ -1,20 +1,26 @@
 import { CommonModule } from '@angular/common'
 import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
-import { Router } from '@angular/router'
-import { MusigService } from '../../services/musig.service'
-import { NotificationService } from '../../services/notification.service'
-import { QrModalService } from '../../services/qr-modal.service'
-import { RemoteSignService } from '../../services/remote-sign.service'
-import { UtilService } from '../../services/util.service'
 import { FormsModule } from '@angular/forms'
+import { Router } from '@angular/router'
+import { ClipboardModule } from 'ngx-clipboard'
+import { NanoAccountIdComponent } from 'app/components'
+import {
+	MusigService,
+	NotificationService,
+	QrModalService,
+	RemoteSignService,
+	UtilService
+} from 'app/services'
 
 @Component({
 	selector: 'app-multisig',
 	templateUrl: './multisig.component.html',
 	styleUrls: ['./multisig.component.css'],
 	imports: [
+		ClipboardModule,
 		CommonModule,
-		FormsModule
+		FormsModule,
+		NanoAccountIdComponent
 	]
 })
 

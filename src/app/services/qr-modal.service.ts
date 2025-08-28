@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core'
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
-import { QrModalComponent, QRType } from '../components/qr-modal/qr-modal.component'
+import { QrModalComponent, QRType } from 'app/components'
 
 @Injectable({
 	providedIn: 'root'

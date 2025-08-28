@@ -217,12 +217,12 @@
 												*ngFor="let pow of powOptions"
 												[value]="pow.value"
 											>
-												<ng-element *ngIf="pow.value === 'server'">
+												<ng-container *ngIf="pow.value === 'server'">
 													{{ getRemotePoWOptionName() }}
-												</ng-element>
-												<ng-element *ngIf="pow.value !== 'server'">
+												</ng-container>
+												<ng-container *ngIf="pow.value !== 'server'">
 													{{ pow.name }}
-												</ng-element>
+												</ng-container>
 											</option>
 										</select>
 									</div>

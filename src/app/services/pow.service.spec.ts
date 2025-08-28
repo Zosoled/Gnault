@@ -1,6 +1,5 @@
 import { TestBed, inject } from '@angular/core/testing'
-
-import { PowService } from './pow.service'
+import { PowService } from 'app/services'
 
 describe('PowService', () => {
 	beforeEach(() => {

@@ -1,13 +1,17 @@
 import { inject } from '@angular/core'
 import { Account, Block, Wallet } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
-import { ApiService } from './api.service'
-import { AppSettingsService } from './app-settings.service'
-import { LedgerService } from './ledger.service'
-import { NotificationService } from './notification.service'
-import { UtilService, StateBlock, TxType } from './util.service'
-import { WalletAccount } from './wallet.service'
-import { WorkPoolService } from './work-pool.service'
+import {
+	ApiService,
+	AppSettingsService,
+	LedgerService,
+	NotificationService,
+	StateBlock,
+	TxType,
+	UtilService,
+	WalletAccount,
+	WorkPoolService
+} from 'app/services'
 
 export class NanoBlockService {
 	private api = inject(ApiService)

@@ -1,18 +1,28 @@
 import { formatDate } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
+import { FormsModule } from '@angular/forms'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { ClipboardModule } from 'ngx-clipboard'
 import * as QRCode from 'qrcode'
-import { ApiService } from '../../services/api.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { NotificationService } from '../../services/notification.service'
-import { UtilService } from '../../services/util.service'
-import { WalletService } from '../../services/wallet.service'
+import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
+import {
+	ApiService,
+	AppSettingsService,
+	NotificationService,
+	UtilService,
+	WalletService
+} from 'app/services'
 
 @Component({
 	selector: 'app-manage-wallet',
 	templateUrl: './manage-wallet.component.html',
 	styleUrls: ['./manage-wallet.component.css'],
 	imports: [
+		AmountSplitPipe,
+		ClipboardModule,
+		FormsModule,
+		RaiPipe,
+		SqueezePipe,
 		TranslocoPipe
 	]
 })
@@ -30,7 +40,7 @@ export class ManageWalletComponent implements OnInit {
 	newPassword = ''
 	confirmPassword = ''
 	validateNewPassword = false
-	validateconfirmPassword = false
+	validateConfirmPassword = false
 
 	showQRExport = false
 	QRExportUrl = ''

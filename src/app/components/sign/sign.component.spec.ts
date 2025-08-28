@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { SignComponent } from './sign.component'
+import { SignComponent } from 'app/components'
 
 describe('SignComponent', () => {
 	let component: SignComponent

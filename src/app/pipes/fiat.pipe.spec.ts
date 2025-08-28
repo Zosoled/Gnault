@@ -1,4 +1,4 @@
-import { FiatPipe } from './fiat.pipe'
+import { FiatPipe } from 'app/pipes'
 
 describe('FiatPipe', () => {
 	it('create an instance', () => {

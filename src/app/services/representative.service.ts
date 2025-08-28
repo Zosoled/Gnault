@@ -1,10 +1,14 @@
 import { inject } from '@angular/core'
 import { Tools } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
-import { BaseApiAccount, WalletApiAccount, WalletService } from './wallet.service'
-import { ApiService } from './api.service'
-import { UtilService } from './util.service'
-import { NinjaService } from './ninja.service'
+import {
+	ApiService,
+	BaseApiAccount,
+	NinjaService,
+	UtilService,
+	WalletApiAccount,
+	WalletService
+} from 'app/services'
 
 export interface RepresentativeStatus {
 	online: boolean

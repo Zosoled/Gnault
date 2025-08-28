@@ -4,10 +4,11 @@ import { bootstrapApplication } from '@angular/platform-browser'
 import { PreloadAllModules, provideRouter, withHashLocation, withPreloading } from '@angular/router'
 import { provideTransloco } from '@jsverse/transloco'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
-import { AppComponent } from './app/app.component'
-import { routes } from './app/routes'
-import { TranslocoHttpLoader } from './app/transloco-loader'
-import { environment } from './environments/environment'
+import { AppComponent } from 'app/app.component'
+import { routes } from 'app/routes'
+import { TranslocoHttpLoader } from 'app/transloco-loader'
+import { NanoAccountIdComponent } from 'app/components'
+import { environment } from 'environments/environment'
 
 // Providers
 import { AddressBookService } from './app/services/address-book.service'
@@ -48,6 +49,7 @@ bootstrapApplication(AppComponent, {
 		ModalService,
 		MusigService,
 		NanoBlockService,
+		NanoAccountIdComponent,
 		NgbActiveModal,
 		NinjaService,
 		NodeService,

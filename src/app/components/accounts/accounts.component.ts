@@ -1,9 +1,13 @@
 import { CommonModule, UpperCasePipe } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
-import { Router, RouterModule } from '@angular/router'
+import { FormsModule } from '@angular/forms'
+import { Router, RouterLink, RouterModule } from '@angular/router'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { ClipboardModule } from 'ngx-clipboard'
 import { Subject, timer } from 'rxjs'
 import { debounce } from 'rxjs/operators'
+import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/helpers'
+import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AppSettingsService,
 	LedgerService,
@@ -12,41 +16,46 @@ import {
 	NotificationService,
 	RepresentativeService,
 	WalletService
-} from '../../services'
+} from 'app/services'
 
 @Component({
 	selector: 'app-accounts',
 	templateUrl: './accounts.component.html',
 	styleUrls: ['./accounts.component.css'],
 	imports: [
+		AmountSplitPipe,
+		ClipboardModule,
 		CommonModule,
+		FiatPipe,
+		FormsModule,
+		NanoAccountIdComponent,
+		NanoIdenticonComponent,
+		RaiPipe,
+		RouterLink,
 		TranslocoPipe,
 		UpperCasePipe
 	]
 })
 
 export class AccountsComponent implements OnInit {
-	private walletService = inject(WalletService)
 	private notificationService = inject(NotificationService)
-	modal = inject(ModalService)
-	settings = inject(AppSettingsService)
 	private representatives = inject(RepresentativeService)
 	private router = inject(Router)
 	private ledger = inject(LedgerService)
 	private translocoService = inject(TranslocoService)
-	accounts
-	isLedgerWallet
-	isSingleKeyWallet
+	modal = inject(ModalService)
+	settings = inject(AppSettingsService)
+	walletService = inject(WalletService)
+
+	accounts = this.walletService.wallet.accounts
+	isLedgerWallet = this.walletService.isLedgerWallet()
+	isSingleKeyWallet = this.walletService.isSingleKeyWallet()
+
 	viewAdvanced = false
 	newAccountIndex = null
 	// When we change the accounts, redetect changable reps (Debounce by 5 seconds)
 	accountsChanged$ = new Subject()
 	reloadRepWarning$ = this.accountsChanged$.pipe(debounce(() => timer(5000)))
-	constructor () {
-		this.accounts = this.walletService.wallet.accounts
-		this.isLedgerWallet = this.walletService.isLedgerWallet()
-		this.isSingleKeyWallet = this.walletService.isSingleKeyWallet()
-	}
 
 	async ngOnInit () {
 		this.reloadRepWarning$.subscribe(a => {

@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { RouterLink } from '@angular/router'
 import { TranslocoPipe } from '@jsverse/transloco'
-import { AppSettingsService, WalletService } from '../../services'
-import { environment } from '../../../environments/environment'
+import { AppSettingsService, WalletService } from 'app/services'
+import { environment } from 'environments/environment'
 
 @Component({
 	selector: 'app-welcome',

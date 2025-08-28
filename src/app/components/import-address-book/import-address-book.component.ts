@@ -1,12 +1,15 @@
+import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { NotificationService } from '../../services/notification.service'
-import { AddressBookService } from '../../services/address-book.service'
+import { AddressBookService, NotificationService } from 'app/services'
 
 @Component({
 	selector: 'app-import-address-book',
 	templateUrl: './import-address-book.component.html',
-	styleUrls: ['./import-address-book.component.css']
+	styleUrls: ['./import-address-book.component.css'],
+	imports: [
+		CommonModule
+	]
 })
 
 export class ImportAddressBookComponent implements OnInit {

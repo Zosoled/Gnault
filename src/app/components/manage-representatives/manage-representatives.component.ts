@@ -1,18 +1,26 @@
 
 import { AfterViewInit, Component, OnInit, inject } from '@angular/core'
+import { FormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
+import { ClipboardModule } from 'ngx-clipboard'
 import { map } from 'rxjs/operators'
-import { ApiService } from '../../services/api.service'
-import { ModalService } from '../../services/modal.service'
-import { NotificationService } from '../../services/notification.service'
-import { RepresentativeService } from '../../services/representative.service'
-import { UtilService } from '../../services/util.service'
+import { NanoAccountIdComponent } from 'app/components'
+import {
+	ApiService,
+	ModalService,
+	NotificationService,
+	RepresentativeService,
+	UtilService
+} from 'app/services'
 
 @Component({
 	selector: 'app-manage-representatives',
 	templateUrl: './manage-representatives.component.html',
 	styleUrls: ['./manage-representatives.component.css'],
 	imports: [
+		ClipboardModule,
+		FormsModule,
+		NanoAccountIdComponent,
 		RouterModule
 	]
 })

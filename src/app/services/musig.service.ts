@@ -4,9 +4,8 @@ import { Injectable, inject } from '@angular/core'
 import { Account } from 'libnemo'
 import base32 from 'nano-base32'
 import { Observable } from 'rxjs'
-import { UtilService } from './util.service'
-import { NotificationService } from './notification.service'
-import { environment } from '../../environments/environment'
+import { NotificationService, UtilService } from 'app/services'
+import { environment } from 'environments/environment'
 
 @Injectable({
 	providedIn: 'root'
