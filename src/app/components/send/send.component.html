@@ -173,7 +173,7 @@
 												</div>
 											</div>
 											<div
-												*ngIf="amountExtraRaw.gt(0)"
+												*ngIf="amountExtraRaw > 0"
 												class="amount-raw-extra uk-width-1-1 uk-text-small text-half-muted"
 											>
 												<span
@@ -270,7 +270,7 @@
 							<span class="currency-name">XNO</span>
 						</div>
 						<div
-							*ngIf="amountExtraRaw.gt(0)"
+							*ngIf="amountExtraRaw > 0"
 							class="uk-text-small text-half-muted"
 							style="margin: 2px 0 -2px 0;"
 						>+{{ amountExtraRaw.toString(10) }} raw</div>

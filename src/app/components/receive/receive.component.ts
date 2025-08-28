@@ -1,24 +1,30 @@
+import { CommonModule } from '@angular/common'
 import { Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { ChildActivationEnd, Router } from '@angular/router'
 import { TranslocoService } from '@jsverse/transloco'
-import * as QRCode from 'qrcode'
-import { WalletService, WalletAccount } from '../../services/wallet.service'
-import { NotificationService } from '../../services/notification.service'
-import { AddressBookService } from '../../services/address-book.service'
-import { ModalService } from '../../services/modal.service'
-import { ApiService } from '../../services/api.service'
-import { UtilService } from '../../services/util.service'
-import { WorkPoolService } from '../../services/work-pool.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { NanoBlockService } from '../../services/nano-block.service'
-import { PriceService } from '../../services/price.service'
-import { WebsocketService } from '../../services/websocket.service'
 import { Account, Tools } from 'libnemo'
+import * as QRCode from 'qrcode'
+import {
+	AddressBookService,
+	ApiService,
+	AppSettingsService,
+	ModalService,
+	NanoBlockService,
+	NotificationService,
+	PriceService,
+	UtilService,
+	WalletService,
+	WebsocketService,
+	WorkPoolService
+} from '../../services'
 
 @Component({
 	selector: 'app-receive',
 	templateUrl: './receive.component.html',
-	styleUrls: ['./receive.component.css']
+	styleUrls: ['./receive.component.css'],
+	imports: [
+		CommonModule
+	]
 })
 
 export class ReceiveComponent implements OnInit, OnDestroy {

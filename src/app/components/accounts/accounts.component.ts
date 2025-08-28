@@ -1,4 +1,4 @@
-import { UpperCasePipe } from '@angular/common'
+import { CommonModule, UpperCasePipe } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { Router, RouterModule } from '@angular/router'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
@@ -19,6 +19,7 @@ import {
 	templateUrl: './accounts.component.html',
 	styleUrls: ['./accounts.component.css'],
 	imports: [
+		CommonModule,
 		TranslocoPipe,
 		UpperCasePipe
 	]

@@ -1,25 +1,34 @@
+import { CommonModule } from '@angular/common'
 import { HttpClient } from '@angular/common/http'
 import { Component, OnInit, inject } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { TranslocoService } from '@jsverse/transloco'
 import { Tools } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
-import { AddressBookService } from '../../services/address-book.service'
-import { WalletService } from '../../services/wallet.service'
-import { NotificationService } from '../../services/notification.service'
-import { ApiService } from '../../services/api.service'
-import { UtilService } from '../../services/util.service'
-import { WorkPoolService } from '../../services/work-pool.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { PriceService } from '../../services/price.service'
-import { NanoBlockService } from '../../services/nano-block.service'
-import { QrModalService } from '../../services/qr-modal.service'
+import { CurrencySymbolPipe, FiatPipe } from '../../pipes'
+import {
+	AddressBookService,
+	ApiService,
+	AppSettingsService,
+	NanoBlockService,
+	NotificationService,
+	PriceService,
+	QrModalService,
+	UtilService,
+	WalletService,
+	WorkPoolService
+} from '../../services'
 import { environment } from '../../../environments/environment'
 
 @Component({
 	selector: 'app-send',
 	templateUrl: './send.component.html',
-	styleUrls: ['./send.component.css']
+	styleUrls: ['./send.component.css'],
+	imports: [
+		CommonModule,
+		CurrencySymbolPipe,
+		FiatPipe
+	]
 })
 
 export class SendComponent implements OnInit {
