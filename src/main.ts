@@ -6,7 +6,7 @@ import { provideTransloco } from '@jsverse/transloco'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 import { AppComponent } from './app/app.component'
 import { routes } from './app/routes'
-import { TranslocoLoader } from './app/transloco-loader.ts'
+import { TranslocoHttpLoader } from './app/transloco-loader'
 import { environment } from './environments/environment'
 
 // Providers
@@ -31,6 +31,7 @@ import { UtilService } from './app/services/util.service'
 import { WalletService } from './app/services/wallet.service'
 import { WebsocketService } from './app/services/websocket.service'
 import { WorkPoolService } from './app/services/work-pool.service'
+import { provideServiceWorker } from '@angular/service-worker'
 
 if (environment.production) {
 	enableProdMode()
@@ -62,10 +63,13 @@ bootstrapApplication(AppComponent, {
 		WorkPoolService,
 		provideHttpClient(),
 		provideRouter(routes, withHashLocation(), withPreloading(PreloadAllModules)),
+		provideServiceWorker('ngsw-worker.js', {
+			enabled: !isDevMode
+		}),
 		provideTransloco({
-		  config: {
-		    availableLangs: [
-		      { id: 'en', label: 'English' },
+			config: {
+				availableLangs: [
+					{ id: 'en', label: 'English' },
 					{ id: 'de', label: 'Deutsch' },
 					{ id: 'es', label: 'Español' },
 					{ id: 'fr', label: 'Français' },
@@ -76,12 +80,12 @@ bootstrapApplication(AppComponent, {
 				missingHandler: {
 					// It will use the first language set in the `fallbackLang` property
 					useFallbackTranslation: true
-        },	
-		    reRenderOnLangChange: true,
-		    prodMode: !isDevMode
-		  },
-		  loader: TranslocoHttpLoader
-    })
-  ]  
+				},
+				reRenderOnLangChange: true,
+				prodMode: !isDevMode
+			},
+			loader: TranslocoHttpLoader
+		})
+	]
 })
 	.catch(err => console.error(err))

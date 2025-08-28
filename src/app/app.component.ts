@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common'
 import { Component, ElementRef, HostListener, OnInit, ViewChild, Renderer2, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink, RouterOutlet } from '@angular/router'
@@ -22,6 +23,7 @@ import { environment } from '../environments/environment'
 	templateUrl: './app.component.html',
 	styleUrls: ['./app.component.less'],
 	imports: [
+		CommonModule,
 		InstallWidgetComponent,
 		FormsModule,
 		NotificationsComponent,
@@ -29,6 +31,9 @@ import { environment } from '../environments/environment'
 		RouterOutlet,
 		TranslocoPipe,
 		WalletWidgetComponent
+	],
+	providers: [
+		SwUpdate
 	]
 })
 
