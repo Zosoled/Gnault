@@ -7,7 +7,7 @@
 	"main": "desktop-app/dist/desktop-app.js",
 	"scripts": {
 		"ng": "ng",
-		"start": "ng serve --ssl --open",
+		"start": "ng serve",
 		"build": "ng build",
 		"test": "ng test",
 		"lint": "ng lint",
