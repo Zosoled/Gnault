@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { NanoIdenticonComponent } from './nano-identicon.component'
+import { NanoIdenticonComponent } from 'app/components/helpers'
 
 describe('NanoIdenticonComponent', () => {
 	let component: NanoIdenticonComponent

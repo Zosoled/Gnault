@@ -1,53 +1,69 @@
-import { Component, OnInit } from '@angular/core'
-import { WalletService } from '../../services/wallet.service'
-import { NotificationService } from '../../services/notification.service'
-import { ApiService } from '../../services/api.service'
-import { UtilService } from '../../services/util.service'
-import { AppSettingsService } from '../../services/app-settings.service'
+import { CommonModule, formatDate } from '@angular/common'
+import { Component, OnInit, inject } from '@angular/core'
+import { FormsModule } from '@angular/forms'
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { ClipboardModule } from 'ngx-clipboard'
 import * as QRCode from 'qrcode'
-import * as bip from 'bip39'
-import { formatDate } from '@angular/common'
+import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
+import {
+	ApiService,
+	AppSettingsService,
+	NotificationService,
+	UtilService,
+	WalletService
+} from 'app/services'
 
 @Component({
 	selector: 'app-manage-wallet',
 	templateUrl: './manage-wallet.component.html',
-	styleUrls: ['./manage-wallet.component.css']
+	styleUrls: ['./manage-wallet.component.css'],
+	imports: [
+		AmountSplitPipe,
+		ClipboardModule,
+		CommonModule,
+		FormsModule,
+		RaiPipe,
+		SqueezePipe,
+		TranslocoPipe
+	]
 })
+
 export class ManageWalletComponent implements OnInit {
+	private api = inject(ApiService)
+	private translocoService = inject(TranslocoService)
+	private util = inject(UtilService)
 
-	wallet = this.walletService.wallet;
-	accounts = this.walletService.wallet.accounts;
+	notifications = inject(NotificationService)
+	settings = inject(AppSettingsService)
+	walletService = inject(WalletService)
 
-	newPassword = '';
-	confirmPassword = '';
+	wallet = this.walletService.wallet
+	accounts = this.walletService.wallet.accounts
+	newPassword = ''
+	confirmPassword = ''
+	validateNewPassword = false
+	validateConfirmPassword = false
 
-	showQRExport = false;
-	QRExportUrl = '';
-	QRExportImg = '';
+	showQRExport = false
+	QRExportUrl = ''
+	QRExportImg = ''
 
-	csvExportStarted = false;
+	csvExportStarted = false
 	transactionHistoryLimit = 500; // if the backend server limit changes, change this too
-	selAccountInit = false;
-	invalidCsvCount = false;
-	invalidCsvOffset = false;
-	csvAccount = this.accounts.length > 0 ? this.accounts[0].id : '0';
-	csvCount = this.transactionHistoryLimit.toString();
-	csvOffset = '';
-	beyondCsvLimit = false;
-	exportingCsv = false;
+	selAccountInit = false
+	invalidCsvCount = false
+	invalidCsvOffset = false
+	csvAccount = this.accounts[0]?.id ?? '0'
+	csvCount = this.transactionHistoryLimit.toString()
+	csvOffset = ''
+	beyondCsvLimit = false
+	exportingCsv = false
 	orderOptions = [
 		{ name: 'Newest Transactions First', value: false },
 		{ name: 'Oldest Transactions First', value: true },
-	];
-	selectedOrder = this.orderOptions[0].value;
-	exportEnabled = true;
-
-	constructor (
-		public walletService: WalletService,
-		public notifications: NotificationService,
-		private api: ApiService,
-		private util: UtilService,
-		public settings: AppSettingsService) { }
+	]
+	selectedOrder = this.orderOptions[0].value
+	exportEnabled = true
 
 	async ngOnInit () {
 		this.wallet = this.walletService.wallet
@@ -55,7 +71,7 @@ export class ManageWalletComponent implements OnInit {
 		// Update selected account if changed in the sidebar
 		this.walletService.wallet.selectedAccount$.subscribe(async acc => {
 			if (this.selAccountInit) {
-				this.csvAccount = acc ? acc.id : (this.accounts.length > 0 ? this.accounts[0].id : '0')
+				this.csvAccount = acc?.id ?? this.accounts[0]?.id ?? '0'
 			}
 			this.selAccountInit = true
 		})
@@ -67,23 +83,19 @@ export class ManageWalletComponent implements OnInit {
 	}
 
 	async changePassword () {
-		if (this.newPassword !== this.confirmPassword) {
-			return this.notifications.sendError(`Passwords do not match`)
+		if (this.newPassword.length < 6) {
+			return this.notifications.sendError(this.translocoService.translate('configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long', { minCharacters: 6 }))
 		}
-		if (this.newPassword.length < 1) {
-			return this.notifications.sendError(`Password cannot be empty`)
+		if (this.newPassword !== this.confirmPassword) {
+			return this.notifications.sendError(this.translocoService.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match'))
 		}
 		if (this.walletService.isLocked()) {
 			const wasUnlocked = await this.walletService.requestWalletUnlock()
-
 			if (wasUnlocked === false) {
 				return
 			}
 		}
-
-		this.walletService.wallet.password = this.newPassword
 		this.walletService.saveWalletExport()
-
 		this.newPassword = ''
 		this.confirmPassword = ''
 		this.notifications.sendSuccess(`Wallet password successfully updated`)
@@ -94,12 +106,10 @@ export class ManageWalletComponent implements OnInit {
 	async exportWallet () {
 		if (this.walletService.isLocked()) {
 			const wasUnlocked = await this.walletService.requestWalletUnlock()
-
 			if (wasUnlocked === false) {
 				return
 			}
 		}
-
 		const exportUrl = this.walletService.generateExportUrl()
 		this.QRExportUrl = exportUrl
 		this.QRExportImg = await QRCode.toDataURL(exportUrl, { errorCorrectionLevel: 'M', scale: 8 })
@@ -112,9 +122,7 @@ export class ManageWalletComponent implements OnInit {
 	}
 
 	seedMnemonic () {
-		if (this.wallet && this.wallet.seed) {
-			return bip.entropyToMnemonic(this.wallet.seed)
-		}
+		return this.wallet?.wallet?.mnemonic
 	}
 
 	triggerFileDownload (fileName, exportData, type) {
@@ -132,7 +140,7 @@ export class ManageWalletComponent implements OnInit {
 					let finalVal = ''
 					let j = 0
 					for (const [key, value] of Object.entries(row)) {
-						const innerValue = value === null ? '' : value.toString()
+						const innerValue = value?.toString() ?? ''
 						let result = innerValue.replace(/"/g, '""')
 						if (result.search(/("|,| |\n)/g) >= 0) {
 							result = '"' + result + '"'
@@ -181,16 +189,13 @@ export class ManageWalletComponent implements OnInit {
 	async exportToFile () {
 		if (this.walletService.isLocked()) {
 			const wasUnlocked = await this.walletService.requestWalletUnlock()
-
 			if (wasUnlocked === false) {
 				return
 			}
 		}
-
 		const fileName = `Gnault-Wallet.json`
 		const exportData = this.walletService.generateExportData()
 		this.triggerFileDownload(fileName, exportData, 'json')
-
 		this.notifications.sendSuccess(`Wallet export downloaded!`)
 	}
 
@@ -249,8 +254,8 @@ export class ManageWalletComponent implements OnInit {
 		}
 
 		this.exportingCsv = true
-		const transactionCount = this.csvCount === '' ? 0 : parseInt(this.csvCount, 10)
-		const transactionOffset = this.csvOffset === '' ? 0 : parseInt(this.csvOffset, 10)
+		const transactionCount = parseInt(this.csvCount, 10) || 0
+		const transactionOffset = parseInt(this.csvOffset, 10) || 0
 		const history = await this.api.accountHistory(this.csvAccount, transactionCount, false, transactionOffset, this.selectedOrder)
 		this.exportingCsv = false // reset it here in case the file download fails (don't want spinning button forever)
 
@@ -259,8 +264,12 @@ export class ManageWalletComponent implements OnInit {
 		if (history && history.history && history.history.length > 0) {
 			history.history.forEach(a => {
 				csvData.push({
-					'account': a.account, 'type': a.type, 'amount': this.util.nano.rawToMnano(a.amount).toString(10),
-					'hash': a.hash, 'height': a.height, 'time': formatDate(a.local_timestamp * 1000, 'y-MM-d HH:mm:ss', 'en-US')
+					'account': a.account,
+					'type': a.type,
+					'amount': this.util.nano.rawToMnano(a.amount),
+					'hash': a.hash,
+					'height': a.height,
+					'time': formatDate(a.local_timestamp * 1000, 'y-MM-d HH:mm:ss', 'en-US')
 				})
 			})
 		}
@@ -270,7 +279,10 @@ export class ManageWalletComponent implements OnInit {
 		}
 
 		// download file
-		const fileName = `${this.csvAccount}_offset=${this.csvOffset === '' ? 0 : this.csvOffset}${this.selectedOrder === true ? '_oldestFirst' : '_newestFirst'}.csv`
+		const order = this.selectedOrder
+			? '_oldestFirst'
+			: '_newestFirst'
+		const fileName = `${this.csvAccount}_offset=${this.csvOffset || 0}${order}.csv`
 		this.triggerFileDownload(fileName, csvData, 'csv')
 		this.notifications.sendSuccess(`Transaction history downloaded!`)
 	}

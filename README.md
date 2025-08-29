@@ -4,7 +4,7 @@
 [![GitHub All Releases](https://img.shields.io/github/downloads/Zosoled/Gnault/total)](https://github.com/Zosoled/Gnault/releases/latest)
 [![Discord](https://img.shields.io/badge/discord-join%20chat-orange.svg?logo=discord&color=7289DA)](https://chat.nano.org)
 
-Gnault is a fork of the popular nano wallet Nault which is a fork of the popular nano wallet [NanoVault](https://github.com/cronoh/nanovault) 💙
+Gnault is a fork of the popular nano wallet [Nault](https://github.com/Nault/Nault) which is a fork of the popular nano wallet [NanoVault](https://github.com/cronoh/nanovault) 💙
 
 It's a fully client-side signing wallet for sending and receiving nano either directly in your browser at [gnault.cc](https://gnault.cc) or with the [desktop app](https://github.com/Zosoled/Gnault/releases/latest).
 

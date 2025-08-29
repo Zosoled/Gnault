@@ -1,36 +1,49 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
-import { WalletService } from '../../services/wallet.service'
-import { NotificationService } from '../../services/notification.service'
-import { LedgerService, LedgerStatus } from '../../services/ledger.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { PowService } from '../../services/pow.service'
+import { CommonModule } from '@angular/common'
+import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core'
+import { FormsModule } from '@angular/forms'
+import { RouterLink } from '@angular/router'
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import {
+	AppSettingsService,
+	LedgerService,
+	NotificationService,
+	PowService,
+	WalletService
+} from 'app/services'
 
 @Component({
 	selector: 'app-wallet-widget',
 	templateUrl: './wallet-widget.component.html',
-	styleUrls: ['./wallet-widget.component.css']
+	styleUrls: ['./wallet-widget.component.css'],
+	imports: [
+		CommonModule,
+		FormsModule,
+		RouterLink,
+		TranslocoPipe
+	]
 })
-export class WalletWidgetComponent implements OnInit {
-	wallet = this.walletService.wallet;
 
+export class WalletWidgetComponent implements OnInit {
+	private notificationService = inject(NotificationService)
+	private powService = inject(PowService)
+	private translocoService = inject(TranslocoService)
+	walletService = inject(WalletService)
+	ledgerService = inject(LedgerService)
+	settings = inject(AppSettingsService)
+
+	wallet = this.walletService.wallet
 	ledgerStatus = {
 		status: 'not-connected',
 		statusText: '',
-	};
-	powAlert = false;
+	}
+	powAlert = false
 
-	unlockPassword = '';
+	unlockPassword = ''
+	validatePassword = false
 
-	modal: any = null;
-	mayAttemptUnlock = true;
-	timeoutIdAllowingUnlock: any = null;
-
-	constructor (
-		public walletService: WalletService,
-		private notificationService: NotificationService,
-		public ledgerService: LedgerService,
-		public settings: AppSettingsService,
-		private powService: PowService) { }
+	modal: any = null
+	mayAttemptUnlock = true
+	timeoutIdAllowingUnlock: any = null
 
 	@ViewChild('passwordInput') passwordInput: ElementRef
 
@@ -73,15 +86,9 @@ export class WalletWidgetComponent implements OnInit {
 	}
 
 	async lockWallet () {
-		if (this.wallet.type === 'ledger') {
-			return // No need to lock a ledger wallet, no password saved
-		}
-		if (!this.wallet.password) {
-			return this.notificationService.sendWarning(`You must set a password on your wallet - it is currently blank!`)
-		}
 		const locked = await this.walletService.lockWallet()
 		if (locked) {
-			this.notificationService.sendSuccess(`Wallet locked`)
+			this.notificationService.sendSuccess(this.translocoService.translate('accounts.wallet-locked'))
 		} else {
 			this.notificationService.sendError(`Unable to lock wallet`)
 		}
@@ -92,13 +99,15 @@ export class WalletWidgetComponent implements OnInit {
 		try {
 			await this.ledgerService.loadLedger()
 			this.notificationService.removeNotification('ledger-status')
-			if (this.ledgerStatus.status === LedgerStatus.READY) {
+			if (this.ledgerStatus.status === 'CONNECTED') {
 				this.notificationService.sendSuccess(`Successfully connected to Ledger device`)
+			} else if (this.ledgerStatus.status === 'LOCKED') {
+				this.notificationService.sendError(`Ledger device locked. Unlock and try again.`)
 			}
 		} catch (err) {
 			console.log(`Got error when loading ledger! `, err)
 			this.notificationService.removeNotification('ledger-status')
-			// this.notificationService.sendError(`Unable to load Ledger Device: ${err.message}`);
+			// this.notificationService.sendError(`Unable to load Ledger Device: ${err.message}`)
 		}
 	}
 
@@ -116,43 +125,32 @@ export class WalletWidgetComponent implements OnInit {
 		if (this.mayAttemptUnlock === false) {
 			return
 		}
-
 		this.mayAttemptUnlock = false
-
 		if (this.timeoutIdAllowingUnlock !== null) {
 			clearTimeout(this.timeoutIdAllowingUnlock)
 		}
-
 		this.timeoutIdAllowingUnlock = setTimeout(
 			() => {
 				this.allowUnlock({ focusInputElement: true })
 			},
 			500
 		)
-
 		const unlocked = await this.walletService.unlockWallet(this.unlockPassword)
 
 		if (unlocked) {
-			this.notificationService.sendSuccess(`Wallet unlocked`)
+			this.notificationService.sendSuccess(this.translocoService.translate('accounts.wallet-unlocked'))
 			this.modal.hide()
-			if (this.unlockPassword.length < 6) {
-				// eslint-disable-next-line max-len
-				this.notificationService.sendWarning(`You are using an insecure password and encouraged to change it from settings > manage wallet`)
-			}
-
 			if (this.timeoutIdAllowingUnlock !== null) {
 				clearTimeout(this.timeoutIdAllowingUnlock)
 				this.timeoutIdAllowingUnlock = null
 			}
-
 			this.allowUnlock({ focusInputElement: false })
 		} else {
-			this.notificationService.sendError(`Incorrect password, please try again!`)
+			this.notificationService.sendError(this.translocoService.translate('accounts.wrong-password'))
 		}
 	}
 
 	cancelPow () {
 		this.powService.cancelAllPow(true)
 	}
-
 }

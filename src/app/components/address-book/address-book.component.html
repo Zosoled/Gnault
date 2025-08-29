@@ -49,17 +49,17 @@
 					class="advanced-options"
 					*ngIf="showAdvancedOptions"
 				>
-					<span [title]="( totalTrackedBalanceRaw.gt(0) ? ( '+' + ( totalTrackedBalanceRaw.toString(10) ) + ' raw' ) : '' )">
+					<span [title]="totalTrackedBalanceRaw > 0 ? ( '+' + ( totalTrackedBalanceRaw.toString() ) + ' raw' ) : ''">
 						<span class="amount-integer">{{ totalTrackedBalance | rai: 'mnano,true' | amountsplit: 0 }}</span>
 						<span class="amount-fractional">{{ totalTrackedBalance | rai: 'mnano,true' | amountsplit: 1 }}</span>
 						<span class="currency-name">XNO</span>
 					</span>
 					<div
-						*ngIf="totalTrackedPending.gt(0)"
+						*ngIf="totalTrackedReceivable > 0"
 						class="incoming-label"
 					>
 						<div class="text-snippet">{{ 'general.new' | transloco }}</div>
-						<div class="text-full">+{{ totalTrackedPending | rai: 'mnano,true' | amountsplit: 0 }}{{ totalTrackedPending | rai: 'mnano,true' | amountsplit: 1 }} XNO</div>
+						<div class="text-full">+{{ totalTrackedReceivable | rai: 'mnano,true' | amountsplit: 0 }}{{ totalTrackedReceivable | rai: 'mnano,true' | amountsplit: 1 }} XNO</div>
 					</div>
 					<div class="account-amounts-converted uk-width-1-1 text-half-muted">
 						{{ totalTrackedBalanceFiat | fiat: appSettings.settings.displayCurrency }}
@@ -96,7 +96,8 @@
 													uk-spinner="ratio: 0.5;"
 													class="icon-transactions-refresh spinner"
 													*ngIf="(loadingBalances || walletService.wallet.updatingBalance === true) else notUpdatingTxList"
-												></div>
+												>
+												</div>
 												<ng-template #notUpdatingTxList>
 													<a
 														class="icon-transactions-refresh"
@@ -115,7 +116,8 @@
 								<div
 									class="uk-width-1-6 uk-text-center"
 									style="padding-left: 0;"
-								>{{ 'general.actions' | transloco }}</div>
+								>{{ 'general.actions' | transloco }}
+								</div>
 							</div>
 						</li>
 					</ul>
@@ -178,17 +180,17 @@
 										>
 											<ng-container *ngIf="(walletService.wallet.updatingBalance === false) else balanceLoading">
 												<div class="account-amounts-primary uk-width-1-1">
-													<span [title]="( accounts[addressBook.account]?.balanceRaw.gt(0) ? ( '+' + ( accounts[addressBook.account]?.balanceRaw.toString(10) ) + ' raw' ) : '' )">
+													<span [title]="accounts[addressBook.account]?.balance > 0 ? ( '+' + accounts[addressBook.account]?.balance.toString() + ' raw' ) : ''">
 														<span class="amount-integer">{{ accounts[addressBook.account]?.balance | rai: 'mnano,true' | amountsplit: 0 }}</span>
 														<span class="amount-fractional">{{ accounts[addressBook.account]?.balance | rai: 'mnano,true' | amountsplit: 1 }}</span>
 														<span class="currency-name">XNO</span>
 													</span>
 													<div
-														*ngIf="accounts[addressBook.account]?.pending.gt(0)"
+														*ngIf="accounts[addressBook.account]?.receivable > 0"
 														class="incoming-label"
 													>
 														<div class="text-snippet">New</div>
-														<div class="text-full">+{{ accounts[addressBook.account]?.pending | rai: 'mnano,true' | amountsplit: 0 }}{{ accounts[addressBook.account]?.pending | rai: 'mnano,true' | amountsplit: 1 }} XNO</div>
+														<div class="text-full">+{{ accounts[addressBook.account]?.receivable | rai: 'mnano,true' | amountsplit: 0 }}{{ accounts[addressBook.account]?.receivable | rai: 'mnano,true' | amountsplit: 1 }} XNO</div>
 													</div>
 												</div>
 												<div class="account-amounts-converted uk-width-1-1 text-half-muted">
@@ -220,7 +222,9 @@
 							*ngIf="!(addressBook$ | async).length"
 							class="uk-text-center"
 						>
-							{{ 'address-book.you-do-not-have-any-address-book-entries-saved-yet.1' | transloco }} <a (click)="addEntry()">{{ 'address-book.you-do-not-have-any-address-book-entries-saved-yet.2-link' | transloco }}</a>{{ 'address-book.you-do-not-have-any-address-book-entries-saved-yet.3' | transloco }}
+							{{ 'address-book.you-do-not-have-any-address-book-entries-saved-yet.1' | transloco }}
+							<a (click)="addEntry()">{{ 'address-book.you-do-not-have-any-address-book-entries-saved-yet.2-link' | transloco }}</a>
+							{{ 'address-book.you-do-not-have-any-address-book-entries-saved-yet.3' | transloco }}
 						</li>
 					</ul>
 				</div>
@@ -235,7 +239,9 @@
 				<div class="uk-card uk-card-default">
 					<div class="uk-card-header">
 						<h2 class="uk-card-title">
-							{{ creatingNewEntry ? ( 'address-book.add-new-entry' | transloco ) : ( 'address-book.edit-entry' | transloco ) }}
+							{{ creatingNewEntry
+								? ('address-book.add-new-entry' | transloco)
+								: ('address-book.edit-entry' | transloco) }}
 						</h2>
 					</div>
 					<div class="uk-card-body">
@@ -287,7 +293,8 @@
 								<label
 									class="uk-form-label"
 									for="new-track-balance"
-								>{{ 'address-book.track-balance' | transloco }} <span
+								>{{ 'address-book.track-balance' | transloco }}
+									<span
 										uk-icon="icon: info;"
 										uk-tooltip
 										[title]="t('address-book.the-balance-will-be-displayed-in-the-address-book')"
@@ -306,11 +313,14 @@
 								<label
 									class="uk-form-label"
 									for="new-track-transactions"
-								>{{ 'address-book.track-transactions' | transloco }} <span
+								>
+									{{ 'address-book.track-transactions' | transloco }}
+									<span
 										uk-icon="icon: info;"
 										uk-tooltip
 										[title]="t('address-book.a-notification-will-be-shown-whenever-the-address-has-a-new')"
-									></span></label>
+									></span>
+								</label>
 								<div class="uk-form-controls">
 									<input
 										class="uk-checkbox checkbox-aligned"
@@ -395,10 +405,13 @@
 								<span
 									*ngIf="!addressBookShowQRExport"
 									class="uk-text-warning"
-								>{{ 'address-book.address-book-too-large-for-a-qr-code' | transloco }}<br>{{ 'address-book.if-you-need-a-qr-use-fewer-entries-or-shorter-aliases' | transloco }}</span>
+								>{{ 'address-book.address-book-too-large-for-a-qr-code' | transloco }}<br>{{ 'address-book.if-you-need-a-qr-use-fewer-entries-or-shorter-names' | transloco }}
+								</span>
 							</div>
 							<div class="uk-width-1-1@s uk-width-1-2@m uk-width-2-3@l">
-								<span *ngIf="addressBookShowQRExport">{{ 'address-book.scan-the-qr-code-on-any-device-to-import-your-address-book' | transloco }}<br><br></span>
+								<span *ngIf="addressBookShowQRExport">
+									{{ 'address-book.scan-the-qr-code-on-any-device-to-import-your-address-book' | transloco}}<br><br>
+								</span>
 								<span *ngIf="addressBookShowQRExport">{{ 'address-book.you-can-also-import-your-address-book-by-using-the-url-below' | transloco }}</span>
 								<span *ngIf="!addressBookShowQRExport">{{ 'address-book.you-can-still-import-your-address-book-by-using-the-url' | transloco }}</span>
 								<br><br>

@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { ReceiveComponent } from './receive.component'
+import { ReceiveComponent } from 'app/components'
 
 describe('ReceiveComponent', () => {
 	let component: ReceiveComponent

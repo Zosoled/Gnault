@@ -1,6 +1,5 @@
 import { TestBed, inject } from '@angular/core/testing'
-
-import { NanoBlockService } from './nano-block.service'
+import { NanoBlockService } from 'app/services'
 
 describe('NanoBlockService', () => {
 	beforeEach(() => {

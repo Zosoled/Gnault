@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { ManageWalletComponent } from './manage-wallet.component'
+import { ManageWalletComponent } from 'app/components'
 
 describe('ManageWalletComponent', () => {
 	let component: ManageWalletComponent

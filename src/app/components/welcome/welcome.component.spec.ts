@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { WelcomeComponent } from './welcome.component'
+import { WelcomeComponent } from 'app/components'
 
 describe('WelcomeComponent', () => {
 	let component: WelcomeComponent

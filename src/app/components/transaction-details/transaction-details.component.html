@@ -72,10 +72,10 @@
 						<span class="currency-name">XNO</span>
 					</div>
 					<div
-						*ngIf="amountRaw.gt(0)"
+						*ngIf="amount > 0n"
 						class="uk-text-small text-half-muted"
 						style="margin: 2px 0 -2px 0;"
-					>+{{ amountRaw.toString(10) }} raw</div>
+					>+{{ amount | rai: 'raw,false' }}</div>
 				</div>
 				<div
 					class="uk-card-header"

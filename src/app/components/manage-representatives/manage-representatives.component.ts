@@ -1,24 +1,47 @@
 
+import { CommonModule } from '@angular/common'
+import { AfterViewInit, Component, OnInit, inject } from '@angular/core'
+import { FormsModule } from '@angular/forms'
+import { RouterModule } from '@angular/router'
+import { ClipboardModule } from 'ngx-clipboard'
 import { map } from 'rxjs/operators'
-import { AfterViewInit, Component, OnInit } from '@angular/core'
-import { AddressBookService } from '../../services/address-book.service'
-import { WalletService } from '../../services/wallet.service'
-import { NotificationService } from '../../services/notification.service'
-import { ModalService } from '../../services/modal.service'
-import { ApiService } from '../../services/api.service'
-import { Router } from '@angular/router'
-import { RepresentativeService } from '../../services/representative.service'
-import { UtilService } from '../../services/util.service'
+import { NanoAccountIdComponent } from 'app/components/helpers'
+import {
+	ApiService,
+	ModalService,
+	NotificationService,
+	RepresentativeService,
+	UtilService
+} from 'app/services'
 
 @Component({
 	selector: 'app-manage-representatives',
 	templateUrl: './manage-representatives.component.html',
-	styleUrls: ['./manage-representatives.component.css']
+	styleUrls: ['./manage-representatives.component.css'],
+	imports: [
+		ClipboardModule,
+		CommonModule,
+		FormsModule,
+		NanoAccountIdComponent,
+		RouterModule
+	]
 })
-export class ManageRepresentativesComponent implements OnInit, AfterViewInit {
 
-	activePanel = 0;
-	creatingNewEntry = false;
+export class ManageRepresentativesComponent implements OnInit, AfterViewInit {
+	private api = inject(ApiService)
+	private notificationService = inject(NotificationService)
+	modal = inject(ModalService)
+	private repService = inject(RepresentativeService)
+	private util = inject(UtilService)
+
+	activePanel = 0
+	creatingNewEntry = false
+	previousRepName = ''
+	newRepAccount = ''
+	newRepName = ''
+	newRepTrusted = false
+	newRepWarn = false
+	onlineReps = []
 
 	// Set the online status of each representative
 	representatives$ = this.repService.representatives$.pipe(map(reps => {
@@ -26,31 +49,16 @@ export class ManageRepresentativesComponent implements OnInit, AfterViewInit {
 			rep.online = this.onlineReps.indexOf(rep.id) !== -1
 			return rep
 		})
-	}));
-
-	previousRepName = '';
-	newRepAccount = '';
-	newRepName = '';
-	newRepTrusted = false;
-	newRepWarn = false;
-
-	onlineReps = [];
-
-	constructor (
-		private api: ApiService,
-		private notificationService: NotificationService,
-		public modal: ModalService,
-		private repService: RepresentativeService,
-		private util: UtilService) { }
+	}))
 
 	async ngOnInit () {
 		this.repService.loadRepresentativeList()
 		this.onlineReps = await this.getOnlineRepresentatives()
-		this.repService.representatives$.next(this.repService.representatives) // Forcefully repush rep list once we have online status
+		// Forcefully repush rep list once we have online status
+		this.repService.representatives$.next(this.repService.representatives)
 	}
 
-	ngAfterViewInit () {
-	}
+	ngAfterViewInit () { }
 
 	addEntry () {
 		this.previousRepName = ''

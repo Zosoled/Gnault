@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { QrModalComponent } from './qr-modal.component'
+import { QrModalComponent } from 'app/components'
 
 describe('QrModalComponent', () => {
 	let component: QrModalComponent

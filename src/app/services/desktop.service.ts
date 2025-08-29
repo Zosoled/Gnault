@@ -1,13 +1,12 @@
-import { Injectable } from '@angular/core'
+import { inject } from '@angular/core'
 import { IpcRenderer } from 'electron'
-import { NotificationService } from './notification.service'
+import { NotificationService } from 'app/services'
 
-@Injectable()
 export class DesktopService {
-
+	private notifications = inject(NotificationService)
 	private _ipc: IpcRenderer | undefined
 
-	constructor (private notifications: NotificationService) {
+	constructor () {
 		if (window.require) {
 			try {
 				this._ipc = window.require('electron').ipcRenderer
@@ -18,8 +17,7 @@ export class DesktopService {
 		}
 	}
 
-	connect () {
-	}
+	connect () { }
 
 	on (channel: string, listener) {
 		if (!this._ipc) return false
@@ -32,5 +30,4 @@ export class DesktopService {
 		this._ipc.send(channel, ...args)
 		return true
 	}
-
 }

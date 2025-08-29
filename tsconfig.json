@@ -19,11 +19,15 @@
 			"DOM"
 		],
 		"module": "esnext",
-		"baseUrl": "./",
+		"baseUrl": "./src",
 		"paths": {
 			"stream": [
 				"../node_modules/readable-stream/readable.js"
 			]
 		}
+	},
+	"angularCompilerOptions": {
+		"strictTemplates": true,
+		"extendedTemplateDiagnostics": true
 	}
 }

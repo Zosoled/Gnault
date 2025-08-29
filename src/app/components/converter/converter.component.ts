@@ -1,40 +1,44 @@
-import { Component, OnInit, OnDestroy } from '@angular/core'
-import { UtilService } from '../../services/util.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import * as nanocurrency from 'nanocurrency'
-import { PriceService } from '../../services/price.service'
-import { BigNumber } from 'bignumber.js'
-import { NotificationService } from '../../services/notification.service'
+import { CommonModule } from '@angular/common'
+import { Component, OnInit, OnDestroy, inject } from '@angular/core'
+import { FormsModule } from '@angular/forms'
+import { Tools } from 'libnemo'
+import { ClipboardModule } from 'ngx-clipboard'
+import {
+	AppSettingsService,
+	NotificationService,
+	PriceService,
+	UtilService
+} from 'app/services'
 
 @Component({
 	selector: 'app-converter',
 	templateUrl: './converter.component.html',
-	styleUrls: ['./converter.component.less']
+	styleUrls: ['./converter.component.less'],
+	imports: [
+		ClipboardModule,
+		CommonModule,
+		FormsModule
+	]
 })
-export class ConverterComponent implements OnInit, OnDestroy {
-	Mnano = '1';
-	raw = '';
-	invalidMnano = false;
-	invalidRaw = false;
-	invalidFiat = false;
-	fiatPrice = '0';
-	priceSub = null;
 
-	constructor (
-		private util: UtilService,
-		public settings: AppSettingsService,
-		private price: PriceService,
-		public notifications: NotificationService,
-	) { }
+export class ConverterComponent implements OnInit, OnDestroy {
+	private util = inject(UtilService)
+	settings = inject(AppSettingsService)
+	private price = inject(PriceService)
+	notifications = inject(NotificationService)
+
+	Mnano = ''
+	raw = ''
+	invalidMnano = false
+	invalidRaw = false
+	invalidFiat = false
+	fiatPrice = '0'
+	priceSub = null
 
 	ngOnInit (): void {
-		BigNumber.config({ DECIMAL_PLACES: 30 })
-		this.Mnano = '1'
-
 		this.priceSub = this.price.lastPrice$.subscribe(event => {
-			this.fiatPrice = (new BigNumber(this.Mnano)).times(this.price.price.lastPrice).toString()
+			this.fiatPrice = this.price.price.lastPrice.toFixed(30)
 		})
-
 		this.unitChange('mnano')
 	}
 
@@ -44,12 +48,12 @@ export class ConverterComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	unitChange (unit) {
+	async unitChange (unit) {
 		switch (unit) {
 			case 'mnano':
 				if (this.util.account.isValidNanoAmount(this.Mnano)) {
-					this.raw = nanocurrency.convert(this.Mnano, { from: nanocurrency.Unit.NANO, to: nanocurrency.Unit.raw })
-					this.fiatPrice = (new BigNumber(this.Mnano)).times(this.price.price.lastPrice).toString(10)
+					this.raw = await Tools.convert(this.Mnano, 'nano', 'raw')
+					this.fiatPrice = (parseFloat(this.Mnano) * this.price.price.lastPrice).toString()
 					this.invalidMnano = false
 					this.invalidRaw = false
 					this.invalidFiat = false
@@ -61,8 +65,8 @@ export class ConverterComponent implements OnInit, OnDestroy {
 				break
 			case 'raw':
 				if (this.util.account.isValidAmount(this.raw)) {
-					this.Mnano = nanocurrency.convert(this.raw, { from: nanocurrency.Unit.raw, to: nanocurrency.Unit.NANO })
-					this.fiatPrice = (new BigNumber(this.Mnano)).times(this.price.price.lastPrice).toString(10)
+					this.Mnano = await Tools.convert(this.raw, 'raw', 'nano')
+					this.fiatPrice = (parseFloat(this.Mnano) * this.price.price.lastPrice).toString()
 					this.invalidRaw = false
 					this.invalidMnano = false
 					this.invalidFiat = false
@@ -74,8 +78,8 @@ export class ConverterComponent implements OnInit, OnDestroy {
 				break
 			case 'fiat':
 				if (this.util.string.isNumeric(this.fiatPrice)) {
-					this.Mnano = (new BigNumber(this.fiatPrice)).dividedBy(this.price.price.lastPrice).toString(10)
-					this.raw = nanocurrency.convert(this.Mnano, { from: nanocurrency.Unit.NANO, to: nanocurrency.Unit.raw })
+					this.Mnano = (parseFloat(this.fiatPrice) / this.price.price.lastPrice).toString()
+					this.raw = await Tools.convert(this.Mnano, 'nano', 'raw')
 					this.invalidRaw = false
 					this.invalidMnano = false
 					this.invalidFiat = false

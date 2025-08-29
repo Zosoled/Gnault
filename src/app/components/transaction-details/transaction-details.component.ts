@@ -1,51 +1,65 @@
-import { Component, OnInit } from '@angular/core'
-import { ActivatedRoute, ChildActivationEnd, Router } from '@angular/router'
-import { WalletService } from '../../services/wallet.service'
-import { ApiService } from '../../services/api.service'
-import { NotificationService } from '../../services/notification.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import BigNumber from 'bignumber.js'
-import { AddressBookService } from '../../services/address-book.service'
-import { TranslocoService } from '@ngneat/transloco'
+import { CommonModule, DatePipe, DecimalPipe } from '@angular/common'
+import { Component, OnInit, inject } from '@angular/core'
+import { ActivatedRoute, ChildActivationEnd, Router, RouterLink } from '@angular/router'
+import { TranslocoService } from '@jsverse/transloco'
+import { ClipboardModule } from 'ngx-clipboard'
+import { AmountSplitPipe, RaiPipe } from 'app/pipes'
+import {
+	AddressBookService,
+	ApiService,
+	AppSettingsService,
+	NotificationService,
+	WalletService
+} from 'app/services'
+import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/helpers'
 
 @Component({
 	selector: 'app-transaction-details',
 	templateUrl: './transaction-details.component.html',
-	styleUrls: ['./transaction-details.component.css']
+	styleUrls: ['./transaction-details.component.css'],
+	imports: [
+		AmountSplitPipe,
+		ClipboardModule,
+		CommonModule,
+		DatePipe,
+		DecimalPipe,
+		NanoAccountIdComponent,
+		NanoIdenticonComponent,
+		RaiPipe,
+		RouterLink
+	]
 })
+
 export class TransactionDetailsComponent implements OnInit {
-	nano = 1000000000000000000000000;
+	private walletService = inject(WalletService)
+	private route = inject(ActivatedRoute)
+	private router = inject(Router)
+	private addressBook = inject(AddressBookService)
+	private api = inject(ApiService)
+	private notifications = inject(NotificationService)
+	private translocoService = inject(TranslocoService)
 
-	routerSub = null;
-	transaction: any = {};
-	hashID = '';
-	blockType = '';
-	loadingBlock = false;
-	isStateBlock = true;
-	isUnconfirmedBlock = false;
-	blockHeight = -1;
+	settings = inject(AppSettingsService)
 
-	toAccountID = '';
-	fromAccountID = '';
-	toAddressBook = '';
-	fromAddressBook = '';
+	routerSub = null
+	transaction: any = {}
+	hashID = ''
+	blockType = ''
+	loadingBlock = false
+	isStateBlock = true
+	isUnconfirmedBlock = false
+	blockHeight = -1
 
-	transactionJSON = '';
-	showBlockData = false;
+	toAccountID = ''
+	fromAccountID = ''
+	toAddressBook = ''
+	fromAddressBook = ''
 
-	amountRaw = new BigNumber(0);
-	successorHash = '';
+	transactionJSON = ''
+	showBlockData = false
 
-	constructor (
-		private walletService: WalletService,
-		private route: ActivatedRoute,
-		private router: Router,
-		private addressBook: AddressBookService,
-		private api: ApiService,
-		private notifications: NotificationService,
-		public settings: AppSettingsService,
-		private translocoService: TranslocoService
-	) { }
+	amount = 0n
+	successorHash = ''
 
 	async ngOnInit () {
 		this.routerSub = this.router.events.subscribe(event => {
@@ -54,11 +68,13 @@ export class TransactionDetailsComponent implements OnInit {
 				this.loadTransaction()
 			}
 		})
-
 		await this.loadTransaction()
 	}
 
 	async loadTransaction () {
+		const hash = this.route.snapshot.params.transaction
+		let legacyFromAccount = ''
+
 		this.toAccountID = ''
 		this.fromAccountID = ''
 		this.toAddressBook = ''
@@ -68,11 +84,9 @@ export class TransactionDetailsComponent implements OnInit {
 		this.isUnconfirmedBlock = false
 		this.blockHeight = -1
 		this.showBlockData = false
-		let legacyFromAccount = ''
 		this.blockType = ''
-		this.amountRaw = new BigNumber(0)
+		this.amount = 0n
 		this.successorHash = ''
-		const hash = this.route.snapshot.params.transaction
 		this.hashID = hash
 
 		this.loadingBlock = true
@@ -90,7 +104,7 @@ export class TransactionDetailsComponent implements OnInit {
 
 		this.transactionJSON = JSON.stringify(hashData.contents, null, 4)
 
-		this.isUnconfirmedBlock = (hashData.confirmed === 'false') ? true : false
+		this.isUnconfirmedBlock = hashData.confirmed === 'false'
 		this.blockHeight = hashData.height
 
 		const HASH_ONLY_ZEROES = '0000000000000000000000000000000000000000000000000000000000000000'
@@ -110,12 +124,12 @@ export class TransactionDetailsComponent implements OnInit {
 					this.blockType = prevData.contents.type
 					legacyFromAccount = prevData.source_account
 				} else {
-					const prevBalance = new BigNumber(prevData.contents.balance)
-					const curBalance = new BigNumber(hashData.contents.balance)
-					const balDifference = curBalance.minus(prevBalance)
-					if (balDifference.isNegative()) {
+					const prevBalance = BigInt(prevData.contents.balance)
+					const curBalance = BigInt(hashData.contents.balance)
+					const balDifference = curBalance - prevBalance
+					if (balDifference < 0n) {
 						this.blockType = 'send'
-					} else if (balDifference.isZero()) {
+					} else if (balDifference === 0n) {
 						this.blockType = 'change'
 					} else {
 						this.blockType = 'receive'
@@ -126,20 +140,14 @@ export class TransactionDetailsComponent implements OnInit {
 			this.blockType = blockType
 			this.isStateBlock = false
 		}
-
 		if (hashData.amount) {
-			this.amountRaw = new BigNumber(hashData.amount).mod(this.nano)
+			this.amount = BigInt(hashData.amount)
 		}
-
-		if (
-			(hashData.successor != null)
-			&& (hashData.successor !== HASH_ONLY_ZEROES)
-		) {
+		if (hashData.successor != null && hashData.successor !== HASH_ONLY_ZEROES) {
 			this.successorHash = hashData.successor
 		}
 
 		this.transaction = hashData
-
 		let fromAccount = ''
 		let toAccount = ''
 		switch (this.blockType) {
@@ -161,44 +169,37 @@ export class TransactionDetailsComponent implements OnInit {
 		if (legacyFromAccount) {
 			fromAccount = legacyFromAccount
 		}
-
 		this.toAccountID = toAccount
 		this.fromAccountID = fromAccount
-
 		this.fromAddressBook = (
 			this.addressBook.getAccountName(fromAccount)
 			|| this.getAccountLabel(fromAccount, null)
 		)
-
 		this.toAddressBook = (
 			this.addressBook.getAccountName(toAccount)
 			|| this.getAccountLabel(toAccount, null)
 		)
-
 		this.loadingBlock = false
 	}
 
 	getAccountLabel (accountID, defaultLabel) {
 		const walletAccount = this.walletService.wallet.accounts.find(a => a.id === accountID)
-
 		if (walletAccount == null) {
 			return defaultLabel
 		}
-
 		return (this.translocoService.translate('general.account') + ' #' + walletAccount.index)
 	}
 
 	getBalanceFromHex (balance) {
-		return new BigNumber(balance, 16)
+		return BigInt(`0x${balance}`)
 	}
 
 	getBalanceFromDec (balance) {
-		return new BigNumber(balance, 10)
+		return BigInt(balance)
 	}
 
 	copied () {
 		this.notifications.removeNotification('success-copied')
 		this.notifications.sendSuccess(`Successfully copied to clipboard!`, { identifier: 'success-copied' })
 	}
-
 }

@@ -248,16 +248,16 @@
 	class="import-panel-navigation"
 	*ngIf="( (activePanel === panels.import) || (activePanel === panels.mnemonicTypeSelection) )"
 	(click)="
-      (
-          (activePanel === panels.import)
-        && (
-             (selectedImportOption === 'mnemonic')
-          || (selectedImportOption === 'bip39-mnemonic')
-        )
-      )
-    ? setPanel(panels.mnemonicTypeSelection)
-    : setPanel(panels.landing)
-  "
+		(
+			(activePanel === panels.import)
+			&& (
+				(selectedImportOption === 'mnemonic')
+				|| (selectedImportOption === 'bip39-mnemonic')
+			)
+		)
+			? setPanel(panels.mnemonicTypeSelection)
+			: setPanel(panels.landing)
+	"
 >
 	<span uk-icon="icon: arrow-left; ratio: 1.5;"></span>
 	<span class="label">Back</span>
@@ -361,7 +361,7 @@
 			<div uk-icon="icon: info; ratio: 2;"></div>
 		</div>
 		<p style="max-width: 580px;">
-			<b>Note:</b> A private key provides access to exactly one account.<br>To import a multi-account secret recovery seed instead, <a
+			<b>Note:</b>A private key provides access to exactly one account.<br>To import a multi-account secret recovery seed instead, <a
 				class="inline-link"
 				(click)="selectedImportOption = 'seed';"
 			>click here</a>
@@ -389,7 +389,7 @@
 		>
 			<div class="uk-width-1-1">
 				<h3>Import Secret Recovery Seed</h3>
-				<p>Enter your secret recovery seed below.</p>
+				<p> Enter your secret recovery seed below.</p>
 				<div class="uk-inline uk-width-1-1">
 					<a
 						class="uk-form-icon uk-form-icon-flip"
@@ -529,7 +529,7 @@
 							href="https://docs.nault.cc/2020/08/04/ledger-guide.html"
 							target="_blank"
 							rel="noopener noreferrer"
-						>Ledger/Gnault User Guide and Troubleshooting</a></p>
+						>Ledger/Nault User Guide and Troubleshooting</a></p>
 					<br>
 				</div>
 				<div *ngIf="!ledgerService.supportsUSB">
@@ -538,7 +538,7 @@
 							<div uk-icon="icon: warning; ratio: 2;"></div>
 						</div>
 						<p>
-							<b>Unsupported Browser</b><br>It looks like your browser does not support USB communication. Recommended browsers are: Chrome, Edge, Brave, or Opera.<br>Note: iOS is currently unsupported. On Mac, use any browser other than Safari.
+							<b>Unsupported Browser</b><br>It looks like your browser does not support USB communication. Recommended browsers are: Chrome, Edge, Brave, or Opera.<br> Note: iOS is currently unsupported. On Mac, use any browser other than Safari.
 						</p>
 					</div>
 				</div>
@@ -793,40 +793,42 @@
 		<h3 class="uk-card-title">{{ 'configure-wallet.set-wallet-password.set-wallet-password' | transloco }}</h3>
 	</div>
 	<div class="uk-card-body">
-		<p>
-			{{ 'configure-wallet.set-wallet-password.choose-a-wallet-password-that-will-be-used-to-unlock-this-application' | transloco }}
-		</p>
-		<p>
-			{{ 'configure-wallet.set-wallet-password.while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted' | transloco }}
-		</p>
+		<p>{{ 'configure-wallet.set-wallet-password.choose-a-wallet-password-that-will-be-used-to-unlock-this-application' | transloco }}</p>
+		<p>{{ 'configure-wallet.set-wallet-password.while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted' | transloco }}</p>
 		<p>{{ 'configure-wallet.set-wallet-password.for-the-safety-of-your-funds-use-a-secure-password' | transloco }}</p>
 		<br>
 		<div uk-grid>
 			<div class="uk-width-1-2@m">
 				<input
 					type="password"
-					class="uk-input"
+					minlength="6"
+					class="uk-input form-control"
 					[(ngModel)]="walletPasswordModel"
 					placeholder="New Wallet Password"
+					(input)="validatePassword=false;"
+					(focusout)="validatePassword=true;"
 				>
-				<!-- <password-strength-meter *ngIf="walletPasswordModel.length > 0" [password]="walletPasswordModel" [enableFeedback]="true" [minPasswordLength]="6"></password-strength-meter> -->
 				<span
 					class="password-helper"
-					*ngIf="walletPasswordModel.length > 0 && walletPasswordModel.length < 6"
+					*ngIf="validatePassword && walletPasswordModel.length > 0 && walletPasswordModel.length < 6"
 				>{{ 'configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long' | transloco: { minCharacters: 6 } }}</span>
-				<span
-					class="password-helper"
-					*ngIf="walletPasswordConfirmModel.length >= 6 && walletPasswordModel !== walletPasswordConfirmModel"
-				>{{ 'configure-wallet.set-wallet-password.errors.passwords-do-not-match' | transloco }}</span>
 			</div>
 			<div class="uk-width-1-2@m">
 				<input
 					type="password"
-					class="uk-input"
-					(keyup.enter)="saveWalletPassword()"
+					minlength="6"
+					class="uk-input form-control"
 					[(ngModel)]="walletPasswordConfirmModel"
 					placeholder="Confirm Wallet Password"
+					[disabled]="(walletPasswordModel.length < 6 && walletPasswordConfirmModel.length == 0)"
+					(keyup.enter)="saveWalletPassword()"
+					(input)="validatePasswordConfirm=false;"
+					(focusout)="validatePasswordConfirm=walletPasswordConfirmModel.length>0;"
 				>
+				<span
+					class="password-helper"
+					*ngIf="(validatePasswordConfirm || walletPasswordModel.length <= walletPasswordConfirmModel.length) && walletPasswordModel !== walletPasswordConfirmModel"
+				>{{ 'configure-wallet.set-wallet-password.errors.passwords-do-not-match' | transloco }}</span>
 			</div>
 		</div>
 	</div>

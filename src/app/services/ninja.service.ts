@@ -1,42 +1,40 @@
-import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { NotificationService } from './notification.service'
-import { UtilService } from './util.service'
+import { inject } from '@angular/core'
+import { NotificationService, UtilService } from 'app/services'
 
-@Injectable()
 export class NinjaService {
+	private http = inject(HttpClient)
+	private notifications = inject(NotificationService)
+	private util = inject(UtilService)
 
-	// URL to MyNanoNinja-compatible representative health check API
+	// URL to representative health check API
 	// set to empty string to disable
-	ninjaUrl = '';
+	ninjaUrl = 'https://node.somenano.com/proxy'
 
 	// null - loading, false - offline, true - online
-	status = null;
+	status = null
 
-	constructor (private http: HttpClient, private notifications: NotificationService, private util: UtilService) { }
-
-	private async request (action): Promise<any> {
+	async recommended (): Promise<any> {
 		if (this.ninjaUrl === '') {
 			return Promise.resolve(null)
 		}
-
-		return await this.http.get(this.ninjaUrl + action).toPromise()
-			.then(res => {
-				return res
-			})
-			.catch(err => {
-				return
-			})
+		this.http.post(this.ninjaUrl, { action: 'representatives_online' }).subscribe(res => {
+			return res
+		})
 	}
 
-	private randomizeByScore (replist: any) {
+	async recommendedRandomized (): Promise<any> {
+		const onlineReps = await this.recommended()
+		if (onlineReps == null) {
+			return []
+		}
 
 		const scores = {}
-		const newlist = []
+		const shuffledReps = []
 
-		for (const account of replist) {
-			scores[account.score] = scores[account.score] || []
-			scores[account.score].push(account)
+		for (const onlineRep of onlineReps) {
+			scores[onlineRep.score] = scores[onlineRep.score] || []
+			scores[onlineRep.score].push(onlineRep)
 		}
 
 		for (const score in scores) {
@@ -45,31 +43,17 @@ export class NinjaService {
 				accounts = this.util.array.shuffle(accounts)
 
 				for (const account of accounts) {
-					newlist.unshift(account)
+					shuffledReps.unshift(account)
 				}
 			}
 		}
 
-		return newlist
-	}
-
-	async recommended (): Promise<any> {
-		return await this.request('accounts/verified')
-	}
-
-	async recommendedRandomized (): Promise<any> {
-		const replist = await this.recommended()
-
-		if (replist == null) {
-			return []
-		}
-
-		return this.randomizeByScore(replist)
+		return shuffledReps
 	}
 
 	async getSuggestedRep (): Promise<any> {
-		const replist = await this.recommendedRandomized()
-		return replist[0]
+		const randomReps = await this.recommendedRandomized()
+		return randomReps[0]
 	}
 
 	// Expected to return:
@@ -82,18 +66,17 @@ export class NinjaService {
 
 		const REQUEST_TIMEOUT_MS = 10000
 
+		const options = {
+			action: "account_info",
+			account: account,
+			receivable: true,
+			representative: true,
+			weight: true
+		}
 		const successPromise =
-			this.http.get(this.ninjaUrl + 'accounts/' + account).toPromise()
-				.then(res => {
-					return res
-				})
-				.catch(err => {
-					if (err.status === 404) {
-						return false
-					}
-
-					return null
-				})
+			this.http.post(this.ninjaUrl, options).subscribe(res => {
+				return res
+			})
 
 		const timeoutPromise =
 			new Promise(resolve => {
@@ -110,5 +93,4 @@ export class NinjaService {
 			timeoutPromise
 		])
 	}
-
 }

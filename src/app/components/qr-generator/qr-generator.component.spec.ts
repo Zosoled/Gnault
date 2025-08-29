@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { QrGeneratorComponent } from './qr-generator.component'
+import { QrGeneratorComponent } from 'app/components'
 
 describe('QrGeneratorComponent', () => {
 	let component: QrGeneratorComponent

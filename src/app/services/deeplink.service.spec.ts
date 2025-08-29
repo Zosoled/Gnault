@@ -1,6 +1,5 @@
 import { TestBed, inject } from '@angular/core/testing'
-
-import { DeeplinkService } from './deeplink.service'
+import { DeeplinkService } from 'app/services'
 
 describe('DeeplinkService', () => {
 	beforeEach(() => {

@@ -1,6 +1,5 @@
 import { TestBed, inject } from '@angular/core/testing'
-
-import { AppSettingsService } from './app-settings.service'
+import { AppSettingsService } from 'app/services'
 
 describe('AppSettingsService', () => {
 	beforeEach(() => {

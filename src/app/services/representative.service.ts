@@ -1,10 +1,14 @@
-import { Injectable } from '@angular/core'
+import { inject } from '@angular/core'
+import { Tools } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
-import { BaseApiAccount, WalletApiAccount, WalletService } from './wallet.service'
-import BigNumber from 'bignumber.js'
-import { ApiService } from './api.service'
-import { UtilService } from './util.service'
-import { NinjaService } from './ninja.service'
+import {
+	ApiService,
+	BaseApiAccount,
+	NinjaService,
+	UtilService,
+	WalletApiAccount,
+	WalletService
+} from 'app/services'
 
 export interface RepresentativeStatus {
 	online: boolean
@@ -20,13 +24,13 @@ export interface RepresentativeStatus {
 	warn: boolean
 	known: boolean
 	daysSinceLastVoted: number
-	uptime: number
+	uptime: string
 	score: number
 }
 
 export interface RepresentativeOverview {
 	id: string
-	weight: BigNumber
+	weight: bigint
 	accounts: WalletApiAccount[]
 }
 
@@ -37,55 +41,51 @@ export interface StoredRepresentative {
 	trusted?: boolean
 }
 
-
 export interface RepresentativeApiOverview extends BaseApiAccount {
 	account: string
 	accounts: WalletApiAccount[]
-	delegatedWeight: BigNumber
+	delegatedWeight: bigint
 }
 
 export interface FullRepresentativeOverview extends RepresentativeApiOverview {
 	id: string
-	percent: BigNumber
+	percent: number
 	statusText: string
 	label: string | null
 	status: RepresentativeStatus
 	donationAddress?: string
 }
 
-
-@Injectable()
 export class RepresentativeService {
-	storeKey = `nanovault-representatives`;
+	private wallet = inject(WalletService)
+	private api = inject(ApiService)
+	private util = inject(UtilService)
+	private ninja = inject(NinjaService)
 
-	representatives$ = new BehaviorSubject([]);
-	representatives = [];
+	storeKey = `nanovault-representatives`
 
-	walletReps$ = new BehaviorSubject([null]);
-	walletReps = [];
+	// Default representatives list
+	defaultRepresentatives = []
 
-	changeableReps$ = new BehaviorSubject([]);
-	changeableReps = [];
+	representatives$ = new BehaviorSubject([])
+	representatives = this.defaultRepresentatives
 
-	onlineStakeTotal = new BigNumber(115202418);
+	walletReps$ = new BehaviorSubject([null])
+	walletReps = []
 
-	loaded = false;
+	changeableReps$ = new BehaviorSubject([])
+	changeableReps = []
 
-	constructor (
-		private wallet: WalletService,
-		private api: ApiService,
-		private util: UtilService,
-		private ninja: NinjaService
-	) {
-		this.representatives = this.defaultRepresentatives
-	}
+	onlineStakeTotal = 115202418
+
+	loaded = false
 
 	/**
 	 * Determine if any accounts in the wallet need a rep change
 	 * @returns {Promise<FullRepresentativeOverview[]>}
 	 */
 	async detectChangeableReps (cachedReps?: FullRepresentativeOverview[]): Promise<FullRepresentativeOverview[]> {
-		const representatives = cachedReps ? cachedReps : await this.getRepresentativesOverview()
+		const representatives = cachedReps ?? await this.getRepresentativesOverview()
 
 		// Now based on some of their properties, we filter them out
 		const needsChange = []
@@ -124,8 +124,9 @@ export class RepresentativeService {
 		const onlineReps = await this.getOnlineRepresentatives()
 		const quorum = await this.api.confirmationQuorum()
 
-		const online_stake_total = quorum ? this.util.nano.rawToMnano(quorum.online_stake_total) : null
-		this.onlineStakeTotal = online_stake_total ? new BigNumber(online_stake_total) : null
+		this.onlineStakeTotal = quorum
+			? parseFloat(Tools.convert(quorum.online_stake_total, 'raw', 'mnano'))
+			: null
 
 		const allReps = []
 
@@ -134,9 +135,13 @@ export class RepresentativeService {
 			const repOnline = onlineReps.indexOf(representative.account) !== -1
 			const knownRep = this.getRepresentative(representative.account)
 			const knownRepNinja = await this.ninja.getAccount(representative.account)
+			console.log('knownRepNinja: ' + Object.getOwnPropertyNames(knownRepNinja))
+			// console.log('knownRepNinja: ' + JSON.stringify(knownRepNinja, null, 4))
 
-			const nanoWeight = this.util.nano.rawToMnano(representative.weight || 0)
-			const percent = this.onlineStakeTotal ? nanoWeight.div(this.onlineStakeTotal).times(100) : new BigNumber(0)
+			const nanoWeight = Tools.convert(representative.weight || 0n, 'raw', 'mnano')
+			const percent = this.onlineStakeTotal
+				? parseFloat(nanoWeight) / this.onlineStakeTotal * 100
+				: 0
 
 			const repStatus: RepresentativeStatus = {
 				online: repOnline,
@@ -160,12 +165,14 @@ export class RepresentativeService {
 			let status = 'none'
 			let label
 
-			if (percent.gte(3)) {
-				status = 'alert' // Has extremely high voting weight
+			if (percent > 3) {
+				// Has extremely high voting weight
+				status = 'alert'
 				repStatus.veryHighWeight = true
 				repStatus.changeRequired = true
-			} else if (percent.gte(2)) {
-				status = 'warn' // Has high voting weight
+			} else if (percent > 2) {
+				// Has high voting weight
+				status = 'warn'
 				repStatus.highWeight = true
 			}
 
@@ -180,23 +187,29 @@ export class RepresentativeService {
 
 			if (knownRep) {
 				// in the list of known representatives
-				status = status === 'none' ? 'ok' : status
+				status = status === 'none'
+					? 'ok'
+					: status
 				label = knownRep.name
 				repStatus.known = true
 				if (knownRep.trusted) {
-					status = 'trusted' // marked as trusted
+					// marked as trusted
+					status = 'trusted'
 					repStatus.trusted = true
 					repStatus.changeRequired = false
 					repStatus.warn = false
 				}
 				if (knownRep.warn) {
-					status = 'alert' // marked to avoid
+					// marked to avoid
+					status = 'alert'
 					repStatus.markedToAvoid = true
 					repStatus.warn = true
 					repStatus.changeRequired = true
 				}
 			} else if (knownRepNinja) {
-				status = status === 'none' ? 'ok' : status
+				if (status === 'none') {
+					status = 'ok'
+				}
 				label = knownRepNinja.alias
 			}
 
@@ -213,8 +226,8 @@ export class RepresentativeService {
 				let uptimeIntervalValue = knownRepNinja.uptime_over.week
 
 				// temporary fix for knownRepNinja.uptime_over.week always returning 0
-				// uptimeIntervalValue = knownRepNinja.uptime_over.month;
-				// uptimeIntervalDays = 30;
+				// uptimeIntervalValue = knownRepNinja.uptime_over.month
+				// uptimeIntervalDays = 30
 				// /temporary fix
 
 				// consider uptime value at least 1/<interval days> of daily uptime
@@ -231,36 +244,24 @@ export class RepresentativeService {
 				repStatus.uptime = uptimeIntervalValue
 				repStatus.score = knownRepNinja.score
 
-				const msSinceLastVoted = knownRepNinja.lastVoted ? (Date.now() - new Date(knownRepNinja.lastVoted).getTime()) : 0
-				repStatus.daysSinceLastVoted = Math.floor(msSinceLastVoted / 86400000)
-				if (uptimeIntervalValue === 0) {
-					// display a minimum of <interval days> if the uptime value is 0%
-					repStatus.daysSinceLastVoted = Math.max(repStatus.daysSinceLastVoted, uptimeIntervalDays)
-				}
-
-				if (uptimeIntervalValue < 50) {
+				if (repStatus.uptime && repStatus.uptime !== 'good') {
 					status = 'alert'
 					repStatus.veryLowUptime = true
 					repStatus.warn = true
 					repStatus.changeRequired = true
-				} else if (uptimeIntervalValue < 60) {
-					if (status !== 'alert') {
-						status = 'warn'
-					}
-					repStatus.lowUptime = true
-					repStatus.warn = true
 				}
 			} else if (knownRepNinja === false) {
 				// does not exist (404)
 				status = 'alert'
-				repStatus.uptime = 0
+				repStatus.uptime = 'bad'
 				repStatus.veryLowUptime = true
-				repStatus.daysSinceLastVoted = uptimeIntervalDays
 				repStatus.warn = true
 				repStatus.changeRequired = true
 			} else {
 				// any other api error
-				status = status === 'none' ? 'unknown' : status
+				if (status === 'none') {
+					status = 'unknown'
+				}
 			}
 
 			const additionalData = {
@@ -269,7 +270,7 @@ export class RepresentativeService {
 				statusText: status,
 				label: label,
 				status: repStatus,
-				donationAddress: knownRepNinja?.donation?.account,
+				donationAddress: knownRepNinja?.donation_address,
 			}
 
 			const fullRep = { ...representative, ...additionalData }
@@ -295,12 +296,12 @@ export class RepresentativeService {
 
 			const existingRep = representatives.find(rep => rep.id === account.representative)
 			if (existingRep) {
-				existingRep.weight = existingRep.weight.plus(new BigNumber(account.balance))
+				existingRep.weight += BigInt(account.balance)
 				existingRep.accounts.push(account)
 			} else {
 				const newRep = {
 					id: account.representative,
-					weight: new BigNumber(account.balance),
+					weight: BigInt(account.balance),
 					accounts: [account],
 				}
 				representatives.push(newRep)
@@ -319,7 +320,9 @@ export class RepresentativeService {
 		const reps = await this.api.representativesOnline()
 		if (!reps) return representatives
 		for (const representative in reps.representatives) {
-			if (!reps.representatives.hasOwnProperty(representative)) continue
+			if (!reps.representatives.hasOwnProperty(representative)) {
+				continue
+			}
 			representatives.push(reps.representatives[representative])
 		}
 
@@ -340,12 +343,10 @@ export class RepresentativeService {
 						res.account = rep.id
 						res.delegatedWeight = rep.weight
 						res.accounts = rep.accounts
-
 						return res
 					})
 			)
 		)
-
 		return repInfos
 	}
 
@@ -354,7 +355,9 @@ export class RepresentativeService {
 	 * @returns {StoredRepresentative[]}
 	 */
 	loadRepresentativeList (): StoredRepresentative[] {
-		if (this.loaded) return this.representatives
+		if (this.loaded) {
+			return this.representatives
+		}
 
 		let list = this.defaultRepresentatives
 		const representativeStore = localStorage.getItem(this.storeKey)
@@ -370,19 +373,17 @@ export class RepresentativeService {
 
 	patchXrbPrefixData () {
 		const representativeStore = localStorage.getItem(this.storeKey)
-		if (!representativeStore) return
-
+		if (!representativeStore) {
+			return
+		}
 		const list = JSON.parse(representativeStore)
-
 		const newRepList = list.map(entry => {
 			if (entry.id.indexOf('xrb_') !== -1) {
 				entry.id = entry.id.replace('xrb_', 'nano_')
 			}
 			return entry
 		})
-
 		localStorage.setItem(this.storeKey, JSON.stringify(newRepList))
-
 		return true
 	}
 
@@ -421,10 +422,10 @@ export class RepresentativeService {
 
 	deleteRepresentative (accountID): void {
 		const existingIndex = this.representatives.findIndex(a => a.id.toLowerCase() === accountID.toLowerCase())
-		if (existingIndex === -1) return
-
+		if (existingIndex === -1) {
+			return
+		}
 		this.representatives.splice(existingIndex, 1)
-
 		this.saveRepresentatives()
 		this.representatives$.next(this.representatives)
 	}
@@ -444,7 +445,6 @@ export class RepresentativeService {
 			}
 			return r
 		})
-
 		return weightedReps.sort((a, b) => b.weight - a.weight)
 	}
 
@@ -452,12 +452,7 @@ export class RepresentativeService {
 		return this.representatives.findIndex(a => a.name.toLowerCase() === name.toLowerCase()) !== -1
 	}
 
-	// Default representatives list
-	// eslint-disable-next-line @typescript-eslint/member-ordering
-	defaultRepresentatives = [];
-
 	// Bad representatives hardcoded to be avoided. Not visible in the user rep list
-	// eslint-disable-next-line @typescript-eslint/member-ordering
 	nfReps = [
 		{
 			id: 'nano_3arg3asgtigae3xckabaaewkx3bzsh7nwz7jkmjos79ihyaxwphhm6qgjps4',
@@ -491,6 +486,5 @@ export class RepresentativeService {
 			id: 'nano_1hza3f7wiiqa7ig3jczyxj5yo86yegcmqk3criaz838j91sxcckpfhbhhra1',
 			name: 'Nano Foundation #8',
 		},
-	];
-
+	]
 }

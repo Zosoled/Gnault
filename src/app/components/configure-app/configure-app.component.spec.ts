@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { ConfigureAppComponent } from './configure-app.component'
+import { ConfigureAppComponent } from 'app/components'
 
 describe('ConfigureAppComponent', () => {
 	let component: ConfigureAppComponent

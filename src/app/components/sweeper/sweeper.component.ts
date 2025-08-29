@@ -1,74 +1,90 @@
-import { Component, OnInit, ElementRef, ViewChild } from '@angular/core'
-import { WalletService } from '../../services/wallet.service'
-import { NotificationService } from '../../services/notification.service'
-import { ModalService } from '../../services/modal.service'
-import { ApiService } from '../../services/api.service'
-import { UtilService, TxType } from '../../services/util.service'
-import { WorkPoolService } from '../../services/work-pool.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { NanoBlockService } from '../../services/nano-block.service'
-import * as nanocurrency from 'nanocurrency'
-import { wallet } from 'nanocurrency-web'
-import * as bip39 from 'bip39'
+import { CommonModule } from '@angular/common'
+import { Component, OnInit, ElementRef, ViewChild, inject } from '@angular/core'
+import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
+import { Account, Block, Tools, Wallet } from 'libnemo'
+import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
+import {
+	ApiService,
+	AppSettingsService,
+	ModalService,
+	NanoBlockService,
+	NotificationService,
+	TxType,
+	UtilService,
+	WalletService,
+	WorkPoolService
+} from 'app/services'
 
-const INDEX_MAX = 4294967295 // seed index
-const SWEEP_MAX_INDEX = 100 // max index keys to sweep
-const SWEEP_MAX_PENDING = 100 // max pending blocks to process per run
+// seed index
+const INDEX_MAX = 4294967295
+// max index keys to sweep
+const SWEEP_MAX_INDEX = 100
+// max receivable blocks to process per run
+const SWEEP_MAX_RECEIVABLE = 100
 
 @Component({
 	selector: 'app-sweeper',
 	templateUrl: './sweeper.component.html',
 	styleUrls: ['./sweeper.component.css'],
+	imports: [
+		AmountSplitPipe,
+		CommonModule,
+		FormsModule,
+		RaiPipe,
+		SqueezePipe
+	]
 })
 
 export class SweeperComponent implements OnInit {
-	accounts = this.walletService.wallet.accounts;
-	indexMax = INDEX_MAX;
-	incomingMax = SWEEP_MAX_PENDING;
+	private walletService = inject(WalletService)
+	private notificationService = inject(NotificationService)
+	private appSettings = inject(AppSettingsService)
+	private api = inject(ApiService)
+	private workPool = inject(WorkPoolService)
+	private nanoBlock = inject(NanoBlockService)
+	private util = inject(UtilService)
+	private route = inject(Router)
 
-	myAccountModel = this.accounts.length > 0 ? this.accounts[0].id : '0';
-	sourceWallet = '';
-	destinationAccount = this.accounts.length > 0 ? this.accounts[0].id : '';
-	startIndex = '0';
-	endIndex = '5';
-	maxIncoming = SWEEP_MAX_PENDING.toString();
+	modal = inject(ModalService)
+	settings = inject(AppSettingsService)
 
-	output = '';
-	sweeping = false;
-	pubKey = '';
-	adjustedBalance = '0';
-	representative = '';
-	privKey = '';
-	previous = '';
-	subType = '';
-	blocks = [];
-	keys = [];
-	keyCount = 0;
-	pendingCallback = null;
-	totalSwept = '0';
-	customAccountSelected = this.accounts.length === 0;
+	accounts = this.walletService.wallet.accounts
+	indexMax = INDEX_MAX
+	incomingMax = SWEEP_MAX_RECEIVABLE
 
-	validSeed = false;
-	validDestination = this.myAccountModel !== '0' ? true : false;
-	validStartIndex = true;
-	validEndIndex = true;
-	validMaxIncoming = true;
-	selAccountInit = false;
+	myAccountModel = this.accounts[0]?.id ?? '0'
+	sourceWallet = ''
+	destinationAccount = this.accounts[0]?.id ?? ''
+	startIndex = '0'
+	endIndex = '5'
+	maxIncoming = SWEEP_MAX_RECEIVABLE.toString()
+
+	output = ''
+	sweeping = false
+	pubKey = ''
+	adjustedBalance = '0'
+	representative = ''
+	privKey = ''
+	previous = ''
+	subType = ''
+	blocks = []
+	keys = []
+	keyCount = 0
+	pendingCallback = null
+	totalSwept = '0'
+	customAccountSelected = this.accounts.length === 0
+
+	validSeed = false
+	validDestination = this.myAccountModel !== '0'
+	validStartIndex = true
+	validEndIndex = true
+	validMaxIncoming = true
+	selAccountInit = false
 
 	@ViewChild('outputarea') logArea: ElementRef
 
-	constructor (
-		private walletService: WalletService,
-		private notificationService: NotificationService,
-		private appSettings: AppSettingsService,
-		public modal: ModalService,
-		private api: ApiService,
-		private workPool: WorkPoolService,
-		public settings: AppSettingsService,
-		private nanoBlock: NanoBlockService,
-		private util: UtilService,
-		private route: Router) {
+	constructor () {
 		if (this.route.getCurrentNavigation().extras.state && this.route.getCurrentNavigation().extras.state.seed) {
 			this.sourceWallet = this.route.getCurrentNavigation().extras.state.seed
 			this.validSeed = true
@@ -79,7 +95,7 @@ export class SweeperComponent implements OnInit {
 		// Update selected account if changed in the sidebar
 		this.walletService.wallet.selectedAccount$.subscribe(async acc => {
 			if (this.selAccountInit) {
-				this.myAccountModel = acc ? acc.id : (this.accounts.length > 0 ? this.accounts[0].id : '0')
+				this.myAccountModel = acc?.id ?? this.accounts[0]?.id ?? '0'
 			}
 			this.selAccountInit = true
 		})
@@ -127,9 +143,9 @@ export class SweeperComponent implements OnInit {
 		}
 	}
 
-	// set max value for pending limit
+	// set max value for receivable limit
 	setMaxIncoming () {
-		this.maxIncoming = SWEEP_MAX_PENDING.toString()
+		this.maxIncoming = SWEEP_MAX_RECEIVABLE.toString()
 	}
 
 	seedChange (seed) {
@@ -141,63 +157,42 @@ export class SweeperComponent implements OnInit {
 	}
 
 	destinationChange (address) {
-		if (nanocurrency.checkAddress(address)) {
+		try {
+			Account.load(address)
 			this.validDestination = true
-		} else {
+		} catch {
 			this.validDestination = false
 		}
 	}
 
 	startIndexChange (index) {
-		let invalid = false
-		if (this.util.string.isNumeric(index) && index % 1 === 0) {
-			index = parseInt(index, 10)
-			if (!nanocurrency.checkIndex(index)) {
-				invalid = true
-			}
-			if (index > INDEX_MAX) {
-				invalid = true
-			}
-		} else {
-			invalid = true
-		}
-		if (invalid) {
+		index = parseInt(index, 10)
+		if (index < 0 || index > INDEX_MAX) {
 			this.validStartIndex = false
 			return
 		}
+		this.validStartIndex = true
 		// check end index
 		if (this.validEndIndex) {
 			if (parseInt(this.endIndex, 10) > index + SWEEP_MAX_INDEX) {
 				this.endIndex = (index + SWEEP_MAX_INDEX).toString()
 			}
 		}
-		this.validStartIndex = true
 	}
 
 	endIndexChange (index) {
-		let invalid = false
-		if (this.util.string.isNumeric(index) && index % 1 === 0) {
-			index = parseInt(index, 10)
-			if (!nanocurrency.checkIndex(index)) {
-				invalid = true
-			}
-			if (index > INDEX_MAX) {
-				invalid = true
-			}
-		} else {
-			invalid = true
-		}
-		if (invalid) {
+		index = parseInt(index, 10)
+		if (Number.isNaN(index) || index < 0 || index > INDEX_MAX) {
 			this.validEndIndex = false
 			return
 		}
+		this.validEndIndex = true
 		// check end index
 		if (this.validStartIndex) {
 			if (parseInt(this.startIndex, 10) < index - SWEEP_MAX_INDEX) {
 				this.startIndex = (index - SWEEP_MAX_INDEX).toString()
 			}
 		}
-		this.validEndIndex = true
 	}
 
 	maxIncomingChange (value) {
@@ -206,7 +201,7 @@ export class SweeperComponent implements OnInit {
 			return
 		} else {
 			value = parseInt(value, 10)
-			if (value > SWEEP_MAX_PENDING) {
+			if (value > SWEEP_MAX_RECEIVABLE) {
 				this.validMaxIncoming = false
 				return
 			}
@@ -216,24 +211,22 @@ export class SweeperComponent implements OnInit {
 	}
 
 	// Validate type of master key. Seed and private key can't be differentiated
-	checkMasterKey (key) {
+	async checkMasterKey (key) {
 		// validate nano seed or private key
-		if (key.length === 64) {
-			if (nanocurrency.checkSeed(key)) {
-				return 'nano_seed'
-			}
+		if (/^[A-F0-9]{64}$/i.test(key)) {
+			return 'nano_seed'
 		}
 		// validate bip39 seed
-		if (key.length === 128) {
-			if (this.util.hex.isHex(key)) {
-				return 'bip39_seed'
-			}
+		if (/^[A-F0-9]{128}$/i.test(key)) {
+			return 'bip39_seed'
 		}
 		// validate mnemonic
-		if (bip39.validateMnemonic(key)) {
+		try {
+			await Wallet.load('BLAKE2b', '', key)
 			return 'mnemonic'
+		} catch (err) {
+			return null
 		}
-		return false
 	}
 
 	// Append row to log output
@@ -249,53 +242,50 @@ export class SweeperComponent implements OnInit {
 
 	// Process final send block
 	async processSend (privKey, previous, sendCallback) {
-		const pubKey = nanocurrency.derivePublicKey(privKey)
-		const address = nanocurrency.deriveAddress(pubKey, { useNanoPrefix: true })
+		const account = await Account.load(privKey, 'private')
+		const destinationAccount = Account.load(this.destinationAccount)
 
 		// make an extra check on valid destination
-		if (this.validDestination && nanocurrency.checkAddress(this.destinationAccount)) {
-			this.appendLog('Transfer started: ' + address)
+		if (this.validDestination) {
+			this.appendLog('Transfer started: ' + account.address)
 			const work = await this.workPool.getWork(previous, 1) // send threshold
 			// create the block with the work found
-			const block = nanocurrency.createBlock(privKey, {
-				balance: '0', representative: this.representative,
-				work: work, link: this.destinationAccount, previous: previous
-			})
-			// replace xrb with nano (old library)
-			block.block.account = block.block.account.replace('xrb', 'nano')
-			block.block.link_as_account = block.block.link_as_account.replace('xrb', 'nano')
+			const block = await new Block(account.address, '0', this.representative, previous)
+				.send(destinationAccount.address, '0')
+				.pow(work)
+			await block.sign(account.privateKey)
 
 			// publish block for each iteration
-			const data = await this.api.process(block.block, TxType.send)
+			const data = await this.api.process(block.toJSON(), TxType.send)
 			if (data.hash) {
 				const blockInfo = await this.api.blockInfo(data.hash)
-				let nanoAmountSent = null
-				if (blockInfo.amount) {
-					nanoAmountSent = this.util.nano.rawToMnano(blockInfo.amount)
-					this.totalSwept = this.util.big.add(this.totalSwept, nanoAmountSent)
-				}
-				this.notificationService.sendInfo('Account ' + address + ' was swept and ' +
-					(nanoAmountSent ? ('Ӿ' + nanoAmountSent.toString(10)) : '') + ' transferred to ' + this.destinationAccount, { length: 15000 })
-				this.appendLog('Funds transferred ' + (nanoAmountSent ? ('(Ӿ' + nanoAmountSent.toString(10) + ')') : '') + ': ' + data.hash)
-				console.log(this.adjustedBalance + ' raw transferred to ' + this.destinationAccount)
+				const nanoAmountSent = blockInfo?.amount ?? 0n
+				this.totalSwept += nanoAmountSent
+
+				this.notificationService.sendInfo(
+					`Account ${account.address} was swept and ${'Ӿ' + nanoAmountSent.toString(10)} transferred to ${this.destinationAccount}`,
+					{ length: 15000 }
+				)
+				this.appendLog(`Funds transferred (Ӿ${nanoAmountSent.toString(10)}): ${data.hash}`)
+				console.log(`${this.adjustedBalance} raw transferred to ${this.destinationAccount}`)
 			} else {
-				this.notificationService.sendWarning(`Failed processing block.`)
-				this.appendLog('Failed processing block: ' + data.error)
+				this.notificationService.sendWarning('Failed processing block.')
+				this.appendLog(`Failed processing block: ${data.error}`)
 			}
 			sendCallback()
 		} else {
-			this.notificationService.sendError(`The destination address is not valid.`)
+			this.notificationService.sendError('The destination address is not valid.')
 			sendCallback()
 		}
 	}
 
-	// For each pending block
-	async processPending (blocks, keys, keyCount) {
+	// For each receivable block
+	async processReceivable (blocks, keys, keyCount) {
 		const key = keys[keyCount]
 		this.blocks = blocks
 		this.keys = keys
 		this.keyCount = keyCount
-		this.adjustedBalance = this.util.big.add(this.adjustedBalance, blocks[key].amount)
+		this.adjustedBalance += blocks[key].amount
 
 		// generate local work
 		try {
@@ -309,31 +299,38 @@ export class SweeperComponent implements OnInit {
 			}
 			const work = await this.workPool.getWork(workInputHash, 1 / 64) // receive threshold
 			// create the block with the work found
-			const block = nanocurrency.createBlock(this.privKey, {
-				balance: this.adjustedBalance, representative: this.representative,
-				work: work, link: key, previous: this.previous
-			})
-			// replace xrb with nano (old library)
-			block.block.account = block.block.account.replace('xrb', 'nano')
-			block.block.link_as_account = block.block.link_as_account.replace('xrb', 'nano')
+			const block = await new Block(
+				this.destinationAccount,
+				this.adjustedBalance,
+				this.previous,
+				this.representative
+			)
+				.receive(key, 0)
+				.sign(this.privKey)
+			await block.pow()
 			// new previous
 			this.previous = block.hash
 
 			// publish block for each iteration
-			const data = await this.api.process(block.block, this.subType === 'open' ? TxType.open : TxType.receive)
+			const data = await this.api.process(
+				block,
+				this.subType === 'open'
+					? TxType.open
+					: TxType.receive
+			)
 			if (data.hash) {
-				this.appendLog('Processed pending: ' + data.hash)
+				this.appendLog(`Processed receivable: ${data.hash}`)
 
-				// continue with the next pending
+				// continue with the next receivable
 				this.keyCount += 1
 				if (this.keyCount < this.keys.length) {
 					// if last block was open, the next one will be a receive
 					if (this.subType === 'open') {
 						this.subType = 'receive'
 					}
-					this.processPending(this.blocks, this.keys, this.keyCount)
-				} else { // all pending done, now we process the final send block
-					this.appendLog('All pending processed!')
+					this.processReceivable(this.blocks, this.keys, this.keyCount)
+				} else { // all receivable done, now we process the final send block
+					this.appendLog('All receivable processed!')
 					this.pendingCallback(this.previous)
 				}
 			} else {
@@ -352,31 +349,31 @@ export class SweeperComponent implements OnInit {
 		}
 	}
 
-	// Create pending blocks based on current balance and previous block (or start with an open block)
-	async createPendingBlocks (privKey, address, balance, previous, subType, callback, accountCallback) {
+	// Create receivable blocks based on current balance and previous block (or start with an open block)
+	async createReceivableBlocks (privKey, address, balance, previous, subType, callback, accountCallback) {
 		this.privKey = privKey
 		this.previous = previous
 		this.subType = subType
 		this.pendingCallback = callback
-		// check for pending first
+		// check for receivable first
 		let data = null
 		if (this.appSettings.settings.minimumReceive) {
-			const minAmount = this.util.nano.mnanoToRaw(this.appSettings.settings.minimumReceive).toString(10)
-			if (this.appSettings.settings.pendingOption === 'amount') {
-				data = await this.api.pendingLimitSorted(address, this.maxIncoming, minAmount)
+			const minAmount = Tools.convert(this.appSettings.settings.minimumReceive, 'mnano', 'raw')
+			if (this.appSettings.settings.receivableOption === 'amount') {
+				data = await this.api.receivableLimitSorted(address, this.maxIncoming, minAmount)
 			} else {
-				data = await this.api.pendingLimit(address, this.maxIncoming, minAmount)
+				data = await this.api.receivableLimit(address, this.maxIncoming, minAmount)
 			}
 
 		} else {
-			if (this.appSettings.settings.pendingOption === 'amount') {
-				data = await this.api.pendingSorted(address, this.maxIncoming)
+			if (this.appSettings.settings.receivableOption === 'amount') {
+				data = await this.api.receivableSorted(address, this.maxIncoming)
 			} else {
-				data = await this.api.pending(address, this.maxIncoming)
+				data = await this.api.receivable(address, this.maxIncoming)
 			}
 		}
 
-		// if there are any pending, process them
+		// if there are any receivable, process them
 		if (data.blocks) {
 			// sum all raw amounts
 			let raw = '0'
@@ -384,19 +381,19 @@ export class SweeperComponent implements OnInit {
 				raw = this.util.big.add(raw, data.blocks[key].amount)
 			}.bind(this))
 			const nanoAmount = this.util.nano.rawToMnano(raw)
-			const pending = { count: Object.keys(data.blocks).length, raw: raw, XNO: nanoAmount, blocks: data.blocks }
-			const row = 'Found ' + pending.count + ' pending containing total ' + pending.XNO + ' XNO'
+			const receivable = { count: Object.keys(data.blocks).length, raw: raw, XNO: nanoAmount, blocks: data.blocks }
+			const row = 'Found ' + receivable.count + ' receivable containing total ' + receivable.XNO + ' XNO'
 			this.appendLog(row)
 
-			// create receive blocks for all pending
+			// create receive blocks for all receivable
 			const keys = []
 			// create an array with all keys to be used recurively
-			Object.keys(pending.blocks).forEach(function (key) {
+			Object.keys(receivable.blocks).forEach(function (key) {
 				keys.push(key)
 			})
 
-			this.processPending(pending.blocks, keys, 0)
-		} else { // no pending, create final block directly
+			this.processReceivable(receivable.blocks, keys, 0)
+		} else { // no receivable, create final block directly
 			if (parseInt(this.adjustedBalance, 10) > 0) {
 				this.processSend(this.privKey, this.previous, () => {
 					accountCallback() // tell that we are ok to continue with next step
@@ -414,8 +411,8 @@ export class SweeperComponent implements OnInit {
 			return
 		}
 
-		this.pubKey = nanocurrency.derivePublicKey(privKey)
-		const address = nanocurrency.deriveAddress(this.pubKey, { useNanoPrefix: true })
+		const account = await Account.load(privKey, 'private')
+		this.pubKey = account.publicKey
 
 		// get account info required to build the block
 		let balance = 0 // balance will be 0 if open block
@@ -425,7 +422,7 @@ export class SweeperComponent implements OnInit {
 		let subType = 'open'
 
 		// retrive from RPC
-		const accountInfo = await this.api.accountInfo(address)
+		const accountInfo = await this.api.accountInfo(account.address)
 		let validResponse = false
 		// if frontier is returned it means the account has been opened and we create a receive block
 		if (accountInfo.frontier) {
@@ -441,8 +438,8 @@ export class SweeperComponent implements OnInit {
 			this.adjustedBalance = '0'
 		}
 		if (validResponse) {
-			// create and publish all pending
-			this.createPendingBlocks(privKey, address, balance, previous, subType, function (previous_) {
+			// create and publish all receivable
+			this.createReceivableBlocks(privKey, account.address, balance, previous, subType, function (previous_) {
 				// the previous is the last received block and will be used to create the final send block
 				if (parseInt(this.adjustedBalance, 10) > 0) {
 					this.processSend(privKey, previous_, () => {
@@ -467,7 +464,7 @@ export class SweeperComponent implements OnInit {
 		const privKey = privKeys[keyCount][0]
 		this.appendLog('Checking index ' + privKeys[keyCount][2] + ' using ' + privKeys[keyCount][1])
 		this.processAccount(privKey, function () {
-			// continue with the next pending
+			// continue with the next receivable
 			keyCount += 1
 			if (keyCount < privKeys.length) {
 				this.processIndexRecursive(privKeys, keyCount)
@@ -485,18 +482,27 @@ export class SweeperComponent implements OnInit {
 		this.sweeping = true
 		this.totalSwept = '0'
 
-		const keyType = this.checkMasterKey(this.sourceWallet)
+		const keyType = await this.checkMasterKey(this.sourceWallet)
 		if (this.validEndIndex && this.validStartIndex && this.validMaxIncoming) {
 			let seed = '', privKey
 			let bip39Seed = ''
 			// input is mnemonic
 			if (keyType === 'mnemonic') {
-				seed = bip39.mnemonicToEntropy(this.sourceWallet).toUpperCase()
-				bip39Seed = this.util.string.mnemonicToSeedSync(this.sourceWallet).toString('hex')
+				const wallet = await Wallet.load('BLAKE2b', '', this.sourceWallet)
+				await wallet.unlock('')
+				seed = bip39Seed = wallet.seed
 				// Seed must be 64 for regular nano blake derivation to happen
 				// For other lengths, only bip39/44 derivation is possible
-				if (seed.length !== 32 && seed.length !== 40 && seed.length !== 48 && seed.length !== 56 && seed.length !== 64) {
-					this.notificationService.sendError(`Mnemonic not 12,15,18,21 or 24 words`)
+				if (seed.length < 32) {
+					this.notificationService.sendError(`Mnemonic must be at least 12 words`)
+					return
+				}
+				if (seed.length > 64) {
+					this.notificationService.sendError(`Mnemonic must be no more than 64 words`)
+					return
+				}
+				if (seed.length % 8 !== 0) {
+					this.notificationService.sendError(`Mnemonic must be multiple of 3 words`)
 					return
 				}
 			}
@@ -508,26 +514,31 @@ export class SweeperComponent implements OnInit {
 				if (seed === '') { // seed from input, no mnemonic
 					seed = this.sourceWallet
 				}
-				this.processAccount(seed, function () {
+				this.processAccount(seed, async function () {
 					// done checking if private key, continue interpret as seed
 					const privKeys = []
 					// start with blake2b derivation (but not if the mnemonic is anything other than 24 words)
 					if (keyType !== 'bip39_seed' && seed.length === 64) {
-						for (let i = parseInt(this.startIndex, 10); i <= parseInt(this.endIndex, 10); i++) {
-							privKey = nanocurrency.deriveSecretKey(seed, i)
-							privKeys.push([privKey, 'blake2b', i])
+						const start = parseInt(this.startIndex, 10)
+						const end = parseInt(this.endIndex, 10)
+						const wallet = await Wallet.load('BLAKE2b', '', seed)
+						const accounts = await wallet.accounts(start, end)
+						for (const account of accounts) {
+							privKeys.push([account.privateKey, 'blake2b', account.index])
 						}
 					}
 					// also check all indexes using bip39/44 derivation
 					// take 128 char bip39 seed directly from input or convert it from a 64 char nano seed (entropy)
-					if (keyType === 'bip39_seed') {
-						bip39Seed = this.sourceWallet
-					} else if (seed.length === 64) {
-						bip39Seed = wallet.generate(seed).seed
+					if (keyType === 'bip39_seed' && seed.length === 128) {
+						const wallet = await Wallet.load('BIP-44', '', seed)
+						bip39Seed = wallet.seed
 					}
 
-					if (bip39Seed.length !== 128) return this.notificationService.sendError(`Invalid input format! Please check.`)
-					const accounts = wallet.accounts(bip39Seed, this.startIndex, this.endIndex)
+					if (bip39Seed.length !== 128) {
+						return this.notificationService.sendError(`Invalid input format! Please check.`)
+					}
+					const wallet = await Wallet.load('BIP-44', '', bip39Seed)
+					const accounts = await wallet.accounts(this.startIndex, this.endIndex)
 					let k = 0
 					for (let i = parseInt(this.startIndex, 10); i <= parseInt(this.endIndex, 10); i++) {
 						privKey = accounts[k].privateKey

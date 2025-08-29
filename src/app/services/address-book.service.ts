@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core'
 import { BehaviorSubject } from 'rxjs'
 
-
 interface AddressBookEntry {
 	account: string
 	name: string
@@ -9,15 +8,11 @@ interface AddressBookEntry {
 	trackTransactions: boolean
 }
 
-
 @Injectable()
 export class AddressBookService {
-	storeKey = `nanovault-addressbook`;
-
-	addressBook: AddressBookEntry[] = [];
-
-	addressBook$ = new BehaviorSubject([]);
-
+	storeKey = `nanovault-addressbook`
+	addressBook: AddressBookEntry[] = []
+	addressBook$ = new BehaviorSubject([])
 	constructor () { }
 
 	loadAddressBook () {

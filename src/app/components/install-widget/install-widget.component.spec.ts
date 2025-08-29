@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { InstallWidgetComponent } from './install-widget.component'
+import { InstallWidgetComponent } from 'app/components'
 
 describe('InstallWidgetComponent', () => {
 	let component: InstallWidgetComponent

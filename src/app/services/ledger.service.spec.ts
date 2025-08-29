@@ -1,6 +1,5 @@
 import { TestBed, inject } from '@angular/core/testing'
-
-import { LedgerService } from './ledger.service'
+import { LedgerService } from 'app/services'
 
 describe('LedgerService', () => {
 	beforeEach(() => {

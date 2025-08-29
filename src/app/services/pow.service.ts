@@ -1,10 +1,12 @@
-import { Injectable } from '@angular/core'
-import { AppSettingsService } from './app-settings.service'
-import { ApiService } from './api.service'
-import { NotificationService } from './notification.service'
+import { inject } from '@angular/core'
 import { NanoPow } from 'nano-pow'
-import { UtilService } from './util.service'
 import { BehaviorSubject } from 'rxjs'
+import {
+	AppSettingsService,
+	ApiService,
+	NotificationService,
+	UtilService
+} from 'app/services'
 
 type DeferredPromise = {
 	promise: Promise<any>
@@ -17,29 +19,26 @@ type PowQueueItem = {
 	promise: DeferredPromise,
 	multiplier: number,
 }
-const mod = window['Module']
+
 export const baseThreshold = 'fffffff800000000' // threshold since v21 epoch update
 const hardwareConcurrency = window.navigator.hardwareConcurrency || 2
 const workerCount = Math.max(hardwareConcurrency - 1, 1)
 export enum workState { 'success', 'cancelled', 'error' }
 
-@Injectable()
 export class PowService {
-	powAlertLimit = 60; // alert long pow after X sec
-	PoWPool = [];
-	parallelQueue = false;
-	processingQueueItem = false;
-	currentProcessTime = 0; // start timestamp for PoW
-	powAlert$: BehaviorSubject<boolean | false> = new BehaviorSubject(false);
-	public shouldContinueQueue = true; // set to false to disable further processing
-	shouldAbortGpuPow = false; // set to true to abort GPU pow
+	private appSettings = inject(AppSettingsService)
+	private api = inject(ApiService)
+	private notifications = inject(NotificationService)
+	private util = inject(UtilService)
 
-	constructor (
-		private appSettings: AppSettingsService,
-		private api: ApiService,
-		private notifications: NotificationService,
-		private util: UtilService
-	) { }
+	powAlertLimit = 60; // alert long pow after X sec
+	PoWPool = []
+	parallelQueue = false
+	processingQueueItem = false
+	currentProcessTime = 0; // start timestamp for PoW
+	powAlert$: BehaviorSubject<boolean | false> = new BehaviorSubject(false)
+	public shouldContinueQueue = true; // set to false to disable further processing
+	shouldAbortGpuPow = false
 
 	/**
 	 * Get PoW for a hash.  If it's already being processed, return the promise.
@@ -136,7 +135,7 @@ export class PowService {
 			queueItem.work = result.work
 			queueItem.promise.resolve(result)
 		} else {
-			// this.notifications.sendError(`Unable to generate work for ${queueItem.hash} using ${powSource}`);
+			// this.notifications.sendError(`Unable to generate work for ${queueItem.hash} using ${powSource}`)
 			queueItem.promise.reject(result)
 		}
 
@@ -152,9 +151,10 @@ export class PowService {
 	 */
 	async getPowFromServer (hash, multiplier, workServer = '') {
 		const newThreshold = this.util.nano.difficultyFromMultiplier(multiplier, baseThreshold)
-		const serverString = workServer === '' ? 'external' : 'custom'
-		console.log('Generating work with multiplier ' + multiplier + ' at threshold ' +
-			newThreshold + ' using ' + serverString + ' server for hash: ', hash)
+		const serverString = workServer === ''
+			? 'external'
+			: 'custom'
+		console.log(`Generating work with multiplier ${multiplier} at threshold ${newThreshold} using ${serverString} server for hash: `, hash)
 		return await this.api.workGenerate(hash, newThreshold, workServer)
 			.then(result => result.work)
 			.catch(async err => {

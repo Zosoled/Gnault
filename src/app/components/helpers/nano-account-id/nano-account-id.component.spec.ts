@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { NanoAccountIdComponent } from './nano-account-id.component'
+import { NanoAccountIdComponent } from 'app/components/helpers'
 
 describe('NanoAccountIdComponent', () => {
 	let component: NanoAccountIdComponent

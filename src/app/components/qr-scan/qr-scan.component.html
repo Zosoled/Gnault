@@ -19,7 +19,7 @@
 							<div class="uk-form-controls">
 								<select
 									class="uk-select"
-									(change)="onDeviceSelectChange($event.target.value)"
+									(change)="onDeviceSelectChange($event.target)"
 								>
 									<option
 										value=""
@@ -29,7 +29,9 @@
 										*ngFor="let device of availableDevices"
 										[value]="device.deviceId"
 										[selected]="currentDevice && device.deviceId === currentDevice.deviceId"
-									>{{device.label}}</option>
+									>
+										{{device.label}}
+									</option>
 								</select>
 							</div>
 						</div>

@@ -1,65 +1,69 @@
-import { Component, Input, OnInit } from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { Component, Input, OnInit, inject } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
-import { NotificationService } from '../../services/notification.service'
 import { BarcodeFormat } from '@zxing/library'
+import { ZXingScannerModule } from '@zxing/ngx-scanner'
+import { Wallet } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
-import { UtilService } from '../../services/util.service'
-import * as bip39 from 'bip39'
+import { NotificationService, UtilService } from 'app/services'
 
 export type QRType = 'account' | 'hash' | 'mnemonic' | 'generic'
 
 @Component({
 	selector: 'app-qr-modal',
 	templateUrl: './qr-modal.component.html',
-	styleUrls: ['./qr-modal.component.css']
+	styleUrls: ['./qr-modal.component.css'],
+	imports: [
+		CommonModule,
+		ZXingScannerModule
+	]
 })
-export class QrModalComponent implements OnInit {
 
-	@Input() title = 'QR Scanner';
+export class QrModalComponent implements OnInit {
+	@Input() title = 'QR Scanner'
 	@Input() reference: string
 	@Input() type: QRType
-	availableDevices: MediaDeviceInfo[]
-	currentDevice: MediaDeviceInfo = null;
-	nano_scheme = /^(xrb|nano|nanorep|nanoseed|nanokey):.+$/g;
 
+	activeModal = inject(NgbActiveModal)
+	private notifcationService = inject(NotificationService)
+	private util = inject(UtilService)
+
+	availableDevices: MediaDeviceInfo[]
+	currentDevice: MediaDeviceInfo = null
+	nano_scheme = /^(xrb|nano|nanorep|nanoseed|nanokey):.+$/g
 	formatsEnabled: BarcodeFormat[] = [
 		BarcodeFormat.CODE_128,
 		BarcodeFormat.DATA_MATRIX,
 		BarcodeFormat.EAN_13,
 		BarcodeFormat.QR_CODE,
-	];
-
+	]
 	hasDevices: boolean
 	hasPermission: boolean
 
-	torchEnabled = false;
-	torchAvailable$ = new BehaviorSubject<boolean>(false);
-	tryHarder = false;
+	torchEnabled = false
+	torchAvailable$ = new BehaviorSubject<boolean>(false)
+	tryHarder = false
 
-	constructor (
-		public activeModal: NgbActiveModal,
-		private notifcationService: NotificationService,
-		private util: UtilService,
-	) { }
-
-	ngOnInit (): void {
-	}
+	ngOnInit (): void { }
 
 	onCamerasFound (devices: MediaDeviceInfo[]): void {
 		this.availableDevices = devices
 		this.hasDevices = Boolean(devices && devices.length)
 	}
 
-	onCodeResult (resultString: string) {
+	async onCodeResult (resultString: string) {
 		let type: QRType = null
 		let content = ''
 		// account
 		if (this.util.account.isValidAccount(resultString)) {
 			type = 'account'
 			content = resultString
-		} else if (bip39.validateMnemonic(resultString)) {
-			type = 'mnemonic'
-			content = resultString
+		} else if (/ /.test(resultString)) {
+			try {
+				await Wallet.load('BLAKE2b', '', resultString)
+				type = 'mnemonic'
+				content = resultString
+			} catch (err) { }
 		} else if (resultString.length === 128) {
 			// includes deterministic R value material which we ignore
 			resultString = resultString.substring(0, 64)
@@ -94,8 +98,9 @@ export class QrModalComponent implements OnInit {
 		}
 	}
 
-	onDeviceSelectChange (selected: string) {
-		const device = this.availableDevices.find(x => x.deviceId === selected)
+	onDeviceSelectChange (target: EventTarget) {
+		const { value } = (target as HTMLSelectElement)
+		const device = this.availableDevices.find(x => x.deviceId === value)
 		this.currentDevice = device || null
 	}
 

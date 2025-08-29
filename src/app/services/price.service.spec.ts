@@ -1,6 +1,5 @@
 import { TestBed, inject } from '@angular/core/testing'
-
-import { PriceService } from './price.service'
+import { PriceService } from 'app/services'
 
 describe('PriceService', () => {
 	beforeEach(() => {

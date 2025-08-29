@@ -1,4 +1,4 @@
-import { SqueezePipe } from './squeeze.pipe'
+import { SqueezePipe } from 'app/pipes'
 
 describe('SqueezePipe', () => {
 	it('create an instance', () => {

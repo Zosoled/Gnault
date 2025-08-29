@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing'
-
-import { QrModalService } from './qr-modal.service'
+import { QrModalService } from 'app/services'
 
 describe('QrModalService', () => {
 	let service: QrModalService

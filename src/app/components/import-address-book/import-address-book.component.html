@@ -29,18 +29,15 @@
 					<span
 						class="import-warning"
 						*ngIf="conflictingEntries"
-					>
-						{{ conflictingEntries }} entries already exist but will have their name and/or tracking settings changed.</span>
+					>{{ conflictingEntries }} entries already exist but will have their name and/or tracking settings changed.</span>
 					<span
 						class="import-warning"
 						*ngIf="newEntries"
-					>
-						{{ newEntries }} New entries will be added.</span>
+					>{{ newEntries }} New entries will be added.</span>
 					<span
 						class="import-warning"
 						*ngIf="existingEntries"
-					>
-						{{ existingEntries }} entries already exist and will not be modified.</span>
+					>{{ existingEntries }} entries already exist and will not be modified.</span>
 				</p>
 				<div uk-grid>
 					<div class="uk-width-1-1">

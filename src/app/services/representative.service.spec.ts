@@ -1,6 +1,5 @@
 import { TestBed, inject } from '@angular/core/testing'
-
-import { RepresentativeService } from './representative.service'
+import { RepresentativeService } from 'app/services'
 
 describe('RepresentativeService', () => {
 	beforeEach(() => {

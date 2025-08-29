@@ -1,63 +1,73 @@
-import { Component, OnInit, Renderer2 } from '@angular/core'
-import { WalletService } from '../../services/wallet.service'
-import { NotificationService } from '../../services/notification.service'
-import { AppSettingsService, PoWSource } from '../../services/app-settings.service'
-import { PriceService } from '../../services/price.service'
-import { PowService } from '../../services/pow.service'
-import { WorkPoolService } from '../../services/work-pool.service'
-import { AddressBookService } from '../../services/address-book.service'
-import { ApiService } from '../../services/api.service'
-import { WebsocketService } from '../../services/websocket.service'
-import { NodeService } from '../../services/node.service'
-import { UtilService } from '../../services/util.service'
+
+import { CommonModule } from '@angular/common'
+import { Component, NgModule, OnInit, Renderer2, inject } from '@angular/core'
+import { FormsModule } from '@angular/forms'
 import { BehaviorSubject } from 'rxjs'
-import { RepresentativeService } from '../../services/representative.service'
-import { NinjaService } from '../../services/ninja.service'
-import { QrModalService } from '../../services/qr-modal.service'
-import { TranslocoService } from '@ngneat/transloco'
+import { TranslocoDirective, TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import {
+	AddressBookService,
+	ApiService,
+	AppSettingsService,
+	NinjaService,
+	NodeService,
+	NotificationService,
+	PowService,
+	PoWSource,
+	PriceService,
+	QrModalService,
+	RepresentativeService,
+	UtilService,
+	WalletService,
+	WebsocketService,
+	WorkPoolService
+} from 'app/services'
 
 @Component({
 	selector: 'app-configure-app',
 	templateUrl: './configure-app.component.html',
-	styleUrls: ['./configure-app.component.css']
+	styleUrls: ['./configure-app.component.css'],
+	imports: [
+		CommonModule,
+		FormsModule,
+		TranslocoDirective,
+		TranslocoPipe
+	]
 })
 
 export class ConfigureAppComponent implements OnInit {
+	private walletService = inject(WalletService)
+	private notifications = inject(NotificationService)
+	private appSettings = inject(AppSettingsService)
+	private addressBook = inject(AddressBookService)
+	private pow = inject(PowService)
+	private api = inject(ApiService)
+	private websocket = inject(WebsocketService)
+	private workPool = inject(WorkPoolService)
+	private repService = inject(RepresentativeService)
+	private node = inject(NodeService)
+	private util = inject(UtilService)
+	private price = inject(PriceService)
+	private ninja = inject(NinjaService)
+	private renderer = inject(Renderer2)
+	private qrModalService = inject(QrModalService)
+	private translocoService = inject(TranslocoService)
 
-	constructor (
-		private walletService: WalletService,
-		private notifications: NotificationService,
-		private appSettings: AppSettingsService,
-		private addressBook: AddressBookService,
-		private pow: PowService,
-		private api: ApiService,
-		private websocket: WebsocketService,
-		private workPool: WorkPoolService,
-		private repService: RepresentativeService,
-		private node: NodeService,
-		private util: UtilService,
-		private price: PriceService,
-		private ninja: NinjaService,
-		private renderer: Renderer2,
-		private qrModalService: QrModalService,
-		private translocoService: TranslocoService) { }
-	wallet = this.walletService.wallet;
-
-	languages = this.translocoService.getAvailableLangs() as [{ id: string, label: string }];
-	selectedLanguage = this.languages[0].id;
+	wallet = this.walletService.wallet
+	languages = this.translocoService.getAvailableLangs() as [{ id: string, label: string }]
+	selectedLanguage = this.languages[0].id
 
 	denominations = [
 		{ name: 'XNO', value: 'mnano' },
 		{ name: 'knano', value: 'knano' },
 		{ name: 'nano', value: 'nano' },
-	];
-	selectedDenomination = this.denominations[0].value;
+	]
+	selectedDenomination = this.denominations[0].value
 
 	storageOptions = [
 		{ name: this.translocoService.translate('configure-app.storage-options.browser-local-storage'), value: 'localStorage' },
 		{ name: this.translocoService.translate('configure-app.storage-options.none'), value: 'none' },
-	];
-	selectedStorage = this.storageOptions[0].value;
+	]
+	selectedStorage = this.storageOptions[0].value
 
 	currencies = [
 		{ name: this.translocoService.translate('configure-app.currencies.none'), value: '' },
@@ -94,21 +104,21 @@ export class ConfigureAppComponent implements OnInit {
 		{ name: 'TRY - Turkish Lira', value: 'TRY' },
 		{ name: 'TWD - New Taiwan Dollar', value: 'TWD' },
 		{ name: 'ZAR - South African Rand', value: 'ZAR' },
-	];
-	selectedCurrency = this.currencies[0].value;
+	]
+	selectedCurrency = this.currencies[0].value
 
 	nightModeOptions = [
 		{ name: this.translocoService.translate('configure-app.night-mode-options.enabled'), value: 'enabled' },
 		{ name: this.translocoService.translate('configure-app.night-mode-options.disabled'), value: 'disabled' },
-	];
-	selectedNightModeOption = this.nightModeOptions[0].value;
+	]
+	selectedNightModeOption = this.nightModeOptions[0].value
 
 	identiconOptions = [
 		{ name: this.translocoService.translate('configure-app.identicon-options.none'), value: 'none' },
 		{ name: this.translocoService.translate('configure-app.identicon-options.nanoidenticons-by-keerifox'), value: 'nanoidenticons' },
 		{ name: this.translocoService.translate('configure-app.identicon-options.natricon-by-appditto'), value: 'natricon' },
-	];
-	selectedIdenticonOption = this.identiconOptions[0].value;
+	]
+	selectedIdenticonOption = this.identiconOptions[0].value
 
 	inactivityOptions = [
 		{ name: this.translocoService.translate('configure-app.identicon-options.never'), value: 0 },
@@ -118,68 +128,55 @@ export class ConfigureAppComponent implements OnInit {
 		{ name: this.translocoService.translate('configure-app.identicon-options.x-minutes', { minutes: 30 }), value: 30 },
 		{ name: this.translocoService.translate('configure-app.identicon-options.1-hour'), value: 60 },
 		{ name: this.translocoService.translate('configure-app.identicon-options.x-hours', { hours: 6 }), value: 360 },
-	];
-	selectedInactivityMinutes = this.inactivityOptions[4].value;
+	]
+	selectedInactivityMinutes = this.inactivityOptions[4].value
 
 	powOptions: { name: string, value: PoWSource }[] = [
 		{ name: this.translocoService.translate('configure-app.pow-options.external-selected-server'), value: 'server' },
 		{ name: this.translocoService.translate('configure-app.pow-options.external-custom-server'), value: 'custom' },
 		{ name: this.translocoService.translate('configure-app.pow-options.internal-client'), value: 'client' },
-	];
-	selectedPoWOption = this.powOptions[0].value;
+	]
+	selectedPoWOption = this.powOptions[0].value
 
-	pendingOptions = [
-		{ name: this.translocoService.translate('configure-app.pending-options.automatic-largest-amount-first'), value: 'amount' },
-		{ name: this.translocoService.translate('configure-app.pending-options.automatic-oldest-transaction-first'), value: 'date' },
-		{ name: this.translocoService.translate('configure-app.pending-options.manual'), value: 'manual' },
-	];
-	selectedPendingOption = this.pendingOptions[0].value;
+	receivableOptions = [
+		{ name: this.translocoService.translate('configure-app.receivable-options.automatic-largest-amount-first'), value: 'amount' },
+		{ name: this.translocoService.translate('configure-app.receivable-options.automatic-oldest-transaction-first'), value: 'date' },
+		{ name: this.translocoService.translate('configure-app.receivable-options.manual'), value: 'manual' },
+	]
+	selectedReceivableOption = this.receivableOptions[0].value
 
-	decentralizedAliasesOptions = [
-		{ name: this.translocoService.translate('configure-app.decentralized-aliases-options.disabled'), value: 'disabled' },
-		{ name: this.translocoService.translate('configure-app.decentralized-aliases-options.enabled'), value: 'enabled' },
-	];
-	selectedDecentralizedAliasesOption = this.decentralizedAliasesOptions[0].value;
+	serverOptions = []
+	selectedServer = null
 
-	// prefixOptions = [
-	//   { name: 'xrb_', value: 'xrb' },
-	//   { name: 'nano_', value: 'nano' },
-	// ];
-	// selectedPrefix = this.prefixOptions[0].value;
+	defaultRepresentative = null
+	representativeResults$ = new BehaviorSubject([])
+	showRepresentatives = false
+	representativeListMatch = ''
+	repStatus = null
+	representativeList = []
 
-	serverOptions = [];
-	selectedServer = null;
+	serverAPI = null
+	serverAPIUpdated = null
+	serverWS = null
+	serverAuth = null
+	minimumReceive = null
 
-	defaultRepresentative = null;
-	representativeResults$ = new BehaviorSubject([]);
-	showRepresentatives = false;
-	representativeListMatch = '';
-	repStatus = null;
-	representativeList = [];
+	nodeBlockCount = null
+	nodeUnchecked = null
+	nodeCemented = null
+	nodeUncemented = null
+	peersStakeReq = null
+	peersStakeTotal = null
+	nodeVendor = null
+	nodeNetwork = null
+	statsRefreshEnabled = true
+	shouldRandom = null
 
-	serverAPI = null;
-	serverAPIUpdated = null;
-	serverWS = null;
-	serverAuth = null;
-	minimumReceive = null;
+	customWorkServer = ''
 
-	nodeBlockCount = null;
-	nodeUnchecked = null;
-	nodeCemented = null;
-	nodeUncemented = null;
-	peersStakeReq = null;
-	peersStakeTotal = null;
-	nodeVendor = null;
-	nodeNetwork = null;
-	statsRefreshEnabled = true;
-	shouldRandom = null;
-
-	customWorkServer = '';
-
-	showServerValues = () => this.selectedServer && this.selectedServer !== 'random' && this.selectedServer !== 'offline';
-	showStatValues = () => this.selectedServer && this.selectedServer !== 'offline';
-	showServerConfigs = () => this.selectedServer && this.selectedServer === 'custom';
-
+	showServerValues = () => this.selectedServer && this.selectedServer !== 'random' && this.selectedServer !== 'offline'
+	showStatValues = () => this.selectedServer && this.selectedServer !== 'offline'
+	showServerConfigs = () => this.selectedServer && this.selectedServer === 'custom'
 	async ngOnInit () {
 		this.loadFromSettings()
 		this.updateNodeStats()
@@ -211,33 +208,47 @@ export class ConfigureAppComponent implements OnInit {
 	}
 
 	async updateNodeStats (refresh = false) {
-		if ((!this.serverAPIUpdated ||
-			(this.serverAPIUpdated !== this.appSettings.settings.serverAPI && this.selectedServer === 'random'))) return
+		if (!this.serverAPIUpdated
+			|| (this.serverAPIUpdated !== this.appSettings.settings.serverAPI
+				&& this.selectedServer === 'random')
+		) {
+			return
+		}
 		// refresh is not enabled
-		if (refresh && !this.statsRefreshEnabled) return
+		if (refresh && !this.statsRefreshEnabled) {
+			return
+		}
 		// Offline mode selected
-		if (this.selectedServer === 'offline') return
-
+		if (this.selectedServer === 'offline') {
+			return
+		}
 		this.statsRefreshEnabled = false
+
 		try {
 			const blockCount = await this.api.blockCount()
 			this.nodeBlockCount = Number(blockCount.count).toLocaleString('en-US')
 			this.nodeUnchecked = Number(blockCount.unchecked).toLocaleString('en-US')
 			this.nodeCemented = Number(blockCount.cemented).toLocaleString('en-US')
 			this.nodeUncemented = Number(blockCount.count - blockCount.cemented).toLocaleString('en-US')
-		} catch { console.warn('Failed to get node stats: block count') }
+		} catch {
+			console.warn('Failed to get node stats: block count')
+		}
 
 		try {
 			const quorumData = await this.api.confirmationQuorum()
-			this.peersStakeReq = quorumData ? Number(this.util.nano.rawToMnano(quorumData.quorum_delta)).toLocaleString('en-US') : null
-			this.peersStakeTotal = quorumData ? Number(this.util.nano.rawToMnano(quorumData.peers_stake_total)).toLocaleString('en-US') : null
-		} catch { console.warn('Failed to get node stats: confirmation quorum') }
+			this.peersStakeReq = Number(this.util.nano.rawToMnano(quorumData?.quorum_delta)).toLocaleString('en-US') ?? null
+			this.peersStakeTotal = Number(this.util.nano.rawToMnano(quorumData?.peers_stake_total)).toLocaleString('en-US') ?? null
+		} catch {
+			console.warn('Failed to get node stats: confirmation quorum')
+		}
 
 		try {
 			const version = await this.api.version()
 			this.nodeVendor = version.node_vendor
 			this.nodeNetwork = version.network
-		} catch { console.warn('Failed to get node stats: version') }
+		} catch {
+			console.warn('Failed to get node stats: version')
+		}
 
 		setTimeout(() => this.statsRefreshEnabled = true, 5000)
 	}
@@ -246,12 +257,14 @@ export class ConfigureAppComponent implements OnInit {
 		const settings = this.appSettings.settings
 
 		const matchingLanguage = this.languages.find(language => language.id === settings.language)
-		this.selectedLanguage = matchingLanguage.id || this.languages[0].id
+		this.selectedLanguage = matchingLanguage?.id || this.languages[0].id
 
 		const matchingCurrency = this.currencies.find(d => d.value === settings.displayCurrency)
 		this.selectedCurrency = matchingCurrency.value || this.currencies[0].value
 
-		const nightModeOptionString = (settings.lightModeEnabled === true) ? 'disabled' : 'enabled'
+		const nightModeOptionString = settings.lightModeEnabled
+			? 'disabled'
+			: 'enabled'
 		const matchingNightModeOption = this.nightModeOptions.find(d => d.value === nightModeOptionString)
 		this.selectedNightModeOption = matchingNightModeOption.value || this.nightModeOptions[0].value
 
@@ -262,18 +275,15 @@ export class ConfigureAppComponent implements OnInit {
 		this.selectedStorage = matchingStorage.value || this.storageOptions[0].value
 
 		const matchingInactivityMinutes = this.inactivityOptions.find(d => d.value === settings.lockInactivityMinutes)
-		this.selectedInactivityMinutes = matchingInactivityMinutes ? matchingInactivityMinutes.value : this.inactivityOptions[4].value
+		this.selectedInactivityMinutes = matchingInactivityMinutes?.value ?? this.inactivityOptions[4].value
 
 		const matchingPowOption = this.powOptions.find(d => d.value === settings.powSource)
-		this.selectedPoWOption = matchingPowOption ? matchingPowOption.value : this.powOptions[0].value
+		this.selectedPoWOption = matchingPowOption?.value ?? this.powOptions[0].value
 
 		this.customWorkServer = settings.customWorkServer
 
-		const matchingPendingOption = this.pendingOptions.find(d => d.value === settings.pendingOption)
-		this.selectedPendingOption = matchingPendingOption ? matchingPendingOption.value : this.pendingOptions[0].value
-
-		const matchingDecentralizedAliasesOption = this.decentralizedAliasesOptions.find(d => d.value === settings.decentralizedAliasesOption)
-		this.selectedDecentralizedAliasesOption = matchingDecentralizedAliasesOption ? matchingDecentralizedAliasesOption.value : this.decentralizedAliasesOptions[0].value
+		const matchingReceivableOption = this.receivableOptions.find(d => d.value === settings.receivableOption)
+		this.selectedReceivableOption = matchingReceivableOption?.value ?? this.receivableOptions[0].value
 
 		this.serverOptions = this.appSettings.serverOptions
 		this.selectedServer = settings.serverName
@@ -303,7 +313,7 @@ export class ConfigureAppComponent implements OnInit {
 		this.appSettings.setAppSetting('identiconsStyle', this.selectedIdenticonOption)
 
 		const newCurrency = this.selectedCurrency
-		// const updatePrefixes = this.appSettings.settings.displayPrefix !== this.selectedPrefix;
+		// const updatePrefixes = this.appSettings.settings.displayPrefix !== this.selectedPrefix
 		const reloadFiat = this.appSettings.settings.displayCurrency !== newCurrency
 		this.notifications.sendSuccess(this.translocoService.translate('configure-app.app-display-settings-successfully-updated'))
 
@@ -318,17 +328,17 @@ export class ConfigureAppComponent implements OnInit {
 		this.translocoService.setActiveLang(this.selectedLanguage)
 
 		// if (updatePrefixes) {
-		//   this.appSettings.setAppSetting('displayPrefix', this.selectedPrefix);
-		// Go through accounts?
-		// this.wallet.accounts.forEach(account => {
-		//   account.id = this.util.account.setPrefix(account.id, this.selectedPrefix);
-		// });
-		// this.walletService.saveWalletExport();
+		// 	this.appSettings.setAppSetting('displayPrefix', this.selectedPrefix)
+		// 	// Go through accounts?
+		// 	this.wallet.accounts.forEach(account => {
+		// 		account.id = this.util.account.setPrefix(account.id, this.selectedPrefix)
+		// 	})
+		// 	this.walletService.saveWalletExport()
 		//
-		// this.addressBook.addressBook.forEach(entry => {
-		//   entry.account = this.util.account.setPrefix(entry.account, this.selectedPrefix);
-		// });
-		// this.addressBook.saveAddressBook();
+		// 	this.addressBook.addressBook.forEach(entry => {
+		// 		entry.account = this.util.account.setPrefix(entry.account, this.selectedPrefix)
+		// 	})
+		// 	this.addressBook.saveAddressBook()
 		// }
 
 	}
@@ -340,13 +350,14 @@ export class ConfigureAppComponent implements OnInit {
 		// ask for user confirmation before clearing the wallet cache
 		if (resaveWallet && newStorage === this.storageOptions[1].value) {
 			const UIkit = window['UIkit']
+			const saveSeedWarning = `<br><b style="font-size: 18px;">${this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed')}</b><br><br><span style="font-size: 18px;"><b>${this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup')}</b></span></p><br>`
 			try {
 				await UIkit.modal.confirm(
 					`<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span>
-          <span style="font-size: 18px;">
-          ${this.translocoService.translate('configure-app.you-are-about-to-disable-storage-of-all-wallet-data-which')}
-          </span><br>
-          ${this.walletService.isConfigured() ? '<br><b style="font-size: 18px;">' + this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') + '</b><br><br><span style="font-size: 18px;"><b>' + this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') + '</b></span></p><br>' : ''}`
+					<span style="font-size: 18px;">
+					${this.translocoService.translate('configure-app.you-are-about-to-disable-storage-of-all-wallet-data-which')}
+					</span><br>
+					${this.walletService.isConfigured() ? saveSeedWarning : ''}`
 				)
 			} catch (err) {
 				// pressing cancel, reset storage setting and interrupt
@@ -357,17 +368,15 @@ export class ConfigureAppComponent implements OnInit {
 		}
 
 		let newPoW = this.selectedPoWOption
-		const pendingOption = this.selectedPendingOption
+		const receivableOption = this.selectedReceivableOption
 		let minReceive = null
 		if (this.util.account.isValidNanoAmount(this.minimumReceive)) {
 			minReceive = this.minimumReceive
 		}
 
-		const decentralizedAliasesOption = this.selectedDecentralizedAliasesOption
-
-		// reload pending if threshold changes or if receive priority changes from manual to auto
-		let reloadPending = this.appSettings.settings.minimumReceive !== this.minimumReceive
-			|| (pendingOption !== 'manual' && pendingOption !== this.appSettings.settings.pendingOption)
+		// reload receivable if threshold changes or if receive priority changes from manual to auto
+		let reloadReceivable = this.appSettings.settings.minimumReceive !== this.minimumReceive
+			|| (receivableOption !== 'manual' && receivableOption !== this.appSettings.settings.receivableOption)
 
 		if (this.defaultRepresentative && this.defaultRepresentative.length) {
 			const valid = this.util.account.isValidAccount(this.defaultRepresentative)
@@ -383,7 +392,7 @@ export class ConfigureAppComponent implements OnInit {
 			if (this.appSettings.settings.powSource === 'client') {
 				// Check if work is ongoing, and cancel it
 				if (this.pow.cancelAllPow(false)) {
-					reloadPending = true // force reload balance => re-work pow
+					reloadReceivable = true // force reload balance => re-work pow
 				}
 			}
 		}
@@ -392,7 +401,7 @@ export class ConfigureAppComponent implements OnInit {
 		if (newPoW === 'client') {
 			// if user accept to reset cache
 			if (await this.clearWorkCache()) {
-				reloadPending = true // force reload balance => re-work pow
+				reloadReceivable = true // force reload balance => re-work pow
 			}
 		}
 
@@ -401,8 +410,7 @@ export class ConfigureAppComponent implements OnInit {
 			lockInactivityMinutes: Number(this.selectedInactivityMinutes),
 			powSource: newPoW,
 			customWorkServer: this.customWorkServer,
-			pendingOption: pendingOption,
-			decentralizedAliasesOption: decentralizedAliasesOption,
+			receivableOption: receivableOption,
 			minimumReceive: minReceive,
 			defaultRepresentative: this.defaultRepresentative || null,
 		}
@@ -413,7 +421,7 @@ export class ConfigureAppComponent implements OnInit {
 		if (resaveWallet) {
 			this.walletService.saveWalletExport() // If swapping the storage engine, resave the wallet
 		}
-		if (reloadPending) {
+		if (reloadReceivable) {
 			this.walletService.reloadBalances()
 		}
 	}
@@ -516,7 +524,9 @@ export class ConfigureAppComponent implements OnInit {
 			this.serverAPIUpdated = null
 			this.serverWS = custom.ws
 			this.serverAuth = custom.auth
-			this.shouldRandom = custom.shouldRandom ? this.translocoService.translate('general.yes') : this.translocoService.translate('general.no')
+			this.shouldRandom = custom.shouldRandom
+				? this.translocoService.translate('general.yes')
+				: this.translocoService.translate('general.no')
 		}
 
 		// reset server stats until updated
@@ -528,22 +538,18 @@ export class ConfigureAppComponent implements OnInit {
 		this.peersStakeTotal = null
 		this.nodeVendor = null
 		this.nodeNetwork = null
-		this.statsRefreshEnabled = newServer === 'random' ? false : true
+		this.statsRefreshEnabled = newServer !== 'random'
 	}
 
 	getRemotePoWOptionName () {
 		const optionName = this.translocoService.translate('configure-app.pow-options.external-selected-server')
-
 		if ((this.selectedServer === 'random') || (this.selectedServer === 'offline')) {
 			return optionName
 		}
-
 		const selectedServerOption = this.appSettings.serverOptions.find(d => d.value === this.selectedServer)
-
 		if (!selectedServerOption) {
 			return optionName
 		}
-
 		return (optionName + ' (' + selectedServerOption.name + ')')
 	}
 
@@ -565,7 +571,6 @@ export class ConfigureAppComponent implements OnInit {
 			await UIkit.modal.confirm('<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">' + this.translocoService.translate('configure-app.you-are-about-to-delete-all-locally-stored-data-about-your') + '</span><br><br><b style="font-size: 18px;">' + this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') + '</b><br><br><span style="font-size: 18px;"><b>' + this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') + '</b></span></p><br>')
 			this.walletService.resetWallet()
 			this.walletService.removeWalletData()
-
 			this.notifications.sendSuccess(this.translocoService.translate('configure-app.successfully-deleted-all-wallet-data'))
 		} catch (err) { }
 	}
@@ -576,17 +581,13 @@ export class ConfigureAppComponent implements OnInit {
 			await UIkit.modal.confirm('<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">' + this.translocoService.translate('configure-app.clear-all-data.1') + '</span><br><br><b style="font-size: 18px;">' + this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') + '</b><br><br><span style="font-size: 18px;"><b>' + this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') + '</b></span></p><br>')
 			this.walletService.resetWallet()
 			this.walletService.removeWalletData()
-
 			this.workPool.deleteCache()
 			this.addressBook.clearAddressBook()
 			this.appSettings.clearAppSettings()
 			this.repService.resetRepresentativeList()
 			this.api.deleteCache()
-
 			this.loadFromSettings()
-
 			this.notifications.sendSuccess(this.translocoService.translate('configure-app.clear-all-data.successfully-deleted-locally-stored-data-and-reset-the'))
-
 			// Get a new random API server or Gnault will get stuck in offline mode
 			this.updateServerSettings()
 		} catch (err) { }

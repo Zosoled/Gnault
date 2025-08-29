@@ -1,27 +1,20 @@
-import { Injectable } from '@angular/core'
+import { inject } from '@angular/core'
 import { BehaviorSubject } from 'rxjs'
-import { AppSettingsService } from './app-settings.service'
+import { AppSettingsService } from 'app/services'
 
-@Injectable()
 export class WebsocketService {
+	private appSettings = inject(AppSettingsService)
 
-	queuedCommands = [];
-
-	keepaliveTimeout = 60 * 1000;
-	reconnectTimeout = 5 * 1000;
-
-	keepaliveSet = false;
-
+	queuedCommands = []
+	keepaliveTimeout = 60 * 1000
+	reconnectTimeout = 5 * 1000
+	keepaliveSet = false
 	socket = {
 		connected: false,
 		ws: null,
-	};
-
-	subscribedAccounts = [];
-
-	newTransactions$ = new BehaviorSubject(null);
-
-	constructor (private appSettings: AppSettingsService) { }
+	}
+	subscribedAccounts = []
+	newTransactions$ = new BehaviorSubject(null)
 
 	forceReconnect () {
 		console.log('Reconnecting Websocket...')
@@ -33,7 +26,6 @@ export class WebsocketService {
 			delete this.socket.ws
 			this.socket.connected = false
 		}
-
 		setTimeout(() => this.connect(), 250)
 	}
 
@@ -55,32 +47,31 @@ export class WebsocketService {
 		ws.onopen = event => {
 			this.socket.connected = true
 			this.queuedCommands.forEach(queueevent => ws.send(JSON.stringify(queueevent)))
-
 			// Resubscribe to accounts?
 			if (this.subscribedAccounts.length) {
 				this.subscribeAccounts(this.subscribedAccounts)
 			}
-
 			if (!this.keepaliveSet) {
 				this.keepalive() // Start keepalives!
 			}
 		}
+
 		ws.onerror = event => {
-			// this.socket.connected = false;
+			// this.socket.connected = false
 			console.log(`Socket error`, event)
 		}
+
 		ws.onclose = event => {
 			this.socket.connected = false
 			console.log(`Socket close`, event)
-
 			// Start attempting to recconect
 			setTimeout(() => this.attemptReconnect(), this.reconnectTimeout)
 		}
+
 		ws.onmessage = event => {
 			try {
 				const newEvent = JSON.parse(event.data)
 				console.log('WS', newEvent)
-
 				if (newEvent.topic === 'confirmation') {
 					this.newTransactions$.next(newEvent.message)
 				}
@@ -93,7 +84,8 @@ export class WebsocketService {
 	attemptReconnect () {
 		this.connect()
 		if (this.reconnectTimeout < 30 * 1000) {
-			this.reconnectTimeout += 5 * 1000 // Slowly increase the timeout up to 30 seconds
+			// Slowly increase the timeout up to 30 seconds
+			this.reconnectTimeout += 5 * 1000
 		}
 	}
 
@@ -108,8 +100,6 @@ export class WebsocketService {
 		}, this.keepaliveTimeout)
 	}
 
-
-
 	subscribeAccounts (accountIDs: string[]) {
 		const event = {
 			action: 'subscribe',
@@ -121,13 +111,15 @@ export class WebsocketService {
 
 		accountIDs.forEach(account => {
 			if (this.subscribedAccounts.indexOf(account) === -1) {
-				this.subscribedAccounts.push(account) // Keep a unique list of subscriptions for reconnecting
+				// Keep a unique list of subscriptions for reconnecting
+				this.subscribedAccounts.push(account)
 			}
 		})
 		if (!this.socket.connected) {
 			this.queuedCommands.push(event)
 			if (this.queuedCommands.length >= 3) {
-				this.queuedCommands.shift() // Prune queued commands
+				// Prune queued commands
+				this.queuedCommands.shift()
 			}
 			return
 		}
@@ -142,11 +134,11 @@ export class WebsocketService {
 				accounts: accountIDs
 			}
 		}
-
 		accountIDs.forEach(account => {
 			const existingIndex = this.subscribedAccounts.indexOf(account)
 			if (existingIndex !== -1) {
-				this.subscribedAccounts.splice(existingIndex, 1) // Remove from our internal subscription list
+				// Remove from our internal subscription list
+				this.subscribedAccounts.splice(existingIndex, 1)
 			}
 		})
 		// If we aren't connected, we don't need to do anything.  On reconnect, it won't subscribe.

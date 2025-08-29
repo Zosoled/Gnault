@@ -1,6 +1,7 @@
 <div
 	class="uk-animation-slide-left-small"
 	uk-grid
+	*transloco="let t"
 >
 	<div class="uk-width-1-1">
 		<ng-template #switchToMerchantModeButton>
@@ -19,7 +20,7 @@
 		</ng-template>
 		<ng-template #copyPaymentUriButton>
 			<button
-				*ngIf="(pendingAccountModel !== '0') && (qrAmount != null)"
+				*ngIf="(receivableAccountModel !== '0') && (qrAmount != null)"
 				class="uk-width-1-1 uk-width-5-6@s uk-button uk-button-primary uk-text-center nlt-icon-button"
 				[class.nlt-button-success]="recentlyCopiedPaymentUri"
 				[class.uk-disabled]="recentlyCopiedPaymentUri"
@@ -37,7 +38,7 @@
 		</ng-template>
 		<ng-template #copyPaymentAddressButton>
 			<button
-				*ngIf="(pendingAccountModel !== '0')"
+				*ngIf="(receivableAccountModel !== '0')"
 				class="uk-width-1-1 uk-width-5-6@s uk-button uk-text-center nlt-icon-button"
 				[class.uk-button-primary]="recentlyCopiedAccountAddress || (qrAmount == null)"
 				[class.uk-button-secondary]="!recentlyCopiedAccountAddress && (qrAmount != null)"
@@ -45,7 +46,7 @@
 				[class.uk-disabled]="recentlyCopiedAccountAddress"
 				type="button"
 				ngxClipboard
-				[cbContent]="pendingAccountModel"
+				[cbContent]="receivableAccountModel"
 				(cbOnSuccess)="copiedAccountAddress()"
 			>
 				<span
@@ -56,7 +57,7 @@
 			</button>
 		</ng-template>
 		<div class="uk-margin-bottom uk-flex uk-flex-between">
-			<h2 class="uk-flex-1 uk-heading-divider uk-margin-remove">Receive Nano</h2>
+			<h2 class="uk-flex-1 uk-heading-divider uk-margin-remove">{{ 'receive.receive-nano' | transloco }}</h2>
 			<div class="uk-flex-none uk-visible@s uk-flex uk-flex-top uk-margin-medium-left">
 				<ng-container *ngTemplateOutlet="switchToMerchantModeButton"></ng-container>
 			</div>
@@ -69,21 +70,22 @@
 							<label
 								for="form-horizontal-select"
 								class="uk-form-label label-block"
-							>Account</label>
+							>{{ 'general.account' | transloco
+								}}</label>
 							<div class="form-account">
 								<select
 									id="form-horizontal-select"
 									class="uk-select"
-									[(ngModel)]="pendingAccountModel"
-									(change)="onSelectedAccountChange(pendingAccountModel)"
+									[(ngModel)]="receivableAccountModel"
+									(change)="onSelectedAccountChange(receivableAccountModel)"
 								>
-									<option [value]="0">All Accounts</option>
+									<option [value]="0">{{ 'receive.all-accounts' | transloco }}</option>
 									<option
 										*ngFor="let account of accounts"
 										[value]="account.id"
-									>{{account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
-										{{ account.id | squeeze }} ({{ account.balance | rai: 'mnano,true' | amountsplit: 0 }}{{ account.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO)
-									</option>
+									>{{account.addressBookName ?
+										account.addressBookName + ' - ' : '#' + account.index + ' - ' }} {{ account.id | squeeze }} ({{ account.balance | rai: 'mnano,true' | amountsplit: 0 }}{{ account.balance | rai: 'mnano,true' |
+										amountsplit: 1 }} XNO)</option>
 								</select>
 							</div>
 						</div>
@@ -91,7 +93,12 @@
 							<label
 								for="form-horizontal-amount"
 								class="uk-form-label label-block"
-							>Requested Amount <span class="uk-text-muted label-optional">optional</span></label>
+							>
+								{{ 'receive.requested-amount' | transloco }}
+								<span class="uk-text-muted label-optional">
+									{{ 'general.optional' | transloco }}
+								</span>
+							</label>
 							<div class="form-amount">
 								<div class="uk-width-1-1 uk-inline">
 									<label
@@ -101,7 +108,7 @@
 									<input
 										[(ngModel)]="amountNano"
 										[ngClass]="{ 'uk-form-danger': !validNano }"
-										[attr.disabled]="pendingAccountModel == '0' || null"
+										[attr.disabled]="receivableAccountModel == '0' || null"
 										autocomplete="off"
 										class="uk-input"
 										id="form-horizontal-amount"
@@ -109,7 +116,7 @@
 										style="padding-left: 52px !important;"
 										type="number"
 										step="any"
-										placeholder="Amount of XNO"
+										[placeholder]="t('receive.amount-of-x', { currency: 'XNO' })"
 										maxlength="40"
 									>
 								</div>
@@ -126,7 +133,7 @@
 										<input
 											[(ngModel)]="amountFiat"
 											[ngClass]="{ 'uk-form-danger': !validFiat }"
-											[attr.disabled]="pendingAccountModel == '0' || null"
+											[attr.disabled]="receivableAccountModel == '0' || null"
 											autocomplete="off"
 											(input)="fiatAmountChange()"
 											style="padding-left: 52px !important;"
@@ -134,7 +141,7 @@
 											id="form-horizontal-text-fiat"
 											type="number"
 											step="any"
-											placeholder="Amount of {{ settings.settings.displayCurrency }}"
+											[placeholder]="t('receive.amount-of-x', { currency: settings.settings.displayCurrency })"
 										>
 									</div>
 								</div>
@@ -168,7 +175,7 @@
 									[class]="qrSuccessClass"
 								>
 									<div uk-icon="icon: check; ratio: 5"></div>
-									<span class="uk-text-large uk-text-center">Nano Received</span>
+									<span class="uk-text-large uk-text-center">{{ 'receive.nano-received' | transloco }}</span>
 								</div>
 								<div style="padding-top: 100%"></div>
 							</div>
@@ -177,11 +184,13 @@
 							<div class="qr-code qr-placeholder">
 								<div
 									class="uk-position-absolute text-half-muted"
-									*ngIf="(pendingAccountModel === '0')"
-								>Select an account<br />to view QR code</div>
+									style="width: 50%;"
+									*ngIf="(receivableAccountModel === '0')"
+								>{{ 'receive.select-an-account-to-view-qr-code' | transloco }}
+								</div>
 								<div
 									class="uk-position-absolute text-half-muted"
-									*ngIf="(pendingAccountModel !== '0')"
+									*ngIf="(receivableAccountModel !== '0')"
 								>
 									<div uk-spinner="ratio: 3;"></div>
 								</div>
@@ -191,10 +200,10 @@
 						<div>
 							<div
 								class="uk-flex uk-flex-center uk-flex-middle uk-text-center qr-address"
-								*ngIf="(pendingAccountModel !== '0')"
+								*ngIf="(receivableAccountModel !== '0')"
 							>
 								<app-nano-account-id
-									[accountID]="pendingAccountModel"
+									[accountID]="receivableAccountModel"
 									middle="break"
 									class="nano-address-monospace uk-width-auto"
 									style="max-width: 90%;"
@@ -211,7 +220,7 @@
 			</div>
 		</div>
 		<div class="transactions-list-header uk-width-1-1 uk-flex uk-flex-center uk-flex-middle uk-margin-small-bottom">
-			<h3 class="uk-margin-remove-bottom">Incoming Transactions</h3>
+			<h3 class="uk-margin-remove-bottom">{{ 'receive.incoming-transactions' | transloco }}</h3>
 			<ul
 				class="uk-width-auto uk-iconnav uk-margin-remove-left"
 				style="margin-top: -1px;"
@@ -226,9 +235,9 @@
 						<a
 							uk-icon="icon: refresh;"
 							class="icon-transactions-refresh"
-							(click)="getPending()"
+							(click)="getReceivable()"
 							uk-tooltip
-							title="Reload incoming transactions from the network"
+							[title]="t('general.reload')"
 						></a>
 					</ng-template>
 				</li>
@@ -239,21 +248,21 @@
 				<div class="transactions-list-mobile only-on-small-viewports">
 					<div
 						class="date-header text-half-muted"
-						*ngIf="(pendingAccountModel !== '0')"
+						*ngIf="(receivableAccountModel !== '0')"
 					>{{ selectedAccountAddressBookName }}</div>
-					<ng-container *ngFor="let transaction of pendingBlocksForSelectedAccount; let transactionIdx = index;">
+					<ng-container *ngFor="let transaction of receivableBlocksForSelectedAccount; let transactionIdx = index;">
 						<div
 							class="date-header text-half-muted"
 							*ngIf="(
-                    (pendingAccountModel === '0')
-                && (
-                    ( pendingBlocksForSelectedAccount[transactionIdx - 1] == null )
-                  || (
-                      transaction.destinationAddressBookName
-                    !== pendingBlocksForSelectedAccount[transactionIdx - 1].destinationAddressBookName
-                  )
-                )
-              )"
+								(receivableAccountModel === '0')
+								&& (
+									(receivableBlocksForSelectedAccount[transactionIdx - 1] == null )
+									|| (
+										transaction.destinationAddressBookName
+										!== receivableBlocksForSelectedAccount[transactionIdx - 1].destinationAddressBookName
+									)
+								)
+							)"
 						>{{ transaction.destinationAddressBookName }}</div>
 						<app-nano-transaction-mobile
 							[transaction]="transaction"
@@ -263,12 +272,12 @@
 					</ng-container>
 					<div
 						class="rounded-area"
-						*ngIf="!loadingIncomingTxList && !pendingBlocksForSelectedAccount.length"
+						*ngIf="!loadingIncomingTxList && !receivableBlocksForSelectedAccount.length"
 					>
-						<div style="text-align: center;">{{ (pendingAccountModel === '0')
-              ? 'No new incoming transactions'
-              : 'No new incoming transactions for selected account'
-            }}</div>
+						<div style="text-align: center;">{{ (receivableAccountModel === '0')
+							? 'No new incoming transactions'
+							: 'No new incoming transactions for selected account'
+							}}</div>
 					</div>
 					<div
 						class="rounded-area"
@@ -277,7 +286,7 @@
 						<div style="text-align: center;"><span
 								class="uk-margin-right"
 								uk-spinner
-							></span> Loading incoming transactions...</div>
+							></span> {{ 'account-details.loading-incoming-transactions' | transloco }}</div>
 					</div>
 				</div>
 				<table
@@ -293,20 +302,21 @@
 							<th
 								scope="col"
 								class="account-column"
-							>Account / Block</th>
+							>{{ 'general.account' | transloco }} / {{ 'general.block' |
+								transloco }}</th>
 							<th
 								scope="col"
 								class="amount-column"
-							>Amount</th>
+							>{{ 'general.amount' | transloco }}</th>
 							<th
 								scope="col"
 								class="date-column"
-							>Actions</th>
+							>{{ 'general.actions' | transloco }}</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr
-							*ngFor="let pending of pendingBlocksForSelectedAccount"
+							*ngFor="let receivable of receivableBlocksForSelectedAccount"
 							[class]="{ 'uk-text-muted': true }"
 						>
 							<td class="type-column">
@@ -325,27 +335,27 @@
 										style="max-width: calc(100% - 35px);"
 									>
 										<a
-											[routerLink]="'/account/' + pending.account"
+											[routerLink]="'/account/' + receivable.account"
 											class="account-container uk-text-truncate"
-											title="View Account Details"
+											[title]="t('general.view-details')"
 											uk-tooltip
 										>
 											<div class="identicon-name-row uk-text-truncate">
 												<app-nano-identicon
 													scale="6"
-													[accountID]="pending.account"
+													[accountID]="receivable.account"
 													[settingIdenticonsStyle]="settings.settings.identiconsStyle"
 													class="nano-identicon"
 													*ngIf="(settings.settings.identiconsStyle !== 'none')"
 												></app-nano-identicon>
 												<div
 													class="account-label uk-text-truncate"
-													*ngIf="pending.addressBookName"
-												>{{ pending.addressBookName }}</div>
+													*ngIf="receivable.addressBookName"
+												>{{ receivable.addressBookName }}</div>
 											</div>
 											<div class="nano-address-clickable nano-address-monospace uk-text-truncate">
 												<app-nano-account-id
-													[accountID]="pending.account"
+													[accountID]="receivable.account"
 													middle="auto"
 												></app-nano-account-id>
 											</div>
@@ -355,22 +365,22 @@
 										<ul class="uk-iconnav">
 											<li><a
 													ngxClipboard
-													[cbContent]="pending.account"
+													[cbContent]="receivable.account"
 													(cbOnSuccess)="copied()"
 													uk-icon="icon: copy"
-													title="Copy Account Address"
+													[title]="t('general.copy-to-clipboard')"
 													uk-tooltip
 												></a></li>
 										</ul>
 									</div>
 								</div>
 								<a
-									[routerLink]="'/transaction/' + pending.hash"
+									[routerLink]="'/transaction/' + receivable.hash"
 									class="uk-link-text uk-text-small uk-text-muted uk-text-truncate block-hash block-hash-monospace"
 									title="View Block Details"
 									uk-tooltip
-								>{{ pending.hash }}</a>
-								<ng-container *ngIf="(pendingAccountModel === '0')">
+								>{{ receivable.hash }}</a>
+								<ng-container *ngIf="(receivableAccountModel === '0')">
 									<div class="arrow-down">
 										<div
 											class="icon"
@@ -386,27 +396,27 @@
 											style="max-width: calc(100% - 35px);"
 										>
 											<a
-												[routerLink]="'/account/' + pending.destination"
+												[routerLink]="'/account/' + receivable.destination"
 												class="account-container uk-text-truncate"
-												title="View Account Details"
+												[title]="t('general.view-details')"
 												uk-tooltip
 											>
 												<div class="identicon-name-row uk-text-truncate">
 													<app-nano-identicon
 														scale="6"
-														[accountID]="pending.destination"
+														[accountID]="receivable.destination"
 														[settingIdenticonsStyle]="settings.settings.identiconsStyle"
 														class="nano-identicon"
 														*ngIf="(settings.settings.identiconsStyle !== 'none')"
 													></app-nano-identicon>
 													<div
 														class="account-label uk-text-truncate"
-														*ngIf="pending.destinationAddressBookName"
-													>{{ pending.destinationAddressBookName }}</div>
+														*ngIf="receivable.destinationAddressBookName"
+													>{{ receivable.destinationAddressBookName }}</div>
 												</div>
 												<div class="nano-address-clickable nano-address-monospace uk-text-truncate">
 													<app-nano-account-id
-														[accountID]="pending.destination"
+														[accountID]="receivable.destination"
 														middle="auto"
 													></app-nano-account-id>
 												</div>
@@ -416,10 +426,10 @@
 											<ul class="uk-iconnav">
 												<li><a
 														ngxClipboard
-														[cbContent]="pending.destination"
+														[cbContent]="receivable.destination"
 														(cbOnSuccess)="copied()"
 														uk-icon="icon: copy"
-														title="Copy Account Address"
+														[title]="t('general.copy-to-clipboard')"
 														uk-tooltip
 													></a></li>
 											</ul>
@@ -430,27 +440,29 @@
 							<ng-template #transactionActions>
 								<div class="button-container">
 									<button
-										*ngIf="!pending.loading"
+										*ngIf="!receivable.loading"
 										class="uk-button uk-button-primary uk-text-center uk-width-auto"
 										type="button"
-										(click)="receiveReceivableBlock(pending)"
-									>RECEIVE</button>
+										(click)="receiveReceivableBlock(receivable)"
+									>{{ 'general.receive' | transloco |
+										uppercase
+										}}</button>
 									<button
-										*ngIf="pending.loading"
+										*ngIf="receivable.loading"
 										class="uk-button uk-button-secondary uk-disabled uk-button-small nlt-icon-button nlt-icon-button-inline"
 									><span
 											class="spinner"
 											uk-spinner="ratio: 0.5;"
-										></span> Receiving</button>
+										></span> {{ 'receive.receiving' | transloco }}</button>
 								</div>
 							</ng-template>
 							<td
 								class="amount-column uk-text-middle uk-text-muted"
-								[title]="('Incoming Transaction') + ( (pending.amountRaw && (pending.amountRaw > 0) ) ? ( ', +' + ( pending.amountRaw.toString(10) ) + ' raw' ) : '' )"
+								[title]="('Incoming Transaction') + ( (receivable.amountRaw && (receivable.amountRaw > 0) ) ? ( ', +' + ( receivable.amountRaw.toString(10) ) + ' raw' ) : '' )"
 							>
-								<span class="uk-text-small">Ready to receive</span><br>
-								<span class="amount-integer">{{ pending.amount | rai: 'mnano,true' | amountsplit: 0 }}</span>
-								<span class="amount-fractional">{{ pending.amount | rai: 'mnano,true' | amountsplit: 1 }}</span>
+								<span class="uk-text-small">{{ 'general.blockactions.ready-to-receive' | transloco }}</span><br>
+								<span class="amount-integer">{{ receivable.amount | rai: 'mnano,true' | amountsplit: 0 }}</span>
+								<span class="amount-fractional">{{ receivable.amount | rai: 'mnano,true' | amountsplit: 1 }}</span>
 								<span class="currency-name">XNO</span>
 								<div class="compact-actions-date">
 									<ng-template [ngTemplateOutlet]="transactionActions"></ng-template>
@@ -460,16 +472,14 @@
 								<ng-template [ngTemplateOutlet]="transactionActions"></ng-template>
 							</td>
 						</tr>
-						<tr *ngIf="!loadingIncomingTxList && !pendingBlocksForSelectedAccount.length">
+						<tr *ngIf="!loadingIncomingTxList && !receivableBlocksForSelectedAccount.length">
 							<td
 								colspan="4"
 								style="text-align: center;"
-							>
-								{{ pendingAccountModel === '0'
-									? 'No new incoming transactions'
-									: 'No new incoming transactions for selected account'
-								}}
-							</td>
+							>{{ (receivableAccountModel === '0')
+								? 'No new incoming transactions'
+								: 'No new incoming transactions for selected account'
+								}}</td>
 						</tr>
 						<tr *ngIf="loadingIncomingTxList">
 							<td
@@ -478,7 +488,7 @@
 							><span
 									class="uk-margin-right"
 									uk-spinner
-								></span>Loading incoming transactions...</td>
+								></span> {{ 'account-details.loading-incoming-transactions' | transloco }}</td>
 						</tr>
 				</table>
 				<table
@@ -490,16 +500,28 @@
 							<td
 								colspan="4"
 								style="text-align: center;"
-							><span uk-icon="icon: info"></span>Minimum Receive is set to <a
+							>
+								<span uk-icon="icon: info"></span>
+								{{ 'receive.minimum-receive-is-set-to.1' | transloco }}
+								<a
 									class="hint-action"
 									routerLink="/configure-app"
 									routerLinkActive="active"
-									*ngIf="( util.nano.mnanoToRaw(this.settings.settings.minimumReceive).toFixed().length > 24 ) else amountInRaw"
-								>{{ util.nano.mnanoToRaw(this.settings.settings.minimumReceive).toFixed() | rai: 'mnano,true' | amountsplit: 0 }}{{ util.nano.mnanoToRaw(this.settings.settings.minimumReceive).toFixed() | rai: 'mnano,true' | amountsplit: 1 }} XNO</a><ng-template #amountInRaw><a
+									*ngIf="util.nano.mnanoToRaw(this.settings.settings.minimumReceive).length > 24 else amountInRaw"
+								>
+									{{ util.nano.mnanoToRaw(this.settings.settings.minimumReceive) | rai: 'mnano,true' | amountsplit: 0 }}{{ util.nano.mnanoToRaw(this.settings.settings.minimumReceive) | rai: 'mnano,false' | amountsplit: 1 }}
+								</a>
+								<ng-template #amountInRaw>
+									<a
 										class="hint-action"
 										routerLink="/configure-app"
 										routerLinkActive="active"
-									>{{ util.nano.mnanoToRaw(this.settings.settings.minimumReceive).toFixed() }} raw</a></ng-template>, transactions below this amount will be hidden.</td>
+									>
+										{{ this.settings.settings.minimumReceive | rai: 'raw,false' }}
+									</a>
+								</ng-template>
+								{{ 'receive.minimum-receive-is-set-to.2' | transloco }}
+							</td>
 						</tr>
 					</thead>
 				</table>
@@ -537,15 +559,17 @@
 						style="vertical-align: 2px;"
 						*ngIf="!mobileTransactionData.received"
 					></span>
-					<span *ngIf="!mobileTransactionData.received && !mobileTransactionData.loading">Receive funds</span>
-					<span *ngIf="!mobileTransactionData.received && mobileTransactionData.loading">Receiving...</span>
+					<span *ngIf="!mobileTransactionData.received && !mobileTransactionData.loading">{{ 'receive.receive-nano' |
+						transloco }}</span>
+					<span *ngIf="!mobileTransactionData.received && mobileTransactionData.loading">{{ 'receive.receiving' |
+						transloco }}</span>
 					<span
 						class="icon"
 						uk-icon="icon: check; ratio: 1.3;"
 						style="vertical-align: 2px;"
 						*ngIf="mobileTransactionData.received"
 					></span>
-					<span *ngIf="mobileTransactionData.received">Received!</span>
+					<span *ngIf="mobileTransactionData.received">{{ 'receive.received' | transloco }}</span>
 				</div>
 				<div
 					class="menu-option"
@@ -557,7 +581,7 @@
 						uk-icon="icon: search; ratio: 1.3;"
 						style="vertical-align: 2px;"
 					></span>
-					<span>View transaction details</span>
+					<span>{{ 'account-details.view-transaction-details' | transloco }}</span>
 				</div>
 			</div>
 		</div>
@@ -589,32 +613,31 @@
 			</div>
 		</div>
 		<div class="merchant-centered-container uk-flex-1 uk-width-1-1 uk-flex uk-flex-column uk-flex-center uk-flex-middle uk-text-center">
-			<ng-container *ngIf="(inMerchantModePaymentComplete === false) && (inMerchantModeQR === false) && (pendingAccountModel === '0')">
+			<ng-container *ngIf="(inMerchantModePaymentComplete === false) && (inMerchantModeQR === false) && (receivableAccountModel === '0')">
 				<div class="uk-width-1-1 uk-card uk-card-default uk-margin-bottom">
 					<div class="uk-card-body">
 						<p class="uk-text-large">Select the <span class="uk-text-primary">destination account</span></p>
 						<select
 							id="form-horizontal-select"
 							class="uk-select"
-							[(ngModel)]="pendingAccountModel"
-							(change)="onSelectedAccountChange(pendingAccountModel)"
+							[(ngModel)]="receivableAccountModel"
+							(change)="onSelectedAccountChange(receivableAccountModel)"
 						>
-							<option [value]="0">-</option>
+							<option [value]="0">–</option>
 							<option
 								*ngFor="let account of accounts"
 								[value]="account.id"
-							>{{account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
-								{{ account.id | squeeze }}
-							</option>
+							>{{account.addressBookName ?
+								account.addressBookName + ' - ' : '#' + account.index + ' - ' }} {{ account.id | squeeze }}</option>
 						</select>
 					</div>
 				</div>
 			</ng-container>
-			<ng-container *ngIf="(inMerchantModePaymentComplete === false) && (inMerchantModeQR === false) && (pendingAccountModel !== '0')">
+			<ng-container *ngIf="(inMerchantModePaymentComplete === false) && (inMerchantModeQR === false) && (receivableAccountModel !== '0')">
 				<div class="identicon-name-row uk-text-truncate">
 					<app-nano-identicon
 						scale="6"
-						[accountID]="pendingAccountModel"
+						[accountID]="receivableAccountModel"
 						[settingIdenticonsStyle]="settings.settings.identiconsStyle"
 						class="nano-identicon"
 						*ngIf="(settings.settings.identiconsStyle !== 'none')"
@@ -622,7 +645,7 @@
 					<div class="account-label uk-text-truncate">{{ selectedAccountAddressBookName }}</div>
 				</div>
 				<app-nano-account-id
-					[accountID]="pendingAccountModel"
+					[accountID]="receivableAccountModel"
 					middle="off"
 					class="nano-address-monospace uk-width-auto"
 				></app-nano-account-id>
@@ -634,7 +657,7 @@
 					<span
 						class="nlt-icon"
 						uk-icon="icon: pencil;"
-					></span>Change account</button>
+					></span> Change account </button>
 				<div
 					class="uk-width-1-1 uk-card uk-card-default uk-margin-bottom"
 					style="margin-top: 60px;"
@@ -650,7 +673,7 @@
 								<input
 									[(ngModel)]="amountNano"
 									[ngClass]="{ 'uk-form-danger': !validNano }"
-									[attr.disabled]="pendingAccountModel == '0' || null"
+									[attr.disabled]="receivableAccountModel == '0' || null"
 									autocomplete="off"
 									class="uk-input"
 									id="form-horizontal-amount"
@@ -679,7 +702,7 @@
 									<input
 										[(ngModel)]="amountFiat"
 										[ngClass]="{ 'uk-form-danger': !validFiat }"
-										[attr.disabled]="pendingAccountModel == '0' || null"
+										[attr.disabled]="receivableAccountModel == '0' || null"
 										autocomplete="off"
 										(input)="fiatAmountChange()"
 										style="padding-left: 52px !important;"
@@ -697,7 +720,7 @@
 							type="button"
 							(click)="merchantModeShowQR()"
 						>
-							<span class="merchant-mode-icon-qr-code"></span>Create QR code</button>
+							<span class="merchant-mode-icon-qr-code"></span> Create QR code </button>
 					</div>
 				</div>
 			</ng-container>
@@ -713,8 +736,10 @@
 					class="uk-text-large uk-text-primary uk-margin-remove-top"
 					*ngIf="(amountNano !== '')"
 				>
-					<span class="merchant-mode-amount-integer">{{ merchantModeRawRequestedQR | rai: 'mnano,true' | amountsplit: 0 }}</span>
-					<span class="merchant-mode-amount-fractional">{{ merchantModeRawRequestedQR | rai: 'mnano,true' | amountsplit: 1 }}</span>
+					<span class="merchant-mode-amount-integer">{{ merchantModeRawRequestedQR | rai: 'mnano,true' | amountsplit: 0
+						}}</span>
+					<span class="merchant-mode-amount-fractional">{{ merchantModeRawRequestedQR | rai: 'mnano,true' | amountsplit:
+						1 }}</span>
 					<span class="merchant-mode-currency-name merchant-mode-currency-margin">XNO</span>
 				</p>
 				<p
@@ -722,7 +747,7 @@
 					style="margin: -16px 0 10px 0;"
 				>to</p>
 				<app-nano-account-id
-					[accountID]="pendingAccountModel"
+					[accountID]="receivableAccountModel"
 					middle="break"
 					class="nano-address-monospace uk-width-auto"
 					style="display: inline-block; max-width: 325px;"
@@ -752,29 +777,31 @@
 						<p
 							*ngIf="(amountNano === '')"
 							class="uk-text-large text-half-muted uk-margin-remove-bottom"
-						>Received</p>
+						> Received </p>
 						<p
 							*ngIf="(amountNano !== '') && prompt.moreThanRequested"
 							class="uk-text-large text-half-muted uk-margin-remove-bottom"
-						>Received <span class="uk-text-success">more</span> than requested</p>
+						> Received <span class="uk-text-success">more</span> than requested </p>
 						<p
 							*ngIf="(amountNano !== '') && prompt.lessThanRequested"
 							class="uk-text-large text-half-muted uk-margin-remove-bottom"
-						>Received <span class="uk-text-warning">less</span> than requested</p>
+						> Received <span class="uk-text-warning">less</span> than requested </p>
 						<p
 							class="uk-text-large uk-margin-remove-top"
 							[class.uk-text-success]="prompt.moreThanRequested"
 							[class.uk-text-warning]="prompt.lessThanRequested"
 						>
-							<span class="merchant-mode-amount-integer">{{ prompt.amountRaw | rai: 'mnano,true' | amountsplit: 0 }}</span>
-							<span class="merchant-mode-amount-fractional">{{ prompt.amountRaw | rai: 'mnano,true' | amountsplit: 1 }}</span>
+							<span class="merchant-mode-amount-integer">{{ prompt.amountRaw | rai: 'mnano,true' | amountsplit: 0
+								}}</span>
+							<span class="merchant-mode-amount-fractional">{{ prompt.amountRaw | rai: 'mnano,true' | amountsplit: 1
+								}}</span>
 							<span class="merchant-mode-currency-name merchant-mode-currency-margin">XNO</span>
 						</p>
 						<div
-							*ngIf="prompt.amountHiddenRaw.gt(0)"
+							*ngIf="prompt.amountHiddenRaw > 0n"
 							class="uk-text-small text-half-muted block-hash-monospace"
 							style="margin: -22px 0 28px 0;"
-						>+{{ prompt.amountHiddenRaw.toString(10) }} raw</div>
+						> +{{ prompt.amountHiddenRaw.toString(10) }} raw </div>
 						<button
 							*ngIf="prompt.moreThanRequested"
 							class="uk-width-1-1 uk-button uk-button-primary uk-text-center nlt-icon-button uk-margin-bottom nlt-button-green"
@@ -785,7 +812,7 @@
 								class="nlt-icon"
 								uk-icon="icon: check;"
 								style="margin-top: -2px;"
-							></span>Mark Payment Complete</button>
+							></span> Mark Payment Complete </button>
 						<button
 							*ngIf="prompt.lessThanRequested"
 							class="uk-width-1-1 uk-button uk-button-primary uk-text-center nlt-icon-button uk-margin-bottom"
@@ -796,7 +823,7 @@
 								class="nlt-icon"
 								uk-icon="icon: pencil;"
 								style="margin-top: -2px;"
-							></span>Subtract From Amount</button>
+							></span> Subtract From Amount </button>
 						<button
 							class="uk-width-1-1 uk-button uk-button-secondary uk-text-danger uk-text-center nlt-icon-button"
 							type="button"
@@ -806,7 +833,7 @@
 								class="nlt-icon"
 								uk-icon="icon: close;"
 								style="margin-top: -2px;"
-							></span>Discard As Unrelated</button>
+							></span> Discard As Unrelated </button>
 					</div>
 				</div>
 				<ng-container *ngIf="merchantModePrompts.length === 0">
@@ -817,7 +844,7 @@
 						[class.uk-button-secondary]="loadingIncomingTxList"
 						[class.uk-disabled]="loadingIncomingTxList"
 						type="button"
-						(click)="!loadingIncomingTxList && getPending()"
+						(click)="!loadingIncomingTxList && getReceivable()"
 					>
 						<span
 							class="nlt-icon"
@@ -849,15 +876,17 @@
 			<ng-container *ngIf="(inMerchantModePaymentComplete === true)">
 				<p class="uk-text-large uk-margin-remove-bottom uk-text-success">Received</p>
 				<p class="uk-text-large uk-text-success uk-margin-remove-top">
-					<span class="merchant-mode-amount-integer">{{ merchantModeRawReceivedTotal | rai: 'mnano,true' | amountsplit: 0 }}</span>
-					<span class="merchant-mode-amount-fractional">{{ merchantModeRawReceivedTotal | rai: 'mnano,true' | amountsplit: 1 }}</span>
+					<span class="merchant-mode-amount-integer">{{ merchantModeRawReceivedTotal | rai: 'mnano,true' | amountsplit:
+						0 }}</span>
+					<span class="merchant-mode-amount-fractional">{{ merchantModeRawReceivedTotal | rai: 'mnano,true' |
+						amountsplit: 1 }}</span>
 					<span class="merchant-mode-currency-name merchant-mode-currency-margin">XNO</span>
 				</p>
 				<div
-					*ngIf="merchantModeRawReceivedTotalHiddenRaw.gt(0)"
+					*ngIf="merchantModeRawReceivedTotalHiddenRaw > 0n"
 					class="uk-text-small text-half-muted block-hash-monospace"
 					style="margin: -22px 0 28px 0;"
-				>+{{ merchantModeRawReceivedTotalHiddenRaw.toString(10) }} raw</div>
+				> +{{ merchantModeRawReceivedTotalHiddenRaw.toString(10) }} raw </div>
 				<img
 					style="width: 50%; margin-top: -40px;"
 					src="data:image/svg+xml,%3Csvg width='200mm' height='200mm' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m157.05 40.584c-2.5562-2e-6 -5.1127 0.97964-7.0714 2.9383l-65.687 65.687-34.266-34.266c-3.9174-3.9174-10.225-3.9174-14.142 1e-6l-12.915 12.915c-3.9174 3.9174-3.9174 10.225-1e-6 14.142l39.526 39.526c0.4262 0.72955 0.95143 1.4181 1.5782 2.0448l12.915 12.915c3.9174 3.9174 10.225 3.9174 14.142 0l85.906-85.907c3.9174-3.9174 3.9174-10.224 0-14.142l-12.915-12.915c-1.9587-1.9587-4.5147-2.9383-7.0709-2.9383z' fill='none' stop-color='%23000000' stroke='%2332d296' stroke-linejoin='round' stroke-width='2' style='paint-order:stroke fill markers'/%3E%3C/svg%3E"
@@ -868,25 +897,25 @@
 						type="button"
 						ngxClipboard
 						[cbContent]="(
-                  'Amount Requested: '
-                + ( merchantModeRawRequestedTotal | rai: 'mnano,true' | amountsplit: 0 )
-                + ( merchantModeRawRequestedTotal | rai: 'mnano,true' | amountsplit: 1 )
-                + ' XNO'
-                + '\n\n'
-                + 'Amount Paid: '
-                + ( merchantModeRawReceivedTotal | rai: 'mnano,true' | amountsplit: 0 )
-                + ( merchantModeRawReceivedTotal | rai: 'mnano,true' | amountsplit: 1 )
-                + ' XNO'
-                + '\n\n'
-                + 'Transaction ID\'s:'
-                + '\n- '
-                + merchantModeTransactionHashes.join('\n- ')
-            )"
+							'Amount Requested: '
+							+ ( merchantModeRawRequestedTotal | rai: 'mnano,true' | amountsplit: 0 )
+							+ ( merchantModeRawRequestedTotal | rai: 'mnano,true' | amountsplit: 1 )
+							+ ' XNO'
+							+ '\n\n'
+							+ 'Amount Paid: '
+							+ ( merchantModeRawReceivedTotal | rai: 'mnano,true' | amountsplit: 0 )
+							+ ( merchantModeRawReceivedTotal | rai: 'mnano,true' | amountsplit: 1 )
+							+ ' XNO'
+							+ '\n\n'
+							+ 'Transaction ID\'s:'
+							+ '\n- '
+							+ merchantModeTransactionHashes.join('\n- ')
+						)"
 					>
 						<span
 							class="nlt-icon"
 							uk-icon="icon: copy;"
-						></span>Copy Payment Information</button>
+						></span> Copy Payment Information </button>
 				</p>
 				<ul class="uk-width-1-1">
 					<li

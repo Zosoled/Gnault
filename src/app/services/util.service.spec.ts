@@ -1,6 +1,5 @@
 import { TestBed, inject } from '@angular/core/testing'
-
-import { UtilService } from './util.service'
+import { UtilService } from 'app/services'
 
 describe('UtilService', () => {
 	beforeEach(() => {

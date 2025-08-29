@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { KeygeneratorComponent } from './keygenerator.component'
+import { KeygeneratorComponent } from 'app/components'
 
 describe('KeygeneratorComponent', () => {
 	let component: KeygeneratorComponent

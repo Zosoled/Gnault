@@ -26,37 +26,44 @@
 			style="margin-top: 20px;"
 		>
 			<div class="uk-card-header">
-				<h3 class="uk-card-title">Generate a new random keypair</h3>
+				<h3 class="uk-card-title"> Generate a new random keypair </h3>
 				<p>For <strong>Remote Signing</strong> or <strong>Multisig</strong>, you will need to store and use the <strong>Private Key</strong>.</p>
 			</div>
 			<div class="uk-card-body">
 				<div uk-grid>
-					<div class="uk-width-1-4@m">{{ 'configure-wallet.new-wallet.secret-recovery-seed' | transloco }} <span
+					<div class="uk-width-1-4@m">{{ 'configure-wallet.new-wallet.secret-recovery-seed' | transloco }}
+						<span
 							uk-icon="icon: info;"
 							uk-tooltip
 							title="Can be used to derive many private keys with different indexes or converted to a secret recovery mnemonic. It's NOT bip39/44."
-						></span></div>
+						></span>
+					</div>
 					<div class="uk-width-3-4@m">
 						<div
 							*ngIf="seed == ''"
 							class="uk-margin-small-bottom"
 						>...</div>
 						<div *ngIf="seed !== ''">
-							<div class="uk-margin-small-bottom word-wrap-anywhere">{{ seed }}</div>
+							<div class="uk-margin-small-bottom word-wrap-anywhere">
+								{{ seed }}
+							</div>
 							<a
 								[title]="( 'configure-wallet.new-wallet.copy-secret-recovery-seed' | transloco )"
 								ngxClipboard
 								[cbContent]="seed"
 								(cbOnSuccess)="copied()"
 								uk-tooltip
-							>{{ 'configure-wallet.new-wallet.copy-secret-recovery-seed' | transloco }}</a>
+							>
+								{{ 'configure-wallet.new-wallet.copy-secret-recovery-seed' | transloco }}
+							</a>
 						</div>
 					</div>
 				</div>
 				<hr class="uk-divider-icon">
 				<div uk-grid>
 					<div class="uk-width-1-4@m">
-						{{ 'configure-wallet.new-wallet.secret-recovery-mnemonic' | transloco }} <span
+						{{ 'configure-wallet.new-wallet.secret-recovery-mnemonic' | transloco }}
+						<span
 							uk-icon="icon: info;"
 							uk-tooltip
 							title="Can be used to derive many private keys with different indexes or converted to a secret recovery seed. It's NOT bip39/44."
@@ -75,7 +82,9 @@
 								[cbContent]="mnemonic"
 								(cbOnSuccess)="copied()"
 								uk-tooltip
-							>{{ 'configure-wallet.new-wallet.copy-secret-recovery-mnemonic' | transloco }}</a>
+							>
+								{{ 'configure-wallet.new-wallet.copy-secret-recovery-mnemonic' | transloco }}
+							</a>
 						</div>
 					</div>
 				</div>
@@ -88,7 +97,9 @@
 							class="uk-margin-small-bottom"
 						>...</div>
 						<div *ngIf="privateKey !== ''">
-							<div class="uk-margin-small-bottom word-wrap-anywhere">{{ privateKey }}</div>
+							<div class="uk-margin-small-bottom word-wrap-anywhere">
+								{{ privateKey }}
+							</div>
 							<a
 								title="Copy Private Key"
 								ngxClipboard
@@ -105,7 +116,7 @@
 						<div class="icon-column">
 							<div uk-icon="icon: warning; ratio: 2;"></div>
 						</div>
-						<p>You will NOT be able to access any funds on the address below, without a secret recovery seed/mnemonic or a private key written above.<br> Make sure to securely store any of the secret recovery seed, mnemonic or private key, save it somewhere safe and <strong>never share it with anyone!</strong>
+						<p>You will NOT be able to access any funds on the address below, without a secret recovery seed/mnemonic or a private key written above.<br>Make sure to securely store any of the secret recovery seed, mnemonic or private key, save it somewhere safe and <strong>never share it with anyone!</strong>
 						</p>
 					</div>
 				</div>
@@ -118,11 +129,13 @@
 							class="uk-margin-small-bottom"
 						>...</div>
 						<div *ngIf="account !== ''">
-							<div class="uk-margin-small-bottom"><app-nano-account-id
+							<div class="uk-margin-small-bottom">
+								<app-nano-account-id
 									[accountID]="account"
 									middle="auto"
 									class="nano-address-monospace"
-								></app-nano-account-id></div>
+								></app-nano-account-id>
+							</div>
 							<a
 								title="Copy Address"
 								ngxClipboard
