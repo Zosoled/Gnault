@@ -15,7 +15,9 @@
 						"index": "src/index.html",
 						"main": "src/main.ts",
 						"tsConfig": "src/tsconfig.app.json",
-						"polyfills": "src/polyfills.ts",
+						"polyfills": [
+							"src/polyfills.ts"
+						],
 						"assets": [
 							"src/assets",
 							"src/404.html",
@@ -35,7 +37,6 @@
 							"hw-app-nano",
 							"hw-transport-web-ble",
 							"hw-transport-webusb",
-							"pbkdf2",
 							"punycode",
 							"querystring",
 							"qrcode",
@@ -43,7 +44,7 @@
 							"url",
 							"zxcvbn"
 						],
-						"vendorChunk": true,
+						"vendorChunk": false,
 						"extractLicenses": false,
 						"buildOptimizer": false,
 						"sourceMap": true,
