@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common'
-import { Component, ElementRef, HostListener, OnInit, ViewChild, Renderer2, inject } from '@angular/core'
+import {
+	Component,
+	ElementRef,
+	HostListener,
+	OnInit,
+	Renderer2,
+	ViewChild,
+	inject
+} from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink, RouterOutlet } from '@angular/router'
 import { SwUpdate } from '@angular/service-worker'
