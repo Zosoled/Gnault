@@ -10,7 +10,6 @@ import {
 	LedgerStatus,
 	NotificationService,
 	QrModalService,
-	RepresentativeService,
 	UtilService,
 	WalletService
 } from 'app/services'
@@ -40,10 +39,9 @@ const INDEX_MAX = 4294967295
 })
 
 export class ConfigureWalletComponent implements OnInit {
-	private router = inject(ActivatedRoute)
 	private notifications = inject(NotificationService)
-	private route = inject(Router)
 	private qrModalService = inject(QrModalService)
+	private route = inject(Router)
 	private util = inject(UtilService)
 	private translocoService = inject(TranslocoService)
 	ledgerService = inject(LedgerService)
@@ -300,9 +298,9 @@ export class ConfigureWalletComponent implements OnInit {
 		this.activePanel = panels.password
 	}
 
-	async createNewWallet () {
-		const newWallet = await Wallet.load('BIP-44', '', this.newWalletSeed)
-		await newWallet.unlock('')
+	async createNewWallet (password: string) {
+		const newWallet = await Wallet.create('BIP-44', password)
+		await newWallet.unlock(password)
 		this.newWalletSeed = newWallet.seed
 		this.newWalletMnemonic = newWallet.mnemonic
 		// Split the seed up so we can show 4 per line
@@ -343,7 +341,7 @@ export class ConfigureWalletComponent implements OnInit {
 		this.walletPasswordConfirmModel = ''
 
 		if (this.isNewWallet) {
-			this.createNewWallet()
+			this.createNewWallet(this.newPassword)
 		} else if (this.selectedImportOption === 'mnemonic' || this.selectedImportOption === 'seed') {
 			this.importExistingWallet()
 		} else if (this.selectedImportOption === 'privateKey' || this.selectedImportOption === 'expandedKey'
