@@ -1,30 +1,29 @@
-import { Injectable, inject } from '@angular/core'
-import { UtilService } from './util.service'
-import { NotificationService } from './notification.service'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
+import { Injectable, inject } from '@angular/core'
+import { Account } from 'libnemo'
 import { Observable } from 'rxjs'
-import * as nanocurrency from 'nanocurrency'
+import { NotificationService, UtilService } from 'app/services'
 import { environment } from 'environments/environment'
-const base32 = require('nano-base32')
 
 @Injectable({
 	providedIn: 'root'
 })
+
 export class MusigService {
-	private util = inject(UtilService);
-	private notificationService = inject(NotificationService);
-	private http = inject(HttpClient);
+	private util = inject(UtilService)
+	private notificationService = inject(NotificationService)
+	private http = inject(HttpClient)
 
 	// The multisig wasm library can be validated by running build-or-validate_musig_wasm.sh
 	private wasmURL = environment.desktop
 		? '../../../resources/app.asar/dist/assets/lib/musig-nano/musig_nano.wasm.b64'
-		: '../../../assets/lib/musig-nano/musig_nano.wasm.b64';
+		: '../../../assets/lib/musig-nano/musig_nano.wasm.b64'
 
-	wasm = null;
-	wasmErrors = ['No error', 'Internal error', 'Invalid parameter(s)', 'Invalid Participant Input'];
-	musigStagePtr: number = null;
-	musigStageNum: number = null;
-	savedPublicKeys = [];
+	wasm = null
+	wasmErrors = ['No error', 'Internal error', 'Invalid parameter(s)', 'Invalid Participant Input']
+	musigStagePtr: number = null
+	musigStageNum: number = null
+	savedPublicKeys = []
 
 	constructor () {
 		// Read the wasm file for multisig
@@ -128,11 +127,12 @@ export class MusigService {
 		}
 	}
 
-	aggregate (storedAccounts, runWithPubkeys = null) {
+	async aggregate (storedAccounts, runWithPubkeys = null) {
 		let addresses = []
 		if (runWithPubkeys && this.savedPublicKeys?.length > 1) {
 			for (const pubKey of this.savedPublicKeys) {
-				addresses.push(nanocurrency.deriveAddress(pubKey, { useNanoPrefix: true }))
+				const account = Account.load(pubKey)
+				addresses.push(account.address)
 			}
 		} else {
 			addresses = storedAccounts
@@ -146,18 +146,9 @@ export class MusigService {
 			if (!address.startsWith('xrb_') && !address.startsWith('nano_')) {
 				throw new Error('Nano addresses must start with xrb_ or nano_')
 			}
-			address = address.split('_', 2)[1]
 			try {
-				const bytes = base32.decode(address)
-				if (bytes.length !== 37) {
-					throw new Error('Wrong nano address length')
-				}
-				const pubkey = bytes.subarray(0, 32)
-				const checksum_ = this.util.account.getAccountChecksum(pubkey)
-				if (!this.util.array.equalArrays(bytes.subarray(32), checksum_)) {
-					throw new Error('Invalid nano address checksum')
-				}
-				pubkeys.push(pubkey)
+				const { publicKey } = Account.load(address)
+				pubkeys.push(publicKey)
 			} catch (err_) {
 				console.error(err_.toString())
 				throw new Error('Invalid nano address (bad character?)')
@@ -183,21 +174,13 @@ export class MusigService {
 			throw this.wasmError(err)
 		}
 		const aggPubkey = outBuf.subarray(1).slice()
-		const checksum = this.util.account.getAccountChecksum(aggPubkey)
-		const fullAddress = new Uint8Array(37)
-		for (let i = 0; i < 32; i++) {
-			fullAddress[i] = aggPubkey[i]
-		}
-		for (let i = 0; i < 5; i++) {
-			fullAddress[32 + i] = checksum[i]
-		}
-		const fullAddressFinal = 'nano_' + base32.encode(fullAddress)
-		console.log('Multisig Account: ' + fullAddressFinal)
+		const { address } = Account.load(aggPubkey)
+		console.log('Multisig Account: ' + address)
 		this.wasm.musig_free(outPtr)
-		return { 'multisig': fullAddressFinal, 'pubkey': aggPubkey }
+		return { 'multisig': address, 'pubkey': aggPubkey }
 	}
 
-	multiSign (privateKey, blockHash, inputMultisigData) {
+	async multiSign (privateKey, blockHash, inputMultisigData) {
 		let multisigAccount = ''
 		// Stage 0 (init)
 		if (!this.musigStagePtr) {
@@ -267,7 +250,8 @@ export class MusigService {
 					this.savedPublicKeys.push(input.substring(66, 130).toLowerCase())
 				}
 				// Add the public key from self
-				const pub = nanocurrency.derivePublicKey(privateKey)
+				const account = await Account.load(privateKey, 'private')
+				const pub = account.publicKey
 				if (this.savedPublicKeys.includes(pub.toLowerCase())) {
 					throw new Error('You must use different private keys for each participant!')
 				}
@@ -275,7 +259,7 @@ export class MusigService {
 
 				const blockhash = this.util.hex.toUint8(blockHash)
 				const blockhashPtr = this.copyToWasm(blockhash)
-				const result = this.aggregate('', (pubkeys, pubkeysLen) => {
+				const result = await this.aggregate('', (pubkeys, pubkeysLen) => {
 					const flags = 0 // Set to 1 if private key is a raw/expanded scalar (unusual)
 					newStagePtr = this.wasm.musig_stage1(this.musigStagePtr, privateKeyPtr, pubkeys, pubkeysLen, flags,
 						blockhashPtr, blockhash.length, protocolInputPtrs, protocolInputs.length, outPtr, null, outPtr + 1)

@@ -99,7 +99,7 @@
 											(click)="addSelectedAccounts(rep.accounts)"
 										>
 											<div class="representative-label-container">
-												<div class="account-label rep">{{ rep.label ? rep.label : 'Unknown Rep' }}</div>
+												<div class="account-label rep">{{ rep.label ? rep.label : 'change-rep-widget.unknown-rep' | transloco }}</div>
 												<div class="representative-weight-percentage uk-width-auto uk-flex-inline uk-flex-middle">
 													<div
 														class="value uk-text-small text-half-muted"
@@ -170,7 +170,7 @@
 									colspan="3"
 									style="text-align: center;"
 									*ngIf="settings.settings.serverAPI"
-								>None of your accounts have delegated any voting weight yet, you must receive a transaction to change your representative!</td>
+								>None of your accounts have delegated any voting weight yet. You must receive a transaction to change your representative!</td>
 								<td
 									colspan="3"
 									style="text-align: center;"
@@ -210,7 +210,7 @@
 									<select
 										class="uk-select"
 										[(ngModel)]="changeAccountID"
-										(change)="newAccountID()"
+										(change)="newAccountID($event.target)"
 										id="form-horizontal-select"
 									>
 										<option [value]="null">Select Accounts to Change</option>
@@ -218,7 +218,11 @@
 										<option
 											*ngFor="let account of walletService.wallet.accounts"
 											[value]="account.id"
-										>{{account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
+										>
+											{{ account.addressBookName
+												?account.addressBookName + ' - '
+												: '#' + account.index + ' - '
+											}}
 											{{ account.id | squeeze }} ({{ account.balance | rai: 'mnano,true' | amountsplit: 0 }}{{ account.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO)
 										</option>
 									</select>
@@ -302,7 +306,7 @@
 										</div>
 									</div>
 								</div>
-								<div
+								<!-- <div
 									class="uk-form-controls"
 									*ngIf="representativeListMatch"
 								>
@@ -310,78 +314,155 @@
 										<span class="account-label rep">{{ representativeListMatch }}</span>
 									</div>
 								</div>
-								<!-- <div class="uk-form-controls">
-                  <div class="uk-inline uk-width-1-1 uk-margin-top">
-                    <button class="uk-button uk-button-default uk-button-small" *ngIf="showRecommendedReps" (click)="showRecommendedReps = !showRecommendedReps"><span uk-icon="icon: minus; ratio: 0.8" style="margin-right: 5px;"></span> Hide Recommended Representatives</button>
-                    <button class="uk-button uk-button-primary uk-button-small" *ngIf="!showRecommendedReps" (click)="showRecommendedReps = !showRecommendedReps"><span uk-icon="icon: plus; ratio: 0.8" style="margin-right: 5px;"></span> View Recommended Representatives</button>
-                  </div>
-                </div> -->
+								<div class="uk-form-controls">
+									<div class="uk-inline uk-width-1-1 uk-margin-top">
+										<button
+											class="uk-button uk-button-default uk-button-small"
+											*ngIf="showRecommendedReps"
+											(click)="showRecommendedReps = !showRecommendedReps"
+										><span
+												uk-icon="icon: minus; ratio: 0.8"
+												style="margin-right: 5px;"
+											></span> Hide Recommended Representatives</button>
+										<button
+											class="uk-button uk-button-primary uk-button-small"
+											*ngIf="!showRecommendedReps"
+											(click)="showRecommendedReps = !showRecommendedReps"
+										><span
+												uk-icon="icon: plus; ratio: 0.8"
+												style="margin-right: 5px;"
+											></span> View Recommended Representatives</button>
+									</div>
+								</div>
 							</div>
-							<!-- <div *ngIf="showRecommendedReps">
-                <hr>
-
-                <div class="uk-margin">
-                  <p class="uk-text-lead uk-text-center">Select a representative recommended by <a href="https://mynano.ninja" target="_blank" rel="noopener noreferrer" class="uk-link-text">MyNanoNinja</a></p>
-                  <ul class="uk-list uk-list-striped" style="margin-bottom: 0;">
-                    <li class="uk-list-header">
-                      <div uk-grid>
-                        <div class="uk-width-expand">Representative</div>
-                        <div class="uk-width-1-2">Weight / Uptime / Accounts</div>
-                      </div>
-                    </li>
-                  </ul>
-                  <ul class="uk-list uk-list-striped" style="margin-top: 0;">
-                    <li *ngIf="recommendedRepsLoading" class="uk-text-center">
-                      <span uk-icon="load"></span> Loading reps...
-                    </li>
-                    <li *ngIf="recommendedRepsLoading === null" class="uk-text-center">
-                      <span uk-icon="load"></span> Unable to load representatives from My Nano Ninja
-                    </li>
-                    <li *ngFor="let rep of recommendedRepsPaginated">
-                      <div uk-grid >
-                        <div class="uk-width-expand" (click)="selectRecommendedRep(rep)" style="cursor: pointer;">
-                          <span class="uk-badge" uk-tooltip title="My Nano Ninja Score" style="margin-right: 4px;">{{ rep.score }}</span> <span uk-tooltip title="Select this representative">{{ rep.alias }}</span>
-
-                        </div>
-                        <div class="uk-width-1-2">
-                          <a [href]="'https://mynano.ninja/account/' + rep.account" target="_blank" rel="noopener noreferrer" style="float: right;" uk-tooltip title="View more details on My Nano Ninja" class="uk-link-muted"><span uk-icon="search"></span></a>
-
-                          <span style="display: inline-block; margin-right: 15px;" uk-tooltip title="Percentage of network voting weight delegated" class="uk-text-primary"><span uk-icon="users"></span> {{ rep.percent }}%</span>
-                          <span style="display: inline-block; margin-right: 15px; color: #13ab60;" uk-tooltip title="Uptime since creation" class=""><span uk-icon="bolt"></span> {{ rep.uptime.toFixed(2) }}%</span>
-
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                  <a href="https://mynano.ninja" target="_blank" rel="noopener noreferrer" class="view-all-reps-link uk-link-muted" uk-tooltip title="View all verified representatives on MyNanoNinja">View All <span uk-icon="icon: push; ratio: 0.9;"></span></a>
-                  <ul class="uk-pagination uk-flex-center uk-flex-middle">
-                    <li><a (click)="previousReps()" uk-tooltip title="Previous Page"><span uk-pagination-previous class="uk-icon-button"></span></a></li>
-                    <li>Showing {{ (currentRepPage * repsPerPage)+ 1 }} - {{ (currentRepPage * repsPerPage)+ repsPerPage }} of {{ recommendedReps.length }} reps</li>
-                    <li><a (click)="nextReps()" uk-tooltip title="Next Page"><span uk-pagination-next class="uk-icon-button"></span></a></li>
-                  </ul>
-                </div>
-
-              </div> -->
+							<div *ngIf="showRecommendedReps">
+								<hr>
+								<div class="uk-margin">
+									<p class="uk-text-lead uk-text-center">Select a representative recommended by <a
+											href="https://mynano.ninja"
+											target="_blank"
+											rel="noopener noreferrer"
+											class="uk-link-text"
+										>MyNanoNinja</a></p>
+									<ul
+										class="uk-list uk-list-striped"
+										style="margin-bottom: 0;"
+									>
+										<li class="uk-list-header">
+											<div uk-grid>
+												<div class="uk-width-expand">Representative</div>
+												<div class="uk-width-1-2">Weight / Uptime / Accounts</div>
+											</div>
+										</li>
+									</ul>
+									<ul
+										class="uk-list uk-list-striped"
+										style="margin-top: 0;"
+									>
+										<li
+											*ngIf="recommendedRepsLoading"
+											class="uk-text-center"
+										>
+											<span uk-icon="load"></span> Loading reps...
+										</li>
+										<li
+											*ngIf="recommendedRepsLoading === null"
+											class="uk-text-center"
+										>
+											<span uk-icon="load"></span> Unable to load representatives from My Nano Ninja
+										</li>
+										<li *ngFor="let rep of recommendedRepsPaginated">
+											<div uk-grid>
+												<div
+													class="uk-width-expand"
+													(click)="selectRecommendedRep(rep)"
+													style="cursor: pointer;"
+												>
+													<span
+														class="uk-badge"
+														uk-tooltip
+														title="My Nano Ninja Score"
+														style="margin-right: 4px;"
+													>{{ rep.score }}</span> <span
+														uk-tooltip
+														title="Select this representative"
+													>{{ rep.alias }}</span>
+												</div>
+												<div class="uk-width-1-2">
+													<a
+														[href]="'https://mynano.ninja/account/' + rep.account"
+														target="_blank"
+														rel="noopener noreferrer"
+														style="float: right;"
+														uk-tooltip
+														title="View more details on My Nano Ninja"
+														class="uk-link-muted"
+													><span uk-icon="search"></span></a>
+													<span
+														style="display: inline-block; margin-right: 15px;"
+														uk-tooltip
+														title="Percentage of network voting weight delegated"
+														class="uk-text-primary"
+													><span uk-icon="users"></span> {{ rep.percent }}%</span>
+													<span
+														style="display: inline-block; margin-right: 15px; color: #13ab60;"
+														uk-tooltip
+														title="Uptime since creation"
+														class=""
+													><span uk-icon="bolt"></span> {{ rep.uptime.toFixed(2) }}%</span>
+												</div>
+											</div>
+										</li>
+									</ul>
+									<a
+										href="https://somenano.com"
+										target="_blank"
+										rel="noopener noreferrer"
+										class="view-all-reps-link uk-link-muted"
+										uk-tooltip
+										title="View all verified representatives on MyNanoNinja"
+									>View All <span uk-icon="icon: push; ratio: 0.9;"></span></a>
+									<ul class="uk-pagination uk-flex-center uk-flex-middle">
+										<li><a
+												(click)="previousReps()"
+												uk-tooltip
+												title="Previous Page"
+											><span
+													uk-pagination-previous
+													class="uk-icon-button"
+												></span></a></li>
+										<li>Showing {{ (currentRepPage * repsPerPage)+ 1 }} - {{ (currentRepPage * repsPerPage)+ repsPerPage }} of {{ recommendedReps.length }} reps</li>
+										<li><a
+												(click)="nextReps()"
+												uk-tooltip
+												title="Next Page"
+											><span
+													uk-pagination-next
+													class="uk-icon-button"
+												></span></a></li>
+									</ul>
+								</div>
+							</div> -->
+							</div>
 						</div>
-					</div>
-					<div class="uk-card-footer">
-						<button
-							class="uk-button uk-button-primary uk-width-1-1@s uk-width-auto@m uk-float-right"
-							type="button"
-							(click)="changeRepresentatives()"
-							*ngIf="!changingRepresentatives"
-						>Update Representatives</button>
-						<button
-							class="uk-button uk-button-secondary uk-width-1-1 uk-disabled nlt-icon-button"
-							type="button"
-							*ngIf="changingRepresentatives"
-						><span
-								class="spinner"
-								uk-spinner="ratio: 0.5;"
-							></span>Updating Representatives</button>
+						<div class="uk-card-footer">
+							<button
+								class="uk-button uk-button-primary uk-width-1-1@s uk-width-auto@m uk-float-right"
+								type="button"
+								(click)="changeRepresentatives()"
+								*ngIf="!changingRepresentatives"
+							>Update Representatives</button>
+							<button
+								class="uk-button uk-button-secondary uk-width-1-1 uk-disabled nlt-icon-button"
+								type="button"
+								*ngIf="changingRepresentatives"
+							><span
+									class="spinner"
+									uk-spinner="ratio: 0.5;"
+								></span>Updating Representatives</button>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
-</div>

@@ -1,6 +1,5 @@
-import { Injectable, inject } from '@angular/core'
-import * as url from 'url'
-import { TranslocoService, getBrowserCultureLang, getBrowserLang } from '@ngneat/transloco'
+import { inject } from '@angular/core'
+import { TranslocoService, getBrowserCultureLang, getBrowserLang } from '@jsverse/transloco'
 
 export type WalletStore = 'localStorage' | 'none'
 export type PoWSource = 'client' | 'custom' | 'server'
@@ -9,7 +8,6 @@ export type LedgerConnectionType = 'usb' | 'bluetooth'
 interface AppSettings {
 	language: string
 	displayDenomination: string
-	// displayPrefix: string | null;
 	walletStore: string
 	displayCurrency: string
 	defaultRepresentative: string | null
@@ -18,8 +16,7 @@ interface AppSettings {
 	ledgerReconnect: LedgerConnectionType
 	powSource: PoWSource
 	customWorkServer: string
-	pendingOption: string
-	decentralizedAliasesOption: string
+	receivableOption: string
 	serverName: string
 	serverAPI: string | null
 	serverWS: string | null
@@ -30,16 +27,12 @@ interface AppSettings {
 	identiconsStyle: string
 }
 
-@Injectable()
 export class AppSettingsService {
-	private translate = inject(TranslocoService);
-
-	storeKey = `nanovault-appsettings`;
-
+	private translate = inject(TranslocoService)
+	storeKey = `nanovault-appsettings`
 	settings: AppSettings = {
 		language: null,
 		displayDenomination: 'mnano',
-		// displayPrefix: 'xrb',
 		walletStore: 'localStorage',
 		displayCurrency: 'USD',
 		defaultRepresentative: null,
@@ -48,8 +41,7 @@ export class AppSettingsService {
 		ledgerReconnect: 'usb',
 		powSource: 'server',
 		customWorkServer: '',
-		pendingOption: 'amount',
-		decentralizedAliasesOption: 'disabled',
+		receivableOption: 'amount',
 		serverName: 'random',
 		serverAPI: null,
 		serverWS: null,
@@ -58,8 +50,7 @@ export class AppSettingsService {
 		walletVersion: 1,
 		lightModeEnabled: false,
 		identiconsStyle: 'nanoidenticons',
-	};
-
+	}
 	serverOptions = [
 		{
 			name: 'Random',
@@ -117,7 +108,7 @@ export class AppSettingsService {
 			auth: null,
 			shouldRandom: false,
 		}
-	];
+	]
 
 	// Simplified list for comparison in other classes
 	knownApiEndpoints = this.serverOptions.reduce((acc, server) => {
@@ -126,7 +117,7 @@ export class AppSettingsService {
 		return acc
 	}, [
 		'node.somenano.com'
-	]);
+	])
 
 	loadAppSettings () {
 		let settings: AppSettings = this.settings
@@ -147,20 +138,16 @@ export class AppSettingsService {
 			} else {
 				this.settings.language = this.translate.getDefaultLang()
 			}
-
 			console.log('No language configured, setting to: ' + this.settings.language)
 			console.log('Browser culture language: ' + browserCultureLang)
 			console.log('Browser language: ' + browserLang)
 		}
-
 		this.loadServerSettings()
-
 		return this.settings
 	}
 
 	loadServerSettings () {
 		const matchingServerOption = this.serverOptions.find(d => d.value === this.settings.serverName)
-
 		if (this.settings.serverName === 'random' || !matchingServerOption) {
 			const availableServers = this.serverOptions.filter(server => server.shouldRandom)
 			const randomServerOption = availableServers[Math.floor(Math.random() * availableServers.length)]
@@ -202,7 +189,6 @@ export class AppSettingsService {
 			if (!settingsObject.hasOwnProperty(key)) continue
 			this.settings[key] = settingsObject[key]
 		}
-
 		this.saveAppSettings()
 	}
 
@@ -211,7 +197,6 @@ export class AppSettingsService {
 		this.settings = {
 			language: 'en',
 			displayDenomination: 'mnano',
-			// displayPrefix: 'xrb',
 			walletStore: 'localStorage',
 			displayCurrency: 'USD',
 			defaultRepresentative: null,
@@ -220,8 +205,7 @@ export class AppSettingsService {
 			ledgerReconnect: 'usb',
 			powSource: 'server',
 			customWorkServer: '',
-			pendingOption: 'amount',
-			decentralizedAliasesOption: 'disabled',
+			receivableOption: 'amount',
 			serverName: 'random',
 			serverAPI: null,
 			serverWS: null,
@@ -231,12 +215,5 @@ export class AppSettingsService {
 			lightModeEnabled: false,
 			identiconsStyle: 'nanoidenticons',
 		}
-	}
-
-	// Get the base URL part of the serverAPI, e.g. https://nanovault.io from https://nanovault.io/api/node-api.
-	getServerApiBaseUrl (): string {
-		const u = url.parse(this.settings.serverAPI)
-		u.pathname = '/'
-		return url.format(u)
 	}
 }

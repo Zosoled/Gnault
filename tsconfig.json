@@ -7,23 +7,30 @@
 		"outDir": "./dist/out-tsc",
 		"sourceMap": true,
 		"declaration": false,
-		"moduleResolution": "node",
+		"moduleResolution": "Bundler",
 		"experimentalDecorators": true,
 		"allowSyntheticDefaultImports": true,
-		"target": "ESNext",
+		"target": "ES2022",
 		"typeRoots": [
 			"node_modules/@types",
 			"./src/typings"
 		],
 		"lib": [
-			"DOM"
+			"DOM",
+			"ES2022",
+			"ScriptHost",
+			"WebWorker"
 		],
-		"module": "esnext",
-		"baseUrl": "./",
+		"module": "ES2022",
+		"baseUrl": "./src",
 		"paths": {
 			"stream": [
 				"../node_modules/readable-stream/readable.js"
 			]
 		}
+	},
+	"angularCompilerOptions": {
+		"strictTemplates": true,
+		"extendedTemplateDiagnostics": true
 	}
 }

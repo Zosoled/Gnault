@@ -1,138 +1,172 @@
 import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
-import BigNumber from 'bignumber.js'
-import { AddressBookService } from '../../services/address-book.service'
-import { BehaviorSubject } from 'rxjs'
-import { WalletService } from '../../services/wallet.service'
-import { NotificationService } from '../../services/notification.service'
-import { UtilService, StateBlock, TxType } from '../../services/util.service'
-import { WorkPoolService } from '../../services/work-pool.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { ActivatedRoute, Router } from '@angular/router'
-import { NanoBlockService } from '../../services/nano-block.service'
-import { ApiService } from '../../services/api.service'
-import { PriceService } from '../../services/price.service'
-import * as QRCode from 'qrcode'
-import * as bip39 from 'bip39'
-import * as bip39Wallet from 'nanocurrency-web'
-import { QrModalService } from '../../services/qr-modal.service'
+import { FormsModule } from '@angular/forms'
+import { ActivatedRoute, Router, RouterLink } from '@angular/router'
 import hermes from 'hermes-channel'
-import * as nanocurrency from 'nanocurrency'
-import { MusigService } from '../../services/musig.service'
+import { Account, Tools, Wallet } from 'libnemo'
+import { ClipboardModule } from 'ngx-clipboard'
+import * as QRCode from 'qrcode'
+import { BehaviorSubject } from 'rxjs'
+import { NanoIdenticonComponent, NanoAccountIdComponent } from 'app/components/helpers'
+import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
+import {
+	AddressBookService,
+	ApiService,
+	AppSettingsService,
+	MusigService,
+	NanoBlockService,
+	NotificationService,
+	PriceService,
+	QrModalService,
+	StateBlock,
+	TxType,
+	UtilService,
+	WalletService,
+	WorkPoolService
+} from 'app/services'
 import { environment } from 'environments/environment'
+import { CommonModule } from '@angular/common'
 
 const INDEX_MAX = 4294967295
 // navigation source for cancel command (excluding camera source because too complicated to fix)
 enum navSource { 'remote', 'multisig' }
+
 @Component({
 	selector: 'app-sign',
 	templateUrl: './sign.component.html',
-	styleUrls: ['./sign.component.css']
+	styleUrls: ['./sign.component.css'],
+	imports: [
+		AmountSplitPipe,
+		ClipboardModule,
+		CommonModule,
+		FiatPipe,
+		FormsModule,
+		NanoAccountIdComponent,
+		NanoIdenticonComponent,
+		RaiPipe,
+		RouterLink
+	]
 })
 
 export class SignComponent implements OnInit {
-	private router = inject(ActivatedRoute);
-	private routerService = inject(Router);
-	private walletService = inject(WalletService);
-	private addressBookService = inject(AddressBookService);
-	private notificationService = inject(NotificationService);
-	private nanoBlock = inject(NanoBlockService);
-	private workPool = inject(WorkPoolService);
-	settings = inject(AppSettingsService);
-	private api = inject(ApiService);
-	private util = inject(UtilService);
-	private qrModalService = inject(QrModalService);
-	private musigService = inject(MusigService);
-	price = inject(PriceService);
+	private router = inject(ActivatedRoute)
+	private routerService = inject(Router)
+	private walletService = inject(WalletService)
+	private addressBookService = inject(AddressBookService)
+	private notificationService = inject(NotificationService)
+	private nanoBlock = inject(NanoBlockService)
+	private workPool = inject(WorkPoolService)
+	private api = inject(ApiService)
+	private util = inject(UtilService)
+	private qrModalService = inject(QrModalService)
+	private musigService = inject(MusigService)
 
-	paramsString = '';
-	activePanel = 'error';
-	shouldSign: boolean = null; // if a block has been scanned for signing (or if it is a block to process)
-	accounts = this.walletService.wallet.accounts;
-	addressBookResults$ = new BehaviorSubject([]);
-	showAddressBook = false;
-	addressBookMatch = '';
-	amount = null;
-	rawAmount: BigNumber = new BigNumber(0);
-	amountFiat: number | null = null;
-	fromAccountID: any = '';
-	fromAccountBalance: BigNumber = null;
-	fromAddressBook = '';
-	toAccountID = '';
-	toAccountBalance: BigNumber = null;
-	toAddressBook = '';
-	repAddressBook = '';
-	toAccountStatus = null;
-	currentBlock: StateBlock = null;
-	previousBlock: StateBlock = null;
-	txType: TxType = null;
+	price = inject(PriceService)
+	settings = inject(AppSettingsService)
+
+	paramsString = ''
+	activePanel = 'error'
+
+	// if a block has been scanned for signing (or if it is a block to process)
+	shouldSign: boolean = null
+	blockProcessed: boolean = false
+
+	accounts = this.walletService.wallet.accounts
+	addressBookResults$ = new BehaviorSubject([])
+	showAddressBook = false
+	addressBookMatch = ''
+	amount = null
+	rawAmount: bigint = 0n
+	amountFiat: number | null = null
+	fromAccountID: any = ''
+	fromAccountBalance: bigint = null
+	fromAddressBook = ''
+	toAccountID = ''
+	toAccountBalance: bigint = null
+	toAddressBook = ''
+	repAddressBook = ''
+	toAccountStatus = null
+	currentBlock: StateBlock = null
+	previousBlock: StateBlock = null
+	txType: TxType = null
 	txTypes = TxType; // to access enum in html
-	txTypeMessage = '';
-	confirmingTransaction = false;
-	shouldGenWork = false;
-	signTypes: string[] = ['Internal Wallet or Ledger', 'Seed or Mnemonic+Index', 'Private or Expanded Key', 'Multisig'];
-	signTypeSelected: string = this.signTypes[0];
-	signatureAccount = '';
-	signatureMessage = '';
-	signatureMessageSuccess = '';
-	walletAccount = null;
-	nullBlock = '0000000000000000000000000000000000000000000000000000000000000000';
-	qrString = null;
-	qrCodeImage = null;
-	qrCodeImageBlock = null;
-	validSeed = false;
-	validIndex = true;
-	validPrivkey = false;
-	sourceSecret = '';
-	sourcePriv = '';
-	index = '0';
-	privateKey = null; // the final private key to sign with if using manual entry
-	privateKeyExpanded = false; // if a private key is provided manually and it's expanded 128 char
-	processedHash: string = null;
-	finalSignature: string = null;
+	txTypeMessage = ''
+	confirmingTransaction = false
+	shouldGenWork = false
+	signTypes: string[] = ['Internal Wallet or Ledger', 'Seed or Mnemonic+Index', 'Private or Expanded Key', 'Multisig']
+	signTypeSelected: string = this.signTypes[0]
+	signatureAccount = ''
+	signatureMessage = ''
+	signatureMessageSuccess = ''
+	wallet = this.walletService.wallet.wallet
+	walletAccount = null
+	nullBlock = '0000000000000000000000000000000000000000000000000000000000000000'
+	qrString = null
+	qrCodeImage = null
+	qrCodeImageBlock = null
+	validSeed = false
+	validIndex = true
+	validPrivkey = false
+	sourceSecret = ''
+	sourcePriv = ''
+	index = '0'
+
+	// the final private key to sign with if using manual entry
+	privateKey = null
+
+	// if a private key is provided manually and it's expanded 128 char
+	privateKeyExpanded = false
+	processedHash: string = null
+	finalSignature: string = null
+
 	// With v21 the 1x is the old 8x and max will be 8x due to the webgl threshold is max ffffffff00000000
-	// Note: with NanoPow integration, max threshold is now full 64-bit ffffffffffffffff
+	// Note: with NanoPow integration, max threshold now supports full 64-bit ffffffffffffffff but is limited to network send max to prevent abuse
 	thresholds = [
 		{ name: '1x', value: 1 }
-	];
-	selectedThreshold = this.thresholds[0].value;
-	selectedThresholdOld = this.selectedThreshold;
-	navigationSource = navSource.remote;
+	]
+	selectedThreshold = this.thresholds[0].value
+	selectedThresholdOld = this.selectedThreshold
+	navigationSource = navSource.remote
 
 	/**
 	 MULTISIG
 	 */
-	multisigLink = this.getMultisigLink(); // link to be shared to other multisig participants
-	participants = 2;
-	validParticipants = true;
-	savedParticipants = 0;
-	tabData = [];
-	tabListenerActive = false;
-	tabCount = null;
-	inputMultisigData = [];
-	multisigAccount = '';
-	outputMultisigData = '';
-	activeStep = 1;
-	inputAdd = '';
-	validInputAdd = false;
-	isInputAddDisabled = false;
-	tabMode = false;
+	// link to be shared to other multisig participants
+	multisigLink = this.getMultisigLink()
+	participants = 2
+	validParticipants = true
+	savedParticipants = 0
+	tabData = []
+	tabListenerActive = false
+	tabCount = null
+	inputMultisigData = []
+	multisigAccount = ''
+	outputMultisigData = ''
+	activeStep = 1
+	inputAdd = ''
+	validInputAdd = false
+	isInputAddDisabled = false
+	tabMode = false
 	tabChecked = false; // if multi-tab mode enabled
-	blockHash = '';
-	remoteTabInit = false;
-	qrModal: any = null;
-	qrCodeImageOutput = null;
-	showAddBox = false;
-	isDesktop = environment.desktop;
+	blockHash = ''
+	remoteTabInit = false
+	qrModal: any = null
+	qrCodeImageOutput = null
+	showAddBox = false
+	isDesktop = environment.desktop
+	// END MULTISIG
 
 	@ViewChild('dataAddFocus') _el: ElementRef
 
 	async ngOnInit () {
 		const UIkit = window['UIkit']
 		const qrModal = UIkit.modal('#qr-code-modal')
+		this.blockProcessed = false
 		this.qrModal = qrModal
 
 		const params = this.router.snapshot.queryParams
-		this.signTypeSelected = this.walletService.isConfigured() ? this.signTypes[0] : this.signTypes[1]
+		this.signTypeSelected = this.walletService.isConfigured()
+			? this.signTypes[0]
+			: this.signTypes[1]
 
 		// Multisig tab listening functions
 		hermes.on('tab-ping', (data) => {
@@ -175,31 +209,70 @@ export class SignComponent implements OnInit {
 
 		let shouldGetFromAccount = false
 
-		if ('sign' in params && 'n_account' in params && 'n_previous' in params && 'n_representative' in params &&
-			'n_balance' in params && 'n_link' in params) {
+		if (
+			'sign' in params
+			&& 'n_account' in params
+			&& 'n_previous' in params
+			&& 'n_representative' in params
+			&& 'n_balance' in params
+			&& 'n_link' in params
+		) {
 			this.currentBlock = {
-				'account': params.n_account, 'previous': params.n_previous, 'representative': params.n_representative,
-				'balance': params.n_balance, 'link': params.n_link, 'signature': 'n_signature' in params ? params.n_signature : '',
-				'work': 'n_work' in params ? params.n_work : ''
+				'account': params.n_account,
+				'previous': params.n_previous,
+				'representative': params.n_representative,
+				'balance': params.n_balance,
+				'link': params.n_link,
+				'signature': params.n_signature ?? '',
+				'work': params.n_work ?? ''
 			}
-
-			this.paramsString = 'sign?sign=' + params.sign + '&n_account=' + params.n_account + '&n_previous=' + params.n_previous +
-				'&n_representative=' + params.n_representative + '&n_balance=' + params.n_balance + '&n_link=' + params.n_link +
-				('n_signature' in params ? ('&n_signature=' + params.n_signature) : '') + ('n_work' in params ? ('&n_work=' + params.n_work) : '')
+			const paramsArray = [
+				`sign?sign=${params.sign}`,
+				`n_account=${params.n_account}`,
+				`n_previous=${params.n_previous}`,
+				`n_representative=${params.n_representative}`,
+				`n_balance=${params.n_balance}`,
+				`n_link=${params.n_link}`,
+				'n_signature' in params
+					? `n_signature=${params.n_signature}`
+					: '',
+				'n_work' in params
+					? `n_work=${params.n_work}`
+					: ''
+			]
+			this.paramsString = paramsArray.join('&')
 
 			// previous block won't be included with open block (or maybe if another wallet implement this feature)
-			if ('p_account' in params && 'p_previous' in params && 'p_representative' in params && 'p_balance' in params && 'p_link' in params) {
+			if (
+				'p_account' in params
+				&& 'p_previous' in params
+				&& 'p_representative' in params
+				&& 'p_balance' in params
+				&& 'p_link' in params
+			) {
 				this.previousBlock = {
-					'account': params.p_account, 'previous': params.p_previous, 'representative': params.p_representative,
-					'balance': params.p_balance, 'link': params.p_link, 'signature': 'p_signature' in params ? params.p_signature : '', 'work': ''
+					'account': params.p_account,
+					'previous': params.p_previous,
+					'representative': params.p_representative,
+					'balance': params.p_balance,
+					'link': params.p_link,
+					'signature': params.p_signature ?? '',
+					'work': ''
 				}
-
-				this.paramsString = this.paramsString + '&p_account=' + params.p_account + '&p_previous=' + params.p_previous +
-					'&p_representative=' + params.p_representative + '&p_balance=' + params.p_balance + '&p_link=' + params.p_link +
-					('p_signature' in params ? ('&p_signature=' + params.p_signature) : '')
+				const paramsArray = [
+					`${this.paramsString}`,
+					`p_account=${params.p_account}`,
+					`p_previous=${params.p_previous}`,
+					`p_representative=${params.p_representative}`,
+					`p_balance=${params.p_balance}`,
+					`p_link=${params.p_link}`,
+					'p_signature' in params
+						? `p_signature=${params.p_signature}`
+						: ''
+				]
+				this.paramsString = paramsArray.join('&')
 			}
-
-			this.shouldSign = params.sign === '1' ? true : false
+			this.shouldSign = params.sign === '1'
 			this.shouldGenWork = this.currentBlock.work === '' && !this.shouldSign
 
 			// check if multisig
@@ -213,43 +286,46 @@ export class SignComponent implements OnInit {
 			// check if both new block and previous block hashes matches (balances has not been tampered with) and have valid parameters
 			if (this.previousBlock && this.verifyBlock(this.currentBlock) && this.verifyBlock(this.previousBlock)) {
 				// it's a send block
-				if (new BigNumber(this.previousBlock.balance).gt(new BigNumber(this.currentBlock.balance))) {
+				if (BigInt(this.previousBlock.balance) > BigInt(this.currentBlock.balance)) {
 					this.txType = TxType.send
 					this.txTypeMessage = 'send'
-					this.rawAmount = new BigNumber(this.previousBlock.balance).minus(new BigNumber(this.currentBlock.balance))
+					this.rawAmount = BigInt(this.previousBlock.balance) - BigInt(this.currentBlock.balance)
 					this.fromAccountID = this.currentBlock.account
-					this.toAccountID = this.util.account.getPublicAccountID(this.util.hex.toUint8(this.currentBlock.link))
-					this.fromAccountBalance = new BigNumber(this.previousBlock.balance)
+					this.toAccountID = Account.load(this.currentBlock.link).publicKey
+					this.fromAccountBalance = BigInt(this.previousBlock.balance)
 					// sending to itself
 					if (this.fromAccountID === this.toAccountID) {
 						this.toAccountBalance = this.fromAccountBalance
 					}
-				} else if (new BigNumber(this.previousBlock.balance).eq(new BigNumber(this.currentBlock.balance)) &&
-					this.previousBlock.representative !== this.currentBlock.representative && this.currentBlock.link === this.nullBlock) {
+				} else if (BigInt(this.previousBlock.balance) === BigInt(this.currentBlock.balance)
+					&& this.previousBlock.representative !== this.currentBlock.representative
+					&& this.currentBlock.link === this.nullBlock
+				) {
 					// it's a change block
 					this.txType = TxType.change
 					this.txTypeMessage = 'change the representative'
-					this.rawAmount = new BigNumber(0)
+					this.rawAmount = 0n
 					this.fromAccountID = this.currentBlock.account
 					this.toAccountID = this.currentBlock.account
-					this.fromAccountBalance = new BigNumber(this.currentBlock.balance)
-					this.toAccountBalance = new BigNumber(this.currentBlock.balance)
-				} else if (new BigNumber(this.previousBlock.balance).lt(
-					new BigNumber(this.currentBlock.balance)) && this.currentBlock.previous !== this.nullBlock) {
+					this.fromAccountBalance = BigInt(this.currentBlock.balance)
+					this.toAccountBalance = BigInt(this.currentBlock.balance)
+				} else if (BigInt(this.previousBlock.balance) < BigInt(this.currentBlock.balance)
+					&& this.currentBlock.previous !== this.nullBlock
+				) {
 					// it's a receive block
 					this.txType = TxType.receive
 					this.txTypeMessage = 'receive'
-					this.rawAmount = new BigNumber(this.currentBlock.balance).minus(new BigNumber(this.previousBlock.balance))
+					this.rawAmount = BigInt(this.currentBlock.balance) - BigInt(this.previousBlock.balance)
 
 					shouldGetFromAccount = true
 
 					this.toAccountID = this.currentBlock.account
-					this.toAccountBalance = new BigNumber(this.previousBlock.balance)
+					this.toAccountBalance = BigInt(this.previousBlock.balance)
 				} else {
 					return this.notificationService.sendError(`Meaningless block. The balance and representative are unchanged!`, { length: 0 })
 				}
 
-				this.amount = this.util.nano.rawToMnano(this.rawAmount).toString(10)
+				this.amount = Tools.convert(this.rawAmount, 'raw', 'mnano')
 
 				this.prepareTransaction()
 			} else if (!this.previousBlock && this.verifyBlock(this.currentBlock)) {
@@ -258,17 +334,17 @@ export class SignComponent implements OnInit {
 				if (this.currentBlock.previous === this.nullBlock) {
 					this.txType = TxType.open
 					this.txTypeMessage = 'receive'
-					this.rawAmount = new BigNumber(this.currentBlock.balance)
+					this.rawAmount = BigInt(this.currentBlock.balance)
 
 					shouldGetFromAccount = true
 
 					this.toAccountID = this.currentBlock.account
-					this.toAccountBalance = new BigNumber(0)
+					this.toAccountBalance = 0n
 				} else {
 					return this.notificationService.sendError(`Only OPEN block is currently supported when previous block is missing`, { length: 0 })
 				}
 
-				this.amount = this.util.nano.rawToMnano(this.rawAmount).toString(10)
+				this.amount = Tools.convert(this.rawAmount, 'raw', 'mnano')
 				this.prepareTransaction()
 			} else {
 				return
@@ -365,7 +441,7 @@ export class SignComponent implements OnInit {
 		this.addressBookResults$.next(matches)
 	}
 
-	signTypeChange () {
+	async signTypeChange () {
 		this.signatureMessage = ''
 		this.signatureMessageSuccess = ''
 		let params = this.paramsString
@@ -382,7 +458,7 @@ export class SignComponent implements OnInit {
 				break
 
 			case this.signTypes[1]:
-				this.seedChange(this.sourceSecret)
+				await this.seedChange(this.sourceSecret)
 				break
 
 			case this.signTypes[2]:
@@ -407,7 +483,9 @@ export class SignComponent implements OnInit {
 	changeThreshold () {
 		// multiplier has changed, clear the cache and recalculate
 		if (this.selectedThreshold !== this.selectedThresholdOld) {
-			const workBlock = this.txType === TxType.open ? this.util.account.getAccountPublicKey(this.toAccountID) : this.currentBlock.previous
+			const workBlock = this.txType === TxType.open
+				? Account.load(this.toAccountID).publicKey
+				: this.currentBlock.previous
 			this.workPool.removeFromCache(workBlock)
 			console.log('PoW multiplier changed: Clearing cache')
 			this.powChange()
@@ -418,7 +496,9 @@ export class SignComponent implements OnInit {
 		// The block has been verified
 		if (this.toAccountID) {
 			console.log('Precomputing work...')
-			const workBlock = this.txType === TxType.open ? this.util.account.getAccountPublicKey(this.toAccountID) : this.currentBlock.previous
+			const workBlock = this.txType === TxType.open
+				? Account.load(this.toAccountID).publicKey
+				: this.currentBlock.previous
 			const difficulty = (this.txType === TxType.receive || this.txType === TxType.open)
 				? 1 / 64
 				: this.selectedThreshold
@@ -429,7 +509,7 @@ export class SignComponent implements OnInit {
 	async prepareTransaction () {
 		// Determine fiat value of the amount (if not offline mode)
 		if (this.settings.settings.serverAPI) {
-			this.amountFiat = this.util.nano.rawToMnano(this.rawAmount).times(this.price.price.lastPrice).toNumber()
+			this.amountFiat = parseFloat(Tools.convert(this.rawAmount, 'raw', 'mnano')) * this.price.price.lastPrice
 		}
 
 		this.fromAddressBook = this.addressBookService.getAccountName(this.fromAccountID)
@@ -449,12 +529,13 @@ export class SignComponent implements OnInit {
 		}
 
 		if (this.shouldSign) {
-			this.signTypeChange()
+			await this.signTypeChange()
 		}
 	}
 
 	// Create signature for the block
 	async confirmTransaction (signature = '') {
+		let wallet = this.wallet
 		let walletAccount = this.walletAccount
 		let isLedger = this.walletService.isLedgerWallet()
 
@@ -472,14 +553,24 @@ export class SignComponent implements OnInit {
 		}
 
 		// using seed or private key
-		if ((this.signTypeSelected === this.signTypes[1] && !this.validSeed) || (this.signTypeSelected === this.signTypes[2]
-			&& !this.validPrivkey) || (this.signTypeSelected === this.signTypes[3] && !this.validPrivkey)) {
+		if (
+			(this.signTypeSelected === this.signTypes[1] && !this.validSeed)
+			|| (this.signTypeSelected === this.signTypes[2] && !this.validPrivkey)
+			|| (this.signTypeSelected === this.signTypes[3] && !this.validPrivkey)
+		) {
 			return this.notificationService.sendWarning('Could not find a valid private key to sign with.')
 		}
-		if (this.signTypeSelected === this.signTypes[1] || this.signTypeSelected === this.signTypes[2]) {
+		if (
+			this.signTypeSelected === this.signTypes[1]
+			|| this.signTypeSelected === this.signTypes[2]
+		) {
 			isLedger = false
 			// create dummy wallet that only contains needed elements for signature
-			walletAccount = { keyPair: { secretKey: this.util.hex.toUint8(this.privateKey), expanded: this.privateKeyExpanded } }
+			const keyPair = {
+				secretKey: this.util.hex.toUint8(this.privateKey),
+				expanded: this.privateKeyExpanded
+			}
+			walletAccount = { keyPair: keyPair }
 		}
 
 		this.confirmingTransaction = true
@@ -487,8 +578,15 @@ export class SignComponent implements OnInit {
 		// sign the block (if not multisig)
 		let block: StateBlock
 		if (this.signTypeSelected !== this.signTypes[3]) {
-			block = await this.nanoBlock.signOfflineBlock(walletAccount, this.currentBlock,
-				this.previousBlock, this.txType, this.shouldGenWork, this.selectedThreshold, isLedger)
+			block = await this.nanoBlock.signOfflineBlock(
+				wallet,
+				walletAccount,
+				this.currentBlock,
+				this.previousBlock,
+				this.txType,
+				this.shouldGenWork,
+				isLedger
+			)
 			console.log('Signature: ' + block.signature || 'Error')
 			console.log('Work: ' + block.work || 'Not applied')
 
@@ -509,11 +607,13 @@ export class SignComponent implements OnInit {
 				return this.notificationService.sendError('The multi-signature was invalid!', { length: 0 })
 			}
 			block.signature = signature
-			const openEquiv = this.txType === TxType.open
+
 			// Start precomputing the work...
 			if (this.shouldGenWork) {
 				// For open blocks which don't have a frontier, use the public key of the account
-				const workBlock = openEquiv ? this.util.account.getAccountPublicKey(this.multisigAccount) : block.previous
+				const workBlock = this.txType === TxType.open
+					? Account.load(this.multisigAccount).publicKey
+					: block.previous
 				if (!this.workPool.workExists(workBlock)) {
 					this.notificationService.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
 				}
@@ -572,7 +672,9 @@ export class SignComponent implements OnInit {
 	// Send signed block to the network
 	async confirmBlock () {
 		this.confirmingTransaction = true
-		const workBlock = this.txType === TxType.open ? this.util.account.getAccountPublicKey(this.toAccountID) : this.currentBlock.previous
+		const workBlock = this.txType === TxType.open
+			? Account.load(this.toAccountID).publicKey
+			: this.currentBlock.previous
 		if (this.shouldGenWork) {
 			// For open blocks which don't have a frontier, use the public key of the account
 			if (!this.workPool.workExists(workBlock)) {
@@ -618,9 +720,10 @@ export class SignComponent implements OnInit {
 		const processResponse = await this.api.process(blockData, this.txType)
 		if (processResponse && processResponse.hash) {
 			// Add new hash into the work pool but does not make much sense for this case
-			// this.workPool.addWorkToCache(processResponse.hash);
+			// this.workPool.addWorkToCache(processResponse.hash)
 			this.workPool.removeFromCache(workBlock)
 			this.processedHash = processResponse.hash
+			this.blockProcessed = true
 			this.notificationService.sendSuccess('Successfully processed the block!')
 		} else {
 			console.log(processResponse)
@@ -642,8 +745,8 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	seedChange (input) {
-		const keyType = this.checkMasterKey(input)
+	async seedChange (input) {
+		const keyType = await this.checkMasterKey(input)
 		this.validSeed = keyType !== null
 		if (this.validSeed && this.validIndex) {
 			this.verifyKey(keyType, input, Number(this.index))
@@ -658,7 +761,7 @@ export class SignComponent implements OnInit {
 		if (privKey !== null) {
 			// Match given block account with with private key
 			const pubKey = this.util.account.generateAccountKeyPair(this.util.hex.toUint8(privKey), this.privateKeyExpanded).publicKey
-			const address = this.util.account.getPublicAccountID(pubKey)
+			const address = Account.load(pubKey).address
 			if (address === this.signatureAccount) {
 				this.validPrivkey = true
 				this.privateKey = privKey
@@ -676,7 +779,7 @@ export class SignComponent implements OnInit {
 		this.privateKey = ''
 	}
 
-	indexChange (index) {
+	async indexChange (index) {
 		this.validIndex = true
 		if (this.util.string.isNumeric(index) && index % 1 === 0) {
 			index = parseInt(index, 10)
@@ -691,7 +794,7 @@ export class SignComponent implements OnInit {
 		}
 
 		if (this.validSeed && this.validIndex) {
-			const keyType = this.checkMasterKey(this.sourceSecret)
+			const keyType = await this.checkMasterKey(this.sourceSecret)
 			this.verifyKey(keyType, this.sourceSecret, Number(this.index))
 		} else {
 			this.signatureMessage = ''
@@ -699,14 +802,16 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	verifyKey (keyType: string, input: string, index: number) {
+	async verifyKey (keyType: string, input: string, index: number) {
 		let seed = ''
 		let privKey1 = ''
 		let privKey2 = ''
 
 		// input is mnemonic
 		if (keyType === 'mnemonic') {
-			seed = bip39.mnemonicToEntropy(input).toUpperCase()
+			const blakeWallet = await Wallet.load('BLAKE2b', '', input)
+			await blakeWallet.unlock('')
+			seed = blakeWallet.seed
 			// seed must be 64 or the nano wallet can't be created.
 			// This is the reason 12-words can't be used because the seed would be 32 in length
 			if (seed.length !== 64) {
@@ -730,16 +835,19 @@ export class SignComponent implements OnInit {
 			if (keyType === 'bip39_seed') {
 				bip39Seed = input
 			} else {
-				bip39Seed = bip39Wallet.wallet.generate(seed).seed
+				const bip39 = await Wallet.load('BIP-44', '', seed)
+				bip39Seed = bip39.seed
 			}
-			privKey2 = bip39Wallet.wallet.accounts(bip39Seed, index, index)[0].privateKey
+			const wallet = await Wallet.load('BIP-44', '', bip39Seed)
+			const accounts = await wallet.accounts(index)
+			privKey2 = accounts[0].privateKey
 		}
 
 		// Match given block account with any of the private keys extracted
 		const pubKey1 = this.util.account.generateAccountKeyPair(this.util.hex.toUint8(privKey1), this.privateKeyExpanded).publicKey
 		const pubKey2 = this.util.account.generateAccountKeyPair(this.util.hex.toUint8(privKey2), this.privateKeyExpanded).publicKey
-		const address1 = this.util.account.getPublicAccountID(pubKey1)
-		const address2 = this.util.account.getPublicAccountID(pubKey2)
+		const address1 = Account.load(pubKey1).address
+		const address2 = Account.load(pubKey2).address
 
 		if (address1 === this.signatureAccount || address2 === this.signatureAccount) {
 			if (address1 === this.signatureAccount) {
@@ -756,7 +864,7 @@ export class SignComponent implements OnInit {
 	}
 
 	// Validate type of master key
-	checkMasterKey (key) {
+	async checkMasterKey (key) {
 		// validate nano seed
 		if (key.length === 64) {
 			if (this.util.nano.isValidSeed(key)) {
@@ -770,10 +878,12 @@ export class SignComponent implements OnInit {
 			}
 		}
 		// validate mnemonic
-		if (bip39.validateMnemonic(key)) {
+		try {
+			await Wallet.load('BLAKE2b', '', key)
 			return 'mnemonic'
+		} catch (err) {
+			return null
 		}
-		return null
 	}
 
 	convertPrivateKey (key) {
@@ -791,13 +901,14 @@ export class SignComponent implements OnInit {
 	// open qr reader modal
 	openQR (reference, type) {
 		const qrResult = this.qrModalService.openQR(reference, type)
-		qrResult.then((data) => {
+		qrResult.then(async data => {
 			switch (data.reference) {
-				case 'seed1':
+				case 'seed1': {
 					this.sourceSecret = data.content
-					this.seedChange(data.content)
+					await this.seedChange(data.content)
 					break
-				case 'priv1':
+				}
+				case 'priv1': {
 					this.sourcePriv = data.content
 					if (this.signTypeSelected === this.signTypes[2]) {
 						this.privkeyChange(data.content)
@@ -805,9 +916,9 @@ export class SignComponent implements OnInit {
 						this.privkeyChangeMulti(data.content)
 					}
 					break
+				}
 			}
-		}, () => { }
-		)
+		})
 	}
 
 	async generateOutputQR () {
@@ -829,7 +940,6 @@ export class SignComponent implements OnInit {
 	/**
 	 * MULTISIG
 	 */
-
 	privkeyChangeMulti (input) {
 		const privKey = this.convertPrivateKey(input)
 		if (privKey !== null) {
@@ -859,10 +969,12 @@ export class SignComponent implements OnInit {
 			if (this.blockHash === data[0]) {
 				this.tabCount++
 				if (this.tabCount === this.participants) {
-					hermes.off('tab-pong') // unsubscribe
+					// unsubscribe
+					hermes.off('tab-pong')
 					// Start the process
 					console.log('Starting step 1 from local tab')
-					this.tabListener(false) // start in passive mode to wait for signing process
+					// start in passive mode to wait for signing process
+					this.tabListener(false)
 					// Init step
 					this.multiSign()
 				}
@@ -877,14 +989,15 @@ export class SignComponent implements OnInit {
 
 	checkTabs () {
 		if (this.tabCount && this.tabCount < this.participants) {
-			hermes.off('tab-pong') // unsubscribe
+			// unsubscribe
+			hermes.off('tab-pong')
 			return this.notificationService.sendWarning('Make sure you have enough tabs running with the same block hash')
 		}
 	}
 
 	// Checking input tab data and act when enough data is available for the current active step
 	tabListener (activate = false) {
-		this.tabListenerActive = activate ? true : this.tabListenerActive
+		this.tabListenerActive = !!activate || this.tabListenerActive
 		if (this.tabListenerActive) {
 			const stepData = []
 			for (const data of this.tabData) {
@@ -1039,7 +1152,8 @@ export class SignComponent implements OnInit {
 			this.isInputAddDisabled = true
 			// Automatic tab mode is running, go ahead with the next step
 			if (this.tabMode) {
-				this.tabListenerActive = false // pause processing input data
+				// pause processing input data
+				this.tabListenerActive = false
 				this.multiSign()
 			}
 		}
@@ -1073,8 +1187,8 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	multiSign () {
-		const result = this.musigService.runMultiSign(this.privateKey, this.blockHash, this.inputMultisigData)
+	async multiSign () {
+		const result = await this.musigService.runMultiSign(this.privateKey, this.blockHash, this.inputMultisigData)
 		// used for validation when the final nano block is created
 		if (result && result.multisig !== '') {
 			this.multisigAccount = result.multisig
@@ -1082,9 +1196,10 @@ export class SignComponent implements OnInit {
 
 		if (result?.stage === 0) {
 			console.log('Started multisig using block hash: ' + this.blockHash)
+			const account = await Account.load(this.privateKey, 'private')
 			// Combine output with public key
 			const output = this.activeStep + ':' + this.util.hex.fromUint8(result.outbuf.subarray(33)) +
-				nanocurrency.derivePublicKey(this.privateKey)
+				account.publicKey
 			this.activeStep = this.activeStep + 1
 			this.outputMultisigData = output.toUpperCase()
 			this.generateOutputQR()

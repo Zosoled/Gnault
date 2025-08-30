@@ -1,29 +1,30 @@
+import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
-import { NotificationService } from '../../services/notification.service'
-import { ActivatedRoute } from '@angular/router'
-import { AddressBookService } from '../../services/address-book.service'
-import { Router } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
+import { AddressBookService, NotificationService } from 'app/services'
 
 @Component({
 	selector: 'app-import-address-book',
 	templateUrl: './import-address-book.component.html',
-	styleUrls: ['./import-address-book.component.css']
+	styleUrls: ['./import-address-book.component.css'],
+	imports: [
+		CommonModule
+	]
 })
+
 export class ImportAddressBookComponent implements OnInit {
-	private route = inject(ActivatedRoute);
-	private notifications = inject(NotificationService);
-	private addressBook = inject(AddressBookService);
-	private router = inject(Router);
+	private route = inject(ActivatedRoute)
+	private notifications = inject(NotificationService)
+	private addressBook = inject(AddressBookService)
+	private router = inject(Router)
 
-	activePanel = 'error';
-
-	validImportData = false;
-	importData: any = null;
-
-	conflictingEntries = 0;
-	newEntries = 0;
-	existingEntries = 0;
-	hostname = '';
+	activePanel = 'error'
+	validImportData = false
+	importData: any = null
+	conflictingEntries = 0
+	newEntries = 0
+	existingEntries = 0
+	hostname = ''
 
 	ngOnInit () {
 		const importData = this.route.snapshot.fragment
@@ -83,9 +84,9 @@ export class ImportAddressBookComponent implements OnInit {
 				if (!importEntry.originalName) {
 					this.newEntries++
 				} else if (
-					(importEntry.originalName === entryName)
-					&& (importEntry.originalTrackBalance === importEntry.trackBalance)
-					&& (importEntry.originalTrackTransactions === importEntry.trackTransactions)
+					importEntry.originalName === entryName
+					&& importEntry.originalTrackBalance === importEntry.trackBalance
+					&& importEntry.originalTrackTransactions === importEntry.trackTransactions
 				) {
 					this.existingEntries++
 				} else {
@@ -120,10 +121,12 @@ export class ImportAddressBookComponent implements OnInit {
 		// If new entry or any of name, trackTransactions or trackBalance has changed
 		let importedCount = 0
 		for (const entry of this.importData) {
-			if (!entry.originalName || (entry.originalName && (entry.originalName !== entry.name ||
-				entry.originalTrackBalance !== entry.trackBalance || entry.originalTrackTransactions !== entry.trackTransactions))) {
-				await this.addressBook.saveAddress(entry.account, entry.name,
-					entry.trackBalance ? entry.trackBalance : false, entry.trackTransactions ? entry.trackTransactions : false)
+			if (
+				entry.originalName !== entry.name
+				|| entry.originalTrackBalance !== entry.trackBalance
+				|| entry.originalTrackTransactions !== entry.trackTransactions
+			) {
+				await this.addressBook.saveAddress(entry.account, entry.name, entry.trackBalance ?? false, entry.trackTransactions ?? false)
 				importedCount++
 			}
 		}

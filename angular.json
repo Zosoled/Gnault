@@ -9,13 +9,15 @@
 			"projectType": "application",
 			"architect": {
 				"build": {
-					"builder": "@angular-devkit/build-angular:browser",
+					"builder": "@angular-devkit/build-angular:browser-esbuild",
 					"options": {
 						"outputPath": "dist",
 						"index": "src/index.html",
 						"main": "src/main.ts",
 						"tsConfig": "src/tsconfig.app.json",
-						"polyfills": "src/polyfills.ts",
+						"polyfills": [
+							"src/polyfills.ts"
+						],
 						"assets": [
 							"src/assets",
 							"src/404.html",
@@ -26,28 +28,23 @@
 						],
 						"scripts": [],
 						"allowedCommonJsDependencies": [
-							"qrcode",
-							"bip39",
 							"@zxing/library",
-							"bignumber.js",
-							"hw-app-nano",
-							"crypto-js",
-							"blakejs",
-							"bignumber.js",
+							"bip39",
+							"buffer",
 							"create-hash",
-							"randombytes",
-							"pbkdf2",
-							"zxcvbn",
-							"url",
-							"punycode",
-							"querystring",
-							"hw-transport-webusb",
-							"hw-transport-web-ble",
 							"events",
 							"hermes-channel",
-							"buffer"
+							"hw-app-nano",
+							"hw-transport-web-ble",
+							"hw-transport-webusb",
+							"punycode",
+							"querystring",
+							"qrcode",
+							"randombytes",
+							"url",
+							"zxcvbn"
 						],
-						"vendorChunk": true,
+						"vendorChunk": false,
 						"extractLicenses": false,
 						"buildOptimizer": false,
 						"sourceMap": true,

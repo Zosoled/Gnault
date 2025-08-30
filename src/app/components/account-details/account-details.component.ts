@@ -1,43 +1,72 @@
-import { formatDate } from '@angular/common'
+import { CommonModule, DecimalPipe, formatDate } from '@angular/common'
 import { Component, OnDestroy, OnInit, inject } from '@angular/core'
-import { ActivatedRoute, ChildActivationEnd, Router, NavigationEnd } from '@angular/router'
-import { translate } from '@jsverse/transloco'
+import { FormsModule } from '@angular/forms'
+import { ActivatedRoute, ChildActivationEnd, NavigationEnd, Router, RouterLink } from '@angular/router'
+import { translate, TranslocoPipe } from '@jsverse/transloco'
 import { Account, Block, Tools } from 'libnemo'
-import { BehaviorSubject } from 'rxjs'
-import { AddressBookService } from '../../services/address-book.service'
-import { ApiService } from '../../services/api.service'
-import { NotificationService } from '../../services/notification.service'
-import { WalletService } from '../../services/wallet.service'
-import { NanoBlockService } from '../../services/nano-block.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { PriceService } from '../../services/price.service'
-import { UtilService } from '../../services/util.service'
+import { ClipboardModule } from 'ngx-clipboard'
 import * as QRCode from 'qrcode'
-import { RepresentativeService } from '../../services/representative.service'
-import { NinjaService } from '../../services/ninja.service'
-import { QrModalService } from '../../services/qr-modal.service'
+import { BehaviorSubject } from 'rxjs'
+import {
+	NanoAccountIdComponent,
+	NanoIdenticonComponent,
+	NanoTransactionMobileComponent
+} from 'app/components/helpers'
+import {
+	AmountSplitPipe,
+	CurrencySymbolPipe,
+	FiatPipe,
+	RaiPipe
+} from 'app/pipes'
+import {
+	AddressBookService,
+	ApiService,
+	AppSettingsService,
+	NanoBlockService,
+	NinjaService,
+	NotificationService,
+	PriceService,
+	QrModalService,
+	RepresentativeService,
+	UtilService,
+	WalletService
+} from 'app/services'
 
 @Component({
 	selector: 'app-account-details',
 	templateUrl: './account-details.component.html',
-	styleUrls: ['./account-details.component.css']
+	styleUrls: ['./account-details.component.css'],
+	imports: [
+		AmountSplitPipe,
+		ClipboardModule,
+		CommonModule,
+		CurrencySymbolPipe,
+		DecimalPipe,
+		FiatPipe,
+		FormsModule,
+		NanoAccountIdComponent,
+		NanoIdenticonComponent,
+		NanoTransactionMobileComponent,
+		RaiPipe,
+		RouterLink,
+		TranslocoPipe
+	]
 })
 export class AccountDetailsComponent implements OnInit, OnDestroy {
-	private router = inject(ActivatedRoute);
-	private route = inject(Router);
-	private addressBook = inject(AddressBookService);
-	private api = inject(ApiService);
-	private price = inject(PriceService);
-	private repSvc = inject(RepresentativeService);
-	private notify = inject(NotificationService);
-	private wallet = inject(WalletService);
-	private util = inject(UtilService);
-	settings = inject(AppSettingsService);
-	private nanoBlock = inject(NanoBlockService);
-	private qrModalSvc = inject(QrModalService);
-	private ninja = inject(NinjaService);
+	private router = inject(ActivatedRoute)
+	private route = inject(Router)
+	private addressBook = inject(AddressBookService)
+	private api = inject(ApiService)
+	private repSvc = inject(RepresentativeService)
+	private notify = inject(NotificationService)
+	private nanoBlock = inject(NanoBlockService)
+	private qrModalSvc = inject(QrModalService)
+	private ninja = inject(NinjaService)
 
-	nano = 1000000000000000000000000n
+	price = inject(PriceService)
+	settings = inject(AppSettingsService)
+	util = inject(UtilService)
+	wallet = inject(WalletService)
 	zeroHash = '0000000000000000000000000000000000000000000000000000000000000000'
 
 	accountHistory: any[] = []
@@ -46,7 +75,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	maxPageSize = 200
 
 	repLabel: any = ''
-	repVotingWeight: bigint
+	repVotingWeight: any = ''
 	repDonationAddress: any = ''
 
 	addressBookEntry: any = null
@@ -118,7 +147,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	// End remote signing
 
 	constructor () {
-		const route = this.route;
+		const route = this.route
 
 		// to detect when the account changes if the view is already active
 		route.events.subscribe((val) => {
@@ -145,8 +174,8 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			}
 		})
 		this.priceSub = this.price.lastPrice$.subscribe(event => {
-			this.account.balanceFiat = this.util.nano.rawToMnano(this.account.balance || 0).times(this.price.price.lastPrice).toNumber()
-			this.account.receivableFiat = this.util.nano.rawToMnano(this.account.receivable || 0).times(this.price.price.lastPrice).toNumber()
+			this.account.balanceFiat = parseFloat(Tools.convert(this.account.balance || 0, 'raw', 'nano')) * this.price.price.lastPrice
+			this.account.receivableFiat = parseFloat(Tools.convert(this.account.receivable || 0, 'raw', 'nano')) * this.price.price.lastPrice
 		})
 
 		this.wallet.wallet.receivableBlocksUpdate$.subscribe(async receivableBlockUpdate => {
@@ -240,30 +269,21 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		if (!this.account) {
 			return
 		}
-
-		const representativeFromOverview =
-			this.representativesOverview.find(
-				(rep) =>
-					(rep.account === this.account.representative)
-			)
-
+		const representativeFromOverview = this.representativesOverview
+			.find(rep => rep.account === this.account.representative)
 		if (representativeFromOverview != null) {
 			this.repLabel = representativeFromOverview.label
 			this.repVotingWeight = representativeFromOverview.percent
 			this.repDonationAddress = representativeFromOverview.donationAddress
 			return
 		}
-
 		this.repVotingWeight = 0n
 		this.repDonationAddress = null
-
 		const knownRepresentative = this.repSvc.getRepresentative(this.account.representative)
-
 		if (knownRepresentative != null) {
 			this.repLabel = knownRepresentative.name
 			return
 		}
-
 		this.repLabel = null
 	}
 
@@ -526,8 +546,8 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		// Set fiat values?
 		this.account.balanceRaw = BigInt(this.account.balance || 0)
 		this.account.receivableRaw = BigInt(this.account.receivable || 0)
-		this.account.balanceFiat = this.util.nano.rawToMnano(this.account.balance || 0).times(this.price.price.lastPrice).toNumber()
-		this.account.receivableFiat = this.util.nano.rawToMnano(this.account.receivable || 0).times(this.price.price.lastPrice).toNumber()
+		this.account.balanceFiat = parseFloat(Tools.convert(this.account.balance || 0, 'raw', 'nano')) * this.price.price.lastPrice
+		this.account.receivableFiat = parseFloat(Tools.convert(this.account.receivable || 0, 'raw', 'nano')) * this.price.price.lastPrice
 
 		await this.getAccountHistory(accountID)
 
@@ -622,17 +642,11 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 							|| this.getAccountLabel(h.link_as_account, null)
 						)
 					} else {
-						h.link_as_account = this.util.account.getPublicAccountID(this.util.hex.toUint8(h.link))
-						h.addressBookName = (
-							this.addressBook.getAccountName(h.link_as_account)
-							|| this.getAccountLabel(h.link_as_account, null)
-						)
+						h.link_as_account = Account.load(h.link).address
+						h.addressBookName = this.addressBook.getAccountName(h.link_as_account) || this.getAccountLabel(h.link_as_account, null)
 					}
 				} else {
-					h.addressBookName = (
-						this.addressBook.getAccountName(h.account)
-						|| this.getAccountLabel(h.account, null)
-					)
+					h.addressBookName = this.addressBook.getAccountName(h.account) || this.getAccountLabel(h.account, null)
 				}
 				h.confirmed = parseInt(h.height, 10) <= accountConfirmationHeight
 				return h
@@ -785,19 +799,9 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			this.amountFiat = 0
 			return
 		}
-
-		// This is getting hacky, but if their currency is bitcoin, use 6 decimals, if it is not, use 2
-		const precision = this.settings.settings.displayCurrency === 'BTC'
-			? 1000000
-			: 100
-
-		// Determine fiat value of the amount
-		const fiatAmount = this.util.nano.rawToMnano(rawAmount)
-			.times(this.price.price.lastPrice)
-			.times(precision)
-			.decimalPlaces(0, 3).dividedBy(precision).toNumber()
-
-		this.amountFiat = fiatAmount
+		const precision = this.settings.settings.displayCurrency === 'BTC' ? 6 : 2
+		const fiatAmount = (parseFloat(Tools.convert(rawAmount, 'raw', 'nano')) * this.price.price.lastPrice).toFixed(precision)
+		this.amountFiat = parseFloat(fiatAmount)
 	}
 
 	// An update to the fiat amount, sync the nano value based on currently selected denomination
@@ -871,9 +875,8 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	}
 
 	async setMaxAmount () {
-		this.amountRaw = BigInt(this.account?.balance || 0)
-		const nanoVal = this.util.nano.rawToNano(this.account?.balance).decimalPlaces(0, 3)
-		this.amount = parseInt(await Tools.convert(nanoVal.toString(), 'nano', 'mnano'))
+		this.amountRaw = BigInt(this.account?.balance || 0n)
+		this.amount = parseFloat(Tools.convert(this.account?.balance, 'raw', 'nano')).toFixed(6)
 		this.syncFiatPrice()
 	}
 
@@ -967,7 +970,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.amountRaw = this.rawAmount
 
 		// Determine fiat value of the amount
-		this.amountFiat = this.util.nano.rawToMnano(rawAmount).times(this.price.price.lastPrice).toNumber()
+		this.amountFiat = parseFloat(Tools.convert(rawAmount, 'raw', 'nano')) * this.price.price.lastPrice
 
 		const defaultRepresentative = this.settings.settings.defaultRepresentative || this.nanoBlock.getRandomRepresentative()
 		const representative = from.representative || defaultRepresentative

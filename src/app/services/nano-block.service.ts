@@ -1,24 +1,25 @@
-import { Injectable, inject } from '@angular/core'
-import { ApiService } from './api.service'
-import { UtilService, StateBlock, TxType } from './util.service'
-import { WorkPoolService } from './work-pool.service'
-import BigNumber from 'bignumber.js'
-import { NotificationService } from './notification.service'
-import { AppSettingsService } from './app-settings.service'
-import { LedgerService } from './ledger.service'
-import { WalletAccount } from './wallet.service'
+import { inject } from '@angular/core'
+import { Account, Block, Wallet } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
-import { tools as nanocurrencyWebTools } from 'nanocurrency-web'
-const nacl = window['nacl']
+import {
+	ApiService,
+	AppSettingsService,
+	LedgerService,
+	NotificationService,
+	StateBlock,
+	TxType,
+	UtilService,
+	WalletAccount,
+	WorkPoolService
+} from 'app/services'
 
-@Injectable()
 export class NanoBlockService {
-	private api = inject(ApiService);
-	private util = inject(UtilService);
-	private workPool = inject(WorkPoolService);
-	private notifications = inject(NotificationService);
-	private ledgerService = inject(LedgerService);
-	settings = inject(AppSettingsService);
+	private api = inject(ApiService)
+	private util = inject(UtilService)
+	private workPool = inject(WorkPoolService)
+	private notifications = inject(NotificationService)
+	private ledgerService = inject(LedgerService)
+	settings = inject(AppSettingsService)
 
 	representativeAccounts = [
 		'nano_1x7biz69cem95oo7gxkrw6kzhfywq4x5dupw4z1bdzkb74dk9kpxwzjbdhhs', // NanoCrawler
@@ -32,24 +33,23 @@ export class NanoBlockService {
 		'nano_1xckpezrhg56nuokqh6t1stjca67h37jmrp9qnejjkfgimx1msm9ehuaieuq', // Flying Amigos
 		'nano_3n7ky76t4g57o9skjawm8pprooz1bminkbeegsyt694xn6d31c6s744fjzzz', // Humble Nano
 		'nano_1wenanoqm7xbypou7x3nue1isaeddamjdnc3z99tekjbfezdbq8fmb659o7t', // WeNano
-	];
+	]
 
-	zeroHash = '0000000000000000000000000000000000000000000000000000000000000000';
+	zeroHash = '0000000000000000000000000000000000000000000000000000000000000000'
 
 	// https://docs.nano.org/releases/network-upgrades/#epoch-blocks
-	epochV2SignerAccount = 'nano_3qb6o6i1tkzr6jwr5s7eehfxwg9x6eemitdinbpi7u8bjjwsgqfj4wzser3x';
+	epochV2SignerAccount = 'nano_3qb6o6i1tkzr6jwr5s7eehfxwg9x6eemitdinbpi7u8bjjwsgqfj4wzser3x'
 
-	newOpenBlock$: BehaviorSubject<boolean | false> = new BehaviorSubject(false);
+	newOpenBlock$: BehaviorSubject<boolean | false> = new BehaviorSubject(false)
 
-	async generateChange (walletAccount, representativeAccount, ledger = false) {
-		const toAcct = await this.api.accountInfo(walletAccount.id)
+	async generateChange (wallet: Wallet, walletAccount, representativeAccount, ledger = false) {
+		const account = Account.load(walletAccount.id)
+		const toAcct = await this.api.accountInfo(account.address)
 		if (!toAcct) throw new Error(`Account must have an open block first`)
 
-		const walletAccountPublicKey = this.util.account.getAccountPublicKey(walletAccount.id)
+		await this.validateAccount(toAcct, account.publicKey)
 
-		await this.validateAccount(toAcct, walletAccountPublicKey)
-
-		const balance = new BigNumber(toAcct.balance)
+		const balance = BigInt(toAcct.balance)
 		const balanceDecimal = balance.toString(10)
 		const link = this.zeroHash
 		const blockData = {
@@ -81,7 +81,8 @@ export class NanoBlockService {
 				return
 			}
 		} else {
-			this.signStateBlock(walletAccount, blockData)
+			this.validateAccount(toAcct, toAcct.publicKey)
+			await wallet.sign(walletAccount.index, blockData as unknown as Block)
 		}
 
 		if (!this.workPool.workExists(toAcct.frontier)) {
@@ -105,54 +106,54 @@ export class NanoBlockService {
 	// This might be used in the future to send state changes on the blocks instead of normal true/false
 	// subscribeSend(walletAccount, toAccountID, rawAmount, ledger = false): Observable {
 	//   const doSend = async (observable) => {
-	//     console.log(`OBS: Promise resolve, running main send logic.`);
-	//     const startTime = Date.now();
+	//     console.log(`OBS: Promise resolve, running main send logic.`)
+	//     const startTime = Date.now()
 	//
-	//     console.log(`Observable: Creation event run`);
-	//     observable.next({ step: 0, startTime: startTime });
+	//     console.log(`Observable: Creation event run`)
+	//     observable.next({ step: 0, startTime: startTime })
 	//
 	//
-	//     const fromAccount = await this.api.accountInfo(walletAccount.id);
-	//     if (!fromAccount) throw new Error(`Unable to get account information for ${walletAccount.id}`);
+	//     const fromAccount = await this.api.accountInfo(walletAccount.id)
+	//     if (!fromAccount) throw new Error(`Unable to get account information for ${walletAccount.id}`)
 	//
-	//     const remaining = new BigNumber(fromAccount.balance).minus(rawAmount);
-	//     const remainingDecimal = remaining.toString(10);
-	//     let remainingPadded = remaining.toString(16);
+	//     const remaining = new BigNumber(fromAccount.balance).minus(rawAmount)
+	//     const remainingDecimal = remaining.toString(10)
+	//     let remainingPadded = remaining.toString(16)
 	//     while (remainingPadded.length < 32) remainingPadded = '0' + remainingPadded; // Left pad with 0's
 	//
-	//     let blockData;
-	//     const representative = fromAccount.representative || (this.settings.settings.defaultRepresentative || this.representativeAccount);
+	//     let blockData
+	//     const representative = fromAccount.representative || (this.settings.settings.defaultRepresentative || this.representativeAccount)
 	//
-	//     observable.next({ step: 1, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) });
+	//     observable.next({ step: 1, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) })
 	//
-	//     let signature = null;
+	//     let signature = null
 	//     if (ledger) {
 	//       const ledgerBlock = {
 	//         previousBlock: fromAccount.frontier,
 	//         representative: representative,
 	//         balance: remainingDecimal,
 	//         recipient: toAccountID,
-	//       };
+	//       }
 	//       try {
-	//         this.sendLedgerNotification();
-	//         await this.ledgerService.updateCache(walletAccount.index, fromAccount.frontier);
-	//         const sig = await this.ledgerService.signBlock(walletAccount.index, ledgerBlock);
-	//         this.clearLedgerNotification();
-	//         signature = sig.signature;
+	//         this.sendLedgerNotification()
+	//         await this.ledgerService.updateCache(walletAccount.index, fromAccount.frontier)
+	//         const sig = await this.ledgerService.signBlock(walletAccount.index, ledgerBlock)
+	//         this.clearLedgerNotification()
+	//         signature = sig.signature
 	//
-	//         observable.next({ step: 2, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) });
+	//         observable.next({ step: 2, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) })
 	//       } catch (err) {
-	//         this.clearLedgerNotification();
-	//         this.sendLedgerDeniedNotification(err);
-	//         return;
+	//         this.clearLedgerNotification()
+	//         this.sendLedgerDeniedNotification(err)
+	//         return
 	//       }
 	//     } else {
-	//       signature = this.signSendBlock(walletAccount, fromAccount, representative, remainingPadded, toAccountID);
-	//       observable.next({ step: 2, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) });
+	//       signature = this.signSendBlock(walletAccount, fromAccount, representative, remainingPadded, toAccountID)
+	//       observable.next({ step: 2, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) })
 	//     }
 	//
 	//     if (!this.workPool.workExists(fromAccount.frontier)) {
-	//       this.notifications.sendInfo(`Generating Proof of Work...`);
+	//       this.notifications.sendInfo(`Generating Proof of Work...`)
 	//     }
 	//
 	//     blockData = {
@@ -161,44 +162,41 @@ export class NanoBlockService {
 	//       previous: fromAccount.frontier,
 	//       representative: representative,
 	//       balance: remainingDecimal,
-	//       link: this.util.account.getAccountPublicKey(toAccountID),
+	//       link: new Account(toAccountID).publicKey,
 	//       work: await this.workPool.getWork(fromAccount.frontier),
 	//       signature: signature,
-	//     };
+	//     }
 	//
-	//     observable.next({ step: 3, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) });
+	//     observable.next({ step: 3, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) })
 	//
-	//     const processResponse = await this.api.process(blockData);
-	//     if (!processResponse || !processResponse.hash) throw new Error(processResponse.error || `Node returned an error`);
+	//     const processResponse = await this.api.process(blockData)
+	//     if (!processResponse || !processResponse.hash) throw new Error(processResponse.error || `Node returned an error`)
 	//
-	//     observable.next({ step: 4, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) });
+	//     observable.next({ step: 4, startTime: startTime, eventTime: ((Date.now() - startTime) / 1000).toFixed(3) })
 	//
-	//     walletAccount.frontier = processResponse.hash;
+	//     walletAccount.frontier = processResponse.hash
 	//     this.workPool.addWorkToCache(processResponse.hash); // Add new hash into the work pool
-	//     this.workPool.removeFromCache(fromAccount.frontier);
+	//     this.workPool.removeFromCache(fromAccount.frontier)
 	//
-	//     observable.complete();
-	//   };
+	//     observable.complete()
+	//   }
 	//
 	//
-	//   console.log(`Creating observable... on send...`);
+	//   console.log(`Creating observable... on send...`)
 	//   // Create an observable that can be returned instantly.
 	//   return new Observable(observable => {
 	//
-	//     doSend(observable).then(val => console.log(val));
-	//   });
+	//     doSend(observable).then(val => console.log(val))
+	//   })
 	//
 	// }
 
-	async generateSend (walletAccount, toAccountID, rawAmount, ledger = false) {
-		const fromAccount = await this.api.accountInfo(walletAccount.id)
-		if (!fromAccount) throw new Error(`Unable to get account information for ${walletAccount.id}`)
+	async generateSend (wallet: Wallet, walletAccount, toAccountID, rawAmount, ledger = false) {
+		const account = Account.load(walletAccount.id)
+		const fromAccount = await this.api.accountInfo(account.address)
+		if (!fromAccount) throw new Error(`Unable to get account information for ${account.address}`)
 
-		const walletAccountPublicKey = this.util.account.getAccountPublicKey(walletAccount.id)
-
-		await this.validateAccount(fromAccount, walletAccountPublicKey)
-
-		const remaining = new BigNumber(fromAccount.balance).minus(rawAmount)
+		const remaining = BigInt(fromAccount.balance) - rawAmount
 		const remainingDecimal = remaining.toString(10)
 
 		const representative = fromAccount.representative || (this.settings.settings.defaultRepresentative || this.getRandomRepresentative())
@@ -208,7 +206,7 @@ export class NanoBlockService {
 			previous: fromAccount.frontier,
 			representative: representative,
 			balance: remainingDecimal,
-			link: this.util.account.getAccountPublicKey(toAccountID),
+			link: Account.load(toAccountID).publicKey,
 			work: null,
 			signature: null,
 		}
@@ -232,7 +230,8 @@ export class NanoBlockService {
 				return
 			}
 		} else {
-			this.signStateBlock(walletAccount, blockData)
+			this.validateAccount(fromAccount, fromAccount.publicKey)
+			await wallet.sign(account.index, blockData as unknown as Block)
 		}
 
 		if (!this.workPool.workExists(fromAccount.frontier)) {
@@ -252,11 +251,9 @@ export class NanoBlockService {
 		return processResponse.hash
 	}
 
-	async generateReceive (walletAccount, sourceBlock, ledger = false) {
-		const toAcct = await this.api.accountInfo(walletAccount.id)
-		const walletAccountPublicKey = this.util.account.getAccountPublicKey(walletAccount.id)
-
-		await this.validateAccount(toAcct, walletAccountPublicKey)
+	async generateReceive (wallet, walletAccount, sourceBlock, ledger = false) {
+		const account = Account.load(walletAccount)
+		const toAcct = await this.api.accountInfo(account.address)
 
 		let workBlock = null
 
@@ -266,8 +263,10 @@ export class NanoBlockService {
 		const representative = toAcct.representative || (this.settings.settings.defaultRepresentative || this.getRandomRepresentative())
 
 		const srcBlockInfo = await this.api.blocksInfo([sourceBlock])
-		const srcAmount = new BigNumber(srcBlockInfo.blocks[sourceBlock].amount)
-		const newBalance = openEquiv ? srcAmount : new BigNumber(toAcct.balance).plus(srcAmount)
+		const srcAmount = BigInt(srcBlockInfo.blocks[sourceBlock].amount)
+		const newBalance = openEquiv
+			? srcAmount
+			: BigInt(toAcct.balance) + srcAmount
 		const newBalanceDecimal = newBalance.toString(10)
 		let newBalancePadded = newBalance.toString(16)
 		while (newBalancePadded.length < 32) newBalancePadded = '0' + newBalancePadded // Left pad with 0's
@@ -307,10 +306,13 @@ export class NanoBlockService {
 				return
 			}
 		} else {
-			this.signStateBlock(walletAccount, blockData)
+			this.validateAccount(toAcct, toAcct.publicKey)
+			await wallet.sign(account.index, blockData as unknown as Block)
 		}
 
-		workBlock = openEquiv ? walletAccountPublicKey : previousBlock
+		workBlock = openEquiv
+			? Account.load(walletAccount.id).publicKey
+			: previousBlock
 		if (!this.workPool.workExists(workBlock)) {
 			this.notifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
 		}
@@ -318,12 +320,17 @@ export class NanoBlockService {
 		console.log('Get work for receive block')
 		blockData.work = await this.workPool.getWork(workBlock, 1 / 64) // low PoW threshold since receive block
 		this.notifications.removeNotification('pow')
-		const processResponse = await this.api.process(blockData, openEquiv ? TxType.open : TxType.receive)
+		const processResponse = await this.api.process(
+			blockData,
+			openEquiv
+				? TxType.open
+				: TxType.receive
+		)
 		if (processResponse && processResponse.hash) {
 			walletAccount.frontier = processResponse.hash
 			// Add new hash into the work pool, high PoW threshold since we don't know what the next one will be
-			// Skip adding new work cache directly, let reloadBalances() check for pending and decide instead
-			// this.workPool.addWorkToCache(processResponse.hash, 1);
+			// Skip adding new work cache directly, let reloadBalances() check for receivable and decide instead
+			// this.workPool.addWorkToCache(processResponse.hash, 1)
 			this.workPool.removeFromCache(workBlock)
 
 			// update the rep view via subscription
@@ -337,8 +344,7 @@ export class NanoBlockService {
 	}
 
 	// for signing block when offline
-	async signOfflineBlock (walletAccount: WalletAccount, block: StateBlock, prevBlock: StateBlock,
-		type: TxType, genWork: boolean, multiplier: number, ledger = false) {
+	async signOfflineBlock (wallet: Wallet, walletAccount: WalletAccount, block: StateBlock, prevBlock: StateBlock, type: TxType, genWork: boolean, ledger = false) {
 		// special treatment if open block
 		const openEquiv = type === TxType.open
 		console.log('Signing block of subtype: ' + TxType[type])
@@ -350,7 +356,7 @@ export class NanoBlockService {
 					previousBlock: block.previous,
 					representative: block.representative,
 					balance: block.balance,
-					recipient: this.util.account.getPublicAccountID(this.util.hex.toUint8(block.link)),
+					recipient: Account.load(block.link).publicKey,
 				}
 			} else if (type === TxType.receive || type === TxType.open) {
 				ledgerBlock = {
@@ -369,29 +375,33 @@ export class NanoBlockService {
 				}
 			}
 			try {
+				const wallet = await Wallet.create('Ledger')
 				this.sendLedgerNotification()
 				// On new accounts, we do not need to cache anything
 				if (!openEquiv) {
 					try {
-						// await this.ledgerService.updateCache(walletAccount.index, block.previous);
+						// await wallet.ledger.updateCache(walletAccount.index, prevBlock)
 						await this.ledgerService.updateCacheOffline(walletAccount.index, prevBlock)
 					} catch (err) { console.log(err) }
 				}
-				const sig = await this.ledgerService.signBlock(walletAccount.index, ledgerBlock)
+				// const sig = await wallet.ledger.sign(walletAccount.index, ledgerBlock)
+				const { signature } = await this.ledgerService.signBlock(walletAccount.index, ledgerBlock)
 				this.clearLedgerNotification()
-				block.signature = sig.signature
+				block.signature = signature
 			} catch (err) {
 				this.clearLedgerNotification()
 				this.sendLedgerDeniedNotification(err)
 				return null
 			}
 		} else {
-			this.signStateBlock(walletAccount, block)
+			await wallet.sign(walletAccount.index, block as unknown as Block)
 		}
 
 		if (genWork) {
 			// For open blocks which don't have a frontier, use the public key of the account
-			const workBlock = openEquiv ? this.util.account.getAccountPublicKey(walletAccount.id) : block.previous
+			const workBlock = openEquiv
+				? Account.load(walletAccount.id).publicKey
+				: block.previous
 			if (!this.workPool.workExists(workBlock)) {
 				this.notifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
 			}
@@ -405,87 +415,57 @@ export class NanoBlockService {
 		return block // return signed block (with or without work)
 	}
 
-	async validateAccount (accountInfoUntrusted, accountPublicKey) {
-		if (!accountInfoUntrusted) return
+	async validateAccount (accountInfo, accountPublicKey) {
+		if (!accountInfo) return
 
-		if (!accountInfoUntrusted.frontier || accountInfoUntrusted.frontier === this.zeroHash) {
-			if (accountInfoUntrusted.balance && accountInfoUntrusted.balance !== '0') {
+		if (!accountInfo.frontier || accountInfo.frontier === this.zeroHash) {
+			if (accountInfo.balance && accountInfo.balance !== '0') {
 				throw new Error(`Frontier not set, but existing account balance is nonzero`)
 			}
 
-			if (accountInfoUntrusted.representative) {
+			if (accountInfo.representative) {
 				throw new Error(`Frontier not set, but existing account representative is set`)
 			}
-
 			return
 		}
+		const blockResponse = await this.api.blocksInfo([accountInfo.frontier])
+		const blockData = blockResponse.blocks[accountInfo.frontier]
+		if (!blockData) throw new Error(`Unable to load frontier block data`)
+		blockData.contents = JSON.parse(blockData.contents)
 
-		const frontierBlockResponseUntrusted =
-			await this.api.blocksInfo([accountInfoUntrusted.frontier])
-
-		const frontierBlockDataUntrusted =
-			frontierBlockResponseUntrusted.blocks[accountInfoUntrusted.frontier]
-
-		if (!frontierBlockDataUntrusted) throw new Error(`Unable to load frontier block data`)
-
-		frontierBlockDataUntrusted.contents = JSON.parse(frontierBlockDataUntrusted.contents)
-
-		const isFrontierBlockMatchingAccountInfo = (
-			(frontierBlockDataUntrusted.contents.balance === accountInfoUntrusted.balance)
-			&& (frontierBlockDataUntrusted.contents.representative === accountInfoUntrusted.representative)
-		)
-
-		if (isFrontierBlockMatchingAccountInfo !== true) {
+		if (accountInfo.balance !== blockData.contents.balance || accountInfo.representative !== blockData.contents.representative) {
 			throw new Error(`Frontier block data doesn't match account info`)
 		}
 
-		if (frontierBlockDataUntrusted.contents.type !== 'state') {
+		if (blockData.contents.type !== 'state') {
 			throw new Error(`Frontier block wasn't a state block, which shouldn't be possible`)
 		}
-
-		const isComputedBlockHashMatchingAccountFrontierHash = (
-			this.util.hex.fromUint8(this.util.nano.hashStateBlock(frontierBlockDataUntrusted.contents))
-			=== accountInfoUntrusted.frontier
-		)
-
-		if (isComputedBlockHashMatchingAccountFrontierHash !== true) {
+		if (this.util.hex.fromUint8(this.util.nano.hashStateBlock(blockData.contents)) !== accountInfo.frontier) {
 			throw new Error(`Frontier hash didn't match block data`)
 		}
 
-		if (frontierBlockDataUntrusted.subtype === 'epoch') {
-			const isEpochV2BlockSignatureValid =
-				nanocurrencyWebTools.verifyBlock(
-					this.util.account.getAccountPublicKey(this.epochV2SignerAccount),
-					frontierBlockDataUntrusted.contents
-				)
-
+		if (blockData.subtype === 'epoch') {
+			const epochV2SignerAccount = Account.load(this.epochV2SignerAccount)
+			const isEpochV2BlockSignatureValid = await (blockData.contents as Block).verify(epochV2SignerAccount.publicKey)
 			if (isEpochV2BlockSignatureValid !== true) {
 				throw new Error(`Node provided an untrusted frontier block that is an unsupported epoch`)
 			}
 		} else {
-			const isFrontierBlockSignatureValid =
-				nanocurrencyWebTools.verifyBlock(accountPublicKey, frontierBlockDataUntrusted.contents)
-
+			const isFrontierBlockSignatureValid = await (blockData.contents as Block).verify(accountPublicKey)
 			if (isFrontierBlockSignatureValid !== true) {
 				throw new Error(`Node provided an untrusted frontier block that was signed by someone else`)
 			}
 		}
 	}
 
-	// Sign a state block, and insert the signature into the block.
-	signStateBlock (walletAccount, blockData) {
-		const hashBytes = this.util.nano.hashStateBlock(blockData)
-		const privKey = walletAccount.keyPair.secretKey
-		const signed = nacl.sign.detached(hashBytes, privKey, walletAccount.keyPair.expanded)
-		blockData.signature = this.util.hex.fromUint8(signed)
-	}
-
 	sendLedgerDeniedNotification (err = null) {
 		this.notifications.sendWarning(err && err.message || `Transaction denied on Ledger device`)
 	}
+
 	sendLedgerNotification () {
 		this.notifications.sendInfo(`Waiting for confirmation on Ledger Device...`, { identifier: 'ledger-sign', length: 0 })
 	}
+
 	clearLedgerNotification () {
 		this.notifications.removeNotification('ledger-sign')
 	}

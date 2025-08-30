@@ -6,6 +6,7 @@
 	"editor.formatOnSave": true,
 	"editor.formatOnSaveMode": "file",
 	"editor.insertSpaces": false,
+	"editor.maxTokenizationLineLength": 10000000,
 	"editor.tabSize": 2,
 	"html.format.enable": true,
 	"html.format.indentHandlebars": true,

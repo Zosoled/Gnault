@@ -1,15 +1,13 @@
 import { Injectable, inject } from '@angular/core'
-import { NotificationService } from './notification.service'
+import { NotificationService } from 'app/services'
 
 @Injectable()
 export class NodeService {
-	private notifications = inject(NotificationService);
-
+	private notifications = inject(NotificationService)
 
 	node = {
 		status: null, // null - loading, false - offline, true - online
-	};
-
+	}
 	setOffline (msg = `Unable to connect to the nano node, your balances may be inaccurate!`) {
 		if (this.node.status === false) return // Already offline
 		this.node.status = false

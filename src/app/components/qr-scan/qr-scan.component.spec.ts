@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-
-import { QrScanComponent } from './qr-scan.component'
+import { QrScanComponent } from 'app/components'
 
 describe('AddressBookComponent', () => {
 	let component: QrScanComponent

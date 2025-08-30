@@ -1,23 +1,26 @@
+import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
-import { NotificationService } from '../../services/notification.service'
+import { NotificationService } from 'app/services'
 
 @Component({
 	selector: 'app-notifications',
 	templateUrl: './notifications.component.html',
-	styleUrls: ['./notifications.component.css']
+	styleUrls: ['./notifications.component.css'],
+	imports: [
+		CommonModule
+	]
 })
+
 export class NotificationsComponent implements OnInit {
-	private notificationService = inject(NotificationService);
+	private notificationService = inject(NotificationService)
 
-
-	notificationLength = 5000;
-
-	notifications: any[] = [];
-
+	notificationLength = 5000
+	notifications: any[] = []
 	ngOnInit () {
 		this.notificationService.notifications$.subscribe(notification => {
 			if (!notification) {
-				return // Default value
+				// Default value
+				return
 			}
 
 			// Check the options
@@ -58,7 +61,7 @@ export class NotificationsComponent implements OnInit {
 		})
 	}
 
-	private removeNotification (notification) {
+	removeNotification (notification) {
 		const existingNotification = this.notifications.findIndex(n => n === notification)
 		if (existingNotification !== -1) {
 			this.notifications.splice(existingNotification, 1)
@@ -74,5 +77,4 @@ export class NotificationsComponent implements OnInit {
 			case 'error': return 'uk-alert-danger'
 		}
 	}
-
 }

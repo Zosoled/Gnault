@@ -1,82 +1,112 @@
+import { CommonModule } from '@angular/common'
 import { Component, OnDestroy, OnInit, inject } from '@angular/core'
-import { ChildActivationEnd, Router } from '@angular/router'
-import { WalletService, WalletAccount } from '../../services/wallet.service'
-import { NotificationService } from '../../services/notification.service'
-import { AddressBookService } from '../../services/address-book.service'
-import { ModalService } from '../../services/modal.service'
-import { ApiService } from '../../services/api.service'
-import { UtilService } from '../../services/util.service'
-import { WorkPoolService } from '../../services/work-pool.service'
-import { AppSettingsService } from '../../services/app-settings.service'
-import { NanoBlockService } from '../../services/nano-block.service'
-import { PriceService } from '../../services/price.service'
-import { WebsocketService } from '../../services/websocket.service'
+import { FormsModule } from '@angular/forms'
+import { ChildActivationEnd, Router, RouterLink } from '@angular/router'
+import { TranslocoDirective, TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { Account, Tools } from 'libnemo'
+import { ClipboardModule } from 'ngx-clipboard'
 import * as QRCode from 'qrcode'
-import BigNumber from 'bignumber.js'
-import { TranslocoService } from '@ngneat/transloco'
+import {
+	NanoAccountIdComponent,
+	NanoIdenticonComponent,
+	NanoTransactionMobileComponent
+} from 'app/components/helpers'
+import {
+	AmountSplitPipe,
+	CurrencySymbolPipe,
+	FiatPipe,
+	RaiPipe,
+	SqueezePipe
+} from 'app/pipes'
+import {
+	AddressBookService,
+	ApiService,
+	AppSettingsService,
+	ModalService,
+	NanoBlockService,
+	NotificationService,
+	PriceService,
+	UtilService,
+	WalletService,
+	WebsocketService,
+	WorkPoolService
+} from 'app/services'
 
 @Component({
 	selector: 'app-receive',
 	templateUrl: './receive.component.html',
-	styleUrls: ['./receive.component.css']
+	styleUrls: ['./receive.component.css'],
+	imports: [
+		AmountSplitPipe,
+		ClipboardModule,
+		CommonModule,
+		CurrencySymbolPipe,
+		FiatPipe,
+		FormsModule,
+		NanoAccountIdComponent,
+		NanoIdenticonComponent,
+		NanoTransactionMobileComponent,
+		RaiPipe,
+		RouterLink,
+		SqueezePipe,
+		TranslocoDirective,
+		TranslocoPipe
+	]
 })
 
-
-
 export class ReceiveComponent implements OnInit, OnDestroy {
-	private route = inject(Router);
-	private walletService = inject(WalletService);
-	private notificationService = inject(NotificationService);
-	private addressBook = inject(AddressBookService);
-	modal = inject(ModalService);
-	private api = inject(ApiService);
-	private workPool = inject(WorkPoolService);
-	settings = inject(AppSettingsService);
-	private nanoBlock = inject(NanoBlockService);
-	price = inject(PriceService);
-	private websocket = inject(WebsocketService);
-	private util = inject(UtilService);
-	private translocoService = inject(TranslocoService);
+	private route = inject(Router)
+	private walletService = inject(WalletService)
+	private notificationService = inject(NotificationService)
+	private addressBook = inject(AddressBookService)
+	modal = inject(ModalService)
+	private api = inject(ApiService)
+	private workPool = inject(WorkPoolService)
+	settings = inject(AppSettingsService)
+	private nanoBlock = inject(NanoBlockService)
+	price = inject(PriceService)
+	private websocket = inject(WebsocketService)
+	util = inject(UtilService)
+	private translocoService = inject(TranslocoService)
 
-	nano = 1000000000000000000000000;
-	accounts = this.walletService.wallet.accounts;
+	nano = 1000000000000000000000000
+	accounts = this.walletService.wallet.accounts
+	timeoutIdClearingRecentlyCopiedState: any = null
+	mobileTransactionMenuModal: any = null
+	merchantModeModal: any = null
+	mobileTransactionData: any = null
 
-	timeoutIdClearingRecentlyCopiedState: any = null;
-	mobileTransactionMenuModal: any = null;
-	merchantModeModal: any = null;
-	mobileTransactionData: any = null;
+	selectedAccountAddressBookName = ''
+	receivableAccountModel = '0'
+	receivableBlocks = []
+	receivableBlocksForSelectedAccount = []
+	qrCodeUri = null
+	qrCodeImage = null
+	qrAccount = ''
+	qrAmount: bigint = null
+	recentlyCopiedAccountAddress = false
+	recentlyCopiedPaymentUri = false
+	walletAccount: Account = null
+	selAccountInit = false
+	loadingIncomingTxList = false
+	amountNano = ''
+	amountFiat = ''
+	validNano = true
+	validFiat = true
+	qrSuccessClass = ''
 
-	selectedAccountAddressBookName = '';
-	pendingAccountModel = '0';
-	pendingBlocks = [];
-	pendingBlocksForSelectedAccount = [];
-	qrCodeUri = null;
-	qrCodeImage = null;
-	qrAccount = '';
-	qrAmount: BigNumber = null;
-	recentlyCopiedAccountAddress = false;
-	recentlyCopiedPaymentUri = false;
-	walletAccount: WalletAccount = null;
-	selAccountInit = false;
-	loadingIncomingTxList = false;
-	amountNano = '';
-	amountFiat = '';
-	validNano = true;
-	validFiat = true;
-	qrSuccessClass = '';
+	inMerchantMode = false
+	inMerchantModeQR = false
+	inMerchantModePaymentComplete = false
+	merchantModeRawRequestedQR: bigint = null
+	merchantModeRawRequestedTotal: bigint = null
+	merchantModeRawReceivedTotal: bigint = null
+	merchantModeRawReceivedTotalHiddenRaw: bigint = null
+	merchantModeSeenBlockHashes = {}
+	merchantModePrompts = []
+	merchantModeTransactionHashes = []
 
-	inMerchantMode = false;
-	inMerchantModeQR = false;
-	inMerchantModePaymentComplete = false;
-	merchantModeRawRequestedQR: BigNumber = null;
-	merchantModeRawRequestedTotal: BigNumber = null;
-	merchantModeRawReceivedTotal: BigNumber = null;
-	merchantModeRawReceivedTotalHiddenRaw: BigNumber = null;
-	merchantModeSeenBlockHashes = {};
-	merchantModePrompts = [];
-	merchantModeTransactionHashes = [];
-
-	routerSub = null;
+	routerSub = null
 
 	async ngOnInit () {
 		const UIkit = window['UIkit']
@@ -97,38 +127,37 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		// Update selected account if changed in the sidebar
 		this.walletService.wallet.selectedAccount$.subscribe(async acc => {
 			if (this.selAccountInit) {
-				this.pendingAccountModel = acc ? acc.id : '0'
-				this.onSelectedAccountChange(this.pendingAccountModel)
+				this.receivableAccountModel = acc?.id ?? '0'
+				this.onSelectedAccountChange(this.receivableAccountModel)
 			}
 			this.selAccountInit = true
 		})
 
-		this.walletService.wallet.pendingBlocksUpdate$.subscribe(async receivableBlockUpdate => {
+		this.walletService.wallet.receivableBlocksUpdate$.subscribe(async receivableBlockUpdate => {
 			if (receivableBlockUpdate === null) {
 				return
 			}
-
-			this.updatePendingBlocks()
+			this.updateReceivableBlocks()
 		})
 
-		await this.updatePendingBlocks()
+		await this.updateReceivableBlocks()
 
 		if (this.walletService.wallet.selectedAccount !== null) {
 			// Set the account selected in the sidebar as default
-			this.pendingAccountModel = this.walletService.wallet.selectedAccount.id
-			this.onSelectedAccountChange(this.pendingAccountModel)
+			this.receivableAccountModel = this.walletService.wallet.selectedAccount.id
+			this.onSelectedAccountChange(this.receivableAccountModel)
 		} else if (this.accounts.length === 1) {
 			// Auto-select account if it is the only account in the wallet
-			this.pendingAccountModel = this.accounts[0].id
-			this.onSelectedAccountChange(this.pendingAccountModel)
+			this.receivableAccountModel = this.accounts[0].id
+			this.onSelectedAccountChange(this.receivableAccountModel)
 		}
 
 		// Listen as new transactions come in. Ignore the latest transaction that is already present on page load.
 		const latest = this.websocket.newTransactions$.getValue()
 		this.websocket.newTransactions$.subscribe(async (transaction) => {
 			if (transaction && latest !== transaction) {
-				const rawAmount = new BigNumber(transaction.amount)
-				if (transaction.block.link_as_account === this.qrAccount && rawAmount.gte(this.qrAmount || 0)) {
+				const rawAmount = BigInt(transaction.amount)
+				if (transaction.block.link_as_account === this.qrAccount && rawAmount > (this.qrAmount || 0n)) {
 					this.showQrConfirmation()
 					setTimeout(() => this.resetAmount(), 500)
 				}
@@ -147,56 +176,52 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	async updatePendingBlocks () {
-		this.pendingBlocks =
-			this.walletService.wallet.pendingBlocks
+	async updateReceivableBlocks () {
+		this.receivableBlocks =
+			this.walletService.wallet.receivableBlocks
 				.map(
-					(pendingBlock) =>
+					(receivableBlock) =>
 						Object.assign(
 							{},
-							pendingBlock,
+							receivableBlock,
 							{
-								account: pendingBlock.source,
-								destination: pendingBlock.account,
+								account: receivableBlock.source,
+								destination: receivableBlock.account,
 								source: null,
 								addressBookName: (
-									this.addressBook.getAccountName(pendingBlock.source)
-									|| this.getAccountLabel(pendingBlock.source, null)
+									this.addressBook.getAccountName(receivableBlock.source)
+									|| this.getAccountLabel(receivableBlock.source, null)
 								),
 								destinationAddressBookName: (
-									this.addressBook.getAccountName(pendingBlock.account)
-									|| this.getAccountLabel(pendingBlock.account, 'Account')
+									this.addressBook.getAccountName(receivableBlock.account)
+									|| this.getAccountLabel(receivableBlock.account, this.translocoService.translate('general.account'))
 								),
 								isReceivable: true,
 								local_time_string: '',
 							}
 						)
 				)
-				.sort(
-					(a, b) =>
-						a.destinationAddressBookName.localeCompare(b.destinationAddressBookName)
+				.sort((a, b) => a.destinationAddressBookName.localeCompare(b.destinationAddressBookName)
 				)
 
-		this.filterPendingBlocksForDestinationAccount(this.pendingAccountModel)
+		this.filterReceivableBlocksForDestinationAccount(this.receivableAccountModel)
 	}
 
-	filterPendingBlocksForDestinationAccount (selectedAccountID) {
+	filterReceivableBlocksForDestinationAccount (selectedAccountID) {
 		if (selectedAccountID === '0') {
 			// Blocks for all accounts
-			this.pendingBlocksForSelectedAccount = [...this.pendingBlocks]
+			this.receivableBlocksForSelectedAccount = [...this.receivableBlocks]
 			return
 		}
 
 		// Blocks for selected account
-		this.pendingBlocksForSelectedAccount =
-			this.pendingBlocks.filter(block => (block.destination === selectedAccountID))
+		this.receivableBlocksForSelectedAccount = this.receivableBlocks
+			.filter(block => (block.destination === selectedAccountID))
 
 		if (this.inMerchantModeQR === true) {
-			this.pendingBlocksForSelectedAccount.forEach(
-				(pendingBlock) => {
-					this.onMerchantModeReceiveTransaction(pendingBlock)
-				}
-			)
+			this.receivableBlocksForSelectedAccount.forEach(receivableBlock => {
+				this.onMerchantModeReceiveTransaction(receivableBlock)
+			})
 		}
 	}
 
@@ -209,18 +234,16 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 
 	getAccountLabel (accountID, defaultLabel) {
 		const walletAccount = this.walletService.wallet.accounts.find(a => a.id === accountID)
-
 		if (walletAccount == null) {
 			return defaultLabel
 		}
-
 		return (this.translocoService.translate('general.account') + ' #' + walletAccount.index)
 	}
 
-	async getPending () {
-		// clear the list of pending blocks. Updated again with reloadBalances()
-		this.pendingBlocks = []
-		this.pendingBlocksForSelectedAccount = []
+	async getReceivable () {
+		// clear the list of receivable blocks. Updated again with reloadBalances()
+		this.receivableBlocks = []
+		this.receivableBlocksForSelectedAccount = []
 		this.loadingIncomingTxList = true
 		await this.walletService.reloadBalances()
 		this.loadingIncomingTxList = false
@@ -232,17 +255,12 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			this.changeQRAmount()
 			return
 		}
-		const rawAmount = this.util.nano.mnanoToRaw(this.amountNano || 0)
+		const precision = this.settings.settings.displayCurrency === 'BTC' ? 6 : 2
+		const rawAmount = Tools.convert(this.amountNano || 0, 'mnano', 'raw')
+		const fiatAmount = parseFloat(Tools.convert(rawAmount, 'raw', 'mnano')) * this.price.price.lastPrice
 
-		// This is getting hacky, but if their currency is bitcoin, use 6 decimals, if it is not, use 2
-		const precision = this.settings.settings.displayCurrency === 'BTC' ? 1000000 : 100
-
-		// Determine fiat value of the amount
-		const fiatAmount = this.util.nano.rawToMnano(rawAmount).times(this.price.price.lastPrice)
-			.times(precision).floor().div(precision).toNumber()
-
-		this.amountFiat = fiatAmount.toString()
-		this.changeQRAmount(rawAmount.toFixed())
+		this.amountFiat = fiatAmount.toFixed(precision)
+		this.changeQRAmount(rawAmount)
 		this.validateFiatAmount()
 	}
 
@@ -252,13 +270,13 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			this.changeQRAmount()
 			return
 		}
-		const rawAmount = this.util.nano.mnanoToRaw(new BigNumber(this.amountFiat).div(this.price.price.lastPrice))
-		const nanoVal = this.util.nano.rawToNano(rawAmount).floor()
-		const rawRounded = this.util.nano.nanoToRaw(nanoVal)
-		const nanoAmount = this.util.nano.rawToMnano(rawRounded)
+		const amount = parseFloat(this.amountFiat) / this.price.price.lastPrice
+		const raw = Tools.convert(amount, 'mnano', 'raw')
+		const nanoRounded = parseFloat(this.util.nano.rawToMnano(raw)).toFixed(6)
+		const rawRounded = this.util.nano.nanoToRaw(nanoRounded)
 
-		this.amountNano = nanoAmount.toFixed()
-		this.changeQRAmount(rawRounded.toFixed())
+		this.amountNano = nanoRounded
+		this.changeQRAmount(rawRounded)
 		this.validateNanoAmount()
 	}
 
@@ -283,37 +301,41 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	onSelectedAccountChange (accountID) {
 		this.selectedAccountAddressBookName = (
 			this.addressBook.getAccountName(accountID)
-			|| this.getAccountLabel(accountID, 'Account')
+			|| this.getAccountLabel(accountID, this.translocoService.translate('general.account'))
 		)
 
 		this.changeQRAccount(accountID)
-		this.filterPendingBlocksForDestinationAccount(accountID)
+		this.filterReceivableBlocksForDestinationAccount(accountID)
 	}
 
 	async changeQRAccount (account) {
-		this.walletAccount = this.walletService.wallet.accounts.find(a => a.id === account) || null
+		this.walletAccount = this.walletService.wallet.accounts.find(a => a.address === account) || null
 		this.qrAccount = ''
 		let qrCode = null
 		if (account.length > 1) {
 			this.qrAccount = account
 			this.qrCodeImage = null
-			this.qrCodeUri = `nano:${account}${this.qrAmount ? `?amount=${this.qrAmount.toString(10)}` : ''}`
+			const amount = this.qrAmount > 0n
+				? `?amount=${this.qrAmount.toString()}`
+				: ''
+			this.qrCodeUri = `nano:${account}${amount}`
 			qrCode = await QRCode.toDataURL(this.qrCodeUri, { scale: 7 })
 		}
 		this.qrCodeImage = qrCode
 	}
 
-	async changeQRAmount (raw?) {
+	async changeQRAmount (raw?: bigint | string) {
 		this.qrAmount = null
 		let qrCode = null
-		if (raw) {
-			if (this.util.account.isValidAmount(raw)) {
-				this.qrAmount = raw
-			}
+		if (raw && this.util.account.isValidAmount(raw)) {
+			this.qrAmount = BigInt(raw)
 		}
 		if (this.qrAccount.length > 1) {
 			this.qrCodeImage = null
-			this.qrCodeUri = `nano:${this.qrAccount}${this.qrAmount ? `?amount=${this.qrAmount.toString(10)}` : ''}`
+			const amount = this.qrAmount > 0n
+				? `?amount=${this.qrAmount.toString()}`
+				: ''
+			this.qrCodeUri = `nano:${this.qrAccount}${amount}`
 			qrCode = await QRCode.toDataURL(this.qrCodeUri, { scale: 7 })
 			this.qrCodeImage = qrCode
 		}
@@ -344,7 +366,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 
 		const walletAccount = this.walletService.wallet.accounts.find(a => a.id === receivableBlock.destination)
 		if (!walletAccount) {
-			throw new Error(`Unable to find receiving account in wallet`)
+			throw new Error(this.translocoService.translate('receive.unable-to-find-receiving-account'))
 		}
 
 		if (this.walletService.isLocked()) {
@@ -360,8 +382,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		let hasShownErrorNotification = false
 
 		try {
-			createdReceiveBlockHash =
-				await this.nanoBlock.generateReceive(walletAccount, sourceBlock, this.walletService.isLedgerWallet())
+			createdReceiveBlockHash = await this.nanoBlock.generateReceive(walletAccount, sourceBlock, this.walletService.isLedgerWallet())
 		} catch (err) {
 			this.notificationService.sendError('Error receiving transaction: ' + err.message)
 			hasShownErrorNotification = true
@@ -371,25 +392,23 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			receivableBlock.received = true
 			this.mobileTransactionMenuModal.hide()
 			this.notificationService.removeNotification('success-receive')
-			this.notificationService.sendSuccess(`Successfully received nano!`, { identifier: 'success-receive' })
-			// pending has been processed, can be removed from the list
+			this.notificationService.sendSuccess(this.translocoService.translate('receive.successfully-received-nano'), { identifier: 'success-receive' })
+			// receivable has been processed, can be removed from the list
 			// list also updated with reloadBalances but not if called too fast
-			this.walletService.removePendingBlock(receivableBlock.hash)
+			this.walletService.removeReceivableBlock(receivableBlock.hash)
 		} else {
-			if (hasShownErrorNotification === false) {
-				if (!this.walletService.isLedgerWallet()) {
-					this.notificationService.sendError(`Error receiving transaction, please try again`, { length: 10000 })
-				}
+			if (hasShownErrorNotification === false && !this.walletService.isLedgerWallet()) {
+				this.notificationService.sendError(this.translocoService.translate('receive.there-was-a-problem-receiving-the-transaction-try-manually'), { length: 10000 })
 			}
 		}
 
 		receivableBlock.loading = false
-		this.updatePendingBlocks() // update the list
+		this.updateReceivableBlocks() // update the list
 	}
 
 	copied () {
 		this.notificationService.removeNotification('success-copied')
-		this.notificationService.sendSuccess(`Successfully copied to clipboard!`, { identifier: 'success-copied' })
+		this.notificationService.sendSuccess(this.translocoService.translate('general.successfully-copied-to-clipboard'), { identifier: 'success-copied' })
 	}
 
 	copiedAccountAddress () {
@@ -398,12 +417,9 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		}
 		this.recentlyCopiedAccountAddress = true
 		this.recentlyCopiedPaymentUri = false
-		this.timeoutIdClearingRecentlyCopiedState = setTimeout(
-			() => {
-				this.recentlyCopiedAccountAddress = false
-			},
-			2000
-		)
+		this.timeoutIdClearingRecentlyCopiedState = setTimeout(() => {
+			this.recentlyCopiedAccountAddress = false
+		}, 2000)
 	}
 
 	copiedPaymentUri () {
@@ -412,41 +428,30 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		}
 		this.recentlyCopiedPaymentUri = true
 		this.recentlyCopiedAccountAddress = false
-		this.timeoutIdClearingRecentlyCopiedState = setTimeout(
-			() => {
-				this.recentlyCopiedPaymentUri = false
-			},
-			2000
-		)
-	}
-
-	toBigNumber (value) {
-		return new BigNumber(value)
+		this.timeoutIdClearingRecentlyCopiedState = setTimeout(() => {
+			this.recentlyCopiedPaymentUri = false
+		}, 2000)
 	}
 
 	unsetSelectedAccount () {
-		this.pendingAccountModel = '0'
-		this.onSelectedAccountChange(this.pendingAccountModel)
+		this.receivableAccountModel = '0'
+		this.onSelectedAccountChange(this.receivableAccountModel)
 	}
 
 	getRawAmountWithoutTinyRaws (rawAmountWithTinyRaws) {
-		const tinyRaws =
-			rawAmountWithTinyRaws.mod(this.nano)
-
+		const tinyRaws = rawAmountWithTinyRaws.mod(this.nano)
 		return rawAmountWithTinyRaws.minus(tinyRaws)
 	}
 
 	merchantModeResetState () {
 		this.unsetSelectedAccount()
 		this.resetAmount()
-
 		this.inMerchantModeQR = false
 		this.inMerchantModePaymentComplete = false
 	}
 
 	merchantModeEnable () {
 		this.merchantModeResetState()
-
 		this.inMerchantMode = true
 		this.merchantModeModal.show()
 	}
@@ -460,32 +465,21 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 
 	merchantModeShowQR () {
 		const isRequestingAnyAmount = (this.validNano === false || Number(this.amountNano) === 0)
-
 		if (isRequestingAnyAmount === true) {
 			this.resetAmount()
 		}
-
-		this.merchantModeRawRequestedTotal =
-			(isRequestingAnyAmount === true)
-				? new BigNumber(0)
-				: this.util.nano.mnanoToRaw(this.amountNano)
-
-		this.merchantModeRawRequestedQR =
-			(isRequestingAnyAmount === true)
-				? new BigNumber(0)
-				: this.util.nano.mnanoToRaw(this.amountNano)
-
+		this.merchantModeRawRequestedTotal = isRequestingAnyAmount
+			? 0n
+			: BigInt(Tools.convert(this.amountNano, 'mnano', 'raw'))
+		this.merchantModeRawRequestedQR = isRequestingAnyAmount
+			? 0n
+			: BigInt(Tools.convert(this.amountNano, 'mnano', 'raw'))
 		this.merchantModeSeenBlockHashes =
-			this.pendingBlocksForSelectedAccount.reduce(
-				(seenHashes, receivableBlock) => {
-					seenHashes[receivableBlock.hash] = true
-					return seenHashes
-				},
-				{}
-			)
-
+			this.receivableBlocksForSelectedAccount.reduce((seenHashes, receivableBlock) => {
+				seenHashes[receivableBlock.hash] = true
+				return seenHashes
+			}, {})
 		this.merchantModeTransactionHashes = []
-
 		this.inMerchantModeQR = true
 	}
 
@@ -497,54 +491,40 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		if (this.merchantModeSeenBlockHashes[transaction.hash] != null) {
 			return
 		}
-
 		this.merchantModeSeenBlockHashes[transaction.hash] = true
 
-		const receivedAmountWithTinyRaws = new BigNumber(transaction.amount)
-
-		const receivedAmount =
-			this.getRawAmountWithoutTinyRaws(receivedAmountWithTinyRaws)
-
-		const requestedAmount =
-			this.getRawAmountWithoutTinyRaws(this.merchantModeRawRequestedQR)
+		const receivedAmountWithTinyRaws = BigInt(transaction.amount)
+		const receivedAmount = this.getRawAmountWithoutTinyRaws(receivedAmountWithTinyRaws)
+		const requestedAmount = this.getRawAmountWithoutTinyRaws(this.merchantModeRawRequestedQR)
 
 		if (receivedAmount.eq(requestedAmount)) {
 			this.merchantModeTransactionHashes.push(transaction.hash)
-
 			this.merchantModeMarkCompleteWithAmount(this.merchantModeRawRequestedTotal)
 		} else {
 			const transactionPrompt = {
 				moreThanRequested: receivedAmount.gt(requestedAmount),
 				lessThanRequested: receivedAmount.lt(requestedAmount),
 				amountRaw: receivedAmountWithTinyRaws,
-				amountHiddenRaw: receivedAmountWithTinyRaws.mod(this.nano),
+				amountHiddenRaw: receivedAmountWithTinyRaws % BigInt(this.nano),
 				transactionHash: transaction.hash,
 			}
-
 			this.merchantModePrompts.push(transactionPrompt)
 		}
 	}
 
 	merchantModeSubtractAmountFromPrompt (prompt, promptIdx) {
 		const subtractedRawWithTinyRaws = prompt.amountRaw
-
-		const subtractedRaw =
-			this.getRawAmountWithoutTinyRaws(subtractedRawWithTinyRaws)
-
-		const newAmountRaw =
-			this.merchantModeRawRequestedQR.minus(subtractedRaw)
+		const subtractedRaw = this.getRawAmountWithoutTinyRaws(subtractedRawWithTinyRaws)
+		const newAmountRaw = this.merchantModeRawRequestedQR - subtractedRaw
 
 		this.merchantModeRawRequestedQR = newAmountRaw
-		this.changeQRAmount(newAmountRaw.toFixed())
-
+		this.changeQRAmount(newAmountRaw)
 		this.merchantModeTransactionHashes.push(prompt.transactionHash)
-
 		this.merchantModePrompts.splice(promptIdx, 1)
 	}
 
 	merchantModeMarkCompleteFromPrompt (prompt) {
 		this.merchantModeTransactionHashes.push(prompt.transactionHash)
-
 		this.merchantModeMarkCompleteWithAmount(prompt.amountRaw)
 	}
 
@@ -555,9 +535,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	merchantModeMarkCompleteWithAmount (amountRaw) {
 		this.merchantModeRawReceivedTotal = amountRaw
 		this.merchantModeRawReceivedTotalHiddenRaw = amountRaw.mod(this.nano)
-
 		this.inMerchantModePaymentComplete = true
 		this.inMerchantModeQR = false
 	}
-
 }

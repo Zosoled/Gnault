@@ -1,83 +1,72 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild, Renderer2, inject } from '@angular/core'
-import { TranslocoService } from '@jsverse/transloco'
-import { WalletService } from './services/wallet.service'
-import { AddressBookService } from './services/address-book.service'
-import { AppSettingsService } from './services/app-settings.service'
-import { WebsocketService } from './services/websocket.service'
-import { PriceService } from './services/price.service'
-import { UtilService } from './services/util.service'
-import { NotificationService } from './services/notification.service'
-import { WorkPoolService } from './services/work-pool.service'
-import { Router } from '@angular/router'
+import { CommonModule } from '@angular/common'
+import {
+	Component,
+	ElementRef,
+	HostListener,
+	OnInit,
+	Renderer2,
+	ViewChild,
+	inject
+} from '@angular/core'
+import { FormsModule } from '@angular/forms'
+import { Router, RouterLink, RouterOutlet } from '@angular/router'
 import { SwUpdate } from '@angular/service-worker'
-import { RepresentativeService } from './services/representative.service'
-import { NodeService } from './services/node.service'
-import { DesktopService, LedgerService } from './services'
-import { environment } from '../environments/environment'
-import { DeeplinkService } from './services/deeplink.service'
-
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import {
+	ChangeRepWidgetComponent,
+	InstallWidgetComponent,
+	NotificationsComponent,
+	WalletWidgetComponent
+} from 'app/components'
+import {
+	AmountSplitPipe,
+	FiatPipe,
+	RaiPipe
+} from 'app/pipes'
+import {
+	AddressBookService,
+	AppSettingsService,
+	DeeplinkService,
+	DesktopService,
+	LedgerService,
+	NodeService,
+	NotificationService,
+	PriceService,
+	RepresentativeService,
+	UtilService,
+	WalletService,
+	WebsocketService,
+	WorkPoolService
+} from 'app/services'
+import { environment } from 'environments/environment'
 
 @Component({
 	selector: 'app-root',
 	templateUrl: './app.component.html',
-	styleUrls: ['./app.component.less']
+	styleUrls: ['./app.component.less'],
+	imports: [
+		AmountSplitPipe,
+		ChangeRepWidgetComponent,
+		CommonModule,
+		FiatPipe,
+		InstallWidgetComponent,
+		FormsModule,
+		NotificationsComponent,
+		RaiPipe,
+		RouterLink,
+		RouterOutlet,
+		TranslocoPipe,
+		WalletWidgetComponent
+	],
+	providers: [
+		SwUpdate
+	]
 })
+
 export class AppComponent implements OnInit {
-	private addressBook = inject(AddressBookService);
-	private websocket = inject(WebsocketService);
-	private notifications = inject(NotificationService);
-	private representative = inject(RepresentativeService);
-	private router = inject(Router);
-	private workPool = inject(WorkPoolService);
-	private util = inject(UtilService);
-	private desktop = inject(DesktopService);
-	private ledger = inject(LedgerService);
-	private renderer = inject(Renderer2);
-	private deeplinkService = inject(DeeplinkService);
-	private translate = inject(TranslocoService);
-	walletService = inject(WalletService);
-	settings = inject(AppSettingsService);
-	nodeService = inject(NodeService);
-	updates = inject(SwUpdate);
-	price = inject(PriceService);
-
-	wallet
-	node
-	nanoPrice
-	isConfigured
-
-	constructor () {
-		const router = this.router;
-
-		router.events.subscribe(() => {
-			this.closeNav()
-		})
-
-		this.wallet = this.walletService.wallet
-		this.node = this.nodeService.node
-		this.nanoPrice = this.price.price
-		this.isConfigured = this.walletService.isConfigured
-	}
-
-	@ViewChild('selectButton') selectButton: ElementRef
-	@ViewChild('accountsDropdown') accountsDropdown: ElementRef
-
-	fiatTimeout = 5 * 60 * 1000; // Update fiat prices every 5 minutes
-	inactiveSeconds = 0;
-	innerWidth = 0;
-	innerHeight = 0;
-	innerHeightWithoutMobileBar = 0;
-	navExpanded = false;
-	navAnimating = false;
-	showAccountsDropdown = false;
-	canToggleLightMode = true;
-	searchData = '';
-	donationAccount = environment.donationAddress;
-
 	@HostListener('window:resize', ['$event']) onResize (e) {
 		this.onWindowResize(e.target)
 	}
-
 	@HostListener('document:mousedown', ['$event']) onGlobalClick (event): void {
 		if (
 			this.selectButton.nativeElement.contains(event.target) === false
@@ -86,6 +75,50 @@ export class AppComponent implements OnInit {
 			this.showAccountsDropdown = false
 		}
 	}
+	@ViewChild('selectButton') selectButton: ElementRef
+	@ViewChild('accountsDropdown') accountsDropdown: ElementRef
+
+	private addressBook = inject(AddressBookService)
+	private websocket = inject(WebsocketService)
+	private notifications = inject(NotificationService)
+	private representative = inject(RepresentativeService)
+	private router = inject(Router)
+	private workPool = inject(WorkPoolService)
+	private util = inject(UtilService)
+	private desktop = inject(DesktopService)
+	private ledger = inject(LedgerService)
+	private renderer = inject(Renderer2)
+	private deeplinkService = inject(DeeplinkService)
+	private translate = inject(TranslocoService)
+	walletService = inject(WalletService)
+	settings = inject(AppSettingsService)
+	nodeService = inject(NodeService)
+	updates = inject(SwUpdate)
+	price = inject(PriceService)
+
+	wallet = this.walletService.wallet
+	node = this.nodeService.node
+	nanoPrice = this.price.price
+	isConfigured = this.walletService.isConfigured
+
+	constructor () {
+		const router = this.router
+		router.events.subscribe(() => {
+			this.closeNav()
+		})
+	}
+
+	fiatTimeout = 5 * 60 * 1000; // Update fiat prices every 5 minutes
+	inactiveSeconds = 0
+	innerWidth = 0
+	innerHeight = 0
+	innerHeightWithoutMobileBar = 0
+	navExpanded = false
+	navAnimating = false
+	showAccountsDropdown = false
+	canToggleLightMode = true
+	searchData = ''
+	donationAccount = environment.donationAddress
 
 	async ngOnInit () {
 		this.onWindowResize(window)
@@ -113,7 +146,7 @@ export class AppComponent implements OnInit {
 		// Navigate to accounts page if there is wallet, but only if coming from home. On desktop app the path ends with index.html
 		if (this.walletService.isConfigured() && (window.location.pathname === '/' || window.location.pathname.endsWith('index.html'))) {
 			if (this.wallet.selectedAccountId) {
-				this.router.navigate([`account/${this.wallet.selectedAccountId}`], { queryParams: { 'compact': 1 }, replaceUrl: true })
+				this.router.navigate([`accounts/${this.wallet.selectedAccountId}`], { queryParams: { 'compact': 1 }, replaceUrl: true })
 			} else {
 				this.router.navigate(['accounts'], { replaceUrl: true })
 			}
@@ -194,16 +227,16 @@ export class AppComponent implements OnInit {
 		/* DEPRECATED
 		// Notify user after service worker was updated
 		this.updates.activated.subscribe((event) => {
-			console.log(`SW update successful. Current: ${event.current.hash}`);
-			this.notifications.sendSuccess('Gnault was updated successfully.');
-		});
+			console.log(`SW update successful. Current: ${event.current.hash}`)
+			this.notifications.sendSuccess('Gnault was updated successfully.')
+		})
 		*/
 
 		// Check how long the wallet has been inactive, and lock it if it's been too long
 		setInterval(() => {
 			this.inactiveSeconds += 1
 			if (!this.settings.settings.lockInactivityMinutes) return // Do not lock on inactivity
-			if (this.wallet.locked || !this.wallet.password) return
+			if (this.wallet.locked) return
 
 			// Determine if we have been inactive for longer than our lock setting
 			if (this.inactiveSeconds >= this.settings.settings.lockInactivityMinutes * 60) {

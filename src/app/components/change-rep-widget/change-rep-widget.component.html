@@ -8,16 +8,16 @@
 		(mouseover)="showRepHelp=rep.id"
 		(mouseout)="showRepHelp=null"
 	>
-		<h2>{{ (repIdx !== 0)
-      ? (
-          'change-rep-widget.representative-for-account' | transloco: { account: (
-            rep.accounts[0].addressBookName
-          ? ( '"' + rep.accounts[0].addressBookName + '"' )
-          : ( rep.accounts[0].id.slice(0, 10) + '...' )
-        )}
-      )
-      : ('general.representative' | transloco)
-    }}</h2>
+		<h2>
+			{{ repIdx === 0
+				? ('general.representative' | transloco)
+				: ('change-rep-widget.representative-for-account' | transloco: {
+					account: rep.accounts[0]?.addressBookName
+						? '"' + rep.accounts[0]?.addressBookName + '"'
+						: rep.accounts[0]?.id.slice(0, 10) + '...'
+				})
+			}}
+		</h2>
 		<div class="representative-name-row">
 			<a
 				(click)="showRepSelectionForSpecificRep(rep)"
@@ -66,9 +66,7 @@
 			</div>
 		</ng-container>
 		<div [class]="[ 'representative-help-tooltip', showRepHelp==rep.id ? 'visible' : 'hidden' ]">
-			<p class="primary">
-				{{ 'change-rep-widget.rep-represents-you' | transloco: { name: (rep.label || ('change-rep-widget.unknown-rep' | transloco)) } }}
-			</p>
+			<p class="primary">{{ 'change-rep-widget.rep-represents-you' | transloco: { name: (rep.label || ('change-rep-widget.unknown-rep' | transloco)) } }}</p>
 			<p>{{ 'change-rep-widget.you-can-change-representative-at-any-time' | transloco }}</p>
 			<div class="header-row">
 				<div class="separator"></div>
@@ -189,7 +187,8 @@
 		></span>
 	</div>
 	<div class="status-labels">
-		<div class="label primary uk-text-warning">{{ 'change-rep-widget.representative-change-required' | transloco }}
+		<div class="label primary uk-text-warning">
+			{{ 'change-rep-widget.representative-change-required' | transloco }}
 		</div>
 	</div>
 </div>
