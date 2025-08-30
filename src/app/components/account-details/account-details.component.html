@@ -298,7 +298,7 @@
 								<div class="account-amounts-primary">
 									<div
 										class="account-amounts-primary-confirmed"
-										[title]="( (account && account.balanceRaw && account.balanceRaw.gt(0) ) ? ( '+' + ( account.balanceRaw.toString(10)  ) + ' raw' ) : '' )"
+										[title]="( (account && account.balanceRaw && account.balanceRaw > 0 ) ? ( '+' + ( account.balanceRaw.toString(10)  ) + ' raw' ) : '' )"
 									>
 										<span class="amount-currency-symbol xno-symbol"></span>
 										<span class="amount-integer">{{ !account ? 0 : (account.balance || 0 | rai: 'mnano,true') | amountsplit: 0 }}</span>
@@ -307,7 +307,7 @@
 									<div
 										*ngIf="account && account.receivable && (account.receivable > 0)"
 										class="incoming-label"
-										[title]="( (account && account.receivableRaw && account.receivableRaw.gt(0) ) ? ( '+' + ( account.receivableRaw.toString(10) ) + ' raw' ) : '' )"
+										[title]="( (account && account.receivableRaw && account.receivableRaw > 0 ) ? ( '+' + ( account.receivableRaw.toString(10) ) + ' raw' ) : '' )"
 									>
 										<div class="text-snippet">{{ 'general.new' | transloco }}</div>
 										<div class="text-full">

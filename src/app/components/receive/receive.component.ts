@@ -502,8 +502,8 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			this.merchantModeMarkCompleteWithAmount(this.merchantModeRawRequestedTotal)
 		} else {
 			const transactionPrompt = {
-				moreThanRequested: receivedAmount.gt(requestedAmount),
-				lessThanRequested: receivedAmount.lt(requestedAmount),
+				moreThanRequested: receivedAmount > requestedAmount,
+				lessThanRequested: receivedAmount < requestedAmount,
 				amountRaw: receivedAmountWithTinyRaws,
 				amountHiddenRaw: receivedAmountWithTinyRaws % BigInt(this.nano),
 				transactionHash: transaction.hash,

@@ -608,7 +608,7 @@ export class WalletService {
 		// if (this.appSettings.settings.minimumReceive) {
 		//   return this.wallet.hasReceivable
 		// } else {
-		//   return this.wallet.receivableRaw.gt(0)
+		//   return this.wallet.receivableRaw > 0
 		// }
 	}
 
