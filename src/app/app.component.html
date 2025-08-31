@@ -216,7 +216,7 @@
 									</div>
 								</div>
 							</div>
-							<ng-container *ngIf="(wallet.selectedAccount !== null) ? wallet.selectedAccount.receivable : walletService.hasReceivableTransactions()">
+							<ng-container *ngIf="(wallet.selectedAccount !== null) ? wallet.selectedAccount.receivable > 0 : walletService.hasReceivableTransactions()">
 								<ng-container *ngIf="walletService.processingReceivable else notProcessingReceivable">
 									<div
 										class="nav-action-receive"
