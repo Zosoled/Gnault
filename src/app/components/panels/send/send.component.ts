@@ -7,7 +7,7 @@ import { TranslocoService } from '@jsverse/transloco'
 import { Tools } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 import { BehaviorSubject } from 'rxjs'
-import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/helpers'
+import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/elements'
 import {
 	AmountSplitPipe,
 	CurrencySymbolPipe,

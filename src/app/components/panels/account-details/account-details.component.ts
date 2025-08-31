@@ -11,7 +11,7 @@ import {
 	NanoAccountIdComponent,
 	NanoIdenticonComponent,
 	NanoTransactionMobileComponent
-} from 'app/components/helpers'
+} from 'app/components/elements'
 import {
 	AmountSplitPipe,
 	CurrencySymbolPipe,

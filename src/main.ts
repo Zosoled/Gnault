@@ -7,7 +7,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 import { AppComponent } from 'app/app.component'
 import { routes } from 'app/routes'
 import { TranslocoHttpLoader } from 'app/transloco-loader'
-import { NanoAccountIdComponent } from 'app/components/helpers'
+import { NanoAccountIdComponent } from 'app/components/elements'
 import { environment } from 'environments/environment'
 
 // Providers

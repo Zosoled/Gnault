@@ -6,7 +6,7 @@ import { TranslocoDirective, TranslocoPipe, TranslocoService } from '@jsverse/tr
 import { Tools } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 import * as QRCode from 'qrcode'
-import { NanoAccountIdComponent } from 'app/components/helpers'
+import { NanoAccountIdComponent } from 'app/components/elements'
 import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AddressBookService,

@@ -6,7 +6,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import { ClipboardModule } from 'ngx-clipboard'
 import { Subject, timer } from 'rxjs'
 import { debounce } from 'rxjs/operators'
-import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/helpers'
+import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/elements'
 import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AppSettingsService,

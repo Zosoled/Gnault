@@ -3,7 +3,7 @@ import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
 import { ClipboardModule } from 'ngx-clipboard'
-import { NanoAccountIdComponent } from 'app/components/helpers'
+import { NanoAccountIdComponent } from 'app/components/elements'
 import {
 	MusigService,
 	NotificationService,

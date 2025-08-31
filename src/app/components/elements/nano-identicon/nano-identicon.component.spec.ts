@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-import { NanoAccountIdComponent } from 'app/components/helpers'
+import { NanoIdenticonComponent } from 'app/components/elements'
 
-describe('NanoAccountIdComponent', () => {
-	let component: NanoAccountIdComponent
-	let fixture: ComponentFixture<NanoAccountIdComponent>
+describe('NanoIdenticonComponent', () => {
+	let component: NanoIdenticonComponent
+	let fixture: ComponentFixture<NanoIdenticonComponent>
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			declarations: [NanoAccountIdComponent]
+			declarations: [NanoIdenticonComponent]
 		})
 			.compileComponents()
 	}))
 
 	beforeEach(() => {
-		fixture = TestBed.createComponent(NanoAccountIdComponent)
+		fixture = TestBed.createComponent(NanoIdenticonComponent)
 		component = fixture.componentInstance
 		fixture.detectChanges()
 	})

@@ -3,7 +3,7 @@ import { Component, OnInit, inject } from '@angular/core'
 import { TranslocoPipe } from '@jsverse/transloco'
 import { Wallet } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
-import { NanoAccountIdComponent } from 'app/components/helpers'
+import { NanoAccountIdComponent } from 'app/components/elements'
 import { NotificationService } from 'app/services'
 
 @Component({
