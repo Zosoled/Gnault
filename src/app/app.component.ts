@@ -16,7 +16,8 @@ import {
 	ChangeRepWidgetComponent,
 	InstallWidgetComponent,
 	NotificationsComponent,
-	WalletWidgetComponent
+	WalletWidgetComponent,
+	UnlockWalletDialogComponent
 } from 'app/components'
 import {
 	AmountSplitPipe,
@@ -56,7 +57,8 @@ import { environment } from 'environments/environment'
 		RouterLink,
 		RouterOutlet,
 		TranslocoPipe,
-		WalletWidgetComponent
+		WalletWidgetComponent,
+		UnlockWalletDialogComponent
 	],
 	providers: [
 		SwUpdate

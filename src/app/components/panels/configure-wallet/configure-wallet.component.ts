@@ -129,7 +129,7 @@ export class ConfigureWalletComponent implements OnInit {
 		await this.walletService.createWalletFromSeed(this.newPassword, this.importSeed)
 		await this.walletService.createWalletFromSeed(this.newPassword, this.importSeed)
 		this.importSeed = ''
-		this.storePassword()
+		this.newPassword = ''
 
 		this.notifications.sendSuccess(`Successfully imported wallet!`, { length: 10000 })
 
@@ -139,7 +139,7 @@ export class ConfigureWalletComponent implements OnInit {
 
 	async importSingleKeyWallet () {
 		this.walletService.createWalletFromSingleKey(this.keyString, this.isExpanded)
-		this.storePassword()
+		this.newPassword = ''
 		this.route.navigate(['accounts']) // load accounts and watch them update in real-time
 		this.keyString = ''
 
@@ -301,6 +301,7 @@ export class ConfigureWalletComponent implements OnInit {
 	async createNewWallet (password: string) {
 		const newWallet = await Wallet.create('BIP-44', password)
 		await newWallet.unlock(password)
+		password = ''
 		this.newWalletSeed = newWallet.seed
 		this.newWalletMnemonic = newWallet.mnemonic
 		// Split the seed up so we can show 4 per line
@@ -322,7 +323,7 @@ export class ConfigureWalletComponent implements OnInit {
 			return this.notifications.sendWarning(`Please confirm you have saved a wallet backup!`)
 		}
 		this.walletService.createNewWallet(this.newPassword)
-		this.storePassword()
+		this.newPassword = ''
 		this.newWalletSeed = ''
 		this.newWalletMnemonicLines = []
 		this.saveNewWallet()
@@ -348,10 +349,6 @@ export class ConfigureWalletComponent implements OnInit {
 			|| this.selectedImportOption === 'bip39-mnemonic') {
 			this.importSingleKeyWallet()
 		}
-	}
-
-	storePassword () {
-		this.newPassword = ''
 	}
 
 	saveNewWallet () {

@@ -1,0 +1,19 @@
+.uk-button {
+	margin-left: 10px;
+}
+
+.uk-text-top {
+	margin-right: 5px;
+}
+
+.password-input {
+	transition: border-color 100ms ease-in-out, background 100ms ease-in-out;
+}
+
+.password-hint {
+	font-size: 70%;
+	font-weight: 400;
+	color: #f0506e !important;
+	margin-top: .25rem;
+	display: block;
+}

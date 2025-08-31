@@ -27,34 +27,18 @@ export class WalletWidgetComponent implements OnInit {
 	private notificationService = inject(NotificationService)
 	private powService = inject(PowService)
 	private translocoService = inject(TranslocoService)
-	walletService = inject(WalletService)
+
 	ledgerService = inject(LedgerService)
 	settings = inject(AppSettingsService)
+	walletService = inject(WalletService)
 
-	wallet = this.walletService.wallet
 	ledgerStatus = {
 		status: 'not-connected',
 		statusText: '',
 	}
 	powAlert = false
 
-	unlockPassword = ''
-	validatePassword = false
-
-	modal: any = null
-	mayAttemptUnlock = true
-	timeoutIdAllowingUnlock: any = null
-
-	@ViewChild('passwordInput') passwordInput: ElementRef
-
 	ngOnInit () {
-		const UIkit = (window as any).UIkit
-		const modal = UIkit.modal(document.getElementById('unlock-wallet-modal'))
-		UIkit.util.on('#unlock-wallet-modal', 'hidden', () => {
-			this.onModalHidden()
-		})
-		this.modal = modal
-
 		this.ledgerService.ledgerStatus$.subscribe((ledgerStatus) => {
 			this.ledgerStatus = ledgerStatus
 		})
@@ -67,22 +51,6 @@ export class WalletWidgetComponent implements OnInit {
 				this.powAlert = false
 			}
 		})
-
-		this.walletService.wallet.unlockModalRequested$.subscribe(async wasRequested => {
-			if (wasRequested === true) {
-				this.showModal()
-			}
-		})
-	}
-
-	showModal () {
-		this.unlockPassword = ''
-		this.modal.show()
-	}
-
-	onModalHidden () {
-		this.unlockPassword = ''
-		this.walletService.wallet.unlockModalRequested$.next(false)
 	}
 
 	async lockWallet () {
@@ -111,42 +79,10 @@ export class WalletWidgetComponent implements OnInit {
 		}
 	}
 
-	allowUnlock (params: any) {
-		this.mayAttemptUnlock = true
-		this.timeoutIdAllowingUnlock = null
-		this.unlockPassword = ''
-
-		if (params.focusInputElement === true) {
-			setTimeout(() => { this.passwordInput.nativeElement.focus() }, 10)
-		}
-	}
-
 	async unlockWallet () {
-		if (this.mayAttemptUnlock === false) {
+		const isUnlocked = await this.walletService.requestWalletUnlock()
+		if (isUnlocked === false) {
 			return
-		}
-		this.mayAttemptUnlock = false
-		if (this.timeoutIdAllowingUnlock !== null) {
-			clearTimeout(this.timeoutIdAllowingUnlock)
-		}
-		this.timeoutIdAllowingUnlock = setTimeout(
-			() => {
-				this.allowUnlock({ focusInputElement: true })
-			},
-			500
-		)
-		const unlocked = await this.walletService.unlockWallet(this.unlockPassword)
-
-		if (unlocked) {
-			this.notificationService.sendSuccess(this.translocoService.translate('accounts.wallet-unlocked'))
-			this.modal.hide()
-			if (this.timeoutIdAllowingUnlock !== null) {
-				clearTimeout(this.timeoutIdAllowingUnlock)
-				this.timeoutIdAllowingUnlock = null
-			}
-			this.allowUnlock({ focusInputElement: false })
-		} else {
-			this.notificationService.sendError(this.translocoService.translate('accounts.wrong-password'))
 		}
 	}
 

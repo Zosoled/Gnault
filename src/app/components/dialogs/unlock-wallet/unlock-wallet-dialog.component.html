@@ -1,0 +1,61 @@
+<div
+	#dialog
+	class="modal-position-bottom"
+	id="unlock-wallet-dialog-component"
+	uk-modal
+>
+	<div class="uk-modal-dialog">
+		<button
+			class="uk-modal-close-default"
+			type="button"
+			uk-close
+		></button>
+		<div class="uk-modal-header">
+			<h2 class="uk-modal-title">{{ 'general.unlock' | transloco}}</h2>
+		</div>
+		<form>
+			<div class="uk-modal-body">
+				<input
+					autocomplete="username"
+					hidden="true"
+					type="text"
+				>
+				<input
+					#input
+					type="password"
+					name="password"
+					[(ngModel)]="password"
+					autocomplete="current-password"
+					minlength="6"
+					autofocus
+					[class]="{ 'form-control': true, 'uk-input': true, 'password-input': true, 'uk-form-danger': isIncorrect }"
+					[placeholder]="isIncorrect ? 'Incorrect password' : 'Enter wallet password'"
+					(keyup.enter)="unlock()"
+					(input)="isIncorrect=false;isFocused=true;"
+					(focusout)="isFocused=false;"
+				><!-- noformat -->
+				 @if (!isFocused && password.length > 0 && password.length < 6) {
+					<span class="password-hint">
+						{{ 'configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long' | transloco: { minLength: 6 } }}
+					</span>
+				}<!-- noformat -->
+			</div>
+			<div class="uk-modal-footer uk-text-right nlt-button-group">
+				<button
+					class="uk-button uk-button-default uk-modal-close"
+					type="button"
+				>
+					{{ 'general.cancel' | transloco }}
+				</button>
+				<button
+					class="uk-button uk-button-primary"
+					type="button"
+					(click)="unlock()"
+					[disabled]="password.length < 6"
+				>
+					{{ 'general.unlock' | transloco }}
+				</button>
+			</div>
+		</form>
+	</div>
+</div>

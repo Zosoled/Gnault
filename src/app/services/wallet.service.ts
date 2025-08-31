@@ -501,7 +501,9 @@ export class WalletService {
 	async createNewWallet (password: string) {
 		this.resetWallet()
 		this.wallet.wallet = await Wallet.create('BLAKE2b', password)
+		await this.wallet.wallet.unlock(password)
 		this.addWalletAccount()
+		this.wallet.wallet.lock()
 		return this.wallet.wallet.seed
 	}
 
