@@ -224,7 +224,8 @@ function sendStatusToWindow (progressObj) {
 	log.info(log_message)
 	// sending message to ipcRenderer can be done as well but not sure where and how to display it
 	// using the title bar instead
-	// mainWindow.webContents.send('downloading', Math.round(progressObj.percent))	mainWindow.setTitle(`Gnault - ${autoUpdater.currentVersion} - Downloading Update: ${Math.round(progressObj.percent)} %`)
+	// mainWindow.webContents.send('downloading', Math.round(progressObj.percent))
+	mainWindow.setTitle(`Gnault - ${autoUpdater.currentVersion} - Downloading Update: ${Math.round(progressObj.percent)} %`)
 }
 
 // run only one app
