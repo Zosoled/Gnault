@@ -36,8 +36,8 @@
 		"ledger-device-must-be-ready": "O dispositivo Ledger deve estar pronto",
 		"missing-accounts": {
 			"1": "Contas ausentes?",
-			"3": "para importar um endereço usado anteriormente.",
-			"2-link": "Adicione uma nova conta"
+			"2-link": "Adicione uma nova conta",
+			"3": "para importar um endereço usado anteriormente."
 		},
 		"simple-mode": "Modo Simples",
 		"successfully-created-new-account": "Nova conta {{ account }} criada com sucesso",
@@ -45,15 +45,15 @@
 		"the-account-at-this-index-is-already-loaded": "A conta neste índice já está carregada",
 		"unable-to-add-new-account": "Não foi possível adicionar nova conta: {{ error }}",
 		"unable-to-delete-account": "Não foi possível excluir a conta: {{ error }}",
-		"wallet-locked": "Carteira bloqueada",
 		"wallet-is-not-configured": "A carteira não está configurada",
+		"wallet-locked": "Carteira bloqueada",
 		"wallet-unlocked": "Carteira desbloqueada",
 		"wrong-password": "Senha incorreta. Por favor, tente novamente.",
 		"you-can-only-track-up-to-x-accounts-at-a-time": "Você só pode rastrear até {{ accounts }} contas por vez.",
 		"you-dont-have-any-accounts-yet": {
 			"1": "Você ainda não tem nenhuma conta,",
-			"3": ".",
-			"2-link": "clique aqui para criar uma"
+			"2-link": "clique aqui para criar uma",
+			"3": "."
 		}
 	},
 	"address-book": {
@@ -74,6 +74,7 @@
 		"export-address-book": "Exportar Catálogo de Endereços",
 		"export-all-address-book-entries-to-a-file-or-qr-code-url": "Exportar todas as entradas do catálogo de endereços para um arquivo ou Código QR/URL.",
 		"export-as-file": "Exportar Como Arquivo",
+		"if-you-need-a-qr-use-fewer-entries-or-shorter-names": "Se você precisa de um QR, use menos entradas ou nomes mais curtos.",
 		"import-address-book": "Importar Catálogo de Endereços",
 		"import-address-book-entries-from-a-file": "Importar entradas do catálogo de endereços de um arquivo.",
 		"import-export": "Importar / Exportar",
@@ -100,10 +101,9 @@
 		},
 		"you-do-not-have-any-address-book-entries-saved-yet": {
 			"1": "Você ainda não tem nenhuma entrada salva no catálogo de endereços,",
-			"3": ".",
-			"2-link": "clique aqui para criar uma"
-		},
-		"if-you-need-a-qr-use-fewer-entries-or-shorter-names": "Se você precisa de um QR, use menos entradas ou nomes mais curtos."
+			"2-link": "clique aqui para criar uma",
+			"3": "."
+		}
 	},
 	"change-rep-widget": {
 		"acceptable-representative": "Representante Aceitável",
@@ -197,11 +197,6 @@
 		"node-stats": "Estatísticas do Nó",
 		"note-since-this-server-only-notifies-about-new-transactions": "Nota: Como este servidor só notifica sobre novas transações, a maioria das funções da carteira funciona bem sem ele.",
 		"optional-increased-work-for-transaction-priority-during": "Trabalho aumentado opcional para prioridade de transação durante a saturação da rede. Substitui as dificuldades padrão de ENVIO 1x e RECEBIMENTO 1/64x.",
-		"receivable-options": {
-			"automatic-largest-amount-first": "Automático - Maior Valor Primeiro",
-			"automatic-oldest-transaction-first": "Automático - Transação Mais Antiga Primeiro",
-			"manual": "Manual"
-		},
 		"pow-multiplier": "Multiplicador de PoW",
 		"pow-options": {
 			"best-option-available": "Melhor Opção Disponível",
@@ -212,6 +207,11 @@
 		},
 		"pow-source": "Fonte de PoW",
 		"random-server": "Servidor Aleatório",
+		"receivable-options": {
+			"automatic-largest-amount-first": "Automático - Maior Valor Primeiro",
+			"automatic-oldest-transaction-first": "Automático - Transação Mais Antiga Primeiro",
+			"manual": "Manual"
+		},
 		"receive-method": "Método de Recebimento",
 		"save-settings-to-update": "Salvar configurações para atualizar",
 		"server-configuration": "Configuração do Servidor",
@@ -228,18 +228,18 @@
 		"this-has-to-be-a-valid-authorization-header": "Isso tem que ser um cabeçalho de Autorização válido.",
 		"this-has-to-be-a-valid-rpc": {
 			"1": "Isso tem que ser um",
-			"3": "válido ou uma API compatível com ele.",
-			"2-link-rpc": "endpoint RPC nano"
+			"2-link-rpc": "endpoint RPC nano",
+			"3": "válido ou uma API compatível com ele."
 		},
 		"this-has-to-be-a-valid-websocket": {
 			"1": "Isso tem que ser um",
-			"3": "válido ou uma API WebSocket compatível com ele.",
-			"2-link-websocket": "WebSocket do Nó Nano"
+			"2-link-websocket": "WebSocket do Nó Nano",
+			"3": "válido ou uma API WebSocket compatível com ele."
 		},
 		"this-has-to-be-a-valid-work": {
 			"1": "Isso tem que ser um",
-			"3": "válido ou uma API compatível com ele. Se seu servidor em localhost não funcionar, tente o aplicativo desktop.",
-			"2-link-work": "Servidor de Trabalho Nano"
+			"2-link-work": "Servidor de Trabalho Nano",
+			"3": "válido ou uma API compatível com ele. Se seu servidor em localhost não funcionar, tente o aplicativo desktop."
 		},
 		"this-representative-will-be-used-for-any-new-account": "Este representante será usado para qualquer nova conta",
 		"this-server-is-used-for-rpc-communication-with-the-nano-node": "Este servidor é usado para comunicação RPC com o nó nano",
@@ -269,8 +269,8 @@
 			"recovery-phrases-alert": {
 				"1": {
 					"1": "Certifique-se de anotar sua semente e/ou mnemônico ou salvá-los em um local seguro, e ",
-					"3": "!",
-					"2-strong": "nunca compartilhe com ninguém"
+					"2-strong": "nunca compartilhe com ninguém",
+					"3": "!"
 				},
 				"2": "É a chave mestra para todas as suas contas e a única maneira de recuperar seus fundos em uma emergência."
 			},
@@ -283,7 +283,7 @@
 		"set-wallet-password": {
 			"choose-a-wallet-password-that-will-be-used-to-unlock-this-application": "Escolha uma senha de carteira que será usada para desbloquear este aplicativo.",
 			"errors": {
-				"password-must-be-at-least-x-characters-long": "A senha deve ter pelo menos {{ minCharacters }} caracteres",
+				"password-must-be-at-least-x-characters-long": "A senha deve ser pelo menos {{ minLength }} caracteres.",
 				"passwords-do-not-match": "As senhas não coincidem!"
 			},
 			"for-the-safety-of-your-funds-use-a-secure-password": "Para a segurança de seus fundos, use uma senha segura.",
@@ -384,30 +384,30 @@
 			"1": "O Gnault é um aplicativo web que pode ser usado na maioria dos dispositivos desktop e portáteis.",
 			"2": {
 				"1": "Você também pode usar o aplicativo desktop para Windows, Linux ou Mac. Está disponível para download",
-				"3": ".",
-				"2-link-github-releases": "na página de lançamentos do GitHub"
+				"2-link-github-releases": "na página de lançamentos do GitHub",
+				"3": "."
 			},
 			"3": {
 				"1": "Todo o código é de código aberto e",
-				"3": ".",
-				"2-link-github": "disponível no GitHub"
+				"2-link-github": "disponível no GitHub",
+				"3": "."
 			},
 			"title": "Qualquer Dispositivo, Em Qualquer Lugar"
 		},
 		"any-node-always-available": {
 			"1": {
 				"1": "Mesmo se o domínio oficial",
-				"3": "se tornasse inacessível, você ainda poderia usar o",
-				"5": "ou",
-				"7": ".",
 				"2-link-gnault": "gnault.cc",
+				"3": "se tornasse inacessível, você ainda poderia usar o",
 				"4-link-github-releases": "aplicativo desktop",
-				"6-link-github-web-app": "hospedar o aplicativo web você mesmo"
+				"5": "ou",
+				"6-link-github-web-app": "hospedar o aplicativo web você mesmo",
+				"7": "."
 			},
 			"2": {
 				"1": "No Gnault não há uma única fonte de verdade. Todas as informações são fornecidas pelo servidor que está definido nas configurações do aplicativo. Isso também significa que não há um único ponto de falha – você pode escolher qualquer",
-				"3": "público ou auto-hospedado como servidor.",
-				"2-link-nano-node": "nó nano"
+				"2-link-nano-node": "nó nano",
+				"3": "público ou auto-hospedado como servidor."
 			},
 			"title": "Qualquer Nó, Sempre Disponível"
 		},
@@ -416,8 +416,8 @@
 		"secure-the-nano-network": {
 			"1": {
 				"1": "O Nano usa",
-				"3": ", que permite aos usuários controlar quanto poder de voto os representantes têm na rede.",
-				"2-link-orv": "consenso ORV"
+				"2-link-orv": "consenso ORV",
+				"3": ", que permite aos usuários controlar quanto poder de voto os representantes têm na rede."
 			},
 			"2": "O Gnault verificará automaticamente o status de seus representantes e fornecerá recomendações para garantir a segurança e a resistência à censura para todos os participantes da rede.",
 			"title": "Proteja a Rede Nano"

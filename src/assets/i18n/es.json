@@ -36,8 +36,8 @@
 		"ledger-device-must-be-ready": "El dispositivo Ledger debe estar listo",
 		"missing-accounts": {
 			"1": "¿Faltan cuentas?",
-			"3": "para importar una dirección utilizada previamente.",
-			"2-link": "Agregar nueva cuenta"
+			"2-link": "Agregar nueva cuenta",
+			"3": "para importar una dirección utilizada previamente."
 		},
 		"simple-mode": "Modo simple",
 		"successfully-created-new-account": "Se creó exitosamente la nueva cuenta {{ account }}",
@@ -45,15 +45,15 @@
 		"the-account-at-this-index-is-already-loaded": "La cuenta en este índice ya está cargada",
 		"unable-to-add-new-account": "No se pudo agregar nueva cuenta: {{ error }}",
 		"unable-to-delete-account": "No se pudo eliminar la cuenta: {{ error }}",
-		"wallet-locked": "Billetera bloqueada",
 		"wallet-is-not-configured": "La billetera no está configurada",
+		"wallet-locked": "Billetera bloqueada",
 		"wallet-unlocked": "Billetera desbloqueada",
 		"wrong-password": "Contraseña incorrecta. Por favor, inténtelo de nuevo.",
 		"you-can-only-track-up-to-x-accounts-at-a-time": "Solo puede rastrear hasta {{ accounts }} cuentas a la vez.",
 		"you-dont-have-any-accounts-yet": {
 			"1": "Aún no tienes ninguna cuenta,",
-			"3": ".",
-			"2-link": "haz clic aquí para crear una"
+			"2-link": "haz clic aquí para crear una",
+			"3": "."
 		}
 	},
 	"address-book": {
@@ -74,6 +74,7 @@
 		"export-address-book": "Exportar libreta de direcciones",
 		"export-all-address-book-entries-to-a-file-or-qr-code-url": "Exportar todas las entradas de la libreta de direcciones a un archivo o código QR/URL.",
 		"export-as-file": "Exportar como archivo",
+		"if-you-need-a-qr-use-fewer-entries-or-shorter-names": "Si necesita un QR, use menos entradas o nombres más cortos.",
 		"import-address-book": "Importar libreta de direcciones",
 		"import-address-book-entries-from-a-file": "Importar entradas de la libreta de direcciones desde un archivo.",
 		"import-export": "Importar / Exportar",
@@ -100,10 +101,9 @@
 		},
 		"you-do-not-have-any-address-book-entries-saved-yet": {
 			"1": "Aún no tienes ninguna entrada guardada en la libreta de direcciones,",
-			"3": ".",
-			"2-link": "haz clic aquí para crear una"
-		},
-		"if-you-need-a-qr-use-fewer-entries-or-shorter-names": "Si necesita un QR, use menos entradas o nombres más cortos."
+			"2-link": "haz clic aquí para crear una",
+			"3": "."
+		}
 	},
 	"change-rep-widget": {
 		"acceptable-representative": "Representante aceptable",
@@ -197,11 +197,6 @@
 		"node-stats": "Estadísticas del nodo",
 		"note-since-this-server-only-notifies-about-new-transactions": "Nota: Dado que este servidor solo notifica sobre nuevas transacciones, la mayoría de las funciones de la billetera funcionan bien sin él.",
 		"optional-increased-work-for-transaction-priority-during": "Trabajo aumentado opcional para prioridad de transacción durante la saturación de la red. Anula las dificultades predeterminadas de ENVÍO 1x y RECEPCIÓN 1/64x.",
-		"receivable-options": {
-			"automatic-largest-amount-first": "Automático - Cantidad más grande primero",
-			"automatic-oldest-transaction-first": "Automático - Transacción más antigua primero",
-			"manual": "Manual"
-		},
 		"pow-multiplier": "Multiplicador de PoW",
 		"pow-options": {
 			"best-option-available": "Mejor opción disponible",
@@ -212,6 +207,11 @@
 		},
 		"pow-source": "Fuente de PoW",
 		"random-server": "Servidor aleatorio",
+		"receivable-options": {
+			"automatic-largest-amount-first": "Automático - Cantidad más grande primero",
+			"automatic-oldest-transaction-first": "Automático - Transacción más antigua primero",
+			"manual": "Manual"
+		},
 		"receive-method": "Método de recepción",
 		"save-settings-to-update": "Guardar configuración para actualizar",
 		"server-configuration": "Configuración del servidor",
@@ -228,18 +228,18 @@
 		"this-has-to-be-a-valid-authorization-header": "Esto debe ser un encabezado de Autorización válido.",
 		"this-has-to-be-a-valid-rpc": {
 			"1": "Esto tiene que ser un",
-			"3": "válido o una API compatible con él.",
-			"2-link-rpc": "punto final RPC de nano"
+			"2-link-rpc": "punto final RPC de nano",
+			"3": "válido o una API compatible con él."
 		},
 		"this-has-to-be-a-valid-websocket": {
 			"1": "Esto tiene que ser un",
-			"3": "válido o una API de WebSocket compatible con él.",
-			"2-link-websocket": "WebSocket de Nodo Nano"
+			"2-link-websocket": "WebSocket de Nodo Nano",
+			"3": "válido o una API de WebSocket compatible con él."
 		},
 		"this-has-to-be-a-valid-work": {
 			"1": "Esto tiene que ser un",
-			"3": "válido o una API compatible con él. Si tu servidor en localhost no funciona, intenta la aplicación de escritorio en su lugar.",
-			"2-link-work": "Servidor de Trabajo Nano"
+			"2-link-work": "Servidor de Trabajo Nano",
+			"3": "válido o una API compatible con él. Si tu servidor en localhost no funciona, intenta la aplicación de escritorio en su lugar."
 		},
 		"this-representative-will-be-used-for-any-new-account": "Este representante se utilizará para cualquier nueva cuenta",
 		"this-server-is-used-for-rpc-communication-with-the-nano-node": "Este servidor se utiliza para la comunicación RPC con el nodo nano",
@@ -269,8 +269,8 @@
 			"recovery-phrases-alert": {
 				"1": {
 					"1": "Asegúrate de anotar tu semilla y/o frase mnemotécnica o guardarla en un lugar seguro, y ",
-					"3": "!",
-					"2-strong": "nunca la compartas con nadie"
+					"2-strong": "nunca la compartas con nadie",
+					"3": "!"
 				},
 				"2": "Es la clave maestra de todas tus cuentas y la única forma de recuperar tus fondos en caso de emergencia."
 			},
@@ -283,7 +283,7 @@
 		"set-wallet-password": {
 			"choose-a-wallet-password-that-will-be-used-to-unlock-this-application": "Elige una contraseña para la billetera que se utilizará para desbloquear esta aplicación.",
 			"errors": {
-				"password-must-be-at-least-x-characters-long": "La contraseña debe tener al menos {{ minCharacters }} caracteres",
+				"password-must-be-at-least-x-characters-long": "La contraseña debe ser al menos {{ minLength }} caracteres.",
 				"passwords-do-not-match": "¡Las contraseñas no coinciden!"
 			},
 			"for-the-safety-of-your-funds-use-a-secure-password": "Por la seguridad de tus fondos, utiliza una contraseña segura.",
@@ -384,30 +384,30 @@
 			"1": "Gnault es una aplicación web que se puede usar en la mayoría de los dispositivos de escritorio y portátiles.",
 			"2": {
 				"1": "También puedes usar la aplicación de escritorio para Windows, Linux o Mac. Está disponible para descargar",
-				"3": ".",
-				"2-link-github-releases": "desde la página de lanzamientos de GitHub"
+				"2-link-github-releases": "desde la página de lanzamientos de GitHub",
+				"3": "."
 			},
 			"3": {
 				"1": "Todo el código es de código abierto y",
-				"3": ".",
-				"2-link-github": "está disponible en GitHub"
+				"2-link-github": "está disponible en GitHub",
+				"3": "."
 			},
 			"title": "Cualquier dispositivo, en cualquier lugar"
 		},
 		"any-node-always-available": {
 			"1": {
 				"1": "Incluso si el dominio oficial",
-				"3": "se volviera inaccesible, aún podrías usar la",
-				"5": "o",
-				"7": ".",
 				"2-link-gnault": "gnault.cc",
+				"3": "se volviera inaccesible, aún podrías usar la",
 				"4-link-github-releases": "aplicación de escritorio",
-				"6-link-github-web-app": "alojar la aplicación web tú mismo"
+				"5": "o",
+				"6-link-github-web-app": "alojar la aplicación web tú mismo",
+				"7": "."
 			},
 			"2": {
 				"1": "En Gnault no hay una única fuente de verdad. Toda la información es proporcionada por el servidor que está configurado en la configuración de la aplicación. Eso también significa que no hay un único punto de falla – puedes elegir cualquier",
-				"3": "público o autohospedado como servidor.",
-				"2-link-nano-node": "nodo nano"
+				"2-link-nano-node": "nodo nano",
+				"3": "público o autohospedado como servidor."
 			},
 			"title": "Cualquier nodo, siempre disponible"
 		},
@@ -416,8 +416,8 @@
 		"secure-the-nano-network": {
 			"1": {
 				"1": "Nano utiliza",
-				"3": ", que permite a los usuarios controlar cuánto poder de voto tienen los representantes en la red.",
-				"2-link-orv": "consenso ORV"
+				"2-link-orv": "consenso ORV",
+				"3": ", que permite a los usuarios controlar cuánto poder de voto tienen los representantes en la red."
 			},
 			"2": "Gnault verificará automáticamente el estado de tus representantes y proporcionará recomendaciones para garantizar la seguridad y la resistencia a la censura para todos los participantes de la red.",
 			"title": "Asegura la red Nano"

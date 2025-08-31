@@ -45,8 +45,8 @@
 		"the-account-at-this-index-is-already-loaded": "The account at this index is already loaded",
 		"unable-to-add-new-account": "Unable to add new account: {{ error }}",
 		"unable-to-delete-account": "Unable to delete account: {{ error }}",
-		"wallet-locked": "Wallet locked",
 		"wallet-is-not-configured": "Wallet is not configured",
+		"wallet-locked": "Wallet locked",
 		"wallet-unlocked": "Wallet unlocked",
 		"wrong-password": "Wrong password. Please try again.",
 		"you-can-only-track-up-to-x-accounts-at-a-time": "You can only track up to {{ accounts }} accounts at a time.",
@@ -197,11 +197,6 @@
 		"node-stats": "Node Stats",
 		"note-since-this-server-only-notifies-about-new-transactions": "Note: Since this server only notifies about new transactions, most of the wallet functions fine without it.",
 		"optional-increased-work-for-transaction-priority-during": "Deprecated since v22.0",
-		"receivable-options": {
-			"automatic-largest-amount-first": "Automatic - Largest Amount First",
-			"automatic-oldest-transaction-first": "Automatic - Oldest Transaction First",
-			"manual": "Manual"
-		},
 		"pow-multiplier": "PoW Multiplier",
 		"pow-options": {
 			"external-custom-server": "External - Use custom work server",
@@ -210,6 +205,11 @@
 		},
 		"pow-source": "PoW Source",
 		"random-server": "Random Server",
+		"receivable-options": {
+			"automatic-largest-amount-first": "Automatic - Largest Amount First",
+			"automatic-oldest-transaction-first": "Automatic - Oldest Transaction First",
+			"manual": "Manual"
+		},
 		"receive-method": "Receive Method",
 		"save-settings-to-update": "Save settings to update",
 		"server-configuration": "Server Configuration",
@@ -281,7 +281,7 @@
 		"set-wallet-password": {
 			"choose-a-wallet-password-that-will-be-used-to-unlock-this-application": "Choose a wallet password that will be used to unlock this application.",
 			"errors": {
-				"password-must-be-at-least-x-characters-long": "Password must be at least {{ minCharacters }} characters long",
+				"password-must-be-at-least-x-characters-long": "Password must be at least {{ minLength }} characters.",
 				"passwords-do-not-match": "Passwords do not match!"
 			},
 			"for-the-safety-of-your-funds-use-a-secure-password": "For the safety of your funds, use a secure password.",
