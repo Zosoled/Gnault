@@ -27,24 +27,6 @@
 						"styles": [
 							"src/styles.less"
 						],
-						"scripts": [],
-						"allowedCommonJsDependencies": [
-							"@zxing/library",
-							"bip39",
-							"buffer",
-							"create-hash",
-							"events",
-							"hermes-channel",
-							"hw-app-nano",
-							"hw-transport-web-ble",
-							"hw-transport-webusb",
-							"punycode",
-							"querystring",
-							"qrcode",
-							"randombytes",
-							"url",
-							"zxcvbn"
-						],
 						"extractLicenses": false,
 						"sourceMap": true,
 						"optimization": false,
