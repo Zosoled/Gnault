@@ -317,6 +317,7 @@ export class WalletService {
 	}
 
 	async loadStoredWallet () {
+		debugger
 		this.resetWallet()
 
 		const walletData = localStorage.getItem(storeKey)
@@ -500,10 +501,12 @@ export class WalletService {
 	async createNewWallet (password: string) {
 		this.resetWallet()
 		this.wallet.wallet = await Wallet.create('BLAKE2b', password)
-		await this.wallet.wallet.unlock(password)
+		const unlockRequest = this.wallet.wallet.unlock(password)
+		password = ''
+		await unlockRequest
+		const { mnemonic, seed } = this.wallet.wallet
 		this.addWalletAccount()
-		this.wallet.wallet.lock()
-		return this.wallet.wallet.seed
+		return { mnemonic, seed }
 	}
 
 	async createLedgerWallet () {
@@ -952,7 +955,7 @@ export class WalletService {
 
 	saveWalletExport () {
 		const exportData = this.generateWalletExport()
-
+		debugger
 		switch (this.appSettings.settings.walletStore) {
 			case 'none':
 				this.removeWalletData()
@@ -975,10 +978,13 @@ export class WalletService {
 			selectedAccountId: this.wallet.selectedAccount?.id ?? null,
 			locked: true
 		}
-
+		debugger
 		const backup = await Wallet.backup()
+		debugger
 		const walletData = backup.find(v => v.id === this.wallet.wallet.id)
+		debugger
 		data.seed = walletData
+		debugger
 
 		return data
 	}

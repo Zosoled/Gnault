@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common'
 import {
+	AfterViewInit,
 	Component,
 	ElementRef,
 	HostListener,
-	OnInit,
 	Renderer2,
 	ViewChild,
 	inject
@@ -64,7 +64,7 @@ import { environment } from 'environments/environment'
 	]
 })
 
-export class AppComponent implements OnInit {
+export class AppComponent implements AfterViewInit {
 	@HostListener('window:resize', ['$event']) onResize (e) {
 		this.onWindowResize(e.target)
 	}
@@ -102,7 +102,7 @@ export class AppComponent implements OnInit {
 	node = this.svcNode.node
 	wallet = this.svcWallet.wallet
 
-	fiatTimeout = 5 * 60 * 1000; // Update fiat prices every 5 minutes
+	fiatTimeout = 5 * 60 * 1000 // Update fiat prices every 5 minutes
 	inactiveSeconds = 0
 	innerWidth = 0
 	innerHeight = 0
@@ -123,7 +123,7 @@ export class AppComponent implements OnInit {
 		})
 	}
 
-	async ngOnInit () {
+	async ngAfterViewInit () {
 		this.onWindowResize(window)
 		this.svcAppSettings.loadAppSettings()
 		this.svcTransloco.setActiveLang(this.svcAppSettings.settings.language)

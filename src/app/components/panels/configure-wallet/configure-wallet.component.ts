@@ -278,11 +278,11 @@ export class ConfigureWalletComponent {
 	}
 
 	async createNewWallet (password: string) {
-		const newWallet = await Wallet.create('BIP-44', password)
-		await newWallet.unlock(password)
+		const req = this.walletService.createNewWallet(password)
 		password = ''
-		this.newWalletSeed = newWallet.seed
-		this.newWalletMnemonic = newWallet.mnemonic
+		const { mnemonic, seed } = await req
+		this.newWalletMnemonic = mnemonic
+		this.newWalletSeed = seed
 		// Split the seed up so we can show 4 per line
 		const words = this.newWalletMnemonic.split(' ')
 		const lines = [
@@ -301,9 +301,9 @@ export class ConfigureWalletComponent {
 		if (!this.hasConfirmedBackup) {
 			return this.notifications.sendWarning(`Please confirm you have saved a wallet backup!`)
 		}
-		this.walletService.createNewWallet(this.newPassword)
 		this.newPassword = ''
 		this.newWalletSeed = ''
+		this.newWalletMnemonic = ''
 		this.newWalletMnemonicLines = []
 		this.saveNewWallet()
 		this.activePanel = panels.final
