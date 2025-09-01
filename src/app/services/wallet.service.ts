@@ -85,6 +85,8 @@ export interface WalletApiAccount extends BaseApiAccount {
 	error?: string
 }
 
+const storeKey: 'nanovault-wallet' = `nanovault-wallet`
+
 export class WalletService {
 	private util = inject(UtilService)
 	private api = inject(ApiService)
@@ -95,9 +97,6 @@ export class WalletService {
 	private websocket = inject(WebsocketService)
 	private nanoBlock = inject(NanoBlockService)
 	private notifications = inject(NotificationService)
-
-	nano = 1000000000000000000000000
-	storeKey = `nanovault-wallet`
 
 	wallet: FullWallet = {
 		type: 'seed',
@@ -296,7 +295,7 @@ export class WalletService {
 
 	async patchOldSavedData () {
 		// Look for saved accounts using an xrb_ prefix
-		const walletData = localStorage.getItem(this.storeKey)
+		const walletData = localStorage.getItem(storeKey)
 		if (!walletData) return
 
 		const walletJson = JSON.parse(walletData)
@@ -312,7 +311,7 @@ export class WalletService {
 			walletJson.accounts = newAccounts
 		}
 
-		localStorage.setItem(this.storeKey, JSON.stringify(walletJson))
+		localStorage.setItem(storeKey, JSON.stringify(walletJson))
 
 		return
 	}
@@ -320,7 +319,7 @@ export class WalletService {
 	async loadStoredWallet () {
 		this.resetWallet()
 
-		const walletData = localStorage.getItem(this.storeKey)
+		const walletData = localStorage.getItem(storeKey)
 		if (!walletData) return this.wallet
 
 		const walletJson = JSON.parse(walletData)
@@ -557,9 +556,7 @@ export class WalletService {
 		return await this.wallet.wallet.account(index)
 	}
 
-	/**
-	 * Reset wallet to a base state, without changing reference to the main object
-	 */
+	// Reset wallet to a base state, without changing reference to the main object
 	resetWallet () {
 		if (this.wallet.accounts.length) {
 			this.websocket.unsubscribeAccounts(this.wallet.accounts.map(a => a.id)) // Unsubscribe from old accounts
@@ -962,13 +959,13 @@ export class WalletService {
 				break
 			default:
 			case 'localStorage':
-				localStorage.setItem(this.storeKey, JSON.stringify(exportData))
+				localStorage.setItem(storeKey, JSON.stringify(exportData))
 				break
 		}
 	}
 
 	removeWalletData () {
-		localStorage.removeItem(this.storeKey)
+		localStorage.removeItem(storeKey)
 	}
 
 	async generateWalletExport () {
