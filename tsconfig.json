@@ -1,7 +1,6 @@
 {
 	"compileOnSave": false,
 	"compilerOptions": {
-		"downlevelIteration": true,
 		"skipLibCheck": true,
 		"importHelpers": true,
 		"outDir": "./dist/out-tsc",
@@ -9,7 +8,6 @@
 		"declaration": false,
 		"moduleResolution": "Bundler",
 		"experimentalDecorators": true,
-		"allowSyntheticDefaultImports": true,
 		"target": "ES2022",
 		"typeRoots": [
 			"node_modules/@types",
