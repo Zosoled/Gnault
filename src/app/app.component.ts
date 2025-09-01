@@ -126,19 +126,21 @@ export class AppComponent implements OnInit {
 	async ngOnInit () {
 		this.onWindowResize(window)
 		this.svcAppSettings.loadAppSettings()
+		this.svcTransloco.setActiveLang(this.svcAppSettings.settings.language)
 
 		this.updateAppTheme()
 
-		// New for v19: Patch saved xrb_ prefixes to nano_
-		await this.patchXrbToNanoPrefixData()
-
-		// set translation language
-		this.svcTransloco.setActiveLang(this.svcAppSettings.settings.language)
+		// RPC v19: Patch `xrb_` address prefixes to `nano_`
+		// If wallet version >= 2, data is already patched
+		if (this.svcAppSettings.settings.walletVersion < 2) {
+			await this.patchXrbToNanoPrefixData()
+		}
 
 		this.svcAddressBook.loadAddressBook()
 		this.svcWorkPool.loadWorkCache()
 
 		await this.svcWallet.loadStoredWallet()
+
 		// Subscribe to any transaction tracking
 		for (const entry of this.svcAddressBook.addressBook) {
 			if (entry.trackTransactions) {
@@ -269,19 +271,14 @@ export class AppComponent implements OnInit {
 		}
 	}
 
-	/*
-		This is important as it looks through saved data using hardcoded xrb_ prefixes
-		(Your wallet, address book, rep list, etc) and updates them to nano_ prefix for v19 RPC
-	 */
+	// Checked saved data (wallet, address book, representative list, etc.) for
+	// hardcoded `xrb_` address prefixes and updates them to `nano_` for v19 RPC.
 	async patchXrbToNanoPrefixData () {
-		// If wallet is version 2, data has already been patched.  Otherwise, patch all data
-		if (this.svcAppSettings.settings.walletVersion >= 2) return
-
-		await this.svcWallet.patchOldSavedData() // Change saved xrb_ addresses to nano_
+		await this.svcWallet.patchOldSavedData()
 		this.svcAddressBook.patchXrbPrefixData()
 		this.svcRepresentative.patchXrbPrefixData()
-
-		this.svcAppSettings.setAppSetting('walletVersion', 2) // Update wallet version so we do not patch in the future.
+		// Update wallet version so we do not patch in the future
+		this.svcAppSettings.setAppSetting('walletVersion', 2)
 	}
 
 	applySwUpdate () {
