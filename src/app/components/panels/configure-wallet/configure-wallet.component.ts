@@ -39,7 +39,7 @@ const INDEX_MAX = 4294967295
 	]
 })
 
-export class ConfigureWalletComponent implements OnInit {
+export class ConfigureWalletComponent {
 	private notifications = inject(NotificationService)
 	private qrModalService = inject(QrModalService)
 	private route = inject(Router)
@@ -59,10 +59,11 @@ export class ConfigureWalletComponent implements OnInit {
 	isExpanded = false
 	keyString = ''
 
-	exampleSeed = ''
-	examplePrivateKey = ''
-	exampleExpandedPrivateKey = ''
-	exampleMnemonicWords = []
+	exampleMnemonicWords = ["edge", "defense", "waste", "choose"]
+	exampleMnemonicSalt = 'some password'
+	exampleSeed = '0dc285...'
+	examplePrivateKey = '3be4fc...'
+	exampleExpandedPrivateKey = '3be4fc2ef3f3...'
 	showMoreImportOptions = false
 
 	newWalletSeed = ''
@@ -99,30 +100,6 @@ export class ConfigureWalletComponent implements OnInit {
 			this.selectedImportOption = 'privateKey'
 			this.isNewWallet = false
 		}
-	}
-
-	async ngOnInit () {
-		const exampleSeedBytes = globalThis.crypto.getRandomValues(new Uint8Array(32))
-		const exampleSeedFull = this.util.hex.fromUint8(exampleSeedBytes)
-
-		let exampleSeedTrimmed = ''
-		let trimIdx = 0
-		do {
-			exampleSeedTrimmed = exampleSeedFull.slice(trimIdx, trimIdx + 6)
-			trimIdx += 2
-		} while (trimIdx < 30 && exampleSeedTrimmed.match(/^([0-9]+|[A-F]+)$/g) !== null)
-
-		// must have both letters and numbers
-		this.exampleSeed = exampleSeedTrimmed + '...'
-
-		// may have only letters or only numbers with enough luck
-		this.examplePrivateKey = exampleSeedFull.slice(trimIdx + 6, trimIdx + 12) + '...'
-		this.exampleExpandedPrivateKey = exampleSeedFull.slice(trimIdx + 12, trimIdx + 18) + '...'
-
-		// array of mnemonic words
-		const exampleWallet = await Wallet.load('BIP-44', '', exampleSeedFull)
-		await exampleWallet.unlock('')
-		this.exampleMnemonicWords = exampleWallet.mnemonic.split(' ')
 	}
 
 	async importExistingWallet () {
