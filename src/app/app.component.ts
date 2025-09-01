@@ -29,7 +29,6 @@ import {
 	AppSettingsService,
 	DeeplinkService,
 	DesktopService,
-	LedgerService,
 	NodeService,
 	NotificationService,
 	PriceService,
@@ -88,7 +87,6 @@ export class AppComponent implements OnInit {
 	private workPool = inject(WorkPoolService)
 	private util = inject(UtilService)
 	private desktop = inject(DesktopService)
-	private ledger = inject(LedgerService)
 	private renderer = inject(Renderer2)
 	private deeplinkService = inject(DeeplinkService)
 	private translate = inject(TranslocoService)
