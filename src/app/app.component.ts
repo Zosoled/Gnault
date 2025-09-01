@@ -79,34 +79,28 @@ export class AppComponent implements OnInit {
 	@ViewChild('selectButton') selectButton: ElementRef
 	@ViewChild('accountsDropdown') accountsDropdown: ElementRef
 
-	private addressBook = inject(AddressBookService)
-	private websocket = inject(WebsocketService)
-	private notifications = inject(NotificationService)
-	private representative = inject(RepresentativeService)
-	private router = inject(Router)
-	private workPool = inject(WorkPoolService)
-	private util = inject(UtilService)
-	private desktop = inject(DesktopService)
 	private renderer = inject(Renderer2)
-	private deeplinkService = inject(DeeplinkService)
-	private translate = inject(TranslocoService)
-	walletService = inject(WalletService)
-	settings = inject(AppSettingsService)
-	nodeService = inject(NodeService)
-	updates = inject(SwUpdate)
-	price = inject(PriceService)
+	private router = inject(Router)
+	private updates = inject(SwUpdate)
 
-	wallet = this.walletService.wallet
-	node = this.nodeService.node
-	nanoPrice = this.price.price
-	isConfigured = this.walletService.isConfigured
+	private svcAddressBook = inject(AddressBookService)
+	private svcDeeplink = inject(DeeplinkService)
+	private svcDesktop = inject(DesktopService)
+	private svcNotification = inject(NotificationService)
+	private svcRepresentative = inject(RepresentativeService)
+	private svcTransloco = inject(TranslocoService)
+	private svcUtil = inject(UtilService)
+	private svcWebsocket = inject(WebsocketService)
+	private svcWorkPool = inject(WorkPoolService)
 
-	constructor () {
-		const router = this.router
-		router.events.subscribe(() => {
-			this.closeNav()
-		})
-	}
+	svcAppSettings = inject(AppSettingsService)
+	svcNode = inject(NodeService)
+	svcPrice = inject(PriceService)
+	svcWallet = inject(WalletService)
+
+	nanoPrice = this.svcPrice.price
+	node = this.svcNode.node
+	wallet = this.svcWallet.wallet
 
 	fiatTimeout = 5 * 60 * 1000; // Update fiat prices every 5 minutes
 	inactiveSeconds = 0
@@ -120,9 +114,18 @@ export class AppComponent implements OnInit {
 	searchData = ''
 	donationAccount = environment.donationAddress
 
+	get isConfigured () { return this.svcWallet.isConfigured() }
+
+	constructor () {
+		const router = this.router
+		router.events.subscribe(() => {
+			this.closeNav()
+		})
+	}
+
 	async ngOnInit () {
 		this.onWindowResize(window)
-		this.settings.loadAppSettings()
+		this.svcAppSettings.loadAppSettings()
 
 		this.updateAppTheme()
 
@@ -130,21 +133,21 @@ export class AppComponent implements OnInit {
 		await this.patchXrbToNanoPrefixData()
 
 		// set translation language
-		this.translate.setActiveLang(this.settings.settings.language)
+		this.svcTransloco.setActiveLang(this.svcAppSettings.settings.language)
 
-		this.addressBook.loadAddressBook()
-		this.workPool.loadWorkCache()
+		this.svcAddressBook.loadAddressBook()
+		this.svcWorkPool.loadWorkCache()
 
-		await this.walletService.loadStoredWallet()
+		await this.svcWallet.loadStoredWallet()
 		// Subscribe to any transaction tracking
-		for (const entry of this.addressBook.addressBook) {
+		for (const entry of this.svcAddressBook.addressBook) {
 			if (entry.trackTransactions) {
-				this.walletService.trackAddress(entry.account)
+				this.svcWallet.trackAddress(entry.account)
 			}
 		}
 
 		// Navigate to accounts page if there is wallet, but only if coming from home. On desktop app the path ends with index.html
-		if (this.walletService.isConfigured() && (window.location.pathname === '/' || window.location.pathname.endsWith('index.html'))) {
+		if (this.svcWallet.isConfigured() && (window.location.pathname === '/' || window.location.pathname.endsWith('index.html'))) {
 			if (this.wallet.selectedAccountId) {
 				this.router.navigate([`accounts/${this.wallet.selectedAccountId}`], { queryParams: { 'compact': 1 }, replaceUrl: true })
 			} else {
@@ -158,7 +161,7 @@ export class AppComponent implements OnInit {
 			this.wallet.selectedAccount = currentUpdatedAccount
 		}
 
-		await this.walletService.reloadBalances()
+		await this.svcWallet.reloadBalances()
 
 		// Workaround fix for github pages when Gnault is refreshed (or externally linked) and there is a subpath for example to the send screen.
 		// This data is saved from the 404.html page
@@ -185,39 +188,39 @@ export class AppComponent implements OnInit {
 			}
 		}
 
-		this.websocket.connect()
+		this.svcWebsocket.connect()
 
-		this.representative.loadRepresentativeList()
+		this.svcRepresentative.loadRepresentativeList()
 
 		// If the wallet is locked and there is a receivable balance, show a warning to unlock the wallet
 		// (if not receive priority is set to manual)
-		if (this.wallet.locked && this.walletService.hasReceivableTransactions() && this.settings.settings.receivableOption !== 'manual') {
-			this.notifications.sendWarning(`New incoming transaction(s) - Unlock the wallet to receive`, { length: 10000, identifier: 'receivable-locked' })
-		} else if (this.walletService.hasReceivableTransactions() && this.settings.settings.receivableOption === 'manual') {
-			this.notifications.sendWarning(`Incoming transaction(s) found - Set to be received manually`, { length: 10000, identifier: 'receivable-locked' })
+		if (this.wallet.locked && this.svcWallet.hasReceivableTransactions() && this.svcAppSettings.settings.receivableOption !== 'manual') {
+			this.svcNotification.sendWarning(`New incoming transaction(s) - Unlock the wallet to receive`, { length: 10000, identifier: 'receivable-locked' })
+		} else if (this.svcWallet.hasReceivableTransactions() && this.svcAppSettings.settings.receivableOption === 'manual') {
+			this.svcNotification.sendWarning(`Incoming transaction(s) found - Set to be received manually`, { length: 10000, identifier: 'receivable-locked' })
 		}
 
 		// When the page closes, determine if we should lock the wallet
 		window.addEventListener('beforeunload', (e) => {
 			if (this.wallet.locked) return // Already locked, nothing to worry about
-			this.walletService.lockWallet()
+			this.svcWallet.lockWallet()
 		})
 		window.addEventListener('unload', (e) => {
 			if (this.wallet.locked) return // Already locked, nothing to worry about
-			this.walletService.lockWallet()
+			this.svcWallet.lockWallet()
 		})
 
 		// handle deeplinks
-		this.desktop.on('deeplink', (e, deeplink) => {
-			if (!this.deeplinkService.navigate(deeplink)) this.notifications.sendWarning('This URI has an invalid address.', { length: 5000 })
+		this.svcDesktop.on('deeplink', (e, deeplink) => {
+			if (!this.svcDeeplink.navigate(deeplink)) this.svcNotification.sendWarning('This URI has an invalid address.', { length: 5000 })
 		})
-		this.desktop.send('deeplink-ready')
+		this.svcDesktop.send('deeplink-ready')
 
 		// Notify user if service worker update is available
 		this.updates.versionUpdates.subscribe((event) => {
 			if (event.type === 'VERSION_READY') {
 				console.log(`SW update available. Current: ${event.currentVersion.hash}. New: ${event.latestVersion.hash}`)
-				this.notifications.sendInfo(
+				this.svcNotification.sendInfo(
 					'An update was installed in the background and will be applied on next launch. <a href="#" (click)="applySwUpdate()">Apply immediately</a>',
 					{ length: 10000 }
 				)
@@ -235,21 +238,21 @@ export class AppComponent implements OnInit {
 		// Check how long the wallet has been inactive, and lock it if it's been too long
 		setInterval(() => {
 			this.inactiveSeconds += 1
-			if (!this.settings.settings.lockInactivityMinutes) return // Do not lock on inactivity
+			if (!this.svcAppSettings.settings.lockInactivityMinutes) return // Do not lock on inactivity
 			if (this.wallet.locked) return
 
 			// Determine if we have been inactive for longer than our lock setting
-			if (this.inactiveSeconds >= this.settings.settings.lockInactivityMinutes * 60) {
-				this.walletService.lockWallet()
-				this.notifications.sendSuccess(`Wallet locked after ${this.settings.settings.lockInactivityMinutes} minutes of inactivity`)
+			if (this.inactiveSeconds >= this.svcAppSettings.settings.lockInactivityMinutes * 60) {
+				this.svcWallet.lockWallet()
+				this.svcNotification.sendSuccess(`Wallet locked after ${this.svcAppSettings.settings.lockInactivityMinutes} minutes of inactivity`)
 			}
 		}, 1000)
 
 		try {
-			if (!this.settings.settings.serverAPI) return
+			if (!this.svcAppSettings.settings.serverAPI) return
 			await this.updateFiatPrices()
 		} catch (err) {
-			this.notifications.sendWarning(`There was an issue retrieving latest nano price.  Ensure your AdBlocker is disabled on this page then reload to see accurate FIAT values.`, { length: 0, identifier: `price-adblock` })
+			this.svcNotification.sendWarning(`There was an issue retrieving latest nano price.  Ensure your AdBlocker is disabled on this page then reload to see accurate FIAT values.`, { length: 0, identifier: `price-adblock` })
 		}
 	}
 
@@ -272,13 +275,13 @@ export class AppComponent implements OnInit {
 	 */
 	async patchXrbToNanoPrefixData () {
 		// If wallet is version 2, data has already been patched.  Otherwise, patch all data
-		if (this.settings.settings.walletVersion >= 2) return
+		if (this.svcAppSettings.settings.walletVersion >= 2) return
 
-		await this.walletService.patchOldSavedData() // Change saved xrb_ addresses to nano_
-		this.addressBook.patchXrbPrefixData()
-		this.representative.patchXrbPrefixData()
+		await this.svcWallet.patchOldSavedData() // Change saved xrb_ addresses to nano_
+		this.svcAddressBook.patchXrbPrefixData()
+		this.svcRepresentative.patchXrbPrefixData()
 
-		this.settings.setAppSetting('walletVersion', 2) // Update wallet version so we do not patch in the future.
+		this.svcAppSettings.setAppSetting('walletVersion', 2) // Update wallet version so we do not patch in the future.
 	}
 
 	applySwUpdate () {
@@ -312,12 +315,12 @@ export class AppComponent implements OnInit {
 		this.canToggleLightMode = false
 		setTimeout(() => { this.canToggleLightMode = true }, 300)
 
-		this.settings.setAppSetting('lightModeEnabled', !this.settings.settings.lightModeEnabled)
+		this.svcAppSettings.setAppSetting('lightModeEnabled', !this.svcAppSettings.settings.lightModeEnabled)
 		this.updateAppTheme()
 	}
 
 	updateAppTheme () {
-		if (this.settings.settings.lightModeEnabled) {
+		if (this.svcAppSettings.settings.lightModeEnabled) {
 			this.renderer.addClass(document.body, 'light-mode')
 			this.renderer.removeClass(document.body, 'dark-mode')
 		} else {
@@ -342,7 +345,7 @@ export class AppComponent implements OnInit {
 		this.wallet.selectedAccount = account
 		this.wallet.selectedAccount$.next(account)
 		this.toggleAccountsDropdown()
-		this.walletService.saveWalletExport()
+		this.svcWallet.saveWalletExport()
 	}
 
 	performSearch () {
@@ -351,7 +354,7 @@ export class AppComponent implements OnInit {
 
 		const isValidNanoAccount = (
 			(searchData.startsWith('xrb_') || searchData.startsWith('nano_'))
-			&& this.util.account.isValidAccount(searchData)
+			&& this.svcUtil.account.isValidAccount(searchData)
 		)
 
 		if (isValidNanoAccount === true) {
@@ -360,7 +363,7 @@ export class AppComponent implements OnInit {
 			return
 		}
 
-		const isValidBlockHash = this.util.nano.isValidHash(searchData)
+		const isValidBlockHash = this.svcUtil.nano.isValidHash(searchData)
 
 		if (isValidBlockHash === true) {
 			const blockHash = searchData.toUpperCase()
@@ -369,7 +372,7 @@ export class AppComponent implements OnInit {
 			return
 		}
 
-		this.notifications.sendWarning(`Invalid nano address or block hash! Please double check your input`)
+		this.svcNotification.sendWarning(`Invalid nano address or block hash! Please double check your input`)
 	}
 
 	updateIdleTime () {
@@ -377,18 +380,18 @@ export class AppComponent implements OnInit {
 	}
 
 	retryConnection () {
-		if (!this.settings.settings.serverAPI) {
-			this.notifications.sendInfo(`Wallet server settings is set to offline mode. Please change server first!`)
+		if (!this.svcAppSettings.settings.serverAPI) {
+			this.svcNotification.sendInfo(`Wallet server settings is set to offline mode. Please change server first!`)
 			return
 		}
-		this.walletService.reloadBalances()
-		this.notifications.sendInfo(`Attempting to reconnect to nano node`)
+		this.svcWallet.reloadBalances()
+		this.svcNotification.sendInfo(`Attempting to reconnect to nano node`)
 	}
 
 	async updateFiatPrices () {
-		const displayCurrency = this.settings.getAppSetting(`displayCurrency`) || 'USD'
-		await this.price.getPrice(displayCurrency)
-		this.walletService.reloadFiatBalances()
+		const displayCurrency = this.svcAppSettings.getAppSetting(`displayCurrency`) || 'USD'
+		await this.svcPrice.getPrice(displayCurrency)
+		this.svcWallet.reloadFiatBalances()
 		setTimeout(() => this.updateFiatPrices(), this.fiatTimeout)
 	}
 }

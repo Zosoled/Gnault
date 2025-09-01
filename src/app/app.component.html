@@ -45,11 +45,11 @@
 					<div class="address nano-address-monospace">{{ wallet.selectedAccount.id }}</div>
 				</div>
 				<div class="balance-column">
-					<ng-container *ngIf="(walletService.wallet.updatingBalance === false) else balanceLoading">
+					<ng-container *ngIf="(svcWallet.wallet.updatingBalance === false) else balanceLoading">
 						<div class="balance primary">
 							{{ wallet.selectedAccount.balance | rai: 'mnano,true' | amountsplit: 0 }}{{ wallet.selectedAccount.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO
 						</div>
-						<div class="balance converted">{{ wallet.selectedAccount.balanceFiat | fiat: settings.settings.displayCurrency }}</div>
+						<div class="balance converted">{{ wallet.selectedAccount.balanceFiat | fiat: svcAppSettings.settings.displayCurrency }}</div>
 					</ng-container>
 					<ng-template #balanceLoading>
 						<div class="balance loading">
@@ -67,9 +67,9 @@
 					<div class="address"> </div>
 				</div>
 				<div class="balance-column">
-					<ng-container *ngIf="(walletService.wallet.updatingBalance === false) else balanceLoading">
+					<ng-container *ngIf="(svcWallet.wallet.updatingBalance === false) else balanceLoading">
 						<div class="balance primary">{{ wallet.balance | rai: 'mnano,true' | amountsplit: 0 }}{{ wallet.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO</div>
-						<div class="balance converted">{{ wallet.balanceFiat | fiat: settings.settings.displayCurrency }}</div>
+						<div class="balance converted">{{ wallet.balanceFiat | fiat: svcAppSettings.settings.displayCurrency }}</div>
 					</ng-container>
 					<ng-template #balanceLoading>
 						<div class="balance loading">
@@ -89,7 +89,7 @@
 						<div class="address nano-address-monospace">{{ account.id }}</div>
 					</div>
 					<div class="balance-column">
-						<ng-container *ngIf="(walletService.wallet.updatingBalance === false) else balanceLoading">
+						<ng-container *ngIf="(svcWallet.wallet.updatingBalance === false) else balanceLoading">
 							<div class="balance primary">
 								<span
 									class="incoming-label"
@@ -100,7 +100,7 @@
 								</span>
 								{{ account.balance | rai: 'mnano,true' | amountsplit: 0 }}{{ account.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO
 							</div>
-							<div class="balance converted">{{ account.balanceFiat | fiat: settings.settings.displayCurrency }}</div>
+							<div class="balance converted">{{ account.balanceFiat | fiat: svcAppSettings.settings.displayCurrency }}</div>
 						</ng-container>
 						<ng-template #balanceLoading>
 							<div class="balance loading">
@@ -157,7 +157,7 @@
 										</div>
 									</div>
 									<div class="account-balances">
-										<ng-container *ngIf="( ( node.status && (wallet.balanceInitialized === true) ) || !isConfigured() ) else balancesLoading">
+										<ng-container *ngIf="( ( node.status && (wallet.balanceInitialized === true) ) || !isConfigured ) else balancesLoading">
 											<div class="balance-container primary">
 												<div class="currency-name">Ӿ</div>
 												<div class="amount-container">
@@ -175,7 +175,7 @@
 													</div>
 													<div
 														class="amount-updating"
-														*ngIf="wallet.updatingBalance && isConfigured()"
+														*ngIf="wallet.updatingBalance && isConfigured"
 													>
 														<div uk-spinner="ratio: 0.5;"></div>
 													</div>
@@ -183,23 +183,23 @@
 											</div>
 											<div
 												class="balance-container converted"
-												*ngIf="settings.settings.displayCurrency"
+												*ngIf="svcAppSettings.settings.displayCurrency"
 											>
 												<div class="currency-name">
 													<span class="estimate-symbol">~</span>
-													{{ settings.settings.displayCurrency }}
+													{{ svcAppSettings.settings.displayCurrency }}
 												</div>
 												<div class="amount-container">
 													<div class="amount-integer">
 														{{ (wallet.selectedAccount !== null
 															? wallet.selectedAccount.balanceFiat
-															: wallet.balanceFiat) | fiat: settings.settings.displayCurrency | amountsplit: 0
+															: wallet.balanceFiat) | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 0
 														}}
 													</div>
 													<div class="amount-fractional">
 														{{ (wallet.selectedAccount !== null
 															? wallet.selectedAccount.balanceFiat
-															: wallet.balanceFiat) | fiat: settings.settings.displayCurrency | amountsplit: 1
+															: wallet.balanceFiat) | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 1
 														}}
 													</div>
 												</div>
@@ -216,11 +216,11 @@
 									</div>
 								</div>
 							</div>
-							<ng-container *ngIf="(wallet.selectedAccount !== null) ? wallet.selectedAccount.receivable > 0 : walletService.hasReceivableTransactions()">
-								<ng-container *ngIf="walletService.processingReceivable else notProcessingReceivable">
+							<ng-container *ngIf="(wallet.selectedAccount !== null) ? wallet.selectedAccount.receivable > 0 : svcWallet.hasReceivableTransactions()">
+								<ng-container *ngIf="svcWallet.processingReceivable else notProcessingReceivable">
 									<div
 										class="nav-action-receive"
-										*ngIf="walletService.processingReceivable"
+										*ngIf="svcWallet.processingReceivable"
 									>
 										<div
 											class="icon"
@@ -232,10 +232,10 @@
 									</div>
 								</ng-container>
 								<ng-template #notProcessingReceivable>
-									<ng-container *ngIf=" (settings.settings.receivableOption !== 'manual') else manuallyReceivingReceivable ">
+									<ng-container *ngIf=" (svcAppSettings.settings.receivableOption !== 'manual') else manuallyReceivingReceivable ">
 										<div
 											class="nav-action-receive user-action-required uk-animation-slide-left"
-											*ngIf="walletService.isLocked()"
+											*ngIf="svcWallet.isLocked()"
 										>
 											<div
 												class="icon"
@@ -282,20 +282,20 @@
 											</div>
 											<div
 												class="balance-container converted"
-												*ngIf="settings.settings.displayCurrency"
+												*ngIf="svcAppSettings.settings.displayCurrency"
 											>
-												<div class="currency-name"><span class="estimate-symbol">~</span>{{ settings.settings.displayCurrency }}</div>
+												<div class="currency-name"><span class="estimate-symbol">~</span>{{ svcAppSettings.settings.displayCurrency }}</div>
 												<div class="amount-container">
 													<div class="amount-integer">
 														{{ (wallet.selectedAccount
 															? wallet.selectedAccount.receivableFiat
-															: wallet.receivableFiat) | fiat: settings.settings.displayCurrency | amountsplit: 0
+															: wallet.receivableFiat) | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 0
 														}}
 													</div>
 													<div class="amount-fractional">
 														{{ (wallet.selectedAccount
 															? wallet.selectedAccount.receivableFiat
-															: wallet.receivableFiat) | fiat: settings.settings.displayCurrency | amountsplit: 1
+															: wallet.receivableFiat) | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 1
 														}}
 													</div>
 												</div>
@@ -307,7 +307,7 @@
 							</ng-container>
 							<div
 								class="nav-status-row"
-								*ngIf="(node.status === false) && isConfigured()"
+								*ngIf="(node.status === false) && isConfigured"
 							>
 								<div class="status-icon">
 									<span
@@ -317,20 +317,20 @@
 								</div>
 								<div
 									class="status-labels"
-									*ngIf="settings.settings.serverAPI"
+									*ngIf="svcAppSettings.settings.serverAPI"
 								>
 									<div class="label primary uk-text-danger">Unable to connect to the server</div>
 									<div class="label secondary"><a (click)="retryConnection()">Refresh</a> or <a routerLink="/configure-app">select a different server</a></div>
 								</div>
 								<div
 									class="status-labels"
-									*ngIf="!settings.settings.serverAPI"
+									*ngIf="!svcAppSettings.settings.serverAPI"
 								>
 									<div class="label primary uk-text-danger">Wallet is in offline mode</div>
 									<div class="label secondary"><a routerLink="/configure-app">Select a server</a> to interact with the network</div>
 								</div>
 							</div>
-							<app-change-rep-widget *ngIf="isConfigured()"></app-change-rep-widget>
+							<app-change-rep-widget *ngIf="isConfigured"></app-change-rep-widget>
 							<app-wallet-widget></app-wallet-widget>
 							<app-unlock-wallet-dialog></app-unlock-wallet-dialog>
 						</div>
@@ -369,7 +369,7 @@
 								</div>
 								<div class="uk-width-1-4 uk-text-center label-new">
 									<span
-										*ngIf="walletService.hasReceivableTransactions()"
+										*ngIf="svcWallet.hasReceivableTransactions()"
 										class="uk-badge uk-text-top uk-align-center"
 									>
 										<div class="label">{{ 'general.new' | transloco }}</div>
@@ -414,7 +414,7 @@
 									<div class="label">{{ 'general.app-settings' | transloco }}</div>
 								</a>
 							</li>
-							<li *ngIf="isConfigured()">
+							<li *ngIf="isConfigured">
 								<a
 									routerLink="/manage-wallet"
 									routerLinkActive="active"
@@ -563,7 +563,7 @@
 					</div>
 					<div class="uk-width-1-3 uk-text-center dark-mode-column">
 						<div
-							[class]="{'dark-mode-click-area': true, 'enabled': !settings.settings.lightModeEnabled}"
+							[class]="{'dark-mode-click-area': true, 'enabled': !svcAppSettings.settings.lightModeEnabled}"
 							(click)="toggleLightMode()"
 						>
 							<div class="dark-mode-area">
