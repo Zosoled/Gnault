@@ -11,6 +11,7 @@ export class NotificationService {
 	// This provides an entry point for all components to send notifications.
 	// It exposes an observable that the actual component uses to grab new notifications
 	sendNotification (type: NotificationType, message: string, options = {}) {
+		options['identifier'] ??= crypto.randomUUID()
 		this.notifications$.next({ type, message, options })
 	}
 
