@@ -1,7 +1,6 @@
 import { Account, Blake2b, Tools } from 'libnemo'
 import NanoPow from 'nano-pow'
 
-const nacl = window['nacl']
 const STATE_BLOCK_PREAMBLE = '0000000000000000000000000000000000000000000000000000000000000006'
 
 export interface StateBlock {
@@ -43,7 +42,6 @@ export class UtilService {
 	}
 	account = {
 		generateAccountSecretKeyBytes: generateAccountSecretKeyBytes,
-		generateAccountKeyPair: generateAccountKeyPair,
 		getAccountChecksum: getAccountChecksum,
 		setPrefix: setPrefix,
 		isValidAccount: isValidAccount,
@@ -221,10 +219,6 @@ function generateAccountSecretKeyBytes (seedBytes, accountIndex) {
 function getAccountChecksum (pubkey) {
 	const out = new Blake2b(5).update(pubkey).digest()
 	return out.reverse()
-}
-
-function generateAccountKeyPair (accountSecretKeyBytes, expanded = false) {
-	return nacl.sign.keyPair.fromSecretKey(accountSecretKeyBytes, expanded)
 }
 
 function isValidAccount (account: string): boolean {
@@ -410,7 +404,6 @@ const util = {
 	},
 	account: {
 		generateAccountSecretKeyBytes: generateAccountSecretKeyBytes,
-		generateAccountKeyPair: generateAccountKeyPair,
 		getAccountChecksum: getAccountChecksum,
 		setPrefix: setPrefix,
 		isValidAccount: isValidAccount,

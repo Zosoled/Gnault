@@ -756,12 +756,11 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	privkeyChange (input) {
+	async privkeyChange (input) {
 		const privKey = this.convertPrivateKey(input)
 		if (privKey !== null) {
 			// Match given block account with with private key
-			const pubKey = this.util.account.generateAccountKeyPair(this.util.hex.toUint8(privKey), this.privateKeyExpanded).publicKey
-			const address = Account.load(pubKey).address
+			const { address, publicKey } = await Account.load(privKey)
 			if (address === this.signatureAccount) {
 				this.validPrivkey = true
 				this.privateKey = privKey
@@ -844,10 +843,8 @@ export class SignComponent implements OnInit {
 		}
 
 		// Match given block account with any of the private keys extracted
-		const pubKey1 = this.util.account.generateAccountKeyPair(this.util.hex.toUint8(privKey1), this.privateKeyExpanded).publicKey
-		const pubKey2 = this.util.account.generateAccountKeyPair(this.util.hex.toUint8(privKey2), this.privateKeyExpanded).publicKey
-		const address1 = Account.load(pubKey1).address
-		const address2 = Account.load(pubKey2).address
+		const { address: address1 } = await Account.load(privKey1)
+		const { address: address2 } = await Account.load(privKey2)
 
 		if (address1 === this.signatureAccount || address2 === this.signatureAccount) {
 			if (address1 === this.signatureAccount) {
