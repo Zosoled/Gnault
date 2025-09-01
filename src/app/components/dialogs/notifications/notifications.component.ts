@@ -1,14 +1,10 @@
-import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { NotificationService } from 'app/services'
 
 @Component({
 	selector: 'app-notifications',
 	templateUrl: './notifications.component.html',
-	styleUrls: ['./notifications.component.css'],
-	imports: [
-		CommonModule
-	]
+	styleUrls: ['./notifications.component.css']
 })
 
 export class NotificationsComponent implements OnInit {
@@ -16,6 +12,7 @@ export class NotificationsComponent implements OnInit {
 
 	notificationLength = 5000
 	notifications: any[] = []
+
 	ngOnInit () {
 		this.notificationService.notifications$.subscribe(notification => {
 			if (!notification) {
@@ -39,8 +36,8 @@ export class NotificationsComponent implements OnInit {
 				type: notification.type,
 				message: notification.message,
 				cssClass: this.getCssClass(notification.type),
-				identifier: identifier,
-				length: length,
+				identifier,
+				length,
 			}
 
 			this.notifications.push(newNotification)
