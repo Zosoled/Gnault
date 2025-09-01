@@ -1,6 +1,6 @@
 <h2 class="uk-heading-divider">Configure Wallet</h2>
 <div
-	*ngIf="isConfigured() && !walletService.isLedgerWallet() && (activePanel === panels.landing || activePanel === panels.import || activePanel === panels.mnemonicTypeSelection)"
+	*ngIf="isConfigured && !walletService.isLedgerWallet() && (activePanel === panels.landing || activePanel === panels.import || activePanel === panels.mnemonicTypeSelection)"
 	class="uk-margin-small-bottom"
 >
 	<div class="uk-alert uk-alert-danger nlt-inline-alert">

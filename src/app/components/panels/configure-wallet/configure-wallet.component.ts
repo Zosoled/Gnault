@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { ActivatedRoute, Router } from '@angular/router'
+import { Router, RouterLink } from '@angular/router'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import { Wallet } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
@@ -34,6 +34,7 @@ const INDEX_MAX = 4294967295
 		ClipboardModule,
 		CommonModule,
 		FormsModule,
+		RouterLink,
 		TranslocoPipe
 	]
 })
@@ -42,15 +43,16 @@ export class ConfigureWalletComponent implements OnInit {
 	private notifications = inject(NotificationService)
 	private qrModalService = inject(QrModalService)
 	private route = inject(Router)
-	private util = inject(UtilService)
 	private translocoService = inject(TranslocoService)
+	private util = inject(UtilService)
+
 	ledgerService = inject(LedgerService)
 	walletService = inject(WalletService)
 
 	panels = panels
 	activePanel = panels.landing
 	wallet = this.walletService.wallet
-	isConfigured = this.walletService.isConfigured
+	get isConfigured () { return this.walletService.isConfigured() }
 	isNewWallet = true
 	hasConfirmedBackup = false
 	importSeed = ''
@@ -159,7 +161,7 @@ export class ConfigureWalletComponent implements OnInit {
 
 	async importLedgerWallet (refreshOnly = false) {
 		// If a wallet exists already, make sure they know they are overwriting it
-		if (!refreshOnly && this.isConfigured()) {
+		if (!refreshOnly && this.isConfigured) {
 			const confirmed = await this.confirmWalletOverwrite()
 			if (!confirmed) {
 				return
@@ -202,7 +204,7 @@ export class ConfigureWalletComponent implements OnInit {
 
 	// Send a confirmation dialog to the user if they already have a wallet configured
 	async confirmWalletOverwrite () {
-		if (!this.isConfigured()) return true
+		if (!this.isConfigured) return true
 
 		const UIkit = window['UIkit']
 		try {
