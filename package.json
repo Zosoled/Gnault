@@ -18,7 +18,8 @@
 		"build:desktop": "ng build --configuration=desktop --base-href && cd desktop-app && tsc && cd ..",
 		"build:desktop:local": "npm run build:desktop && electron-builder -p never",
 		"build:desktop:dev": "npm run build:desktop && electron desktop-app/dist/desktop-app.js",
-		"recompile": "rm -rf node_modules; rm package-lock.json; npm cache clean --force; npm i; ./node_modules/.bin/electron-rebuild"
+		"recompile": "npm run reinstall && ./node_modules/.bin/electron-rebuild",
+		"reinstall": "rm -rf {node_modules,package-lock.json} && npm cache clean --force && npm i"
 	},
 	"private": true,
 	"dependencies": {
