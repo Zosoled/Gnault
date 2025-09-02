@@ -62,9 +62,6 @@ import { environment } from 'environments/environment'
 })
 
 export class AppComponent implements AfterViewInit {
-	@HostListener('window:resize', ['$event']) onResize (e) {
-		this.onWindowResize(e.target)
-	}
 	@HostListener('document:mousedown', ['$event']) onGlobalClick (event): void {
 		if (
 			this.selectButton.nativeElement.contains(event.target) === false
@@ -101,9 +98,6 @@ export class AppComponent implements AfterViewInit {
 
 	fiatTimeout = 5 * 60 * 1000 // Update fiat prices every 5 minutes
 	inactiveSeconds = 0
-	innerWidth = window.innerWidth
-	innerHeight = window.innerHeight
-	get innerHeightWithoutMobileBar () { return this.innerHeight - (this.innerWidth < 940 ? 50 : 0) }
 	navExpanded = false
 	navAnimating = false
 	showAccountsDropdown = false
@@ -111,6 +105,8 @@ export class AppComponent implements AfterViewInit {
 	searchData = ''
 	donationAccount = environment.donationAddress
 
+	get innerHeight () { return window.innerHeight }
+	get innerHeightWithoutMobileBar () { return this.innerHeight - (window.innerWidth < 940 ? 50 : 0) }
 	get isConfigured () { return this.svcWallet.isConfigured() }
 
 	constructor () {
@@ -121,7 +117,6 @@ export class AppComponent implements AfterViewInit {
 	}
 
 	async ngAfterViewInit () {
-		this.onWindowResize(window)
 		this.svcAppSettings.loadAppSettings()
 		this.svcTransloco.setActiveLang(this.svcAppSettings.settings.language)
 
@@ -253,11 +248,6 @@ export class AppComponent implements AfterViewInit {
 		} catch (err) {
 			this.svcNotification.sendWarning(`There was an issue retrieving latest nano price.  Ensure your AdBlocker is disabled on this page then reload to see accurate FIAT values.`, { length: 0, identifier: `price-adblock` })
 		}
-	}
-
-	onWindowResize (windowObject) {
-		this.innerWidth = windowObject.innerWidth
-		this.innerHeight = windowObject.innerHeight
 	}
 
 	// Checked saved data (wallet, address book, representative list, etc.) for

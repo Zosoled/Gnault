@@ -3,7 +3,7 @@
 	class="app"
 	(mousemove)="updateIdleTime()"
 	(keypress)="updateIdleTime()"
-	[style.height]="( innerHeight + 'px' )"
+	[style.height]="`${innerHeight}px`"
 	style="overflow-y: hidden;"
 >
 	<div
@@ -115,11 +115,11 @@
 		<div
 			uk-grid
 			class="app-grid"
-			[style.height]="( innerHeightWithoutMobileBar + 'px' )"
+			[style.height]="`${innerHeightWithoutMobileBar}px`"
 		>
 			<div
 				class="uk-width-1-4 nav-container"
-				[style.height]="( innerHeightWithoutMobileBar + 'px' )"
+				[style.height]="`${innerHeightWithoutMobileBar}px`"
 			>
 				<div class="nav-header">
 					<div uk-grid>
@@ -618,7 +618,7 @@
 				class="uk-width-expand content-container uk-panel"
 				[class.nav-expanded]="navExpanded"
 				[class.nav-animating]="navAnimating"
-				[style.height]="( innerHeightWithoutMobileBar + 'px' )"
+				[style.height]="`${innerHeightWithoutMobileBar}px`"
 				(click)="closeNav()"
 			>
 				<router-outlet></router-outlet>
