@@ -1,4 +1,4 @@
-import { inject } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { NanoPow } from 'nano-pow'
 import { BehaviorSubject } from 'rxjs'
 import {
@@ -25,6 +25,7 @@ const hardwareConcurrency = window.navigator.hardwareConcurrency || 2
 const workerCount = Math.max(hardwareConcurrency - 1, 1)
 export enum workState { 'success', 'cancelled', 'error' }
 
+@Injectable({ providedIn: 'root' })
 export class PowService {
 	private appSettings = inject(AppSettingsService)
 	private api = inject(ApiService)

@@ -1,4 +1,4 @@
-import { inject } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { Account, Block, Wallet } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
 import {
@@ -13,6 +13,7 @@ import {
 	WorkPoolService
 } from 'app/services'
 
+@Injectable({ providedIn: 'root' })
 export class NanoBlockService {
 	private api = inject(ApiService)
 	private util = inject(UtilService)

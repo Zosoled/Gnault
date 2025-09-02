@@ -1,4 +1,4 @@
-import { inject } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import TransportUSB from '@ledgerhq/hw-transport-webusb'
 import TransportHID from '@ledgerhq/hw-transport-webhid'
 import TransportBLE from '@ledgerhq/hw-transport-web-ble'
@@ -43,6 +43,7 @@ export interface LedgerLog {
 
 const zeroBlock = '0000000000000000000000000000000000000000000000000000000000000000'
 
+@Injectable({ providedIn: 'root' })
 export class LedgerService {
 	private api = inject(ApiService)
 	private desktop = inject(DesktopService)

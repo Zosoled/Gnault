@@ -20,16 +20,13 @@ import {
 } from 'app/pipes'
 import {
 	AddressBookService,
-	ApiService,
 	AppSettingsService,
-	ModalService,
 	NanoBlockService,
 	NotificationService,
 	PriceService,
 	UtilService,
 	WalletService,
-	WebsocketService,
-	WorkPoolService
+	WebsocketService
 } from 'app/services'
 
 @Component({
@@ -55,19 +52,17 @@ import {
 })
 
 export class ReceiveComponent implements OnInit, OnDestroy {
-	private route = inject(Router)
-	private walletService = inject(WalletService)
-	private notificationService = inject(NotificationService)
 	private addressBook = inject(AddressBookService)
-	modal = inject(ModalService)
-	private api = inject(ApiService)
-	private workPool = inject(WorkPoolService)
-	settings = inject(AppSettingsService)
 	private nanoBlock = inject(NanoBlockService)
-	price = inject(PriceService)
-	private websocket = inject(WebsocketService)
-	util = inject(UtilService)
+	private notificationService = inject(NotificationService)
+	private route = inject(Router)
 	private translocoService = inject(TranslocoService)
+	private walletService = inject(WalletService)
+	private websocket = inject(WebsocketService)
+
+	price = inject(PriceService)
+	settings = inject(AppSettingsService)
+	util = inject(UtilService)
 
 	nano = 1000000000000000000000000
 	accounts = this.walletService.wallet.accounts

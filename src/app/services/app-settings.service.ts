@@ -1,4 +1,4 @@
-import { inject } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { TranslocoService, getBrowserCultureLang, getBrowserLang } from '@jsverse/transloco'
 
 export type WalletStore = 'localStorage' | 'none'
@@ -27,6 +27,7 @@ interface AppSettings {
 	identiconsStyle: string
 }
 
+@Injectable({ providedIn: 'root' })
 export class AppSettingsService {
 	private translate = inject(TranslocoService)
 	storeKey = `nanovault-appsettings`

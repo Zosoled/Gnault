@@ -1,7 +1,8 @@
-import { inject } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { BehaviorSubject } from 'rxjs'
 import { AppSettingsService } from 'app/services'
 
+@Injectable({ providedIn: 'root' })
 export class WebsocketService {
 	private appSettings = inject(AppSettingsService)
 

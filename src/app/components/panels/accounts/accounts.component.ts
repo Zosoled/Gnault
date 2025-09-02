@@ -1,7 +1,7 @@
 import { CommonModule, UpperCasePipe } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { Router, RouterLink, RouterModule } from '@angular/router'
+import { Router, RouterLink } from '@angular/router'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import { ClipboardModule } from 'ngx-clipboard'
 import { Subject, timer } from 'rxjs'
@@ -12,7 +12,6 @@ import {
 	AppSettingsService,
 	LedgerService,
 	LedgerStatus,
-	ModalService,
 	NotificationService,
 	RepresentativeService,
 	WalletService
@@ -43,7 +42,6 @@ export class AccountsComponent implements OnInit {
 	private router = inject(Router)
 	private ledger = inject(LedgerService)
 	private translocoService = inject(TranslocoService)
-	modal = inject(ModalService)
 	settings = inject(AppSettingsService)
 	walletService = inject(WalletService)
 

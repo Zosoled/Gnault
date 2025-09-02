@@ -1,4 +1,4 @@
-import { inject } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { Tools } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
 import {
@@ -56,6 +56,7 @@ export interface FullRepresentativeOverview extends RepresentativeApiOverview {
 	donationAddress?: string
 }
 
+@Injectable({ providedIn: 'root' })
 export class RepresentativeService {
 	private wallet = inject(WalletService)
 	private api = inject(ApiService)

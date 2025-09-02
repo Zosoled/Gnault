@@ -8,7 +8,7 @@ interface AddressBookEntry {
 	trackTransactions: boolean
 }
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class AddressBookService {
 	storeKey = `nanovault-addressbook`
 	addressBook: AddressBookEntry[] = []

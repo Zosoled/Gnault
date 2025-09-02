@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core'
 import { NotificationService, PowService, UtilService } from 'app/services'
 import { baseThreshold, workState } from 'app/services/pow.service'
 
+@Injectable({ providedIn: 'root' })
 export class WorkPoolService {
 	private pow = inject(PowService)
 	private notifications = inject(NotificationService)

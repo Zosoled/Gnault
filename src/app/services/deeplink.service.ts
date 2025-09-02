@@ -1,4 +1,4 @@
-import { inject } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { Router } from '@angular/router'
 import {
 	NotificationService,
@@ -7,6 +7,7 @@ import {
 	WalletService
 } from 'app/services'
 
+@Injectable({ providedIn: 'root' })
 export class DeeplinkService {
 	private router = inject(Router)
 	private notifcationService = inject(NotificationService)

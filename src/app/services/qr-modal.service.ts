@@ -2,10 +2,7 @@ import { Injectable, inject } from '@angular/core'
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap'
 import { QrModalComponent, QRType } from 'app/components'
 
-@Injectable({
-	providedIn: 'root'
-})
-
+@Injectable({ providedIn: 'root' })
 export class QrModalService {
 	private modalService = inject(NgbModal)
 

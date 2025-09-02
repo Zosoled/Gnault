@@ -12,7 +12,6 @@ import {
 	AddressBookService,
 	ApiService,
 	AppSettingsService,
-	ModalService,
 	NotificationService,
 	PriceService,
 	QrModalService,
@@ -55,7 +54,6 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	private translocoService = inject(TranslocoService)
 
 	appSettings = inject(AppSettingsService)
-	modal = inject(ModalService)
 	notificationService = inject(NotificationService)
 	walletService = inject(WalletService)
 

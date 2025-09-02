@@ -5,10 +5,7 @@ import { Observable } from 'rxjs'
 import { NotificationService, UtilService } from 'app/services'
 import { environment } from 'environments/environment'
 
-@Injectable({
-	providedIn: 'root'
-})
-
+@Injectable({ providedIn: 'root' })
 export class MusigService {
 	private util = inject(UtilService)
 	private notificationService = inject(NotificationService)

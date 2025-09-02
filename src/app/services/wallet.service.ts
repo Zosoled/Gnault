@@ -1,4 +1,4 @@
-import { inject } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { Account, Tools, Wallet, WalletType } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
 import {
@@ -87,6 +87,7 @@ export interface WalletApiAccount extends BaseApiAccount {
 
 const storeKey: 'nanovault-wallet' = `nanovault-wallet`
 
+@Injectable({ providedIn: 'root' })
 export class WalletService {
 	private util = inject(UtilService)
 	private api = inject(ApiService)
@@ -978,14 +979,9 @@ export class WalletService {
 			selectedAccountId: this.wallet.selectedAccount?.id ?? null,
 			locked: true
 		}
-		debugger
 		const backup = await Wallet.backup()
-		debugger
 		const walletData = backup.find(v => v.id === this.wallet.wallet.id)
-		debugger
 		data.seed = walletData
-		debugger
-
 		return data
 	}
 

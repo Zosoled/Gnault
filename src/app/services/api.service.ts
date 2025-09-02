@@ -1,4 +1,4 @@
-import { inject } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import {
 	AppSettingsService,
@@ -6,6 +6,7 @@ import {
 	TxType
 } from 'app/services'
 
+@Injectable({ providedIn: 'root' })
 export class ApiService {
 	private http = inject(HttpClient)
 	private node = inject(NodeService)

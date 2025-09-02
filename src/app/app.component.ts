@@ -41,7 +41,7 @@ import {
 import { environment } from 'environments/environment'
 
 @Component({
-	selector: 'app-root',
+	selector: 'app',
 	templateUrl: './app.component.html',
 	styleUrls: ['./app.component.less'],
 	imports: [
@@ -58,9 +58,6 @@ import { environment } from 'environments/environment'
 		TranslocoPipe,
 		WalletWidgetComponent,
 		UnlockWalletDialogComponent
-	],
-	providers: [
-		SwUpdate
 	]
 })
 

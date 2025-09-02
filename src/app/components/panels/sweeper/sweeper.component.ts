@@ -7,7 +7,6 @@ import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
 import {
 	ApiService,
 	AppSettingsService,
-	ModalService,
 	NanoBlockService,
 	NotificationService,
 	TxType,
@@ -46,7 +45,6 @@ export class SweeperComponent implements OnInit {
 	private util = inject(UtilService)
 	private route = inject(Router)
 
-	modal = inject(ModalService)
 	settings = inject(AppSettingsService)
 
 	accounts = this.walletService.wallet.accounts

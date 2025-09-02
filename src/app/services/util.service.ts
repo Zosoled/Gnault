@@ -1,3 +1,4 @@
+import { Injectable } from '@angular/core'
 import { Account, Blake2b, Tools } from 'libnemo'
 import NanoPow from 'nano-pow'
 
@@ -15,6 +16,7 @@ export interface StateBlock {
 
 export enum TxType { 'send', 'receive', 'open', 'change' }
 
+@Injectable({ providedIn: 'root' })
 export class UtilService {
 	hex = {
 		toUint4: hexToUint4,
