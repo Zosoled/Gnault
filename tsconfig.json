@@ -6,9 +6,9 @@
 		"outDir": "./dist/out-tsc",
 		"sourceMap": true,
 		"declaration": false,
-		"moduleResolution": "Bundler",
+		"moduleResolution": "bundler",
 		"experimentalDecorators": true,
-		"target": "ES2022",
+		"target": "es2023",
 		"typeRoots": [
 			"node_modules/@types",
 			"./src/typings"
@@ -19,7 +19,7 @@
 			"ScriptHost",
 			"WebWorker"
 		],
-		"module": "ES2022",
+		"module": "es2022",
 		"baseUrl": "./src",
 		"paths": {
 			"stream": [
@@ -28,7 +28,7 @@
 		}
 	},
 	"angularCompilerOptions": {
-		"strictTemplates": true,
-		"extendedTemplateDiagnostics": true
+		"extendedTemplateDiagnostics": true,
+		"strictTemplates": true
 	}
 }
