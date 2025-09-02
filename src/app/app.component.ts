@@ -101,9 +101,9 @@ export class AppComponent implements AfterViewInit {
 
 	fiatTimeout = 5 * 60 * 1000 // Update fiat prices every 5 minutes
 	inactiveSeconds = 0
-	innerWidth = 0
-	innerHeight = 0
-	innerHeightWithoutMobileBar = 0
+	innerWidth = window.innerWidth
+	innerHeight = window.innerHeight
+	get innerHeightWithoutMobileBar () { return this.innerHeight - (this.innerWidth < 940 ? 50 : 0) }
 	navExpanded = false
 	navAnimating = false
 	showAccountsDropdown = false
@@ -258,14 +258,6 @@ export class AppComponent implements AfterViewInit {
 	onWindowResize (windowObject) {
 		this.innerWidth = windowObject.innerWidth
 		this.innerHeight = windowObject.innerHeight
-
-		const isMobileBarVisible = (this.innerWidth < 940)
-
-		if (isMobileBarVisible === true) {
-			this.innerHeightWithoutMobileBar = this.innerHeight - 50
-		} else {
-			this.innerHeightWithoutMobileBar = this.innerHeight
-		}
 	}
 
 	// Checked saved data (wallet, address book, representative list, etc.) for
