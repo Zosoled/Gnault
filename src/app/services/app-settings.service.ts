@@ -30,7 +30,7 @@ interface AppSettings {
 @Injectable({ providedIn: 'root' })
 export class AppSettingsService {
 	private translate = inject(TranslocoService)
-	storeKey = `nanovault-appsettings`
+	storeKey: 'Gnault-AppSettings' = 'Gnault-AppSettings'
 	settings: AppSettings = {
 		language: null,
 		displayDenomination: 'mnano',

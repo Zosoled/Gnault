@@ -87,7 +87,7 @@ export interface WalletApiAccount extends BaseApiAccount {
 	error?: string
 }
 
-const storeKey: 'nanovault-wallet' = `nanovault-wallet`
+const storeKey: 'Gnault-Wallet' = `Gnault-Wallet`
 
 @Injectable({ providedIn: 'root' })
 export class WalletService {
@@ -322,6 +322,7 @@ export class WalletService {
 	}
 
 	async loadStoredWallet () {
+		debugger
 		this.resetWallet()
 
 		const walletData = localStorage.getItem(storeKey)

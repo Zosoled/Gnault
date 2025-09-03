@@ -12,7 +12,7 @@ export class ApiService {
 	private node = inject(NodeService)
 	private appSettings = inject(AppSettingsService)
 
-	storeKey = `nanovault-active-difficulty`
+	storeKey: 'Gnault-ActiveDifficulty' = 'Gnault-ActiveDifficulty'
 	private async request (action, data, skipError, url = '', validateResponse?): Promise<any> {
 		data.action = action
 		const apiUrl = url || this.appSettings.settings.serverAPI

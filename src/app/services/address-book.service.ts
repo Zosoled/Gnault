@@ -10,7 +10,7 @@ interface AddressBookEntry {
 
 @Injectable({ providedIn: 'root' })
 export class AddressBookService {
-	storeKey = `nanovault-addressbook`
+	storeKey: 'Gnault-AddressBook' = 'Gnault-AddressBook'
 	addressBook: AddressBookEntry[] = []
 	addressBook$ = new BehaviorSubject([])
 	constructor () { }

@@ -63,7 +63,7 @@ export class RepresentativeService {
 	private util = inject(UtilService)
 	private ninja = inject(NinjaService)
 
-	storeKey = `nanovault-representatives`
+	storeKey: 'Gnault-Representatives' = 'Gnault-Representatives'
 
 	// Default representatives list
 	defaultRepresentatives = []
