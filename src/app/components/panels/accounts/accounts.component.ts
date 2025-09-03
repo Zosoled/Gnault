@@ -12,7 +12,7 @@ import {
 	AppSettingsService,
 	LedgerService,
 	LedgerStatus,
-	NotificationService,
+	NotificationsService,
 	RepresentativeService,
 	WalletService
 } from 'app/services'
@@ -37,7 +37,7 @@ import {
 })
 
 export class AccountsComponent implements OnInit {
-	private notificationService = inject(NotificationService)
+	private notificationService = inject(NotificationsService)
 	private representatives = inject(RepresentativeService)
 	private router = inject(Router)
 	private ledger = inject(LedgerService)

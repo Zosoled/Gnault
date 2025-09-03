@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
-import { AddressBookService, NotificationService } from 'app/services'
+import { AddressBookService, NotificationsService } from 'app/services'
 
 @Component({
 	selector: 'app-import-address-book',
@@ -14,7 +14,7 @@ import { AddressBookService, NotificationService } from 'app/services'
 
 export class ImportAddressBookComponent implements OnInit {
 	private route = inject(ActivatedRoute)
-	private notifications = inject(NotificationService)
+	private notifications = inject(NotificationsService)
 	private addressBook = inject(AddressBookService)
 	private router = inject(Router)
 

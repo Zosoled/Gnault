@@ -8,7 +8,7 @@ import {
 	AddressBookService,
 	ApiService,
 	AppSettingsService,
-	NotificationService,
+	NotificationsService,
 	WalletService
 } from 'app/services'
 import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/elements'
@@ -36,7 +36,7 @@ export class TransactionDetailsComponent implements OnInit {
 	private router = inject(Router)
 	private addressBook = inject(AddressBookService)
 	private api = inject(ApiService)
-	private notifications = inject(NotificationService)
+	private notifications = inject(NotificationsService)
 	private translocoService = inject(TranslocoService)
 
 	settings = inject(AppSettingsService)

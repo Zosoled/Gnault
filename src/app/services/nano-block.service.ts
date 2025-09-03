@@ -5,7 +5,7 @@ import {
 	ApiService,
 	AppSettingsService,
 	LedgerService,
-	NotificationService,
+	NotificationsService,
 	StateBlock,
 	TxType,
 	UtilService,
@@ -18,7 +18,7 @@ export class NanoBlockService {
 	private api = inject(ApiService)
 	private util = inject(UtilService)
 	private workPool = inject(WorkPoolService)
-	private notifications = inject(NotificationService)
+	private notifications = inject(NotificationsService)
 	private ledgerService = inject(LedgerService)
 	settings = inject(AppSettingsService)
 

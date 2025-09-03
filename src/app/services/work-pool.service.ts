@@ -1,11 +1,11 @@
 import { Injectable, inject } from '@angular/core'
-import { NotificationService, PowService, UtilService } from 'app/services'
+import { NotificationsService, PowService, UtilService } from 'app/services'
 import { baseThreshold, workState } from 'app/services/pow.service'
 
 @Injectable({ providedIn: 'root' })
 export class WorkPoolService {
 	private pow = inject(PowService)
-	private notifications = inject(NotificationService)
+	private notifications = inject(NotificationsService)
 	private util = inject(UtilService)
 
 	storeKey = `nanovault-workcache`

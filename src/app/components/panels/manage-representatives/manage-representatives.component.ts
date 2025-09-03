@@ -8,7 +8,7 @@ import { map } from 'rxjs/operators'
 import { NanoAccountIdComponent } from 'app/components/elements'
 import {
 	ApiService,
-	NotificationService,
+	NotificationsService,
 	RepresentativeService,
 	UtilService
 } from 'app/services'
@@ -28,7 +28,7 @@ import {
 
 export class ManageRepresentativesComponent implements OnInit, AfterViewInit {
 	private api = inject(ApiService)
-	private notificationService = inject(NotificationService)
+	private notificationService = inject(NotificationsService)
 	private repService = inject(RepresentativeService)
 	private util = inject(UtilService)
 

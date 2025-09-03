@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core'
-import { NotificationService } from 'app/services'
+import { NotificationsService } from 'app/services'
 
 @Injectable({ providedIn: 'root' })
 export class NodeService {
-	private notifications = inject(NotificationService)
+	private notifications = inject(NotificationsService)
 
 	node = {
 		status: null, // null - loading, false - offline, true - online

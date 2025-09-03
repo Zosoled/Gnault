@@ -12,7 +12,7 @@ import {
 	AddressBookService,
 	ApiService,
 	AppSettingsService,
-	NotificationService,
+	NotificationsService,
 	PriceService,
 	QrModalService,
 	UtilService,
@@ -54,7 +54,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	private translocoService = inject(TranslocoService)
 
 	appSettings = inject(AppSettingsService)
-	notificationService = inject(NotificationService)
+	notificationService = inject(NotificationsService)
 	walletService = inject(WalletService)
 
 	activePanel = 0

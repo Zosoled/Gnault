@@ -13,7 +13,7 @@ import {
 	FullRepresentativeOverview,
 	NanoBlockService,
 	NinjaService,
-	NotificationService,
+	NotificationsService,
 	QrModalService,
 	RepresentativeService,
 	UtilService,
@@ -39,7 +39,7 @@ export class RepresentativesComponent implements OnInit {
 	private router = inject(ActivatedRoute)
 	walletService = inject(WalletService)
 	private api = inject(ApiService)
-	private notifications = inject(NotificationService)
+	private notifications = inject(NotificationsService)
 	private nanoBlock = inject(NanoBlockService)
 	private util = inject(UtilService)
 	private representativeService = inject(RepresentativeService)

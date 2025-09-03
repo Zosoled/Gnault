@@ -3,7 +3,7 @@ import { Component, OnInit, inject } from '@angular/core'
 import { BarcodeFormat } from '@zxing/library'
 import { ZXingScannerModule } from '@zxing/ngx-scanner'
 import { BehaviorSubject } from 'rxjs'
-import { DeeplinkService, NotificationService } from 'app/services'
+import { DeeplinkService, NotificationsService } from 'app/services'
 
 @Component({
 	selector: 'app-qr-scan',
@@ -19,7 +19,7 @@ export class QrScanComponent implements OnInit {
 	[key: string]: any
 
 	private svcDeeplink = inject(DeeplinkService)
-	private svcNotification = inject(NotificationService);
+	private svcNotification = inject(NotificationsService);
 
 	availableDevices: MediaDeviceInfo[]
 	currentDevice: MediaDeviceInfo = null

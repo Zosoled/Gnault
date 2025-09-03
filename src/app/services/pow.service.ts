@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs'
 import {
 	AppSettingsService,
 	ApiService,
-	NotificationService,
+	NotificationsService,
 	UtilService
 } from 'app/services'
 
@@ -29,7 +29,7 @@ export enum workState { 'success', 'cancelled', 'error' }
 export class PowService {
 	private appSettings = inject(AppSettingsService)
 	private api = inject(ApiService)
-	private notifications = inject(NotificationService)
+	private notifications = inject(NotificationsService)
 	private util = inject(UtilService)
 
 	powAlertLimit = 60; // alert long pow after X sec

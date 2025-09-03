@@ -3,7 +3,7 @@ import { AfterViewInit, Component, ElementRef, ViewChild, inject } from '@angula
 import { FormsModule } from '@angular/forms'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import {
-	NotificationService,
+	NotificationsService,
 	WalletService
 } from 'app/services'
 
@@ -19,7 +19,7 @@ import {
 })
 
 export class UnlockWalletDialogComponent implements AfterViewInit {
-	private notificationService = inject(NotificationService)
+	private notificationService = inject(NotificationsService)
 	private translocoService = inject(TranslocoService)
 
 	walletService = inject(WalletService)
@@ -32,9 +32,6 @@ export class UnlockWalletDialogComponent implements AfterViewInit {
 
 	@ViewChild('dialog') dialog: ElementRef
 	@ViewChild('input') input: ElementRef
-
-	ngOnInit () {
-	}
 
 	ngAfterViewInit () {
 		const UIkit = (window as any).UIkit

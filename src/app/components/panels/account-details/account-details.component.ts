@@ -24,7 +24,7 @@ import {
 	AppSettingsService,
 	NanoBlockService,
 	NinjaService,
-	NotificationService,
+	NotificationsService,
 	PriceService,
 	QrModalService,
 	RepresentativeService,
@@ -58,7 +58,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	private addressBook = inject(AddressBookService)
 	private api = inject(ApiService)
 	private repSvc = inject(RepresentativeService)
-	private notify = inject(NotificationService)
+	private notify = inject(NotificationsService)
 	private nanoBlock = inject(NanoBlockService)
 	private qrModalSvc = inject(QrModalService)
 	private ninja = inject(NinjaService)

@@ -6,7 +6,7 @@ import {
 	ApiService,
 	AppSettingsService,
 	NanoBlockService,
-	NotificationService,
+	NotificationsService,
 	PriceService,
 	UtilService,
 	WebsocketService,
@@ -59,7 +59,9 @@ export interface FullWallet {
 	selectedAccount$: BehaviorSubject<Account | null>
 	locked: boolean
 	locked$: BehaviorSubject<boolean | false>
+	passwordUpdated$: BehaviorSubject<boolean | false>
 	unlockModalRequested$: BehaviorSubject<boolean | false>
+	updateModalRequested$: BehaviorSubject<boolean | false>
 	receivableBlocks: Block[]
 	receivableBlocksUpdate$: BehaviorSubject<ReceivableBlockUpdate | null>
 	newWallet$: BehaviorSubject<boolean | false>
@@ -97,7 +99,7 @@ export class WalletService {
 	private workPool = inject(WorkPoolService)
 	private websocket = inject(WebsocketService)
 	private nanoBlock = inject(NanoBlockService)
-	private notifications = inject(NotificationService)
+	private notifications = inject(NotificationsService)
 
 	wallet: FullWallet = {
 		type: 'seed',
@@ -114,7 +116,9 @@ export class WalletService {
 		selectedAccount$: new BehaviorSubject(null),
 		locked: false,
 		locked$: new BehaviorSubject(false),
+		passwordUpdated$: new BehaviorSubject(false),
 		unlockModalRequested$: new BehaviorSubject(false),
+		updateModalRequested$: new BehaviorSubject(false),
 		receivableBlocks: [],
 		receivableBlocksUpdate$: new BehaviorSubject(null),
 		newWallet$: new BehaviorSubject(false),
@@ -318,7 +322,6 @@ export class WalletService {
 	}
 
 	async loadStoredWallet () {
-		debugger
 		this.resetWallet()
 
 		const walletData = localStorage.getItem(storeKey)
@@ -430,12 +433,14 @@ export class WalletService {
 			this.wallet.locked = false
 			this.wallet.locked$.next(false)
 
-			this.notifications.removeNotification('receivable-locked') // If there is a notification to unlock, remove it
+			// If there is a notification to unlock, remove it
+			this.notifications.removeNotification('receivable-locked')
 
 			// Process any receivable blocks
 			this.processReceivableBlocks()
 
-			this.saveWalletExport() // Save so a refresh also gives you your unlocked wallet?
+			// Save so a refresh also gives you your unlocked wallet?
+			this.saveWalletExport()
 
 			return true
 		} catch (err) {
@@ -444,11 +449,25 @@ export class WalletService {
 		}
 	}
 
-	async createWalletFromSeed (password: string, seed: string) {
+	async updatePassword (password: string) {
+		try {
+			await this.wallet.wallet.update(password)
+			this.wallet.passwordUpdated$.next(true)
+			// Save so a refresh also gives you your unlocked wallet?
+			this.saveWalletExport()
+			return true
+		} catch (err) {
+			console.warn(err)
+			this.wallet.passwordUpdated$.next(false)
+			return false
+		}
+	}
+
+	async setWallet (password: string, wallet: Wallet) {
 		this.resetWallet()
-
-		this.wallet.wallet = await Wallet.load('BLAKE2b', password, seed)
-
+		this.wallet.wallet = wallet
+		await this.wallet.wallet.unlock(password)
+		password = ''
 		await this.scanAccounts()
 	}
 
@@ -471,16 +490,10 @@ export class WalletService {
 			// Checking frontiers...
 			const batchResponse = await this.api.accountsFrontiers(batchAccountsArray)
 			if (batchResponse) {
-				for (const accountID in batchResponse.frontiers) {
-					if (batchResponse.frontiers.hasOwnProperty(accountID)) {
-						const frontier = batchResponse.frontiers[accountID]
-						const frontierIsValidHash = this.util.nano.isValidHash(frontier)
-
-						if (frontierIsValidHash === true) {
-							if (frontier !== batchAccounts[accountID].publicKey) {
-								usedIndices.push(batchAccounts[accountID].index)
-							}
-						}
+				for (const address of Object.keys(batchResponse.frontiers)) {
+					const hash = batchResponse.frontiers[address]
+					if (this.util.nano.isValidHash(hash) && hash !== batchAccounts[address].publicKey) {
+						usedIndices.push(batchAccounts[address].index)
 					}
 				}
 			}
@@ -956,7 +969,6 @@ export class WalletService {
 
 	saveWalletExport () {
 		const exportData = this.generateWalletExport()
-		debugger
 		switch (this.appSettings.settings.walletStore) {
 			case 'none':
 				this.removeWalletData()
@@ -1021,41 +1033,68 @@ export class WalletService {
 	requestWalletUnlock () {
 		this.wallet.unlockModalRequested$.next(true)
 
-		return new Promise(
-			(resolve, reject) => {
-				let subscriptionForUnlock
-				let subscriptionForCancel
+		return new Promise((resolve, reject) => {
+			let subscriptionForUnlock
+			let subscriptionForCancel
 
-				const removeSubscriptions = () => {
-					if (subscriptionForUnlock != null) {
-						subscriptionForUnlock.unsubscribe()
-					}
-
-					if (subscriptionForCancel != null) {
-						subscriptionForCancel.unsubscribe()
-					}
+			const removeSubscriptions = () => {
+				if (subscriptionForUnlock != null) {
+					subscriptionForUnlock.unsubscribe()
 				}
-
-				subscriptionForUnlock =
-					this.wallet.locked$.subscribe(async isLocked => {
-						if (isLocked === false) {
-							removeSubscriptions()
-
-							const wasUnlocked = true
-							resolve(wasUnlocked)
-						}
-					})
-
-				subscriptionForCancel =
-					this.wallet.unlockModalRequested$.subscribe(async wasRequested => {
-						if (wasRequested === false) {
-							removeSubscriptions()
-
-							const wasUnlocked = false
-							resolve(wasUnlocked)
-						}
-					})
+				if (subscriptionForCancel != null) {
+					subscriptionForCancel.unsubscribe()
+				}
 			}
-		)
+
+			subscriptionForUnlock = this.wallet.locked$
+				.subscribe(async isLocked => {
+					if (isLocked === false) {
+						removeSubscriptions()
+						resolve(true)
+					}
+				})
+
+			subscriptionForCancel = this.wallet.unlockModalRequested$
+				.subscribe(async wasRequested => {
+					if (wasRequested === false) {
+						removeSubscriptions()
+						resolve(false)
+					}
+				})
+		})
+	}
+
+	requestChangePassword () {
+		this.wallet.updateModalRequested$.next(true)
+
+		return new Promise((resolve, reject) => {
+			let subscriptionForUpdate
+			let subscriptionForCancel
+
+			const removeSubscriptions = () => {
+				if (subscriptionForUpdate != null) {
+					subscriptionForUpdate.unsubscribe()
+				}
+				if (subscriptionForCancel != null) {
+					subscriptionForCancel.unsubscribe()
+				}
+			}
+
+			subscriptionForUpdate = this.wallet.passwordUpdated$
+				.subscribe(async isUpdated => {
+					if (isUpdated) {
+						removeSubscriptions()
+						resolve(true)
+					}
+				})
+
+			subscriptionForCancel = this.wallet.updateModalRequested$
+				.subscribe(async wasRequested => {
+					if (wasRequested === false) {
+						removeSubscriptions()
+						resolve(false)
+					}
+				})
+		})
 	}
 }

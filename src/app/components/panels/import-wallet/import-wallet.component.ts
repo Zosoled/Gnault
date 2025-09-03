@@ -3,7 +3,7 @@ import { Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import {
-	NotificationService,
+	NotificationsService,
 	UtilService,
 	WalletService,
 	WalletKeyType
@@ -21,7 +21,7 @@ import {
 
 export class ImportWalletComponent implements OnInit {
 	private route = inject(ActivatedRoute)
-	private notifications = inject(NotificationService)
+	private notifications = inject(NotificationsService)
 	private router = inject(Router)
 	private util = inject(UtilService)
 

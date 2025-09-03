@@ -4,7 +4,7 @@ import { TranslocoPipe } from '@jsverse/transloco'
 import { Wallet } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 import { NanoAccountIdComponent } from 'app/components/elements'
-import { NotificationService } from 'app/services'
+import { NotificationsService } from 'app/services'
 
 @Component({
 	selector: 'app-keygenerator',
@@ -19,7 +19,7 @@ import { NotificationService } from 'app/services'
 })
 
 export class KeygeneratorComponent implements OnInit {
-	private notificationService = inject(NotificationService)
+	private notificationService = inject(NotificationsService)
 
 	seed = ''
 	mnemonic = ''

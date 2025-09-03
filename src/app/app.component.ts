@@ -16,8 +16,9 @@ import {
 	ChangeRepWidgetComponent,
 	InstallWidgetComponent,
 	NotificationsComponent,
-	WalletWidgetComponent,
-	UnlockWalletDialogComponent
+	SetPasswordDialogComponent,
+	UnlockWalletDialogComponent,
+	WalletWidgetComponent
 } from 'app/components'
 import {
 	AmountSplitPipe,
@@ -30,7 +31,7 @@ import {
 	DeeplinkService,
 	DesktopService,
 	NodeService,
-	NotificationService,
+	NotificationsService,
 	PriceService,
 	RepresentativeService,
 	UtilService,
@@ -55,6 +56,7 @@ import { environment } from 'environments/environment'
 		RaiPipe,
 		RouterLink,
 		RouterOutlet,
+		SetPasswordDialogComponent,
 		TranslocoPipe,
 		WalletWidgetComponent,
 		UnlockWalletDialogComponent
@@ -80,7 +82,7 @@ export class AppComponent implements AfterViewInit {
 	private svcAddressBook = inject(AddressBookService)
 	private svcDeeplink = inject(DeeplinkService)
 	private svcDesktop = inject(DesktopService)
-	private svcNotification = inject(NotificationService)
+	private svcNotification = inject(NotificationsService)
 	private svcRepresentative = inject(RepresentativeService)
 	private svcTransloco = inject(TranslocoService)
 	private svcUtil = inject(UtilService)
@@ -98,6 +100,7 @@ export class AppComponent implements AfterViewInit {
 
 	fiatTimeout = 5 * 60 * 1000 // Update fiat prices every 5 minutes
 	inactiveSeconds = 0
+	isWalletRefreshed = false
 	navExpanded = false
 	navAnimating = false
 	showAccountsDropdown = false
@@ -110,9 +113,13 @@ export class AppComponent implements AfterViewInit {
 	get isConfigured () { return this.svcWallet.isConfigured() }
 
 	constructor () {
-		const router = this.router
-		router.events.subscribe(() => {
+		this.router.events.subscribe(() => {
 			this.closeNav()
+		})
+		this.svcWallet.wallet.refresh$.subscribe(isRefreshed => {
+			if (isRefreshed) {
+				this.isWalletRefreshed = true
+			}
 		})
 	}
 

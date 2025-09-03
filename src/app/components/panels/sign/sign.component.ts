@@ -14,7 +14,7 @@ import {
 	AppSettingsService,
 	MusigService,
 	NanoBlockService,
-	NotificationService,
+	NotificationsService,
 	PriceService,
 	QrModalService,
 	StateBlock,
@@ -52,7 +52,7 @@ export class SignComponent implements OnInit {
 	private routerService = inject(Router)
 	private walletService = inject(WalletService)
 	private addressBookService = inject(AddressBookService)
-	private notificationService = inject(NotificationService)
+	private notificationService = inject(NotificationsService)
 	private nanoBlock = inject(NanoBlockService)
 	private workPool = inject(WorkPoolService)
 	private api = inject(ApiService)

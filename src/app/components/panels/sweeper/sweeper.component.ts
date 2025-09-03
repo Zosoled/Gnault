@@ -8,7 +8,7 @@ import {
 	ApiService,
 	AppSettingsService,
 	NanoBlockService,
-	NotificationService,
+	NotificationsService,
 	TxType,
 	UtilService,
 	WalletService,
@@ -37,7 +37,7 @@ const SWEEP_MAX_RECEIVABLE = 100
 
 export class SweeperComponent implements OnInit {
 	private walletService = inject(WalletService)
-	private notificationService = inject(NotificationService)
+	private notificationService = inject(NotificationsService)
 	private appSettings = inject(AppSettingsService)
 	private api = inject(ApiService)
 	private workPool = inject(WorkPoolService)

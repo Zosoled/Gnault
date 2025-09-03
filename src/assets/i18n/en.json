@@ -280,12 +280,14 @@
 		},
 		"set-wallet-password": {
 			"choose-a-wallet-password-that-will-be-used-to-unlock-this-application": "Choose a wallet password that will be used to unlock this application.",
+			"error": "Failed to set wallet password",
 			"errors": {
 				"password-must-be-at-least-x-characters-long": "Password must be at least {{ minLength }} characters.",
-				"passwords-do-not-match": "Passwords do not match!"
+				"passwords-do-not-match": "Passwords do not match."
 			},
 			"for-the-safety-of-your-funds-use-a-secure-password": "For the safety of your funds, use a secure password.",
 			"set-wallet-password": "Set Wallet Password",
+			"success": "Wallet password set successfully",
 			"while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted": "While the application is locked, the secret recovery phrase will be encrypted, which prevents sending/receiving funds and managing accounts."
 		}
 	},
@@ -337,6 +339,7 @@
 		"uncemented-blocks": "Uncemented Blocks",
 		"unknown": "Unknown",
 		"unlock": "Unlock",
+		"update": "Update",
 		"view-details": "View Details",
 		"view-on-network-explorer": "View on Network Explorer",
 		"wallet-must-be-unlocked": "Wallet must be unlocked",

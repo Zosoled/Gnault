@@ -8,7 +8,7 @@ import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
 import {
 	ApiService,
 	AppSettingsService,
-	NotificationService,
+	NotificationsService,
 	UtilService,
 	WalletService
 } from 'app/services'
@@ -33,7 +33,7 @@ export class ManageWalletComponent implements OnInit {
 	private translocoService = inject(TranslocoService)
 	private util = inject(UtilService)
 
-	notifications = inject(NotificationService)
+	notifications = inject(NotificationsService)
 	settings = inject(AppSettingsService)
 	walletService = inject(WalletService)
 

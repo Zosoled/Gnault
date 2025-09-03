@@ -6,7 +6,7 @@ import { ClipboardModule } from 'ngx-clipboard'
 import { NanoAccountIdComponent } from 'app/components/elements'
 import {
 	MusigService,
-	NotificationService,
+	NotificationsService,
 	QrModalService,
 	RemoteSignService,
 	UtilService
@@ -29,7 +29,7 @@ export class MultisigComponent implements OnInit {
 
 	private util = inject(UtilService)
 	private router = inject(Router)
-	private notificationService = inject(NotificationService)
+	private notificationService = inject(NotificationsService)
 	private remoteSignService = inject(RemoteSignService)
 	private qrModalService = inject(QrModalService)
 	private musigService = inject(MusigService)

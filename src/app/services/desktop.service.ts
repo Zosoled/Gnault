@@ -1,10 +1,10 @@
 import { inject, Injectable } from '@angular/core'
 import { IpcRenderer } from 'electron'
-import { NotificationService } from 'app/services'
+import { NotificationsService } from 'app/services'
 
 @Injectable({ providedIn: 'root' })
 export class DesktopService {
-	private notifications = inject(NotificationService)
+	private notifications = inject(NotificationsService)
 	private _ipc: IpcRenderer | undefined
 
 	constructor () {

@@ -4,7 +4,7 @@ import * as Rx from 'rxjs'
 type NotificationType = 'info' | 'success' | 'warning' | 'error'
 
 @Injectable({ providedIn: 'root' })
-export class NotificationService {
+export class NotificationsService {
 	notifications$ = new Rx.BehaviorSubject(null)
 	removeNotification$ = new Rx.BehaviorSubject(null)
 

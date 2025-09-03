@@ -41,22 +41,31 @@
 				*ngIf="wallet.selectedAccount !== null"
 			> <!-- active nano_ account -->
 				<div class="name-column">
-					<div class="name">{{ wallet.selectedAccount.addressBookName ? wallet.selectedAccount.addressBookName : (('general.account' | transloco) + ' #' + wallet.selectedAccount.index) }}</div>
-					<div class="address nano-address-monospace">{{ wallet.selectedAccount.id }}</div>
+					<div class="name">
+						{{ wallet.selectedAccount.addressBookName ? wallet.selectedAccount.addressBookName : (('general.account' | transloco) + ' #' + wallet.selectedAccount.index) }}
+					</div>
+					<div class="address nano-address-monospace">
+						{{ wallet.selectedAccount.id }}
+					</div>
 				</div>
-				<div class="balance-column">
-					<ng-container *ngIf="(svcWallet.wallet.updatingBalance === false) else balanceLoading">
-						<div class="balance primary">
-							{{ wallet.selectedAccount.balance | rai: 'mnano,true' | amountsplit: 0 }}{{ wallet.selectedAccount.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO
-						</div>
-						<div class="balance converted">{{ wallet.selectedAccount.balanceFiat | fiat: svcAppSettings.settings.displayCurrency }}</div>
-					</ng-container>
-					<ng-template #balanceLoading>
-						<div class="balance loading">
-							<div uk-spinner="ratio: 0.5;"></div>
-						</div>
-					</ng-template>
-				</div>
+				<div class="balance-column"><!-- noformat -->
+					@if (svcWallet.wallet.updatingBalance === false) {
+						<ng-container>
+							<div class="balance primary">
+								{{ wallet.selectedAccount.balance | rai: 'nano,true' | amountsplit: 0 }}{{ wallet.selectedAccount.balance | rai: 'nano,false' | amountsplit: 1 }}
+							</div>
+							<div class="balance converted">
+								{{ wallet.selectedAccount.balanceFiat | fiat: svcAppSettings.settings.displayCurrency }}
+							</div>
+						</ng-container>
+						} @else {
+						<ng-template #balanceLoading>
+							<div class="balance loading">
+								<div uk-spinner="ratio: 0.5;"></div>
+							</div>
+						</ng-template>
+					}
+				<!-- noformat --></div>
 			</div>
 			<div
 				[class]="[ 'account', (wallet.selectedAccount === null) ? 'active' : 'inactive' ]"
@@ -66,17 +75,24 @@
 					<div class="name">Total Balance</div>
 					<div class="address"> </div>
 				</div>
-				<div class="balance-column">
-					<ng-container *ngIf="(svcWallet.wallet.updatingBalance === false) else balanceLoading">
-						<div class="balance primary">{{ wallet.balance | rai: 'mnano,true' | amountsplit: 0 }}{{ wallet.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO</div>
-						<div class="balance converted">{{ wallet.balanceFiat | fiat: svcAppSettings.settings.displayCurrency }}</div>
-					</ng-container>
-					<ng-template #balanceLoading>
-						<div class="balance loading">
-							<div uk-spinner="ratio: 0.5;"></div>
-						</div>
-					</ng-template>
-				</div>
+				<div class="balance-column"><!-- noformat -->
+					@if (this.isWalletRefreshed === false) {
+						<ng-container>
+							<div class="balance primary">
+								{{ wallet.balance | rai: 'nano,true' | amountsplit: 0 }}{{ wallet.balance | rai: 'nano,false' | amountsplit: 1 }}
+							</div>
+							<div class="balance converted">
+								{{ wallet.balanceFiat | fiat: svcAppSettings.settings.displayCurrency }}
+							</div>
+						</ng-container>
+					} @else {
+						<ng-template #balanceLoading>
+							<div class="balance loading">
+								<div uk-spinner="ratio: 0.5;"></div>
+							</div>
+						</ng-template>
+					}
+				<!-- noformat --></div>
 			</div>
 			<ng-container *ngFor="let account of wallet.accounts"> <!-- inactive accounts -->
 				<div
@@ -333,6 +349,7 @@
 							<app-change-rep-widget *ngIf="isConfigured"></app-change-rep-widget>
 							<app-wallet-widget></app-wallet-widget>
 							<app-unlock-wallet-dialog></app-unlock-wallet-dialog>
+							<app-set-password-dialog></app-set-password-dialog>
 						</div>
 					</div>
 				</div>

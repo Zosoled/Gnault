@@ -6,7 +6,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import {
 	AppSettingsService,
 	LedgerService,
-	NotificationService,
+	NotificationsService,
 	PowService,
 	WalletService
 } from 'app/services'
@@ -24,7 +24,7 @@ import {
 })
 
 export class WalletWidgetComponent implements OnInit {
-	private notificationService = inject(NotificationService)
+	private notificationService = inject(NotificationsService)
 	private powService = inject(PowService)
 	private translocoService = inject(TranslocoService)
 

@@ -2,13 +2,13 @@ import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core'
 import { Account } from 'libnemo'
 import { Observable } from 'rxjs'
-import { NotificationService, UtilService } from 'app/services'
+import { NotificationsService, UtilService } from 'app/services'
 import { environment } from 'environments/environment'
 
 @Injectable({ providedIn: 'root' })
 export class MusigService {
 	private util = inject(UtilService)
-	private notificationService = inject(NotificationService)
+	private notificationService = inject(NotificationsService)
 	private http = inject(HttpClient)
 
 	// The multisig wasm library can be validated by running build-or-validate_musig_wasm.sh

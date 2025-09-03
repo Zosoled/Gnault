@@ -5,7 +5,7 @@ import { Tools } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 import {
 	AppSettingsService,
-	NotificationService,
+	NotificationsService,
 	PriceService,
 	UtilService
 } from 'app/services'
@@ -25,7 +25,7 @@ export class ConverterComponent implements OnInit, OnDestroy {
 	private util = inject(UtilService)
 	settings = inject(AppSettingsService)
 	private price = inject(PriceService)
-	notifications = inject(NotificationService)
+	notifications = inject(NotificationsService)
 
 	Mnano = ''
 	raw = ''

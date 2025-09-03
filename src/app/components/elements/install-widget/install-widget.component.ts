@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
-import { NotificationService } from 'app/services'
+import { NotificationsService } from 'app/services'
 
 interface InstallEvent extends Event {
 	userChoice: Promise<{ outcome: 'accepted' | 'dismissed', platform: string }>
@@ -17,7 +17,7 @@ interface InstallEvent extends Event {
 })
 
 export class InstallWidgetComponent implements OnInit {
-	private notifications = inject(NotificationService)
+	private notifications = inject(NotificationsService)
 
 	installEvent: InstallEvent
 	showInstallPromotion = false

@@ -8,7 +8,7 @@ import { ClipboardModule } from 'ngx-clipboard'
 import {
 	LedgerService,
 	LedgerStatus,
-	NotificationService,
+	NotificationsService,
 	QrModalService,
 	UtilService,
 	WalletService
@@ -40,7 +40,7 @@ const INDEX_MAX = 4294967295
 })
 
 export class ConfigureWalletComponent {
-	private notifications = inject(NotificationService)
+	private notifications = inject(NotificationsService)
 	private qrModalService = inject(QrModalService)
 	private route = inject(Router)
 	private translocoService = inject(TranslocoService)
@@ -103,16 +103,22 @@ export class ConfigureWalletComponent {
 	}
 
 	async importExistingWallet () {
-		this.notifications.sendInfo(`Starting to scan the first 20 accounts and importing them if they have been used...`, { length: 7000 })
-		this.route.navigate(['accounts']) // load accounts and watch them update in real-time
-		await this.walletService.createWalletFromSeed(this.newPassword, this.importSeed)
-		await this.walletService.createWalletFromSeed(this.newPassword, this.importSeed)
 		this.importSeed = ''
 		this.newPassword = ''
 
+		await this.walletService.resetWallet()
+
+		// load accounts and watch them update in real-time
+		this.route.navigate(['accounts'])
+
+		this.notifications.sendInfo(`Starting to scan the first 20 accounts and importing them if they have been used...`, { length: 7000 })
+		await this.walletService.scanAccounts()
+
 		this.notifications.sendSuccess(`Successfully imported wallet!`, { length: 10000 })
 
-		// this.repService.detectChangeableReps(); // this is now called from change-rep-widget.component when new wallet
+		// this is now called from change-rep-widget.component when new wallet
+		// this.repService.detectChangeableReps()
+
 		this.walletService.informNewWallet()
 	}
 
@@ -200,7 +206,27 @@ export class ConfigureWalletComponent {
 
 	async setPasswordInit () {
 		// if importing from existing, the format check must be done prior the password page
-		if (!this.isNewWallet) {
+		if (this.isNewWallet) {
+			const req = this.walletService.createNewWallet('')
+			const { mnemonic, seed } = await req
+			this.newWalletMnemonic = mnemonic
+			this.newWalletSeed = seed
+			// Split the seed up so we can show 4 per line
+			const words = this.newWalletMnemonic.split(' ')
+			const lines = [
+				words.slice(0, 4),
+				words.slice(4, 8),
+				words.slice(8, 12),
+				words.slice(12, 16),
+				words.slice(16, 20),
+				words.slice(20, 24),
+			]
+			this.newWalletMnemonicLines = lines
+			const isUpdated = await this.walletService.requestChangePassword()
+			if (isUpdated) {
+				this.activePanel = panels.backup
+			}
+		} else {
 			if (this.selectedImportOption === 'mnemonic' || this.selectedImportOption === 'seed') {
 				if (this.selectedImportOption === 'seed') {
 					const existingSeed = this.importSeedModel.trim()
@@ -215,11 +241,7 @@ export class ConfigureWalletComponent {
 
 					// Try and decode the mnemonic
 					try {
-						const newWallet = await Wallet.load('BLAKE2b', '', mnemonic)
-						await newWallet.unlock('')
-						const newSeed = newWallet.seed
-						if (!newSeed || newSeed.length !== 64 || !this.util.nano.isValidSeed(newSeed)) return this.notifications.sendError(`Mnemonic is invalid, double check it!`)
-						this.importSeed = newSeed.toUpperCase() // Force uppercase, for consistency
+						await Wallet.load('BLAKE2b', '', mnemonic).then(wallet => wallet.destroy())
 					} catch (err) {
 						return this.notifications.sendError(`Unable to decode mnemonic, double check it!`)
 					}
@@ -269,32 +291,15 @@ export class ConfigureWalletComponent {
 				this.keyString = accounts[0].privateKey
 				this.isExpanded = false
 			}
+
+			// If a wallet already exists, confirm that the seed is saved
+			const confirmed = await this.confirmWalletOverwrite()
+			if (!confirmed) return
+			const isUpdated = await this.walletService.requestChangePassword()
+			if (isUpdated) {
+				this.activePanel = panels.backup
+			}
 		}
-
-		// If a wallet already exists, confirm that the seed is saved
-		const confirmed = await this.confirmWalletOverwrite()
-		if (!confirmed) return
-		this.activePanel = panels.password
-	}
-
-	async createNewWallet (password: string) {
-		const req = this.walletService.createNewWallet(password)
-		password = ''
-		const { mnemonic, seed } = await req
-		this.newWalletMnemonic = mnemonic
-		this.newWalletSeed = seed
-		// Split the seed up so we can show 4 per line
-		const words = this.newWalletMnemonic.split(' ')
-		const lines = [
-			words.slice(0, 4),
-			words.slice(4, 8),
-			words.slice(8, 12),
-			words.slice(12, 16),
-			words.slice(16, 20),
-			words.slice(20, 24),
-		]
-		this.newWalletMnemonicLines = lines
-		this.activePanel = panels.backup
 	}
 
 	confirmNewSeed () {
@@ -321,7 +326,7 @@ export class ConfigureWalletComponent {
 		this.walletPasswordConfirmModel = ''
 
 		if (this.isNewWallet) {
-			this.createNewWallet(this.newPassword)
+			// this.walletService.createNewWallet(this.newPassword, this.wallet.wallet)
 		} else if (this.selectedImportOption === 'mnemonic' || this.selectedImportOption === 'seed') {
 			this.importExistingWallet()
 		} else if (this.selectedImportOption === 'privateKey' || this.selectedImportOption === 'expandedKey'

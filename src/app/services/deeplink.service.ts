@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core'
 import { Router } from '@angular/router'
 import {
-	NotificationService,
+	NotificationsService,
 	RemoteSignService,
 	UtilService,
 	WalletService
@@ -10,7 +10,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class DeeplinkService {
 	private router = inject(Router)
-	private notifcationService = inject(NotificationService)
+	private notifcationService = inject(NotificationsService)
 	private util = inject(UtilService)
 	private walletService = inject(WalletService)
 	private remoteSignService = inject(RemoteSignService)

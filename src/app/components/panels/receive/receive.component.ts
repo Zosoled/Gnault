@@ -22,7 +22,7 @@ import {
 	AddressBookService,
 	AppSettingsService,
 	NanoBlockService,
-	NotificationService,
+	NotificationsService,
 	PriceService,
 	UtilService,
 	WalletService,
@@ -54,7 +54,7 @@ import {
 export class ReceiveComponent implements OnInit, OnDestroy {
 	private addressBook = inject(AddressBookService)
 	private nanoBlock = inject(NanoBlockService)
-	private notificationService = inject(NotificationService)
+	private notificationService = inject(NotificationsService)
 	private route = inject(Router)
 	private translocoService = inject(TranslocoService)
 	private walletService = inject(WalletService)

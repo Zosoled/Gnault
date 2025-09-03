@@ -10,7 +10,7 @@ import {
 	ApiService,
 	AppSettingsService,
 	DesktopService,
-	NotificationService
+	NotificationsService
 } from 'app/services'
 import { environment } from 'environments/environment'
 
@@ -47,7 +47,7 @@ const zeroBlock = '0000000000000000000000000000000000000000000000000000000000000
 export class LedgerService {
 	private api = inject(ApiService)
 	private desktop = inject(DesktopService)
-	private notifications = inject(NotificationService)
+	private notifications = inject(NotificationsService)
 	private appSettings = inject(AppSettingsService)
 
 	walletPrefix = `44'/165'/`

@@ -5,7 +5,7 @@ import { Router } from '@angular/router'
 import { BehaviorSubject } from 'rxjs'
 import {
 	AddressBookService,
-	NotificationService,
+	NotificationsService,
 	QrModalService,
 	RemoteSignService,
 	UtilService
@@ -24,7 +24,7 @@ import {
 export class RemoteSigningComponent implements OnInit {
 	private util = inject(UtilService)
 	private router = inject(Router)
-	private notificationService = inject(NotificationService)
+	private notificationService = inject(NotificationsService)
 	private remoteSignService = inject(RemoteSignService)
 	private qrModalService = inject(QrModalService)
 	private addressBookService = inject(AddressBookService)

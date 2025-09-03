@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core'
-import { NotificationService } from 'app/services'
+import { NotificationsService } from 'app/services'
 
 @Component({
 	selector: 'app-notifications',
@@ -8,7 +8,7 @@ import { NotificationService } from 'app/services'
 })
 
 export class NotificationsComponent implements OnInit {
-	private notificationService = inject(NotificationService)
+	private notificationService = inject(NotificationsService)
 
 	notificationLength = 5000
 	notifications: any[] = []

@@ -20,7 +20,7 @@ import {
 	ApiService,
 	AppSettingsService,
 	NanoBlockService,
-	NotificationService,
+	NotificationsService,
 	PriceService,
 	QrModalService,
 	UtilService,
@@ -52,7 +52,7 @@ export class SendComponent implements OnInit {
 	private route = inject(ActivatedRoute)
 	private walletService = inject(WalletService)
 	private addressBookService = inject(AddressBookService)
-	private notificationService = inject(NotificationService)
+	private notificationService = inject(NotificationsService)
 	private nodeApi = inject(ApiService)
 	private nanoBlock = inject(NanoBlockService)
 	price = inject(PriceService)

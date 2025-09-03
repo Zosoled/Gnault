@@ -5,7 +5,7 @@ import { BarcodeFormat } from '@zxing/library'
 import { ZXingScannerModule } from '@zxing/ngx-scanner'
 import { Wallet } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
-import { NotificationService, UtilService } from 'app/services'
+import { NotificationsService, UtilService } from 'app/services'
 
 export type QRType = 'account' | 'hash' | 'mnemonic' | 'generic'
 
@@ -25,7 +25,7 @@ export class QrModalComponent implements OnInit {
 	@Input() type: QRType
 
 	activeModal = inject(NgbActiveModal)
-	private notifcationService = inject(NotificationService)
+	private notifcationService = inject(NotificationsService)
 	private util = inject(UtilService)
 
 	availableDevices: MediaDeviceInfo[]

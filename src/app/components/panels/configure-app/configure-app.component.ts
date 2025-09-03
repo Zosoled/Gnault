@@ -10,7 +10,7 @@ import {
 	AppSettingsService,
 	NinjaService,
 	NodeService,
-	NotificationService,
+	NotificationsService,
 	PowService,
 	PoWSource,
 	PriceService,
@@ -36,7 +36,7 @@ import {
 
 export class ConfigureAppComponent implements OnInit {
 	private walletService = inject(WalletService)
-	private notifications = inject(NotificationService)
+	private notifications = inject(NotificationsService)
 	private appSettings = inject(AppSettingsService)
 	private addressBook = inject(AddressBookService)
 	private pow = inject(PowService)

@@ -1,11 +1,11 @@
 import { Injectable, inject } from '@angular/core'
 import { Router } from '@angular/router'
-import { NotificationService, UtilService } from 'app/services'
+import { NotificationsService, UtilService } from 'app/services'
 
 @Injectable({ providedIn: 'root' })
 export class RemoteSignService {
 	private router = inject(Router)
-	private notifcationService = inject(NotificationService)
+	private notifcationService = inject(NotificationsService)
 	private util = inject(UtilService)
 
 	navigateSignBlock (url) {
