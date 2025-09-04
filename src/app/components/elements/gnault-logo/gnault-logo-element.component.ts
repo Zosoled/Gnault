@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common'
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, ViewChild } from '@angular/core'
-import { createIcon } from 'assets/lib/nanoidenticons.min.cjs'
+import { createIcon } from 'assets/nanoidenticons.min.cjs'
 
 @Component({
 	selector: 'app-nano-identicon',

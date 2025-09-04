@@ -13,8 +13,8 @@ export class MusigService {
 
 	// The multisig wasm library can be validated by running build-or-validate_musig_wasm.sh
 	private wasmURL = environment.desktop
-		? '../../../resources/app.asar/dist/assets/lib/musig-nano/musig_nano.wasm.b64'
-		: '../../../assets/lib/musig-nano/musig_nano.wasm.b64'
+		? '../../../resources/app.asar/dist/assets/musig-nano/musig_nano.wasm.b64'
+		: '../../../assets/musig-nano/musig_nano.wasm.b64'
 
 	wasm = null
 	wasmErrors = ['No error', 'Internal error', 'Invalid parameter(s)', 'Invalid Participant Input']
