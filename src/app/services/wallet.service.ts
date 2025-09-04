@@ -316,7 +316,6 @@ export class WalletService {
 			walletJson.accounts = newAccounts
 		}
 
-		debugger
 		localStorage.setItem(storeKey, JSON.stringify(walletJson))
 
 		return
@@ -990,7 +989,6 @@ export class WalletService {
 	}
 
 	async generateWalletExport () {
-		debugger
 		const data: any = {
 			type: this.wallet.type,
 			accounts: this.wallet.accounts.map(a => ({ id: a.id, index: a.index })),
