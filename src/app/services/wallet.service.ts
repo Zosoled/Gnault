@@ -326,13 +326,17 @@ export class WalletService {
 		this.resetWallet()
 
 		const walletData = localStorage.getItem(storeKey)
-		if (!walletData) return this.wallet
+		if (!walletData) {
+			const wallets = await Wallet.restore()
+			this.wallet.wallet = wallets[0]
+			return this.wallet
+		}
 
 		const walletJson = JSON.parse(walletData)
-		const wallet = await Wallet.restore(walletJson.id)
+		this.wallet.wallet = await Wallet.restore(walletJson.id)
 
-		if (wallet.type === 'Ledger') {
-			wallet.unlock()
+		if (this.wallet.wallet.type === 'Ledger') {
+			this.wallet.wallet.unlock()
 		}
 
 		if (walletJson.accounts && walletJson.accounts.length) {
