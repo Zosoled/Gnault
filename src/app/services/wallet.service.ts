@@ -316,13 +316,13 @@ export class WalletService {
 			walletJson.accounts = newAccounts
 		}
 
+		debugger
 		localStorage.setItem(storeKey, JSON.stringify(walletJson))
 
 		return
 	}
 
 	async loadStoredWallet () {
-		debugger
 		this.resetWallet()
 
 		const walletData = localStorage.getItem(storeKey)
@@ -407,7 +407,7 @@ export class WalletService {
 		return `https://gnault.cc/import-wallet#${base64Data}`
 	}
 
-	lockWallet () {
+	async lockWallet () {
 		try {
 			this.wallet.wallet.lock()
 
@@ -420,7 +420,7 @@ export class WalletService {
 			this.wallet.locked = true
 			this.wallet.locked$.next(true)
 
-			this.saveWalletExport() // Save so that a refresh gives you a locked wallet
+			await this.saveWalletExport() // Save so that a refresh gives you a locked wallet
 
 			return true
 		} catch (err) {
@@ -445,7 +445,7 @@ export class WalletService {
 			this.processReceivableBlocks()
 
 			// Save so a refresh also gives you your unlocked wallet?
-			this.saveWalletExport()
+			await this.saveWalletExport()
 
 			return true
 		} catch (err) {
@@ -459,7 +459,7 @@ export class WalletService {
 			await this.wallet.wallet.update(password)
 			this.wallet.passwordUpdated$.next(true)
 			// Save so a refresh also gives you your unlocked wallet?
-			this.saveWalletExport()
+			await this.saveWalletExport()
 			return true
 		} catch (err) {
 			console.warn(err)
@@ -546,7 +546,7 @@ export class WalletService {
 		const account = await Account.load({ privateKey: keyData }, 'private')
 		this.wallet.accounts.push(account)
 		await this.reloadBalances()
-		this.saveWalletExport()
+		await this.saveWalletExport()
 	}
 
 	async createLedgerAccount (index) {
@@ -850,7 +850,7 @@ export class WalletService {
 
 		this.websocket.subscribeAccounts([newAccount.id])
 
-		this.saveWalletExport()
+		await this.saveWalletExport()
 
 		return newAccount
 	}
@@ -868,7 +868,7 @@ export class WalletService {
 
 		// Reload the balances, save new wallet state
 		await this.reloadBalances()
-		this.saveWalletExport()
+		await this.saveWalletExport()
 
 		return true
 	}
@@ -972,8 +972,8 @@ export class WalletService {
 		setTimeout(() => this.processReceivableBlocks(), 1500)
 	}
 
-	saveWalletExport () {
-		const exportData = this.generateWalletExport()
+	async saveWalletExport () {
+		const exportData = await this.generateWalletExport()
 		switch (this.appSettings.settings.walletStore) {
 			case 'none':
 				this.removeWalletData()
@@ -990,6 +990,7 @@ export class WalletService {
 	}
 
 	async generateWalletExport () {
+		debugger
 		const data: any = {
 			type: this.wallet.type,
 			accounts: this.wallet.accounts.map(a => ({ id: a.id, index: a.index })),

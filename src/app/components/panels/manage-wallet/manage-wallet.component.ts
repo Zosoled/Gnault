@@ -95,7 +95,7 @@ export class ManageWalletComponent implements OnInit {
 				return
 			}
 		}
-		this.walletService.saveWalletExport()
+		await this.walletService.saveWalletExport()
 		this.newPassword = ''
 		this.confirmPassword = ''
 		this.notifications.sendSuccess(`Wallet password successfully updated`)
