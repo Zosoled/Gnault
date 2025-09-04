@@ -14,6 +14,7 @@ import { SwUpdate } from '@angular/service-worker'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import {
 	ChangeRepWidgetComponent,
+	GnaultLogoElementComponent,
 	InstallWidgetComponent,
 	NotificationsComponent,
 	SetPasswordDialogComponent,
@@ -59,7 +60,8 @@ import { environment } from 'environments/environment'
 		SetPasswordDialogComponent,
 		TranslocoPipe,
 		WalletWidgetComponent,
-		UnlockWalletDialogComponent
+		UnlockWalletDialogComponent,
+		GnaultLogoElementComponent
 	]
 })
 

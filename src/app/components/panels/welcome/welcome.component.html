@@ -9,12 +9,7 @@
 				class="uk-width-1-1"
 				style="margin-top: 45px;"
 			>
-				<img
-					[src]="( settingsService.settings.lightModeEnabled ? 'assets/img/gnault-logo.svg' : 'assets/img/gnault-logo.svg' )"
-					width="250px"
-					style="display: block; margin: 0 auto 20px auto;"
-					alt="Logo"
-				/>
+				<app-gnault-logo-element></app-gnault-logo-element>
 				<span class="uk-text-lead">{{ 'welcome.a-secure-open-source-wallet-for-nano' | transloco }}</span><br>
 			</div>
 			<div

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { RouterLink } from '@angular/router'
 import { TranslocoPipe } from '@jsverse/transloco'
+import { GnaultLogoElementComponent } from 'app/components'
 import { AppSettingsService, WalletService } from 'app/services'
 import { environment } from 'environments/environment'
 
@@ -11,6 +12,7 @@ import { environment } from 'environments/environment'
 	styleUrls: ['./welcome.component.css'],
 	imports: [
 		CommonModule,
+		GnaultLogoElementComponent,
 		RouterLink,
 		TranslocoPipe
 	]

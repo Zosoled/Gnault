@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
-import { NanoIdenticonComponent } from 'app/components/elements'
+import { GnaultLogoElementComponent } from 'app/components/elements'
 
-describe('NanoIdenticonComponent', () => {
-	let component: NanoIdenticonComponent
-	let fixture: ComponentFixture<NanoIdenticonComponent>
+describe('GnaultLogoElementComponent', () => {
+	let component: GnaultLogoElementComponent
+	let fixture: ComponentFixture<GnaultLogoElementComponent>
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			declarations: [NanoIdenticonComponent]
+			declarations: [GnaultLogoElementComponent]
 		})
 			.compileComponents()
 	}))
 
 	beforeEach(() => {
-		fixture = TestBed.createComponent(NanoIdenticonComponent)
+		fixture = TestBed.createComponent(GnaultLogoElementComponent)
 		component = fixture.componentInstance
 		fixture.detectChanges()
 	})
