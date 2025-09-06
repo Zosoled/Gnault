@@ -60,8 +60,8 @@ export class SignComponent implements OnInit {
 	private qrModalService = inject(QrModalService)
 	private musigService = inject(MusigService)
 
-	price = inject(PriceService)
-	settings = inject(AppSettingsService)
+	svcPrice = inject(PriceService)
+	svcAppSettings = inject(AppSettingsService)
 
 	paramsString = ''
 	activePanel = 'error'
@@ -508,8 +508,8 @@ export class SignComponent implements OnInit {
 
 	async prepareTransaction () {
 		// Determine fiat value of the amount (if not offline mode)
-		if (this.settings.settings.serverAPI) {
-			this.amountFiat = parseFloat(Tools.convert(this.rawAmount, 'raw', 'mnano')) * this.price.price.lastPrice
+		if (this.svcAppSettings.settings.serverAPI) {
+			this.amountFiat = parseFloat(Tools.convert(this.rawAmount, 'raw', 'mnano')) * this.svcPrice.lastPrice
 		}
 
 		this.fromAddressBook = this.addressBookService.getAccountName(this.fromAccountID)

@@ -189,14 +189,14 @@
 											<div
 												class="uk-width-1-1"
 												style="margin-top: 10px;"
-												*ngIf="settings.settings.displayCurrency"
+												*ngIf="svcAppSettings.settings.displayCurrency"
 											>
 												<div class="uk-width-1-1 uk-inline">
 													<a
 														class="uk-form-icon uk-link-reset uk-link-muted fiat-currency-ticker"
 														uk-tooltip
-														title="Last Price: {{ price.price.lastPrice | fiat: settings.settings.displayCurrency }} / XNO"
-													>{{ settings.settings.displayCurrency | currencySymbol }}</a>
+														title="Last Price: {{ svcPrice.lastPrice | fiat: svcAppSettings.settings.displayCurrency }} / XNO"
+													>{{ svcAppSettings.settings.displayCurrency | currencySymbol }}</a>
 													<input
 														[(ngModel)]="amountFiat"
 														(input)="syncNanoPrice()"
@@ -205,7 +205,7 @@
 														id="form-horizontal-text-fiat"
 														type="number"
 														step="any"
-														placeholder="Amount of {{ settings.settings.displayCurrency }}"
+														placeholder="Amount of {{ svcAppSettings.settings.displayCurrency }}"
 													>
 												</div>
 											</div>
@@ -276,13 +276,13 @@
 						<div
 							style="margin: 8px 0 -1px 0;"
 							class="text-half-muted"
-							*ngIf="settings.settings.displayCurrency"
-						>{{ amountFiat | fiat: settings.settings.displayCurrency }}</div>
+							*ngIf="svcAppSettings.settings.displayCurrency"
+						>{{ amountFiat | fiat: svcAppSettings.settings.displayCurrency }}</div>
 						<div
 							style="margin: 1px 0 -1px 0;"
 							class="uk-text-muted"
-							*ngIf="settings.settings.displayCurrency"
-						>{{ price.price.lastPrice | fiat: settings.settings.displayCurrency }} / XNO</div>
+							*ngIf="svcAppSettings.settings.displayCurrency"
+						>{{ svcPrice.lastPrice | fiat: svcAppSettings.settings.displayCurrency }} / XNO</div>
 					</div>
 				</div>
 				<div
@@ -293,7 +293,7 @@
 					<div class="account-snippet uk-text-truncate">
 						<div
 							class="uk-card uk-card-default uk-text-truncate"
-							[class.identicons-enabled]="(settings.settings.identiconsStyle !== 'none')"
+							[class.identicons-enabled]="(svcAppSettings.settings.identiconsStyle !== 'none')"
 						>
 							<div class="uk-card-header">
 								<div class="snippet-caption uk-text-small text-half-muted">From Account</div>
@@ -311,9 +311,9 @@
 											<app-nano-identicon
 												scale="12"
 												[accountID]="fromAccountID"
-												[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+												[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 												class="nano-identicon"
-												*ngIf="(settings.settings.identiconsStyle !== 'none')"
+												*ngIf="(svcAppSettings.settings.identiconsStyle !== 'none')"
 											></app-nano-identicon>
 											<div
 												class="account-label uk-text-truncate"
@@ -372,7 +372,7 @@
 					<div class="account-snippet uk-text-truncate">
 						<div
 							class="uk-card uk-card-default uk-text-truncate"
-							[class.identicons-enabled]="(settings.settings.identiconsStyle !== 'none')"
+							[class.identicons-enabled]="(svcAppSettings.settings.identiconsStyle !== 'none')"
 						>
 							<div class="uk-card-header">
 								<div class="snippet-caption uk-text-small text-half-muted">To Account</div>
@@ -390,9 +390,9 @@
 											<app-nano-identicon
 												scale="12"
 												[accountID]="getDestinationID()"
-												[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+												[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 												class="nano-identicon"
-												*ngIf="(settings.settings.identiconsStyle !== 'none')"
+												*ngIf="(svcAppSettings.settings.identiconsStyle !== 'none')"
 											></app-nano-identicon>
 											<div
 												class="account-label uk-text-truncate"

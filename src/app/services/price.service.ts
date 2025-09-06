@@ -12,6 +12,7 @@ export class PriceService {
 	#lastPrice$: BehaviorSubject<number> = new BehaviorSubject(1)
 	get lastPrice$ (): BehaviorSubject<number> { return this.#lastPrice$ }
 
+	currencies: string[] = []
 	lastPrice: number = 0
 	lastPriceBtc: number = 0
 
@@ -28,6 +29,7 @@ export class PriceService {
 		}
 
 		const quote = response.market_data.current_price
+		this.currencies = Object.keys(quote)
 		this.lastPrice = quote[currency.toLowerCase()]
 		this.lastPriceBtc = quote.btc
 

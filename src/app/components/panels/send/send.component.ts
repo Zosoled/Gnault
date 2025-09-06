@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common'
-import { HttpClient } from '@angular/common/http'
 import { Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, RouterLink } from '@angular/router'
@@ -50,28 +49,28 @@ import { environment } from 'environments/environment'
 
 export class SendComponent implements OnInit {
 	private route = inject(ActivatedRoute)
-	private walletService = inject(WalletService)
+	private svcWallet = inject(WalletService)
 	private addressBookService = inject(AddressBookService)
 	private notificationService = inject(NotificationsService)
 	private nodeApi = inject(ApiService)
 	private nanoBlock = inject(NanoBlockService)
-	price = inject(PriceService)
 	private workPool = inject(WorkPoolService)
-	settings = inject(AppSettingsService)
 	private util = inject(UtilService)
 	private qrModalService = inject(QrModalService)
-	private http = inject(HttpClient)
 	private translocoService = inject(TranslocoService)
+
+	svcPrice = inject(PriceService)
+	svcAppSettings = inject(AppSettingsService)
 
 	activePanel = 'send'
 	sendDestinationType = 'external-address'
-	accounts = this.walletService.accounts
+	accounts = this.svcWallet.accounts
 	addressBookResults$ = new BehaviorSubject([])
 	showAddressBook = false
 	addressBookMatch = ''
 
 	amount: bigint = 0n
-	get amountFiat (): number { return this.amountNano * this.price.price.lastPrice }
+	get amountFiat (): number { return this.amountNano * this.svcPrice.lastPrice }
 	get amountNano (): number { return parseFloat(Tools.convert(this.amount, 'raw', 'nano')) }
 
 	fromAccount: any = {}
@@ -96,7 +95,7 @@ export class SendComponent implements OnInit {
 		this.fromAccountID = this.accounts[0]?.id ?? ''
 
 		// Update selected account if changed in the sidebar
-		this.walletService.selectedAccount$.subscribe(async acc => {
+		this.svcWallet.selectedAccount$.subscribe(async acc => {
 			if (this.activePanel !== 'send') {
 				// Transaction details already finalized
 				return
@@ -118,8 +117,8 @@ export class SendComponent implements OnInit {
 		})
 
 		// Set the account selected in the sidebar as default
-		if (this.walletService.selectedAccount !== null) {
-			this.fromAccountID = this.walletService.selectedAccount.id
+		if (this.svcWallet.selectedAccount !== null) {
+			this.fromAccountID = this.svcWallet.selectedAccount.id
 		} else {
 			// If "total balance" is selected in the sidebar, use the first account in the wallet that has a balance
 			this.findFirstAccount()
@@ -141,8 +140,8 @@ export class SendComponent implements OnInit {
 
 	async findFirstAccount () {
 		// Load balances before we try to find the right account
-		if (this.walletService.balance === 0n) {
-			await this.walletService.reloadBalances()
+		if (this.svcWallet.balance === 0n) {
+			await this.svcWallet.reloadBalances()
 		}
 
 		// Look for the first account that has a balance
@@ -161,7 +160,7 @@ export class SendComponent implements OnInit {
 	async syncFiatPrice () {
 		console.log(`syncFiatPrice()`)
 		console.log(`this.amountFiat: ${this.amount}`)
-		console.log(`this.price.price.lastPrice: ${this.price.price.lastPrice}`)
+		console.log(`this.price.price.lastPrice: ${this.svcPrice.lastPrice}`)
 		if (!this.validateAmount() || Number(this.amount) === 0) {
 			return
 		}
@@ -177,13 +176,13 @@ export class SendComponent implements OnInit {
 	async syncNanoPrice () {
 		console.log(`syncNanoPrice()`)
 		console.log(`this.amountFiat: ${this.amountFiat}`)
-		console.log(`this.price.price.lastPrice: ${this.price.price.lastPrice}`)
+		console.log(`this.price.price.lastPrice: ${this.svcPrice.lastPrice}`)
 		if (!this.amountFiat) {
 			this.amount = 0n
 			return
 		}
 		if (!this.util.string.isNumeric(this.amountFiat)) return
-		const fx = this.amountFiat / this.price.price.lastPrice
+		const fx = this.amountFiat / this.svcPrice.lastPrice
 		const raw = await Tools.convert(fx, 'nano', 'raw')
 		this.amount = BigInt(raw)
 	}
@@ -262,7 +261,7 @@ export class SendComponent implements OnInit {
 	}
 
 	getAccountLabel (accountID, defaultLabel) {
-		const walletAccount = this.walletService.accounts.find(a => a.id === accountID)
+		const walletAccount = this.svcWallet.accounts.find(a => a.id === accountID)
 		if (walletAccount == null) {
 			return defaultLabel
 		}
@@ -284,7 +283,7 @@ export class SendComponent implements OnInit {
 			return this.toAccountID
 		}
 		// 'own-address'
-		const walletAccount = this.walletService.accounts.find(a => a.id === this.toOwnAccountID)
+		const walletAccount = this.svcWallet.accounts.find(a => a.id === this.toOwnAccountID)
 		if (!walletAccount) {
 			// Unable to find receiving account in wallet
 			return ''
@@ -346,13 +345,13 @@ export class SendComponent implements OnInit {
 	}
 
 	async confirmTransaction () {
-		const wallet = this.walletService.wallet
-		const walletAccount = this.walletService.accounts.find(a => a.id === this.fromAccountID)
+		const wallet = this.svcWallet.wallet
+		const walletAccount = this.svcWallet.accounts.find(a => a.id === this.fromAccountID)
 		if (!walletAccount) {
 			throw new Error(`Unable to find sending account in wallet`)
 		}
-		if (this.walletService.isLocked) {
-			const wasUnlocked = await this.walletService.requestUnlock()
+		if (this.svcWallet.isLocked) {
+			const wasUnlocked = await this.svcWallet.requestUnlock()
 			if (wasUnlocked === false) {
 				return
 			}
@@ -361,7 +360,7 @@ export class SendComponent implements OnInit {
 		try {
 			const destinationID = this.getDestinationID()
 			const newHash = await this.nanoBlock.generateSend(wallet, walletAccount, destinationID,
-				this.amount, this.walletService.isLedger)
+				this.amount, this.svcWallet.isLedger)
 			if (newHash) {
 				this.notificationService.removeNotification('success-send')
 				this.notificationService.sendSuccess(`Successfully sent ${this.amountNano} XNO!`, { identifier: 'success-send' })
@@ -373,7 +372,7 @@ export class SendComponent implements OnInit {
 				this.fromAddressBook = ''
 				this.toAddressBook = ''
 				this.addressBookMatch = ''
-			} else if (!this.walletService.isLedger) {
+			} else if (!this.svcWallet.isLedger) {
 				this.notificationService.sendError(`There was an error sending your transaction, please try again.`)
 			}
 		} catch (err) {
@@ -383,7 +382,7 @@ export class SendComponent implements OnInit {
 	}
 
 	async setMaxAmount () {
-		const walletAccount = this.walletService.accounts
+		const walletAccount = this.svcWallet.accounts
 			.find(a => a.id === this.fromAccountID)
 		if (!walletAccount) {
 			return

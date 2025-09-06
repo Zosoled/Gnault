@@ -60,9 +60,9 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	private walletService = inject(WalletService)
 	private websocket = inject(WebsocketService)
 
-	price = inject(PriceService)
-	settings = inject(AppSettingsService)
-	util = inject(UtilService)
+	svcPrice = inject(PriceService)
+	svcAppSettings = inject(AppSettingsService)
+	svcUtil = inject(UtilService)
 
 	nano = 1000000000000000000000000
 	accounts = this.walletService.accounts
@@ -250,9 +250,9 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			this.changeQRAmount()
 			return
 		}
-		const precision = this.settings.settings.displayCurrency === 'BTC' ? 6 : 2
+		const precision = this.svcAppSettings.settings.displayCurrency === 'BTC' ? 6 : 2
 		const rawAmount = Tools.convert(this.amountNano || 0, 'mnano', 'raw')
-		const fiatAmount = parseFloat(Tools.convert(rawAmount, 'raw', 'mnano')) * this.price.price.lastPrice
+		const fiatAmount = parseFloat(Tools.convert(rawAmount, 'raw', 'mnano')) * this.svcPrice.lastPrice
 
 		this.amountFiat = fiatAmount.toFixed(precision)
 		this.changeQRAmount(rawAmount)
@@ -265,10 +265,10 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			this.changeQRAmount()
 			return
 		}
-		const amount = parseFloat(this.amountFiat) / this.price.price.lastPrice
+		const amount = parseFloat(this.amountFiat) / this.svcPrice.lastPrice
 		const raw = Tools.convert(amount, 'mnano', 'raw')
-		const nanoRounded = parseFloat(this.util.nano.rawToMnano(raw)).toFixed(6)
-		const rawRounded = this.util.nano.nanoToRaw(nanoRounded)
+		const nanoRounded = parseFloat(this.svcUtil.nano.rawToMnano(raw)).toFixed(6)
+		const rawRounded = this.svcUtil.nano.nanoToRaw(nanoRounded)
 
 		this.amountNano = nanoRounded
 		this.changeQRAmount(rawRounded)
@@ -280,7 +280,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			this.validNano = true
 			return true
 		}
-		this.validNano = this.amountNano !== '-' && (this.util.account.isValidNanoAmount(this.amountNano) || Number(this.amountNano) === 0)
+		this.validNano = this.amountNano !== '-' && (this.svcUtil.account.isValidNanoAmount(this.amountNano) || Number(this.amountNano) === 0)
 		return this.validNano
 	}
 
@@ -289,7 +289,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			this.validFiat = true
 			return true
 		}
-		this.validFiat = this.util.string.isNumeric(this.amountFiat) && Number(this.amountFiat) >= 0
+		this.validFiat = this.svcUtil.string.isNumeric(this.amountFiat) && Number(this.amountFiat) >= 0
 		return this.validFiat
 	}
 
@@ -322,7 +322,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	async changeQRAmount (raw?: bigint | string) {
 		this.qrAmount = null
 		let qrCode = null
-		if (raw && this.util.account.isValidAmount(raw)) {
+		if (raw && this.svcUtil.account.isValidAmount(raw)) {
 			this.qrAmount = BigInt(raw)
 		}
 		if (this.qrAccount.length > 1) {

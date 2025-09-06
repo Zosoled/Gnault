@@ -69,42 +69,42 @@ export class ConfigureAppComponent implements OnInit {
 	]
 	selectedStorage = this.storageOptions[0].value
 
-	currencies = [
-		{ name: this.translocoService.translate('configure-app.currencies.none'), value: '' },
-		{ name: 'USD - US Dollar', value: 'USD' },
-		{ name: 'BTC - Bitcoin', value: 'BTC' },
-		{ name: 'AUD - Australian Dollar', value: 'AUD' },
-		{ name: 'BRL - Brazilian Real', value: 'BRL' },
-		{ name: 'CAD - Canadian Dollar', value: 'CAD' },
-		{ name: 'CHF - Swiss Franc', value: 'CHF' },
-		{ name: 'CLP - Chilean Peso', value: 'CLP' },
-		{ name: 'CNY - Chinese Yuan', value: 'CNY' },
-		{ name: 'CZK - Czech Koruna', value: 'CZK' },
-		{ name: 'DKK - Danish Krown', value: 'DKK' },
-		{ name: 'EUR - Euro', value: 'EUR' },
-		{ name: 'GBP - British Pound', value: 'GBP' },
-		{ name: 'HKD - Hong Kong Dollar', value: 'HKD' },
-		{ name: 'HUF - Hungarian Forint', value: 'HUF' },
-		{ name: 'IDR - Indonesian Rupiah', value: 'IDR' },
-		{ name: 'ILS - Israeli New Shekel', value: 'ILS' },
-		{ name: 'INR - Indian Rupee', value: 'INR' },
-		{ name: 'JPY - Japanese Yen', value: 'JPY' },
-		{ name: 'KRW - South Korean Won', value: 'KRW' },
-		{ name: 'MXN - Mexican Peso', value: 'MXN' },
-		{ name: 'MYR - Malaysian Ringgit', value: 'MYR' },
-		{ name: 'NOK - Norwegian Krone', value: 'NOK' },
-		{ name: 'NZD - New Zealand Dollar', value: 'NZD' },
-		{ name: 'PHP - Philippine Piso', value: 'PHP' },
-		{ name: 'PKR - Pakistani Rupee', value: 'PKR' },
-		{ name: 'PLN - Polish Zloty', value: 'PLN' },
-		{ name: 'RUB - Russian Ruble', value: 'RUB' },
-		{ name: 'SEK - Swedish Krona', value: 'SEK' },
-		{ name: 'SGD - Singapore Dollar', value: 'SGD' },
-		{ name: 'THB - Thai Baht', value: 'THB' },
-		{ name: 'TRY - Turkish Lira', value: 'TRY' },
-		{ name: 'TWD - New Taiwan Dollar', value: 'TWD' },
-		{ name: 'ZAR - South African Rand', value: 'ZAR' },
-	]
+	currencies: Map<string, string> = new Map<string, string>([
+		['', this.translocoService.translate('configure-app.currencies.none')],
+		['usd', 'USD - US Dollar'],
+		['btc', 'BTC - Bitcoin'],
+		['aud', 'AUD - Australian Dollar'],
+		['brl', 'BRL - Brazilian Real'],
+		['cad', 'CAD - Canadian Dollar'],
+		['chf', 'CHF - Swiss Franc'],
+		['clp', 'CLP - Chilean Peso'],
+		['cny', 'CNY - Chinese Yuan'],
+		['czk', 'CZK - Czech Koruna'],
+		['dkk', 'DKK - Danish Krown'],
+		['eur', 'EUR - Euro'],
+		['gbp', 'GBP - British Pound'],
+		['hkd', 'HKD - Hong Kong Dollar'],
+		['huf', 'HUF - Hungarian Forint'],
+		['idr', 'IDR - Indonesian Rupiah'],
+		['ils', 'ILS - Israeli New Shekel'],
+		['inr', 'INR - Indian Rupee'],
+		['jpy', 'JPY - Japanese Yen'],
+		['krw', 'KRW - South Korean Won'],
+		['mxn', 'MXN - Mexican Peso'],
+		['myr', 'MYR - Malaysian Ringgit'],
+		['nok', 'NOK - Norwegian Krone'],
+		['nzd', 'NZD - New Zealand Dollar'],
+		['php', 'PHP - Philippine Piso'],
+		['pkr', 'PKR - Pakistani Rupee'],
+		['pln', 'PLN - Polish Zloty'],
+		['rub', 'RUB - Russian Ruble'],
+		['sek', 'SEK - Swedish Krona'],
+		['sgd', 'SGD - Singapore Dollar'],
+		['thb', 'THB - Thai Baht'],
+		['try', 'TRY - Turkish Lira'],
+		['twd', 'TWD - New Taiwan Dollar'],
+		['zar', 'ZAR - South African Rand']
+	])
 	selectedCurrency = this.currencies[0].value
 
 	nightModeOptions = [
@@ -177,6 +177,7 @@ export class ConfigureAppComponent implements OnInit {
 	showServerValues = () => this.selectedServer && this.selectedServer !== 'random' && this.selectedServer !== 'offline'
 	showStatValues = () => this.selectedServer && this.selectedServer !== 'offline'
 	showServerConfigs = () => this.selectedServer && this.selectedServer === 'custom'
+
 	async ngOnInit () {
 		this.loadFromSettings()
 		this.updateNodeStats()
@@ -259,8 +260,7 @@ export class ConfigureAppComponent implements OnInit {
 		const matchingLanguage = this.languages.find(language => language.id === settings.language)
 		this.selectedLanguage = matchingLanguage?.id || this.languages[0].id
 
-		const matchingCurrency = this.currencies.find(d => d.value === settings.displayCurrency)
-		this.selectedCurrency = matchingCurrency.value || this.currencies[0].value
+		this.loadCurrencies()
 
 		const nightModeOptionString = settings.lightModeEnabled
 			? 'disabled'
@@ -297,6 +297,18 @@ export class ConfigureAppComponent implements OnInit {
 		if (this.defaultRepresentative) {
 			this.validateRepresentative()
 		}
+	}
+
+	async loadCurrencies (): Promise<void> {
+		await this.svcPrice.fetchPrice()
+		this.svcPrice.currencies.forEach(currency => {
+			if (this.currencies.get(currency) === undefined) {
+				const currencyName = new Intl.DisplayNames(['en'], { type: 'currency' }).of(currency)
+				this.currencies.set(currency, `${currency.toUpperCase()} - ${currencyName}`)
+			}
+		})
+		const matchingCurrency = this.currencies.get(this.appSettings.settings.displayCurrency)
+		this.selectedCurrency = matchingCurrency || this.currencies[0].value
 	}
 
 	async updateDisplaySettings () {

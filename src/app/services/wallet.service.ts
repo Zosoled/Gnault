@@ -578,7 +578,7 @@ export class WalletService {
 	}
 
 	reloadFiatBalances () {
-		const fiatPrice = this.svcPrice.price.lastPrice
+		const fiatPrice = this.svcPrice.lastPrice
 
 		this.accounts.forEach(account => {
 			account.balanceFiat = parseFloat(Tools.convert(account.balance, 'raw', 'nano')) * fiatPrice
@@ -597,7 +597,7 @@ export class WalletService {
 		if (this.isBalanceUpdating) return
 
 		this.isBalanceUpdating = true
-		const fiatPrice = this.svcPrice.price.lastPrice
+		const fiatPrice = this.svcPrice.lastPrice
 
 		const accountIDs = this.accounts.map(a => a.id)
 		const accounts = await this.svcApi.accountsBalances(accountIDs)

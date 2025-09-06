@@ -122,14 +122,14 @@
 								</div>
 								<div
 									style="margin-top: 10px;"
-									*ngIf="settings.settings.displayCurrency"
+									*ngIf="svcAppSettings.settings.displayCurrency"
 								>
 									<div class="uk-width-1-1 uk-inline">
 										<a
 											class="uk-form-icon uk-link-reset uk-link-muted fiat-currency-ticker"
 											uk-tooltip
-											title="Last Price: {{ price.price.lastPrice | fiat: settings.settings.displayCurrency }} / XNO"
-										>{{ settings.settings.displayCurrency | currencySymbol }}</a>
+											title="Last Price: {{ svcPrice.lastPrice | fiat: svcAppSettings.settings.displayCurrency }} / XNO"
+										>{{ svcAppSettings.settings.displayCurrency | currencySymbol }}</a>
 										<input
 											[(ngModel)]="amountFiat"
 											[ngClass]="{ 'uk-form-danger': !validFiat }"
@@ -141,7 +141,7 @@
 											id="form-horizontal-text-fiat"
 											type="number"
 											step="any"
-											[placeholder]="t('receive.amount-of-x', { currency: settings.settings.displayCurrency })"
+											[placeholder]="t('receive.amount-of-x', { currency: svcAppSettings.settings.displayCurrency })"
 										>
 									</div>
 								</div>
@@ -266,7 +266,7 @@
 						>{{ transaction.destinationAddressBookName }}</div>
 						<app-nano-transaction-mobile
 							[transaction]="transaction"
-							[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+							[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 							(click)="showMobileMenuForTransaction(transaction)"
 						></app-nano-transaction-mobile>
 					</ng-container>
@@ -344,9 +344,9 @@
 												<app-nano-identicon
 													scale="6"
 													[accountID]="receivable.account"
-													[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+													[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 													class="nano-identicon"
-													*ngIf="(settings.settings.identiconsStyle !== 'none')"
+													*ngIf="(svcAppSettings.settings.identiconsStyle !== 'none')"
 												></app-nano-identicon>
 												<div
 													class="account-label uk-text-truncate"
@@ -405,9 +405,9 @@
 													<app-nano-identicon
 														scale="6"
 														[accountID]="receivable.destination"
-														[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+														[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 														class="nano-identicon"
-														*ngIf="(settings.settings.identiconsStyle !== 'none')"
+														*ngIf="(svcAppSettings.settings.identiconsStyle !== 'none')"
 													></app-nano-identicon>
 													<div
 														class="account-label uk-text-truncate"
@@ -493,7 +493,7 @@
 				</table>
 				<table
 					class="uk-table uk-table-striped uk-table-small"
-					*ngIf="settings.settings.minimumReceive"
+					*ngIf="svcAppSettings.settings.minimumReceive"
 				>
 					<thead>
 						<tr class="uk-alert uk-alert-primary missing-accounts-hint">
@@ -507,9 +507,9 @@
 									class="hint-action"
 									routerLink="/configure-app"
 									routerLinkActive="active"
-									*ngIf="util.nano.mnanoToRaw(this.settings.settings.minimumReceive).length > 24 else amountInRaw"
+									*ngIf="svcUtil.nano.mnanoToRaw(this.svcAppSettings.settings.minimumReceive).length > 24 else amountInRaw"
 								>
-									{{ util.nano.mnanoToRaw(this.settings.settings.minimumReceive) | rai: 'mnano,true' | amountsplit: 0 }}{{ util.nano.mnanoToRaw(this.settings.settings.minimumReceive) | rai: 'mnano,false' | amountsplit: 1 }}
+									{{ svcUtil.nano.mnanoToRaw(this.svcAppSettings.settings.minimumReceive) | rai: 'mnano,true' | amountsplit: 0 }}{{ svcUtil.nano.mnanoToRaw(this.svcAppSettings.settings.minimumReceive) | rai: 'mnano,false' | amountsplit: 1 }}
 								</a>
 								<ng-template #amountInRaw>
 									<a
@@ -517,7 +517,7 @@
 										routerLink="/configure-app"
 										routerLinkActive="active"
 									>
-										{{ this.settings.settings.minimumReceive | rai: 'raw,false' }}
+										{{ this.svcAppSettings.settings.minimumReceive | rai: 'raw,false' }}
 									</a>
 								</ng-template>
 								{{ 'receive.minimum-receive-is-set-to.2' | transloco }}
@@ -540,7 +540,7 @@
 				<app-nano-transaction-mobile
 					[isInteractable]="false"
 					[transaction]="mobileTransactionData"
-					[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+					[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 					*ngIf="mobileTransactionData"
 				></app-nano-transaction-mobile>
 			</div>
@@ -638,9 +638,9 @@
 					<app-nano-identicon
 						scale="6"
 						[accountID]="receivableAccountModel"
-						[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+						[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 						class="nano-identicon"
-						*ngIf="(settings.settings.identiconsStyle !== 'none')"
+						*ngIf="(svcAppSettings.settings.identiconsStyle !== 'none')"
 					></app-nano-identicon>
 					<div class="account-label uk-text-truncate">{{ selectedAccountAddressBookName }}</div>
 				</div>
@@ -687,7 +687,7 @@
 							</div>
 							<div
 								style="margin-top: 10px;"
-								*ngIf="settings.settings.displayCurrency"
+								*ngIf="svcAppSettings.settings.displayCurrency"
 							>
 								<p
 									class="text-half-muted"
@@ -697,8 +697,8 @@
 									<a
 										class="uk-form-icon uk-link-reset uk-link-muted fiat-currency-ticker"
 										uk-tooltip
-										title="Last Price: {{ price.price.lastPrice | fiat: settings.settings.displayCurrency }} / XNO"
-									>{{ settings.settings.displayCurrency | currencySymbol }}</a>
+										title="Last Price: {{ svcPrice.lastPrice | fiat: svcAppSettings.settings.displayCurrency }} / XNO"
+									>{{ svcAppSettings.settings.displayCurrency | currencySymbol }}</a>
 									<input
 										[(ngModel)]="amountFiat"
 										[ngClass]="{ 'uk-form-danger': !validFiat }"
@@ -710,7 +710,7 @@
 										id="form-horizontal-text-fiat"
 										type="number"
 										step="any"
-										placeholder="Amount of {{ settings.settings.displayCurrency }}"
+										placeholder="Amount of {{ svcAppSettings.settings.displayCurrency }}"
 									>
 								</div>
 							</div>
