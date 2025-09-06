@@ -46,7 +46,7 @@ export class ConfigureAppComponent implements OnInit {
 	private repService = inject(RepresentativeService)
 	private node = inject(NodeService)
 	private util = inject(UtilService)
-	private price = inject(PriceService)
+	private svcPrice = inject(PriceService)
 	private ninja = inject(NinjaService)
 	private renderer = inject(Renderer2)
 	private qrModalService = inject(QrModalService)
@@ -319,7 +319,7 @@ export class ConfigureAppComponent implements OnInit {
 
 		if (reloadFiat) {
 			// Reload prices with our currency, then call to reload fiat balances.
-			await this.price.getPrice(newCurrency)
+			await this.svcPrice.fetchPrice(newCurrency)
 			this.appSettings.setAppSetting('displayCurrency', newCurrency)
 			this.walletService.reloadFiatBalances()
 		}

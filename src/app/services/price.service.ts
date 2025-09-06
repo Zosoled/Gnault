@@ -1,54 +1,49 @@
-import { Injectable, inject } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { BehaviorSubject } from 'rxjs'
+import { Injectable, inject } from '@angular/core'
+import { BehaviorSubject, firstValueFrom } from 'rxjs'
 
 @Injectable({ providedIn: 'root' })
 export class PriceService {
-	private http = inject(HttpClient)
+	private http: HttpClient = inject(HttpClient)
 
-	storeKey: 'Gnault-Price' = 'Gnault-Price'
-	apiUrl = `https://api.coingecko.com/api/v3/coins/nano?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`
+	static storeKey: 'Gnault-Price' = 'Gnault-Price'
+	static apiUrl: string = `https://api.coingecko.com/api/v3/coins/nano?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`
 
-	price = {
-		lastPrice: 0,
-		lastPriceBTC: 0,
-	}
-	lastPrice$ = new BehaviorSubject(1)
+	#lastPrice$: BehaviorSubject<number> = new BehaviorSubject(1)
+	get lastPrice$ (): BehaviorSubject<number> { return this.#lastPrice$ }
+
+	lastPrice: number = 0
+	lastPriceBtc: number = 0
 
 	constructor () {
-		this.loadSavedPrice()
+		this.loadPrice()
 	}
 
-	async getPrice (currency = 'USD') {
-		if (!currency) return // No currency defined, do not refetch
-		const response: any = await this.http.get(`${this.apiUrl}`).toPromise()
+	async fetchPrice (currency?: string): Promise<number> {
+		currency ??= 'usd'
+		const request = this.http.get(`${PriceService.apiUrl}`)
+		const response: any = await firstValueFrom(request)
 		if (!response) {
-			return this.price.lastPrice
+			return this.lastPrice
 		}
 
 		const quote = response.market_data.current_price
-		const currencyPrice = quote[currency.toLowerCase()]
-		const btcPrice = quote.btc
-
-		this.price.lastPrice = currencyPrice
-		this.price.lastPriceBTC = btcPrice
+		this.lastPrice = quote[currency.toLowerCase()]
+		this.lastPriceBtc = quote.btc
 
 		this.savePrice()
-
-		this.lastPrice$.next(currencyPrice)
-
-		return this.price.lastPrice
+		this.lastPrice$.next(this.lastPrice)
+		return this.lastPrice
 	}
 
-	loadSavedPrice () {
-		const priceData = localStorage.getItem(this.storeKey)
-		if (!priceData) return false
-
-		this.price = JSON.parse(priceData)
+	loadPrice (): void {
+		const priceData = localStorage.getItem(PriceService.storeKey)
+		if (priceData) {
+			Object.assign(this, JSON.parse(priceData))
+		}
 	}
 
-	savePrice () {
-		localStorage.setItem(this.storeKey, JSON.stringify(this.price))
+	savePrice (): void {
+		localStorage.setItem(PriceService.storeKey, JSON.stringify(this))
 	}
-
 }
