@@ -65,7 +65,7 @@ export class SendComponent implements OnInit {
 
 	activePanel = 'send'
 	sendDestinationType = 'external-address'
-	accounts = this.walletService.wallet.accounts
+	accounts = this.walletService.accounts
 	addressBookResults$ = new BehaviorSubject([])
 	showAddressBook = false
 	addressBookMatch = ''
@@ -96,7 +96,7 @@ export class SendComponent implements OnInit {
 		this.fromAccountID = this.accounts[0]?.id ?? ''
 
 		// Update selected account if changed in the sidebar
-		this.walletService.wallet.selectedAccount$.subscribe(async acc => {
+		this.walletService.selectedAccount$.subscribe(async acc => {
 			if (this.activePanel !== 'send') {
 				// Transaction details already finalized
 				return
@@ -118,8 +118,8 @@ export class SendComponent implements OnInit {
 		})
 
 		// Set the account selected in the sidebar as default
-		if (this.walletService.wallet.selectedAccount !== null) {
-			this.fromAccountID = this.walletService.wallet.selectedAccount.id
+		if (this.walletService.selectedAccount !== null) {
+			this.fromAccountID = this.walletService.selectedAccount.id
 		} else {
 			// If "total balance" is selected in the sidebar, use the first account in the wallet that has a balance
 			this.findFirstAccount()
@@ -141,7 +141,7 @@ export class SendComponent implements OnInit {
 
 	async findFirstAccount () {
 		// Load balances before we try to find the right account
-		if (this.walletService.wallet.balance === 0n) {
+		if (this.walletService.balance === 0n) {
 			await this.walletService.reloadBalances()
 		}
 
@@ -262,7 +262,7 @@ export class SendComponent implements OnInit {
 	}
 
 	getAccountLabel (accountID, defaultLabel) {
-		const walletAccount = this.walletService.wallet.accounts.find(a => a.id === accountID)
+		const walletAccount = this.walletService.accounts.find(a => a.id === accountID)
 		if (walletAccount == null) {
 			return defaultLabel
 		}
@@ -284,7 +284,7 @@ export class SendComponent implements OnInit {
 			return this.toAccountID
 		}
 		// 'own-address'
-		const walletAccount = this.walletService.wallet.accounts.find(a => a.id === this.toOwnAccountID)
+		const walletAccount = this.walletService.accounts.find(a => a.id === this.toOwnAccountID)
 		if (!walletAccount) {
 			// Unable to find receiving account in wallet
 			return ''
@@ -346,13 +346,13 @@ export class SendComponent implements OnInit {
 	}
 
 	async confirmTransaction () {
-		const wallet = this.walletService.wallet.wallet
-		const walletAccount = this.walletService.wallet.accounts.find(a => a.id === this.fromAccountID)
+		const wallet = this.walletService.wallet
+		const walletAccount = this.walletService.accounts.find(a => a.id === this.fromAccountID)
 		if (!walletAccount) {
 			throw new Error(`Unable to find sending account in wallet`)
 		}
-		if (this.walletService.isLocked()) {
-			const wasUnlocked = await this.walletService.requestWalletUnlock()
+		if (this.walletService.isLocked) {
+			const wasUnlocked = await this.walletService.requestUnlock()
 			if (wasUnlocked === false) {
 				return
 			}
@@ -361,7 +361,7 @@ export class SendComponent implements OnInit {
 		try {
 			const destinationID = this.getDestinationID()
 			const newHash = await this.nanoBlock.generateSend(wallet, walletAccount, destinationID,
-				this.amount, this.walletService.isLedgerWallet())
+				this.amount, this.walletService.isLedger)
 			if (newHash) {
 				this.notificationService.removeNotification('success-send')
 				this.notificationService.sendSuccess(`Successfully sent ${this.amountNano} XNO!`, { identifier: 'success-send' })
@@ -373,7 +373,7 @@ export class SendComponent implements OnInit {
 				this.fromAddressBook = ''
 				this.toAddressBook = ''
 				this.addressBookMatch = ''
-			} else if (!this.walletService.isLedgerWallet()) {
+			} else if (!this.walletService.isLedger) {
 				this.notificationService.sendError(`There was an error sending your transaction, please try again.`)
 			}
 		} catch (err) {
@@ -383,7 +383,7 @@ export class SendComponent implements OnInit {
 	}
 
 	async setMaxAmount () {
-		const walletAccount = this.walletService.wallet.accounts
+		const walletAccount = this.walletService.accounts
 			.find(a => a.id === this.fromAccountID)
 		if (!walletAccount) {
 			return

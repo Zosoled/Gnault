@@ -92,7 +92,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		})
 
 		// Detect if local wallet balance is refreshed
-		this.refreshSub = this.walletService.wallet.refresh$.subscribe(shouldRefresh => {
+		this.refreshSub = this.walletService.refresh$.subscribe(shouldRefresh => {
 			if (shouldRefresh) {
 				this.loadingBalances = true
 				// Check if we have a local wallet account tracked and update the balances
@@ -101,7 +101,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 						continue
 					}
 					// If the account exist in the wallet, take the info from there to save on RPC calls
-					const walletAccount = this.walletService.wallet.accounts.find(a => a.id === entry.account)
+					const walletAccount = this.walletService.accounts.find(a => a.id === entry.account)
 					if (walletAccount) {
 						// Subtract first so we can add back any updated amounts
 						this.totalTrackedBalance -= this.accounts[entry.account].balance
@@ -176,7 +176,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.totalTrackedReceivable = 0n
 
 		// Get account balances for all account in address book not in wallet (which has tracking active)
-		const accountIDsWallet = this.walletService.wallet.accounts.map(a => a.id)
+		const accountIDsWallet = this.walletService.accounts.map(a => a.id)
 		const accountIDs = this.addressBookService.addressBook
 			.filter(a => !accountIDsWallet.includes(a.account) && a.trackBalance)
 			.map(a => a.account)
@@ -201,7 +201,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 				receivable: 0n
 			}
 			// If the account exist in the wallet, take the info from there to save on RPC calls
-			const walletAccount = this.walletService.wallet.accounts.find(a => a.id === entry.account)
+			const walletAccount = this.walletService.accounts.find(a => a.id === entry.account)
 			if (walletAccount) {
 				balanceAccount.balance = walletAccount.balance
 				balanceAccount.balanceFiat = walletAccount.balanceFiat
@@ -243,8 +243,8 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		}
 
 		// If not already updating balances, update to get latest values from internal wallet
-		if (this.walletService.wallet.updatingBalance) {
-			while (this.walletService.wallet.updatingBalance) {
+		if (this.walletService.isBalanceUpdating) {
+			while (this.walletService.isBalanceUpdating) {
 				await this.sleep(100) // Wait until update is finished
 			}
 		} else {
@@ -316,7 +316,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 				this.newAddressName, this.newTrackBalance, this.newTrackTransactions)
 			this.notificationService.sendSuccess(this.translocoService.translate('address-book.address-book-entry-saved-successfully'))
 			// If this is one of our accounts, set its name and let it propagate through the app
-			const walletAccount = this.walletService.wallet.accounts.find(a => a.id === this.newAddressAccount)
+			const walletAccount = this.walletService.accounts.find(a => a.id === this.newAddressAccount)
 			if (walletAccount) {
 				walletAccount.addressBookName = this.newAddressName
 			}

@@ -112,13 +112,13 @@ export class AppComponent implements AfterViewInit {
 
 	get innerHeight () { return window.innerHeight }
 	get innerHeightWithoutMobileBar () { return this.innerHeight - (window.innerWidth < 940 ? 50 : 0) }
-	get isConfigured () { return this.svcWallet.isConfigured() }
+	get isConfigured () { return this.svcWallet.isConfigured }
 
 	constructor () {
 		this.router.events.subscribe(() => {
 			this.closeNav()
 		})
-		this.svcWallet.wallet.refresh$.subscribe(isRefreshed => {
+		this.svcWallet.refresh$.subscribe(isRefreshed => {
 			if (isRefreshed) {
 				this.isWalletRefreshed = true
 			}
@@ -150,18 +150,18 @@ export class AppComponent implements AfterViewInit {
 		}
 
 		// Navigate to accounts page if there is wallet, but only if coming from home. On desktop app the path ends with index.html
-		if (this.svcWallet.isConfigured() && (window.location.pathname === '/' || window.location.pathname.endsWith('index.html'))) {
-			if (this.wallet.selectedAccountId) {
-				this.router.navigate([`accounts/${this.wallet.selectedAccountId}`], { queryParams: { 'compact': 1 }, replaceUrl: true })
+		if (this.svcWallet.isConfigured && (window.location.pathname === '/' || window.location.pathname.endsWith('index.html'))) {
+			if (this.svcWallet.selectedAccountId) {
+				this.router.navigate([`accounts/${this.svcWallet.selectedAccountId}`], { queryParams: { 'compact': 1 }, replaceUrl: true })
 			} else {
 				this.router.navigate(['accounts'], { replaceUrl: true })
 			}
 		}
 
 		// update selected account object with the latest balance, receivable, etc
-		if (this.wallet.selectedAccountId) {
-			const currentUpdatedAccount = this.wallet.accounts.find(a => a.id === this.wallet.selectedAccountId)
-			this.wallet.selectedAccount = currentUpdatedAccount
+		if (this.svcWallet.selectedAccountId) {
+			const currentUpdatedAccount = this.svcWallet.accounts.find(a => a.id === this.svcWallet.selectedAccountId)
+			this.svcWallet.selectedAccount = currentUpdatedAccount
 		}
 
 		await this.svcWallet.reloadBalances()
@@ -197,7 +197,7 @@ export class AppComponent implements AfterViewInit {
 
 		// If the wallet is locked and there is a receivable balance, show a warning to unlock the wallet
 		// (if not receive priority is set to manual)
-		if (this.wallet.locked && this.svcWallet.hasReceivableTransactions() && this.svcAppSettings.settings.receivableOption !== 'manual') {
+		if (this.svcWallet.isLocked && this.svcWallet.hasReceivableTransactions() && this.svcAppSettings.settings.receivableOption !== 'manual') {
 			this.svcNotification.sendWarning(`New incoming transaction(s) - Unlock the wallet to receive`, { length: 10000, identifier: 'receivable-locked' })
 		} else if (this.svcWallet.hasReceivableTransactions() && this.svcAppSettings.settings.receivableOption === 'manual') {
 			this.svcNotification.sendWarning(`Incoming transaction(s) found - Set to be received manually`, { length: 10000, identifier: 'receivable-locked' })
@@ -205,11 +205,11 @@ export class AppComponent implements AfterViewInit {
 
 		// When the page closes, determine if we should lock the wallet
 		window.addEventListener('beforeunload', (e) => {
-			if (this.wallet.locked) return // Already locked, nothing to worry about
+			if (this.svcWallet.isLocked) return // Already locked, nothing to worry about
 			this.svcWallet.lockWallet()
 		})
 		window.addEventListener('unload', (e) => {
-			if (this.wallet.locked) return // Already locked, nothing to worry about
+			if (this.svcWallet.isLocked) return // Already locked, nothing to worry about
 			this.svcWallet.lockWallet()
 		})
 
@@ -242,7 +242,7 @@ export class AppComponent implements AfterViewInit {
 		setInterval(() => {
 			this.inactiveSeconds += 1
 			if (!this.svcAppSettings.settings.lockInactivityMinutes) return // Do not lock on inactivity
-			if (this.wallet.locked) return
+			if (this.svcWallet.isLocked) return
 
 			// Determine if we have been inactive for longer than our lock setting
 			if (this.inactiveSeconds >= this.svcAppSettings.settings.lockInactivityMinutes * 60) {
@@ -326,9 +326,9 @@ export class AppComponent implements AfterViewInit {
 
 	selectAccount (account) {
 		// note: account is null when user is switching to 'Total Balance'
-		this.wallet.selectedAccountId = account?.id ?? null
-		this.wallet.selectedAccount = account
-		this.wallet.selectedAccount$.next(account)
+		this.svcWallet.selectedAccountId = account?.id ?? null
+		this.svcWallet.selectedAccount = account
+		this.svcWallet.selectedAccount$.next(account)
 		this.toggleAccountsDropdown()
 		this.svcWallet.saveWalletExport()
 	}

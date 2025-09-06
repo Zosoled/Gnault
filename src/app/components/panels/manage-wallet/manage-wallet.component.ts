@@ -38,7 +38,7 @@ export class ManageWalletComponent implements OnInit {
 	walletService = inject(WalletService)
 
 	wallet = this.walletService.wallet
-	accounts = this.walletService.wallet.accounts
+	accounts = this.walletService.accounts
 	newPassword = ''
 	confirmPassword = ''
 	validateNewPassword = false
@@ -69,7 +69,7 @@ export class ManageWalletComponent implements OnInit {
 		this.wallet = this.walletService.wallet
 
 		// Update selected account if changed in the sidebar
-		this.walletService.wallet.selectedAccount$.subscribe(async acc => {
+		this.walletService.selectedAccount$.subscribe(async acc => {
 			if (this.selAccountInit) {
 				this.csvAccount = acc?.id ?? this.accounts[0]?.id ?? '0'
 			}
@@ -77,8 +77,8 @@ export class ManageWalletComponent implements OnInit {
 		})
 
 		// Set the account selected in the sidebar as default
-		if (this.walletService.wallet.selectedAccount !== null) {
-			this.csvAccount = this.walletService.wallet.selectedAccount.id
+		if (this.walletService.selectedAccount !== null) {
+			this.csvAccount = this.walletService.selectedAccount.id
 		}
 	}
 
@@ -89,8 +89,8 @@ export class ManageWalletComponent implements OnInit {
 		if (this.newPassword !== this.confirmPassword) {
 			return this.notifications.sendError(this.translocoService.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match'))
 		}
-		if (this.walletService.isLocked()) {
-			const wasUnlocked = await this.walletService.requestWalletUnlock()
+		if (this.walletService.isLocked) {
+			const wasUnlocked = await this.walletService.requestUnlock()
 			if (wasUnlocked === false) {
 				return
 			}
@@ -104,8 +104,8 @@ export class ManageWalletComponent implements OnInit {
 	}
 
 	async exportWallet () {
-		if (this.walletService.isLocked()) {
-			const wasUnlocked = await this.walletService.requestWalletUnlock()
+		if (this.walletService.isLocked) {
+			const wasUnlocked = await this.walletService.requestUnlock()
 			if (wasUnlocked === false) {
 				return
 			}
@@ -122,7 +122,7 @@ export class ManageWalletComponent implements OnInit {
 	}
 
 	seedMnemonic () {
-		return this.wallet?.wallet?.mnemonic
+		return this.wallet?.mnemonic
 	}
 
 	triggerFileDownload (fileName, exportData, type) {
@@ -187,8 +187,8 @@ export class ManageWalletComponent implements OnInit {
 	}
 
 	async exportToFile () {
-		if (this.walletService.isLocked()) {
-			const wasUnlocked = await this.walletService.requestWalletUnlock()
+		if (this.walletService.isLocked) {
+			const wasUnlocked = await this.walletService.requestUnlock()
 			if (wasUnlocked === false) {
 				return
 			}

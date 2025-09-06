@@ -39,7 +39,7 @@ export class UnlockWalletDialogComponent implements AfterViewInit {
 		UIkit.util.on(this.dialog.nativeElement, 'hidden', () => {
 			this.onModalHidden()
 		})
-		this.walletService.wallet.unlockModalRequested$.subscribe(async isRequested => {
+		this.walletService.isUnlockRequested$.subscribe(async isRequested => {
 			if (isRequested) {
 				this.modal ? this.showModal() : this.isPending = true
 			}
@@ -60,7 +60,7 @@ export class UnlockWalletDialogComponent implements AfterViewInit {
 		this.password = ''
 		this.isFocused = false
 		this.isIncorrect = false
-		this.walletService.wallet.unlockModalRequested$.next(false)
+		this.walletService.isUnlockRequested$.next(false)
 	}
 
 	async unlock () {

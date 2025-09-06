@@ -95,7 +95,7 @@
 												<div
 													uk-spinner="ratio: 0.5;"
 													class="icon-transactions-refresh spinner"
-													*ngIf="(loadingBalances || walletService.wallet.updatingBalance === true) else notUpdatingTxList"
+													*ngIf="(loadingBalances || walletService.isBalanceUpdating) else notUpdatingTxList"
 												>
 												</div>
 												<ng-template #notUpdatingTxList>
@@ -178,7 +178,7 @@
 											class="uk-width-expand amount-container"
 											*ngIf="addressBook.trackBalance"
 										>
-											<ng-container *ngIf="(walletService.wallet.updatingBalance === false) else balanceLoading">
+											<ng-container *ngIf="(walletService.isBalanceUpdating === false) else balanceLoading">
 												<div class="account-amounts-primary uk-width-1-1">
 													<span [title]="accounts[addressBook.account]?.balance > 0 ? ( '+' + accounts[addressBook.account]?.balance.toString() + ' raw' ) : ''">
 														<span class="amount-integer">{{ accounts[addressBook.account]?.balance | rai: 'mnano,true' | amountsplit: 0 }}</span>

@@ -52,7 +52,7 @@ export class ConfigureWalletComponent {
 	panels = panels
 	activePanel = panels.landing
 	wallet = this.walletService.wallet
-	get isConfigured () { return this.walletService.isConfigured() }
+	get isConfigured () { return this.walletService.isConfigured }
 	isNewWallet = true
 	hasConfirmedBackup = false
 	importSeed = ''
@@ -119,7 +119,7 @@ export class ConfigureWalletComponent {
 		// this is now called from change-rep-widget.component when new wallet
 		// this.repService.detectChangeableReps()
 
-		this.walletService.informNewWallet()
+		this.walletService.publishNewWallet()
 	}
 
 	async importSingleKeyWallet () {
@@ -129,7 +129,7 @@ export class ConfigureWalletComponent {
 		this.keyString = ''
 
 		this.notifications.sendSuccess(`Successfully imported wallet from a private key!`)
-		this.walletService.informNewWallet()
+		this.walletService.publishNewWallet()
 	}
 
 	async connectLedgerByBluetooth () {
@@ -182,7 +182,7 @@ export class ConfigureWalletComponent {
 		const newWallet = await this.walletService.createLedgerWallet()
 		this.notifications.sendSuccess(`Successfully loaded ledger device!`)
 
-		this.walletService.informNewWallet()
+		this.walletService.publishNewWallet()
 	}
 
 	// Send a confirmation dialog to the user if they already have a wallet configured
@@ -191,13 +191,13 @@ export class ConfigureWalletComponent {
 
 		const UIkit = window['UIkit']
 		try {
-			const msg = this.walletService.isLedgerWallet()
+			const msg = this.walletService.isLedger
 				? '<p class="uk-alert uk-alert-info"><br><span class="uk-flex"><span uk-icon="icon: info; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">You are about to configure a new wallet, which will <b>disconnect your Ledger device from Gnault</b>.</span><br><br>If you need to use the Ledger wallet, simply import your device again.</p><br>'
 				: '<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">You are about to configure a new wallet, which will <b>replace your currently configured wallet</b>.</span><br><br><b style="font-size: 18px;">' + this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') + '</b><br><br><b style="font-size: 18px;">' + this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') + '</b></p><br>'
 			await UIkit.modal.confirm(msg)
 			return true
 		} catch (err) {
-			if (!this.walletService.isLedgerWallet()) {
+			if (!this.walletService.isLedger) {
 				this.notifications.sendInfo(`You can use the 'Manage Wallet' page to backup your wallet's secret recovery seed and/or mnemonic`)
 			}
 			return false
@@ -337,7 +337,7 @@ export class ConfigureWalletComponent {
 
 	saveNewWallet () {
 		this.walletService.saveWalletExport()
-		this.walletService.informNewWallet()
+		this.walletService.publishNewWallet()
 
 		this.notifications.sendSuccess(`Successfully created new wallet! Do not lose the secret recovery seed/mnemonic!`)
 	}

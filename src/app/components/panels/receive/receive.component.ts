@@ -65,7 +65,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	util = inject(UtilService)
 
 	nano = 1000000000000000000000000
-	accounts = this.walletService.wallet.accounts
+	accounts = this.walletService.accounts
 	timeoutIdClearingRecentlyCopiedState: any = null
 	mobileTransactionMenuModal: any = null
 	merchantModeModal: any = null
@@ -120,7 +120,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		})
 
 		// Update selected account if changed in the sidebar
-		this.walletService.wallet.selectedAccount$.subscribe(async acc => {
+		this.walletService.selectedAccount$.subscribe(async acc => {
 			if (this.selAccountInit) {
 				this.receivableAccountModel = acc?.id ?? '0'
 				this.onSelectedAccountChange(this.receivableAccountModel)
@@ -128,7 +128,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			this.selAccountInit = true
 		})
 
-		this.walletService.wallet.receivableBlocksUpdate$.subscribe(async receivableBlockUpdate => {
+		this.walletService.isReceivableBlocksUpdated$.subscribe(async receivableBlockUpdate => {
 			if (receivableBlockUpdate === null) {
 				return
 			}
@@ -137,9 +137,9 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 
 		await this.updateReceivableBlocks()
 
-		if (this.walletService.wallet.selectedAccount !== null) {
+		if (this.walletService.selectedAccount !== null) {
 			// Set the account selected in the sidebar as default
-			this.receivableAccountModel = this.walletService.wallet.selectedAccount.id
+			this.receivableAccountModel = this.walletService.selectedAccount.id
 			this.onSelectedAccountChange(this.receivableAccountModel)
 		} else if (this.accounts.length === 1) {
 			// Auto-select account if it is the only account in the wallet
@@ -173,7 +173,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 
 	async updateReceivableBlocks () {
 		this.receivableBlocks =
-			this.walletService.wallet.receivableBlocks
+			this.walletService.receivableBlocks
 				.map(
 					(receivableBlock) =>
 						Object.assign(
@@ -228,7 +228,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	}
 
 	getAccountLabel (accountID, defaultLabel) {
-		const walletAccount = this.walletService.wallet.accounts.find(a => a.id === accountID)
+		const walletAccount = this.walletService.accounts.find(a => a.id === accountID)
 		if (walletAccount == null) {
 			return defaultLabel
 		}
@@ -304,7 +304,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	}
 
 	async changeQRAccount (account) {
-		this.walletAccount = this.walletService.wallet.accounts.find(a => a.address === account) || null
+		this.walletAccount = this.walletService.accounts.find(a => a.address === account) || null
 		this.qrAccount = ''
 		let qrCode = null
 		if (account.length > 1) {
@@ -359,13 +359,13 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	async receiveReceivableBlock (receivableBlock) {
 		const sourceBlock = receivableBlock.hash
 
-		const walletAccount = this.walletService.wallet.accounts.find(a => a.id === receivableBlock.destination)
+		const walletAccount = this.walletService.accounts.find(a => a.id === receivableBlock.destination)
 		if (!walletAccount) {
 			throw new Error(this.translocoService.translate('receive.unable-to-find-receiving-account'))
 		}
 
-		if (this.walletService.isLocked()) {
-			const wasUnlocked = await this.walletService.requestWalletUnlock()
+		if (this.walletService.isLocked) {
+			const wasUnlocked = await this.walletService.requestUnlock()
 
 			if (wasUnlocked === false) {
 				return
@@ -377,7 +377,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		let hasShownErrorNotification = false
 
 		try {
-			createdReceiveBlockHash = await this.nanoBlock.generateReceive(walletAccount, sourceBlock, this.walletService.isLedgerWallet())
+			createdReceiveBlockHash = await this.nanoBlock.generateReceive(walletAccount, sourceBlock, this.walletService.isLedger)
 		} catch (err) {
 			this.notificationService.sendError('Error receiving transaction: ' + err.message)
 			hasShownErrorNotification = true
@@ -392,7 +392,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			// list also updated with reloadBalances but not if called too fast
 			this.walletService.removeReceivableBlock(receivableBlock.hash)
 		} else {
-			if (hasShownErrorNotification === false && !this.walletService.isLedgerWallet()) {
+			if (hasShownErrorNotification === false && !this.walletService.isLedger) {
 				this.notificationService.sendError(this.translocoService.translate('receive.there-was-a-problem-receiving-the-transaction-try-manually'), { length: 10000 })
 			}
 		}

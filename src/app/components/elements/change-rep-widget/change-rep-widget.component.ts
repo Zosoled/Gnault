@@ -42,13 +42,13 @@ export class ChangeRepWidgetComponent implements OnInit {
 			this.initialLoadComplete = true
 		})
 
-		this.walletService.wallet.selectedAccount$.subscribe(async acc => {
+		this.walletService.selectedAccount$.subscribe(async acc => {
 			this.selectedAccount = acc
 			this.updateDisplayedRepresentatives()
 		})
 
 		// Detect if a wallet is reset
-		this.walletService.wallet.newWallet$.subscribe(shouldReload => {
+		this.walletService.newWallet$.subscribe(shouldReload => {
 			if (shouldReload) {
 				this.resetRepresentatives()
 			}
@@ -72,7 +72,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 			this.updateDisplayedRepresentatives()
 		})
 
-		this.selectedAccount = this.walletService.wallet.selectedAccount
+		this.selectedAccount = this.walletService.selectedAccount
 		this.updateSelectedAccountHasRep()
 		// calls walletReps$.next
 		await this.repService.getRepresentativesOverview()
@@ -120,7 +120,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 				this.selectedAccountHasRepresentative = !!this.selectedAccount.frontier
 				return
 			}
-			const accounts = this.walletService.wallet.accounts
+			const accounts = this.walletService.accounts
 			this.selectedAccountHasRepresentative = accounts.some(a => a.frontier)
 		}
 	}

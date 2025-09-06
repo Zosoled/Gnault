@@ -1,6 +1,6 @@
 <h2 class="uk-heading-divider">Configure Wallet</h2>
 <div
-	*ngIf="isConfigured && !walletService.isLedgerWallet() && (activePanel === panels.landing || activePanel === panels.import || activePanel === panels.mnemonicTypeSelection)"
+	*ngIf="isConfigured && !walletService.isLedger && (activePanel === panels.landing || activePanel === panels.import || activePanel === panels.mnemonicTypeSelection)"
 	class="uk-margin-small-bottom"
 >
 	<div class="uk-alert uk-alert-danger nlt-inline-alert">
@@ -861,14 +861,14 @@
 	</div>
 </div>
 <div
-	*ngIf="activePanel === panels.final && !walletService.isLedgerWallet()"
+	*ngIf="activePanel === panels.final && !walletService.isLedger"
 	class="uk-alert-primary"
 	uk-alert
 >
 	<p><strong>ProTip:</strong> If you lose your password, you can always restore your wallet using your seed or mnemonic you were given.</p>
 </div>
 <div
-	*ngIf="activePanel === panels.final && walletService.isLedgerWallet()"
+	*ngIf="activePanel === panels.final && walletService.isLedger"
 	class="uk-alert-primary"
 	uk-alert
 >

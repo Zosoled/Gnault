@@ -80,7 +80,7 @@
 						class="uk-visible-toggle"
 					>
 						<ng-template #accountAmounts>
-							<ng-container *ngIf="(walletService.wallet.updatingBalance === false) else balanceLoading">
+							<ng-container *ngIf="(walletService.isBalanceUpdating === false) else balanceLoading">
 								<div class="account-amounts-primary uk-width-1-1">
 									<div
 										*ngIf="account.receivable > 0n"

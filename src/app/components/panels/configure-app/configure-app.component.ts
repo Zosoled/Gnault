@@ -357,7 +357,7 @@ export class ConfigureAppComponent implements OnInit {
 					<span style="font-size: 18px;">
 					${this.translocoService.translate('configure-app.you-are-about-to-disable-storage-of-all-wallet-data-which')}
 					</span><br>
-					${this.walletService.isConfigured() ? saveSeedWarning : ''}`
+					${this.walletService.isConfigured ? saveSeedWarning : ''}`
 				)
 			} catch (err) {
 				// pressing cancel, reset storage setting and interrupt

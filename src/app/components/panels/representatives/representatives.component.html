@@ -216,7 +216,7 @@
 										<option [value]="null">Select Accounts to Change</option>
 										<option [value]="'all'">All Current Accounts</option>
 										<option
-											*ngFor="let account of walletService.wallet.accounts"
+											*ngFor="let account of walletService.accounts"
 											[value]="account.id"
 										>
 											{{ account.addressBookName

@@ -47,7 +47,7 @@ export class SweeperComponent implements OnInit {
 
 	settings = inject(AppSettingsService)
 
-	accounts = this.walletService.wallet.accounts
+	accounts = this.walletService.accounts
 	indexMax = INDEX_MAX
 	incomingMax = SWEEP_MAX_RECEIVABLE
 
@@ -91,7 +91,7 @@ export class SweeperComponent implements OnInit {
 
 	async ngOnInit () {
 		// Update selected account if changed in the sidebar
-		this.walletService.wallet.selectedAccount$.subscribe(async acc => {
+		this.walletService.selectedAccount$.subscribe(async acc => {
 			if (this.selAccountInit) {
 				this.myAccountModel = acc?.id ?? this.accounts[0]?.id ?? '0'
 			}
@@ -99,8 +99,8 @@ export class SweeperComponent implements OnInit {
 		})
 
 		// Set the account selected in the sidebar as default
-		if (this.walletService.wallet.selectedAccount !== null) {
-			this.myAccountModel = this.walletService.wallet.selectedAccount.id
+		if (this.walletService.selectedAccount !== null) {
+			this.myAccountModel = this.walletService.selectedAccount.id
 		}
 	}
 

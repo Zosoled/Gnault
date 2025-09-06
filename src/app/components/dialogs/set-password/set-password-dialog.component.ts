@@ -43,7 +43,7 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 		UIkit.util.on(this.dialog.nativeElement, 'hidden', () => {
 			this.onModalHidden()
 		})
-		this.svcWallet.wallet.updateModalRequested$.subscribe(async isRequested => {
+		this.svcWallet.isChangePasswordRequested$.subscribe(async isRequested => {
 			if (isRequested) {
 				this.modal ? this.showModal() : this.isPending = true
 			}
@@ -70,7 +70,7 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 		this.isNotMatch = false
 		this.isPending = false
 		this.isTooShort = false
-		this.svcWallet.wallet.updateModalRequested$.next(false)
+		this.svcWallet.isChangePasswordRequested$.next(false)
 	}
 
 	async update () {

@@ -1,4 +1,4 @@
-<div *ngIf="walletService.isLedgerWallet()">
+<div *ngIf="walletService.isLedger">
 	<div
 		class="nav-status-row"
 		*ngIf="ledgerStatus.status === 'not-connected' || !ledgerStatus.status"
@@ -69,11 +69,11 @@
 		</div>
 	</div>
 </div>
-<ng-container *ngIf="walletService.isConfigured() && !walletService.isLedgerWallet()">
+<ng-container *ngIf="walletService.isConfigured && !walletService.isLedger">
 	<div
 		class="nav-status-row half-muted interactable"
 		(click)="unlockWallet()"
-		*ngIf="walletService.isLocked()"
+		*ngIf="walletService.isLocked"
 	>
 		<div class="status-icon">
 			<span
@@ -90,7 +90,7 @@
 	<div
 		class="nav-status-row half-muted interactable"
 		(click)="lockWallet()"
-		*ngIf="!walletService.isLocked()"
+		*ngIf="!walletService.isLocked"
 	>
 		<div class="status-icon">
 			<span
@@ -106,7 +106,7 @@
 <a
 	[routerLink]="['/configure-wallet']"
 	class="nav-status-row interactable"
-	*ngIf="!walletService.isConfigured()"
+	*ngIf="!walletService.isConfigured"
 >
 	<div class="status-icon">
 		<span

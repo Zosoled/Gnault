@@ -48,7 +48,7 @@
 								</div>
 								<div
 									class="amount-updating"
-									*ngIf="wallet.wallet.updatingBalance && wallet.isConfigured()"
+									*ngIf="svcWallet.isBalanceUpdating && svcWallet.isConfigured"
 								>
 									<div uk-spinner="ratio: 0.5;"></div>
 								</div>

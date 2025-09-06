@@ -66,7 +66,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	price = inject(PriceService)
 	settings = inject(AppSettingsService)
 	util = inject(UtilService)
-	wallet = inject(WalletService)
+	svcWallet = inject(WalletService)
 	zeroHash = '0000000000000000000000000000000000000000000000000000000000000000'
 
 	accountHistory: any[] = []
@@ -178,7 +178,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			this.account.receivableFiat = parseFloat(Tools.convert(this.account.receivable || 0, 'raw', 'nano')) * this.price.price.lastPrice
 		})
 
-		this.wallet.wallet.receivableBlocksUpdate$.subscribe(async receivableBlockUpdate => {
+		this.svcWallet.isReceivableBlocksUpdated$.subscribe(async receivableBlockUpdate => {
 			this.onReceivableBlockUpdate(receivableBlockUpdate)
 		})
 
@@ -455,7 +455,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 
 		this.addressBookEntry = this.addressBook.getAccountName(accountID)
 		this.addressBookModel = this.addressBookEntry || ''
-		this.walletAccount = this.wallet.getWalletAccount(accountID)
+		this.walletAccount = this.svcWallet.getWalletAccount(accountID)
 
 		this.account = await this.api.accountInfo(accountID)
 
@@ -562,7 +562,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	}
 
 	getAccountLabel (accountID, defaultLabel) {
-		const walletAccount = this.wallet.wallet.accounts.find(a => a.id === accountID)
+		const walletAccount = this.svcWallet.accounts.find(a => a.id === accountID)
 
 		if (walletAccount == null) {
 			return defaultLabel
@@ -898,8 +898,8 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	async receiveReceivableBlock (receivableBlock) {
 		const sourceBlock = receivableBlock.hash
 
-		if (this.wallet.isLocked()) {
-			const wasUnlocked = await this.wallet.requestWalletUnlock()
+		if (this.svcWallet.isLocked) {
+			const wasUnlocked = await this.svcWallet.requestUnlock()
 
 			if (wasUnlocked === false) {
 				return
@@ -913,7 +913,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 
 		try {
 			createdReceiveBlockHash =
-				await this.nanoBlock.generateReceive(this.walletAccount, sourceBlock, this.wallet.isLedgerWallet())
+				await this.nanoBlock.generateReceive(this.walletAccount, sourceBlock, this.svcWallet.isLedger)
 		} catch (err) {
 			this.notify.sendError('Error receiving transaction: ' + err.message)
 			hasShownErrorNotification = true
@@ -925,10 +925,10 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			this.notify.removeNotification('success-receive')
 			this.notify.sendSuccess(`Successfully received nano!`, { identifier: 'success-receive' })
 			// clear the list of receivable blocks. Updated again with reloadBalances()
-			this.wallet.clearReceivableBlocks()
+			this.svcWallet.clearReceivableBlocks()
 		} else {
 			if (hasShownErrorNotification === false) {
-				if (!this.wallet.isLedgerWallet()) {
+				if (!this.svcWallet.isLedger) {
 					this.notify.sendError(`Error receiving transaction, please try again`, { length: 10000 })
 				}
 			}
@@ -936,7 +936,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 
 		receivableBlock.loading = false
 
-		await this.wallet.reloadBalances()
+		await this.svcWallet.reloadBalances()
 
 		this.loadAccountDetailsThrottled({})
 	}

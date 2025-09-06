@@ -6,7 +6,7 @@
 		<h2 class="uk-heading-divider">{{ 'general.manage-wallet' | transloco }}</h2>
 		<div
 			class="uk-card uk-card-default uk-margin"
-			*ngIf="!walletService.isLedgerWallet()"
+			*ngIf="!walletService.isLedger"
 		>
 			<div class="uk-card-header">
 				<h3 class="uk-card-title">Change Wallet Password</h3>
@@ -58,37 +58,37 @@
 		</div>
 		<div
 			class="uk-card uk-card-default uk-margin"
-			*ngIf="!walletService.isLedgerWallet()"
+			*ngIf="!walletService.isLedger"
 		>
 			<div class="uk-card-header">
 				<h3 class="uk-card-title">Backup Wallet</h3>
 			</div>
 			<div class="uk-card-body">
-				<p *ngIf="wallet.locked && wallet.type === 'seed'">
+				<p *ngIf="walletService.isLocked && walletService.type === 'seed'">
 					<span uk-icon="icon: lock;"></span> Unlock wallet to access the secret recovery seed/mnemonic.
 				</p>
-				<p *ngIf="wallet.locked && (wallet.type === 'privateKey' || wallet.type === 'expandedKey')">
+				<p *ngIf="walletService.isLocked && (walletService.type === 'privateKey' || walletService.type === 'expandedKey')">
 					<span uk-icon="icon: lock;"></span> Unlock wallet to access the private key.
 				</p>
-				<p *ngIf="!wallet.locked && wallet.type === 'seed'"> To backup your wallet's secret recovery mnemonic, <a
+				<p *ngIf="!walletService.isLocked && walletService.type === 'seed'"> To backup your wallet's secret recovery mnemonic, <a
 						[title]="('configure-wallet.new-wallet.copy-secret-recovery-mnemonic' | transloco)"
 						ngxClipboard
 						[cbContent]="seedMnemonic()"
 						(cbOnSuccess)="notifications.sendSuccess('Wallet mnemonic copied to clipboard!')"
 						uk-tooltip
 					>click here</a> to copy it to your clipboard. </p>
-				<p *ngIf="!wallet.locked && wallet.type === 'seed'"> To backup your wallet's secret recovery seed, <a
+				<p *ngIf="!walletService.isLocked && walletService.type === 'seed'"> To backup your wallet's secret recovery seed, <a
 						[title]="( 'configure-wallet.new-wallet.copy-secret-recovery-seed' | transloco )"
 						ngxClipboard
-						[cbContent]="wallet.wallet.seed"
+						[cbContent]="walletService.wallet.seed"
 						(cbOnSuccess)="notifications.sendSuccess('Wallet seed copied to clipboard!')"
 						uk-tooltip
 					>click here</a> to copy it to your clipboard.<br>
 				</p>
-				<p *ngIf="!wallet.locked && (wallet.type === 'privateKey' || wallet.type === 'expandedKey')"> To backup your wallet account's private key, <a
+				<p *ngIf="!walletService.isLocked && (walletService.type === 'privateKey' || walletService.type === 'expandedKey')"> To backup your wallet account's private key, <a
 						title="Copy Private Key"
 						ngxClipboard
-						[cbContent]="wallet.wallet.seed"
+						[cbContent]="wallet.seed"
 						(cbOnSuccess)="notifications.sendSuccess('Private Key copied to clipboard!')"
 						uk-tooltip
 					>click here</a> to copy it to your clipboard.<br>
@@ -97,12 +97,12 @@
 		</div>
 		<div
 			class="uk-card uk-card-default uk-margin"
-			*ngIf="!walletService.isLedgerWallet()"
+			*ngIf="!walletService.isLedger"
 		>
 			<div class="uk-card-header">
 				<h3 class="uk-card-title">Export Gnault Wallet</h3>
 			</div>
-			<ng-container *ngIf="wallet.locked else walletUnlocked">
+			<ng-container *ngIf="walletService.isLocked else walletUnlocked">
 				<div class="uk-card-body">
 					<span uk-icon="icon: lock;"></span> Unlock wallet to access the export tool.
 				</div>

@@ -142,7 +142,7 @@ export class RepresentativesComponent implements OnInit {
 			return addressBookName
 		}
 
-		const walletAccount = this.walletService.wallet.accounts.find(a => a.id === account.id)
+		const walletAccount = this.walletService.accounts.find(a => a.id === account.id)
 
 		if (walletAccount == null) {
 			return this.translocoService.translate('general.account')
@@ -302,8 +302,8 @@ export class RepresentativesComponent implements OnInit {
 		if (this.changingRepresentatives) {
 			return // Already running
 		}
-		if (this.walletService.isLocked()) {
-			const wasUnlocked = await this.walletService.requestWalletUnlock()
+		if (this.walletService.isLocked) {
+			const wasUnlocked = await this.walletService.requestUnlock()
 
 			if (wasUnlocked === false) {
 				return
@@ -322,7 +322,7 @@ export class RepresentativesComponent implements OnInit {
 		}
 
 		const accountsToChange = accounts.find(a => a.id === 'All Current Accounts')
-			? this.walletService.wallet.accounts
+			? this.walletService.accounts
 			: accounts
 
 		// Remove any that don't need their represetatives to be changed
@@ -344,7 +344,7 @@ export class RepresentativesComponent implements OnInit {
 			return this.notifications.sendInfo(`None of the accounts selected need to be updated`)
 		}
 
-		const wallet = this.walletService.wallet.wallet
+		const wallet = this.walletService.wallet
 
 		// Now loop and change them
 		for (const account of accountsNeedingChange) {
@@ -354,7 +354,7 @@ export class RepresentativesComponent implements OnInit {
 			}
 
 			try {
-				const changed = await this.nanoBlock.generateChange(wallet, walletAccount, newRep, this.walletService.isLedgerWallet())
+				const changed = await this.nanoBlock.generateChange(wallet, walletAccount, newRep, this.walletService.isLedger)
 				if (!changed) {
 					this.notifications.sendError(`Error changing representative for ${account.id}, please try again`)
 				}

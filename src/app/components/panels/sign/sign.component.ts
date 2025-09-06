@@ -70,7 +70,7 @@ export class SignComponent implements OnInit {
 	shouldSign: boolean = null
 	blockProcessed: boolean = false
 
-	accounts = this.walletService.wallet.accounts
+	accounts = this.walletService.accounts
 	addressBookResults$ = new BehaviorSubject([])
 	showAddressBook = false
 	addressBookMatch = ''
@@ -97,7 +97,7 @@ export class SignComponent implements OnInit {
 	signatureAccount = ''
 	signatureMessage = ''
 	signatureMessageSuccess = ''
-	wallet = this.walletService.wallet.wallet
+	wallet = this.walletService.wallet
 	walletAccount = null
 	nullBlock = '0000000000000000000000000000000000000000000000000000000000000000'
 	qrString = null
@@ -164,7 +164,7 @@ export class SignComponent implements OnInit {
 		this.qrModal = qrModal
 
 		const params = this.router.snapshot.queryParams
-		this.signTypeSelected = this.walletService.isConfigured()
+		this.signTypeSelected = this.walletService.isConfigured
 			? this.signTypes[0]
 			: this.signTypes[1]
 
@@ -537,12 +537,12 @@ export class SignComponent implements OnInit {
 	async confirmTransaction (signature = '') {
 		let wallet = this.wallet
 		let walletAccount = this.walletAccount
-		let isLedger = this.walletService.isLedgerWallet()
+		let isLedger = this.walletService.isLedger
 
 		// using internal wallet
 		if (this.signTypeSelected === this.signTypes[0] && walletAccount) {
-			if (this.walletService.isLocked()) {
-				const wasUnlocked = await this.walletService.requestWalletUnlock()
+			if (this.walletService.isLocked) {
+				const wasUnlocked = await this.walletService.requestUnlock()
 
 				if (wasUnlocked === false) {
 					return

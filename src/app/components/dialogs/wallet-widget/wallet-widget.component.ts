@@ -80,7 +80,7 @@ export class WalletWidgetComponent implements OnInit {
 	}
 
 	async unlockWallet () {
-		const isUnlocked = await this.walletService.requestWalletUnlock()
+		const isUnlocked = await this.walletService.requestUnlock()
 		if (isUnlocked === false) {
 			return
 		}

@@ -45,10 +45,8 @@ export class AccountsComponent implements OnInit {
 	settings = inject(AppSettingsService)
 	walletService = inject(WalletService)
 
-	accounts = this.walletService.wallet.accounts
-	isLedgerWallet = this.walletService.isLedgerWallet()
-	isSingleKeyWallet = this.walletService.isSingleKeyWallet()
-
+	accounts = this.walletService.accounts
+	isLedgerWallet = this.walletService.isLedger
 	viewAdvanced = false
 	newAccountIndex = null
 	// When we change the accounts, redetect changable reps (Debounce by 5 seconds)
@@ -63,8 +61,8 @@ export class AccountsComponent implements OnInit {
 	}
 
 	async createAccount () {
-		if (this.walletService.isLocked()) {
-			const wasUnlocked = await this.walletService.requestWalletUnlock()
+		if (this.walletService.isLocked) {
+			const wasUnlocked = await this.walletService.requestUnlock()
 
 			if (wasUnlocked === false) {
 				return
@@ -74,10 +72,10 @@ export class AccountsComponent implements OnInit {
 		if ((this.isLedgerWallet) && (this.ledger.ledger.status !== LedgerStatus.READY)) {
 			return this.notificationService.sendWarning(this.translocoService.translate('accounts.ledger-device-must-be-ready'))
 		}
-		if (!this.walletService.isConfigured()) {
+		if (!this.walletService.isConfigured) {
 			return this.notificationService.sendError(this.translocoService.translate('accounts.wallet-is-not-configured'))
 		}
-		if (this.walletService.wallet.accounts.length >= 20) {
+		if (this.walletService.accounts.length >= 20) {
 			return this.notificationService.sendWarning(this.translocoService.translate('accounts.you-can-only-track-up-to-x-accounts-at-a-time', { accounts: 20 }))
 		}
 		// Advanced view, manual account index?
@@ -87,7 +85,7 @@ export class AccountsComponent implements OnInit {
 			if (index < 0) {
 				return this.notificationService.sendWarning(this.translocoService.translate('accounts.invalid-account-index-must-be-positive-number'))
 			}
-			const existingAccount = this.walletService.wallet.accounts.find(a => a.index === index)
+			const existingAccount = this.walletService.accounts.find(a => a.index === index)
 			if (existingAccount) {
 				return this.notificationService.sendWarning(
 					this.translocoService.translate('accounts.the-account-at-this-index-is-already-loaded')
@@ -97,6 +95,7 @@ export class AccountsComponent implements OnInit {
 		}
 		try {
 			const newAccount = await this.walletService.addWalletAccount(accountIndex)
+			await this.walletService.reloadBalances()
 			this.notificationService.sendSuccess(
 				this.translocoService.translate('accounts.successfully-created-new-account', { account: newAccount.id })
 			)
@@ -110,14 +109,14 @@ export class AccountsComponent implements OnInit {
 	sortAccounts () {
 		// if (this.walletService.isLocked()) return this.notificationService.sendError(`Wallet is locked.`)
 		// if (!this.walletService.isConfigured()) return this.notificationService.sendError(`Wallet is not configured`)
-		// if (this.walletService.wallet.accounts.length <= 1) {
+		// if (this.walletService.accounts.length <= 1) {
 		// return this.notificationService.sendWarning(`You need at least 2 accounts to sort them`)
 		// }
-		if (this.walletService.isLocked() || !this.walletService.isConfigured() || this.walletService.wallet.accounts.length <= 1) {
+		if (this.walletService.isLocked || !this.walletService.isConfigured || this.walletService.accounts.length <= 1) {
 			return
 		}
-		this.walletService.wallet.accounts = this.walletService.wallet.accounts.sort((a, b) => a.index - b.index)
-		// this.accounts = this.walletService.wallet.accounts
+		this.walletService.accounts = this.walletService.accounts.sort((a, b) => a.index - b.index)
+		// this.accounts = this.walletService.accounts
 		// Save new sorted accounts list
 		this.walletService.saveWalletExport()
 		// this.notificationService.sendSuccess(`Successfully sorted accounts by index!`)
@@ -127,9 +126,9 @@ export class AccountsComponent implements OnInit {
 		const isSmallViewport = (window.innerWidth < 940)
 
 		if (isSmallViewport === true) {
-			this.walletService.wallet.selectedAccountId = account?.id ?? null
-			this.walletService.wallet.selectedAccount = account
-			this.walletService.wallet.selectedAccount$.next(account)
+			this.walletService.selectedAccountId = account?.id ?? null
+			this.walletService.selectedAccount = account
+			this.walletService.selectedAccount$.next(account)
 			this.walletService.saveWalletExport()
 		}
 
@@ -142,8 +141,8 @@ export class AccountsComponent implements OnInit {
 	}
 
 	async deleteAccount (account) {
-		if (this.walletService.isLocked()) {
-			const wasUnlocked = await this.walletService.requestWalletUnlock()
+		if (this.walletService.isLocked) {
+			const wasUnlocked = await this.walletService.requestUnlock()
 
 			if (wasUnlocked === false) {
 				return
