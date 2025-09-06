@@ -22,10 +22,11 @@ import {
 })
 
 export class ConverterComponent implements OnInit, OnDestroy {
-	private util = inject(UtilService)
-	settings = inject(AppSettingsService)
-	private price = inject(PriceService)
-	notifications = inject(NotificationsService)
+	private svcPrice = inject(PriceService)
+	private svcUtil = inject(UtilService)
+
+	svcNotifications = inject(NotificationsService)
+	svcAppSettings = inject(AppSettingsService)
 
 	Mnano = ''
 	raw = ''
@@ -36,8 +37,8 @@ export class ConverterComponent implements OnInit, OnDestroy {
 	priceSub = null
 
 	ngOnInit (): void {
-		this.priceSub = this.price.lastPrice$.subscribe(event => {
-			this.fiatPrice = this.price.price.lastPrice.toFixed(30)
+		this.priceSub = this.svcPrice.lastPrice$.subscribe(event => {
+			this.fiatPrice = this.svcPrice.lastPrice.toFixed(30)
 		})
 		this.unitChange('mnano')
 	}
@@ -51,9 +52,9 @@ export class ConverterComponent implements OnInit, OnDestroy {
 	async unitChange (unit) {
 		switch (unit) {
 			case 'mnano':
-				if (this.util.account.isValidNanoAmount(this.Mnano)) {
+				if (this.svcUtil.account.isValidNanoAmount(this.Mnano)) {
 					this.raw = await Tools.convert(this.Mnano, 'nano', 'raw')
-					this.fiatPrice = (parseFloat(this.Mnano) * this.price.price.lastPrice).toString()
+					this.fiatPrice = (parseFloat(this.Mnano) * this.svcPrice.lastPrice).toString()
 					this.invalidMnano = false
 					this.invalidRaw = false
 					this.invalidFiat = false
@@ -64,9 +65,9 @@ export class ConverterComponent implements OnInit, OnDestroy {
 				}
 				break
 			case 'raw':
-				if (this.util.account.isValidAmount(this.raw)) {
+				if (this.svcUtil.account.isValidAmount(this.raw)) {
 					this.Mnano = await Tools.convert(this.raw, 'raw', 'nano')
-					this.fiatPrice = (parseFloat(this.Mnano) * this.price.price.lastPrice).toString()
+					this.fiatPrice = (parseFloat(this.Mnano) * this.svcPrice.lastPrice).toString()
 					this.invalidRaw = false
 					this.invalidMnano = false
 					this.invalidFiat = false
@@ -77,8 +78,8 @@ export class ConverterComponent implements OnInit, OnDestroy {
 				}
 				break
 			case 'fiat':
-				if (this.util.string.isNumeric(this.fiatPrice)) {
-					this.Mnano = (parseFloat(this.fiatPrice) / this.price.price.lastPrice).toString()
+				if (this.svcUtil.string.isNumeric(this.fiatPrice)) {
+					this.Mnano = (parseFloat(this.fiatPrice) / this.svcPrice.lastPrice).toString()
 					this.raw = await Tools.convert(this.Mnano, 'nano', 'raw')
 					this.invalidRaw = false
 					this.invalidMnano = false

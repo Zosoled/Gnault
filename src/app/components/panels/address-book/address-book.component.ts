@@ -50,7 +50,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	private qrModalService = inject(QrModalService)
 	private router = inject(Router)
 	private api = inject(ApiService)
-	private price = inject(PriceService)
+	private svcPrice = inject(PriceService)
 	private translocoService = inject(TranslocoService)
 
 	appSettings = inject(AppSettingsService)
@@ -87,8 +87,8 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	async ngOnInit () {
 		this.addressBookService.loadAddressBook()
 		// Keep price up to date with the service
-		this.priceSub = this.price.lastPrice$.subscribe(event => {
-			this.fiatPrice = this.price.price.lastPrice
+		this.priceSub = this.svcPrice.lastPrice$.subscribe(event => {
+			this.fiatPrice = this.svcPrice.lastPrice
 		})
 
 		// Detect if local wallet balance is refreshed

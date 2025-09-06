@@ -26,7 +26,7 @@
 													class="uk-form-icon uk-form-icon-flip"
 													ngxClipboard
 													[cbContent]="Mnano"
-													(cbOnSuccess)="notifications.sendSuccess('Value Copied!')"
+													(cbOnSuccess)="svcNotifications.sendSuccess('Value Copied!')"
 													uk-icon="icon: copy"
 													title="Copy Value"
 													uk-tooltip
@@ -67,7 +67,7 @@
 													class="uk-form-icon uk-form-icon-flip"
 													ngxClipboard
 													[cbContent]="raw"
-													(cbOnSuccess)="notifications.sendSuccess('Value Copied!')"
+													(cbOnSuccess)="svcNotifications.sendSuccess('Value Copied!')"
 													uk-icon="icon: copy"
 													title="Copy Value"
 													uk-tooltip
@@ -95,7 +95,7 @@
 								<label
 									class="uk-form-label"
 									for="fiat"
-								>{{settings.settings.displayCurrency}} <span
+								>{{svcAppSettings.settings.displayCurrency}} <span
 										uk-icon="icon: info;"
 										uk-tooltip
 										title="Latest fiat price. The currency can be changed from the app settings."
@@ -108,7 +108,7 @@
 													class="uk-form-icon uk-form-icon-flip"
 													ngxClipboard
 													[cbContent]="fiatPrice"
-													(cbOnSuccess)="notifications.sendSuccess('Value Copied!')"
+													(cbOnSuccess)="svcNotifications.sendSuccess('Value Copied!')"
 													uk-icon="icon: copy"
 													title="Copy Value"
 													uk-tooltip
