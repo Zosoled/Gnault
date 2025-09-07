@@ -5,8 +5,10 @@
 	"editor.detectIndentation": false,
 	"editor.formatOnSave": true,
 	"editor.formatOnSaveMode": "file",
+	"editor.inlineSuggest.enabled": true,
 	"editor.insertSpaces": false,
 	"editor.maxTokenizationLineLength": 10000000,
+	"editor.suggest.snippetsPreventQuickSuggestions": false,
 	"editor.tabSize": 2,
 	"html.format.enable": true,
 	"html.format.indentHandlebars": true,
@@ -34,6 +36,7 @@
 	"javascript.format.insertSpaceBeforeAndAfterBinaryOperators": true,
 	"javascript.format.insertSpaceBeforeFunctionParenthesis": true,
 	"javascript.format.semicolons": "remove",
+	"json.format.enable": true,
 	"typescript.format.enable": true,
 	"typescript.format.insertSpaceAfterCommaDelimiter": true,
 	"typescript.format.insertSpaceAfterConstructor": true,
@@ -45,5 +48,37 @@
 	"typescript.format.insertSpaceBeforeAndAfterBinaryOperators": true,
 	"typescript.format.insertSpaceBeforeFunctionParenthesis": true,
 	"typescript.format.indentSwitchCase": true,
-	"typescript.format.semicolons": "remove"
+	"typescript.format.semicolons": "remove",
+	"[css]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+	"[html]": {
+		"editor.codeActionsOnSave": {
+			"source.fixAll.eslint": "explicit"
+		},
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": false
+	},
+	"[json]": {
+		"editor.defaultFormatter": "vscode.json-language-features",
+		"editor.quickSuggestions": {
+			"strings": true
+		},
+		"editor.suggest.insertMode": "replace"
+	},
+	"[scss]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	},
+	"[typescript]": {
+		"editor.codeActionsOnSave": {
+			"source.organizeImports": "explicit",
+			"source.fixAll.eslint": "explicit",
+			"source.fixAll.tslint": "explicit",
+			"source.fixAll.stylelint": "explicit"
+		},
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	}
 }

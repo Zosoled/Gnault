@@ -1,0 +1,26 @@
+{
+	"bracketSpacing": true,
+	"endOfLine": "lf",
+	"objectWrap": "preserve",
+	"printWidth": 120,
+	"semi": false,
+	"singleAttributePerLine": true,
+	"singleQuote": true,
+	"tabWidth": 2,
+	"trailingComma": "es5",
+	"useTabs": true,
+	"overrides": [
+		{
+			"files": "*.scss",
+			"options": {
+				"singleQuote": false
+			}
+		},
+		{
+			"files": "*.html",
+			"options": {
+				"printWidth": 120
+			}
+		}
+	]
+}
