@@ -1,33 +1,18 @@
-import { CommonModule, formatDate } from '@angular/common'
+import { formatDate } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
+import { ApiService, AppSettingsService, NotificationsService, UtilService, WalletService } from 'app/services'
 import { ClipboardModule } from 'ngx-clipboard'
 import * as QRCode from 'qrcode'
-import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
-import {
-	ApiService,
-	AppSettingsService,
-	NotificationsService,
-	UtilService,
-	WalletService
-} from 'app/services'
 
 @Component({
 	selector: 'app-manage-wallet',
 	templateUrl: './manage-wallet.component.html',
 	styleUrls: ['./manage-wallet.component.css'],
-	imports: [
-		AmountSplitPipe,
-		ClipboardModule,
-		CommonModule,
-		FormsModule,
-		RaiPipe,
-		SqueezePipe,
-		TranslocoPipe
-	]
+	imports: [AmountSplitPipe, ClipboardModule, FormsModule, RaiPipe, SqueezePipe, TranslocoPipe],
 })
-
 export class ManageWalletComponent implements OnInit {
 	private api = inject(ApiService)
 	private translocoService = inject(TranslocoService)
@@ -49,7 +34,7 @@ export class ManageWalletComponent implements OnInit {
 	QRExportImg = ''
 
 	csvExportStarted = false
-	transactionHistoryLimit = 500; // if the backend server limit changes, change this too
+	transactionHistoryLimit = 500 // if the backend server limit changes, change this too
 	selAccountInit = false
 	invalidCsvCount = false
 	invalidCsvOffset = false
@@ -65,11 +50,11 @@ export class ManageWalletComponent implements OnInit {
 	selectedOrder = this.orderOptions[0].value
 	exportEnabled = true
 
-	async ngOnInit () {
+	async ngOnInit() {
 		this.wallet = this.walletService.wallet
 
 		// Update selected account if changed in the sidebar
-		this.walletService.selectedAccount$.subscribe(async acc => {
+		this.walletService.selectedAccount$.subscribe(async (acc) => {
 			if (this.selAccountInit) {
 				this.csvAccount = acc?.id ?? this.accounts[0]?.id ?? '0'
 			}
@@ -82,12 +67,19 @@ export class ManageWalletComponent implements OnInit {
 		}
 	}
 
-	async changePassword () {
+	async changePassword() {
 		if (this.newPassword.length < 6) {
-			return this.notifications.sendError(this.translocoService.translate('configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long', { minCharacters: 6 }))
+			return this.notifications.sendError(
+				this.translocoService.translate(
+					'configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long',
+					{ minCharacters: 6 }
+				)
+			)
 		}
 		if (this.newPassword !== this.confirmPassword) {
-			return this.notifications.sendError(this.translocoService.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match'))
+			return this.notifications.sendError(
+				this.translocoService.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match')
+			)
 		}
 		if (this.walletService.isLocked) {
 			const wasUnlocked = await this.walletService.requestUnlock()
@@ -103,7 +95,7 @@ export class ManageWalletComponent implements OnInit {
 		this.showQRExport = false
 	}
 
-	async exportWallet () {
+	async exportWallet() {
 		if (this.walletService.isLocked) {
 			const wasUnlocked = await this.walletService.requestUnlock()
 			if (wasUnlocked === false) {
@@ -116,16 +108,16 @@ export class ManageWalletComponent implements OnInit {
 		this.showQRExport = true
 	}
 
-	copied () {
+	copied() {
 		this.notifications.removeNotification('success-copied')
 		this.notifications.sendSuccess(`Wallet seed copied to clipboard!`, { identifier: 'success-copied' })
 	}
 
-	seedMnemonic () {
+	seedMnemonic() {
 		return this.wallet?.mnemonic
 	}
 
-	triggerFileDownload (fileName, exportData, type) {
+	triggerFileDownload(fileName, exportData, type) {
 		let blob
 		// first line, include columns for spreadsheet
 		let csvFile = 'account,type,amount,hash,height,time\n'
@@ -186,7 +178,7 @@ export class ManageWalletComponent implements OnInit {
 		}, 200)
 	}
 
-	async exportToFile () {
+	async exportToFile() {
 		if (this.walletService.isLocked) {
 			const wasUnlocked = await this.walletService.requestUnlock()
 			if (wasUnlocked === false) {
@@ -199,11 +191,13 @@ export class ManageWalletComponent implements OnInit {
 		this.notifications.sendSuccess(`Wallet export downloaded!`)
 	}
 
-	csvCountChange (count) {
-		if (this.util.string.isNumeric(count) && count % 1 === 0 || count === '') {
+	csvCountChange(count) {
+		if ((this.util.string.isNumeric(count) && count % 1 === 0) || count === '') {
 			// only allow beyond limit if using a custom server
-			if (this.settings.settings.serverName !== 'custom' &&
-				(parseInt(count, 10) > this.transactionHistoryLimit || count === '' || count === '0')) {
+			if (
+				this.settings.settings.serverName !== 'custom' &&
+				(parseInt(count, 10) > this.transactionHistoryLimit || count === '' || count === '0')
+			) {
 				this.invalidCsvCount = true
 				this.beyondCsvLimit = true
 			} else {
@@ -220,8 +214,8 @@ export class ManageWalletComponent implements OnInit {
 		}
 	}
 
-	csvOffsetChange (offset) {
-		if (this.util.string.isNumeric(offset) && offset % 1 === 0 || offset === '') {
+	csvOffsetChange(offset) {
+		if ((this.util.string.isNumeric(offset) && offset % 1 === 0) || offset === '') {
 			if (parseInt(offset, 10) < 0) {
 				this.invalidCsvOffset = true
 			} else {
@@ -232,19 +226,21 @@ export class ManageWalletComponent implements OnInit {
 		}
 	}
 
-	csvInit () {
+	csvInit() {
 		this.csvExportStarted = true
 	}
 
-	async exportToCsv () {
+	async exportToCsv() {
 		// disable export for a period to reduce RPC calls
 		if (!this.exportEnabled) return
 		this.exportEnabled = false
-		setTimeout(() => this.exportEnabled = true, 3000)
+		setTimeout(() => (this.exportEnabled = true), 3000)
 
 		if (this.invalidCsvCount) {
 			if (this.beyondCsvLimit) {
-				return this.notifications.sendWarning(`To export transactions above the limit, please use a custom Gnault server`)
+				return this.notifications.sendWarning(
+					`To export transactions above the limit, please use a custom Gnault server`
+				)
 			} else {
 				return this.notifications.sendWarning(`Invalid limit`)
 			}
@@ -256,20 +252,26 @@ export class ManageWalletComponent implements OnInit {
 		this.exportingCsv = true
 		const transactionCount = parseInt(this.csvCount, 10) || 0
 		const transactionOffset = parseInt(this.csvOffset, 10) || 0
-		const history = await this.api.accountHistory(this.csvAccount, transactionCount, false, transactionOffset, this.selectedOrder)
+		const history = await this.api.accountHistory(
+			this.csvAccount,
+			transactionCount,
+			false,
+			transactionOffset,
+			this.selectedOrder
+		)
 		this.exportingCsv = false // reset it here in case the file download fails (don't want spinning button forever)
 
 		// contruct the export data
 		const csvData = []
 		if (history && history.history && history.history.length > 0) {
-			history.history.forEach(a => {
+			history.history.forEach((a) => {
 				csvData.push({
-					'account': a.account,
-					'type': a.type,
-					'amount': this.util.nano.rawToMnano(a.amount),
-					'hash': a.hash,
-					'height': a.height,
-					'time': formatDate(a.local_timestamp * 1000, 'y-MM-d HH:mm:ss', 'en-US')
+					account: a.account,
+					type: a.type,
+					amount: this.util.nano.rawToMnano(a.amount),
+					hash: a.hash,
+					height: a.height,
+					time: formatDate(a.local_timestamp * 1000, 'y-MM-d HH:mm:ss', 'en-US'),
 				})
 			})
 		}
@@ -279,9 +281,7 @@ export class ManageWalletComponent implements OnInit {
 		}
 
 		// download file
-		const order = this.selectedOrder
-			? '_oldestFirst'
-			: '_newestFirst'
+		const order = this.selectedOrder ? '_oldestFirst' : '_newestFirst'
 		const fileName = `${this.csvAccount}_offset=${this.csvOffset || 0}${order}.csv`
 		this.triggerFileDownload(fileName, csvData, 'csv')
 		this.notifications.sendSuccess(`Transaction history downloaded!`)

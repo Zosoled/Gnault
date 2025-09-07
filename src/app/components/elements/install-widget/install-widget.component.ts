@@ -1,21 +1,17 @@
-import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { NotificationsService } from 'app/services'
 
 interface InstallEvent extends Event {
-	userChoice: Promise<{ outcome: 'accepted' | 'dismissed', platform: string }>
-	prompt (): void
+	userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
+	prompt(): void
 }
 
 @Component({
 	selector: 'app-install-widget',
 	templateUrl: './install-widget.component.html',
 	styleUrls: ['./install-widget.component.less'],
-	imports: [
-		CommonModule
-	]
+	imports: [],
 })
-
 export class InstallWidgetComponent implements OnInit {
 	private notifications = inject(NotificationsService)
 
@@ -24,7 +20,7 @@ export class InstallWidgetComponent implements OnInit {
 	platform = this.getPlatform()
 	promotablePlatforms = ['Android', 'iOS', 'iPadOS', 'Chrome OS']
 
-	ngOnInit () {
+	ngOnInit() {
 		if (!this.isPromotable()) {
 			return
 		}
@@ -46,7 +42,7 @@ export class InstallWidgetComponent implements OnInit {
 		}
 	}
 
-	install () {
+	install() {
 		if (!this.installEvent) {
 			return
 		}
@@ -60,11 +56,11 @@ export class InstallWidgetComponent implements OnInit {
 		})
 	}
 
-	dismiss () {
+	dismiss() {
 		this.showInstallPromotion = false
 	}
 
-	getPlatform () {
+	getPlatform() {
 		const platform = window.navigator.platform
 		const userAgent = window.navigator.userAgent
 
@@ -85,23 +81,25 @@ export class InstallWidgetComponent implements OnInit {
 		}
 	}
 
-	isIosInstallable () {
+	isIosInstallable() {
 		if (!this.isPromotable() || this.isInstalled()) {
 			return false
 		}
-		return this.platform === 'iOS' || this.platform === 'iPadOS' && 'standalone' in window.navigator
+		return this.platform === 'iOS' || (this.platform === 'iPadOS' && 'standalone' in window.navigator)
 	}
 
-	isPromotable () {
+	isPromotable() {
 		if (this.isInstalled()) {
 			return false
 		}
 		return this.promotablePlatforms.includes(this.platform)
 	}
 
-	isInstalled () {
-		return window.matchMedia('(display-mode: standalone)').matches // Chrome & Edge
-			|| (window.navigator as any).standalone === true // Safari
-			|| window.navigator.userAgent.includes('Electron') // Electron
+	isInstalled() {
+		return (
+			window.matchMedia('(display-mode: standalone)').matches || // Chrome & Edge
+			(window.navigator as any).standalone === true || // Safari
+			window.navigator.userAgent.includes('Electron')
+		) // Electron
 	}
 }

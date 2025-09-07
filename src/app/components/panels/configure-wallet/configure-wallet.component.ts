@@ -1,18 +1,17 @@
-import { CommonModule } from '@angular/common'
-import { Component, OnInit, inject } from '@angular/core'
+import { Component, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
-import { Wallet } from 'libnemo'
-import { ClipboardModule } from 'ngx-clipboard'
 import {
 	LedgerService,
 	LedgerStatus,
 	NotificationsService,
 	QrModalService,
 	UtilService,
-	WalletService
+	WalletService,
 } from 'app/services'
+import { Wallet } from 'libnemo'
+import { ClipboardModule } from 'ngx-clipboard'
 
 enum panels {
 	'landing',
@@ -30,15 +29,8 @@ const INDEX_MAX = 4294967295
 	selector: 'app-configure-wallet',
 	templateUrl: './configure-wallet.component.html',
 	styleUrls: ['./configure-wallet.component.css'],
-	imports: [
-		ClipboardModule,
-		CommonModule,
-		FormsModule,
-		RouterLink,
-		TranslocoPipe
-	]
+	imports: [ClipboardModule, FormsModule, RouterLink, TranslocoPipe],
 })
-
 export class ConfigureWalletComponent {
 	private notifications = inject(NotificationsService)
 	private qrModalService = inject(QrModalService)
@@ -52,14 +44,16 @@ export class ConfigureWalletComponent {
 	panels = panels
 	activePanel = panels.landing
 	wallet = this.walletService.wallet
-	get isConfigured () { return this.walletService.isConfigured }
+	get isConfigured() {
+		return this.walletService.isConfigured
+	}
 	isNewWallet = true
 	hasConfirmedBackup = false
 	importSeed = ''
 	isExpanded = false
 	keyString = ''
 
-	exampleMnemonicWords = ["edge", "defense", "waste", "choose"]
+	exampleMnemonicWords = ['edge', 'defense', 'waste', 'choose']
 	exampleMnemonicSalt = 'some password'
 	exampleSeed = '0dc285...'
 	examplePrivateKey = '3be4fc...'
@@ -89,7 +83,7 @@ export class ConfigureWalletComponent {
 	ledgerStatus = LedgerStatus
 	ledger = this.ledgerService.ledger
 
-	constructor () {
+	constructor() {
 		if (this.route.getCurrentNavigation().extras.state && this.route.getCurrentNavigation().extras.state.seed) {
 			this.activePanel = panels.import
 			this.importSeedModel = this.route.getCurrentNavigation().extras.state.seed
@@ -102,7 +96,7 @@ export class ConfigureWalletComponent {
 		}
 	}
 
-	async importExistingWallet () {
+	async importExistingWallet() {
 		this.importSeed = ''
 		this.newPassword = ''
 
@@ -111,7 +105,9 @@ export class ConfigureWalletComponent {
 		// load accounts and watch them update in real-time
 		this.route.navigate(['accounts'])
 
-		this.notifications.sendInfo(`Starting to scan the first 20 accounts and importing them if they have been used...`, { length: 7000 })
+		this.notifications.sendInfo(`Starting to scan the first 20 accounts and importing them if they have been used...`, {
+			length: 7000,
+		})
 		await this.walletService.scanAccounts()
 
 		this.notifications.sendSuccess(`Successfully imported wallet!`, { length: 10000 })
@@ -122,7 +118,7 @@ export class ConfigureWalletComponent {
 		this.walletService.publishNewWallet()
 	}
 
-	async importSingleKeyWallet () {
+	async importSingleKeyWallet() {
 		this.walletService.createWalletFromSingleKey(this.keyString, this.isExpanded)
 		this.newPassword = ''
 		this.route.navigate(['accounts']) // load accounts and watch them update in real-time
@@ -132,17 +128,17 @@ export class ConfigureWalletComponent {
 		this.walletService.publishNewWallet()
 	}
 
-	async connectLedgerByBluetooth () {
+	async connectLedgerByBluetooth() {
 		this.ledgerService.enableBluetoothMode(true)
 		await this.importLedgerWallet()
 	}
 
-	async connectLedgerByUsb () {
+	async connectLedgerByUsb() {
 		this.ledgerService.enableBluetoothMode(false)
 		await this.importLedgerWallet()
 	}
 
-	async importLedgerWallet (refreshOnly = false) {
+	async importLedgerWallet(refreshOnly = false) {
 		// If a wallet exists already, make sure they know they are overwriting it
 		if (!refreshOnly && this.isConfigured) {
 			const confirmed = await this.confirmWalletOverwrite()
@@ -160,7 +156,10 @@ export class ConfigureWalletComponent {
 
 		if (this.ledger.status === LedgerStatus.NOT_CONNECTED) {
 			this.ledgerService.resetLedger()
-			return this.notifications.sendWarning(`Failed to connect the Ledger device. Make sure the nano app is running on the Ledger. If the error persists: Check the <a href="https://docs.nault.cc/2020/08/04/ledger-guide.html#troubleshooting" target="_blank" rel="noopener noreferrer">troubleshooting guide</a>`, { identifier: 'ledger-error', length: 0 })
+			return this.notifications.sendWarning(
+				`Failed to connect the Ledger device. Make sure the nano app is running on the Ledger. If the error persists: Check the <a href="https://docs.nault.cc/2020/08/04/ledger-guide.html#troubleshooting" target="_blank" rel="noopener noreferrer">troubleshooting guide</a>`,
+				{ identifier: 'ledger-error', length: 0 }
+			)
 		}
 
 		if (this.ledger.status === LedgerStatus.LOCKED) {
@@ -186,25 +185,31 @@ export class ConfigureWalletComponent {
 	}
 
 	// Send a confirmation dialog to the user if they already have a wallet configured
-	async confirmWalletOverwrite () {
+	async confirmWalletOverwrite() {
 		if (!this.isConfigured) return true
 
 		const UIkit = window['UIkit']
 		try {
 			const msg = this.walletService.isLedger
 				? '<p class="uk-alert uk-alert-info"><br><span class="uk-flex"><span uk-icon="icon: info; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">You are about to configure a new wallet, which will <b>disconnect your Ledger device from Gnault</b>.</span><br><br>If you need to use the Ledger wallet, simply import your device again.</p><br>'
-				: '<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">You are about to configure a new wallet, which will <b>replace your currently configured wallet</b>.</span><br><br><b style="font-size: 18px;">' + this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') + '</b><br><br><b style="font-size: 18px;">' + this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') + '</b></p><br>'
+				: '<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">You are about to configure a new wallet, which will <b>replace your currently configured wallet</b>.</span><br><br><b style="font-size: 18px;">' +
+					this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
+					'</b><br><br><b style="font-size: 18px;">' +
+					this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
+					'</b></p><br>'
 			await UIkit.modal.confirm(msg)
 			return true
 		} catch (err) {
 			if (!this.walletService.isLedger) {
-				this.notifications.sendInfo(`You can use the 'Manage Wallet' page to backup your wallet's secret recovery seed and/or mnemonic`)
+				this.notifications.sendInfo(
+					`You can use the 'Manage Wallet' page to backup your wallet's secret recovery seed and/or mnemonic`
+				)
 			}
 			return false
 		}
 	}
 
-	async setPasswordInit () {
+	async setPasswordInit() {
 		// if importing from existing, the format check must be done prior the password page
 		if (this.isNewWallet) {
 			const req = this.walletService.createNewWallet('')
@@ -230,7 +235,8 @@ export class ConfigureWalletComponent {
 			if (this.selectedImportOption === 'mnemonic' || this.selectedImportOption === 'seed') {
 				if (this.selectedImportOption === 'seed') {
 					const existingSeed = this.importSeedModel.trim()
-					if (existingSeed.length !== 64 || !this.util.nano.isValidSeed(existingSeed)) return this.notifications.sendError(`Seed is invalid, double check it!`)
+					if (existingSeed.length !== 64 || !this.util.nano.isValidSeed(existingSeed))
+						return this.notifications.sendError(`Seed is invalid, double check it!`)
 					this.importSeed = existingSeed
 				} else if (this.selectedImportOption === 'mnemonic') {
 					// Clean the value by trimming it and removing newlines
@@ -241,7 +247,7 @@ export class ConfigureWalletComponent {
 
 					// Try and decode the mnemonic
 					try {
-						await Wallet.load('BLAKE2b', '', mnemonic).then(wallet => wallet.destroy())
+						await Wallet.load('BLAKE2b', '', mnemonic).then((wallet) => wallet.destroy())
 					} catch (err) {
 						return this.notifications.sendError(`Unable to decode mnemonic, double check it!`)
 					}
@@ -257,9 +263,7 @@ export class ConfigureWalletComponent {
 					return this.notifications.sendError(`Invalid import option`)
 				}
 
-				this.keyString = this.isExpanded
-					? this.importExpandedKeyModel
-					: this.importPrivateKeyModel
+				this.keyString = this.isExpanded ? this.importExpandedKeyModel : this.importPrivateKeyModel
 				this.keyString = this.keyString.trim()
 				if (this.isExpanded && this.keyString.length === 128) {
 					// includes deterministic R value material which we ignore
@@ -302,7 +306,7 @@ export class ConfigureWalletComponent {
 		}
 	}
 
-	confirmNewSeed () {
+	confirmNewSeed() {
 		if (!this.hasConfirmedBackup) {
 			return this.notifications.sendWarning(`Please confirm you have saved a wallet backup!`)
 		}
@@ -314,12 +318,19 @@ export class ConfigureWalletComponent {
 		this.activePanel = panels.final
 	}
 
-	saveWalletPassword () {
+	saveWalletPassword() {
 		if (this.walletPasswordModel.length < 6) {
-			return this.notifications.sendWarning(this.translocoService.translate('configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long', { minCharacters: 6 }))
+			return this.notifications.sendWarning(
+				this.translocoService.translate(
+					'configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long',
+					{ minCharacters: 6 }
+				)
+			)
 		}
 		if (this.walletPasswordConfirmModel !== this.walletPasswordModel) {
-			return this.notifications.sendError(this.translocoService.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match'))
+			return this.notifications.sendError(
+				this.translocoService.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match')
+			)
 		}
 		this.newPassword = this.walletPasswordModel
 		this.walletPasswordModel = ''
@@ -329,20 +340,23 @@ export class ConfigureWalletComponent {
 			// this.walletService.createNewWallet(this.newPassword, this.wallet.wallet)
 		} else if (this.selectedImportOption === 'mnemonic' || this.selectedImportOption === 'seed') {
 			this.importExistingWallet()
-		} else if (this.selectedImportOption === 'privateKey' || this.selectedImportOption === 'expandedKey'
-			|| this.selectedImportOption === 'bip39-mnemonic') {
+		} else if (
+			this.selectedImportOption === 'privateKey' ||
+			this.selectedImportOption === 'expandedKey' ||
+			this.selectedImportOption === 'bip39-mnemonic'
+		) {
 			this.importSingleKeyWallet()
 		}
 	}
 
-	saveNewWallet () {
+	saveNewWallet() {
 		this.walletService.saveWalletExport()
 		this.walletService.publishNewWallet()
 
 		this.notifications.sendSuccess(`Successfully created new wallet! Do not lose the secret recovery seed/mnemonic!`)
 	}
 
-	setPanel (panel) {
+	setPanel(panel) {
 		this.activePanel = panel
 		if (panel === panels.landing) {
 			this.isNewWallet = true
@@ -351,7 +365,7 @@ export class ConfigureWalletComponent {
 		}
 	}
 
-	copiedNewWalletSeed () {
+	copiedNewWalletSeed() {
 		this.notifications.removeNotification('success-copied')
 		this.notifications.sendSuccess(
 			this.translocoService.translate('configure-wallet.new-wallet.successfully-copied-secret-recovery-seed'),
@@ -359,7 +373,7 @@ export class ConfigureWalletComponent {
 		)
 	}
 
-	copiedNewWalletMnemonic () {
+	copiedNewWalletMnemonic() {
 		this.notifications.removeNotification('success-copied')
 		this.notifications.sendSuccess(
 			this.translocoService.translate('configure-wallet.new-wallet.successfully-copied-secret-recovery-mnemonic'),
@@ -367,7 +381,7 @@ export class ConfigureWalletComponent {
 		)
 	}
 
-	importFromFile (files) {
+	importFromFile(files) {
 		if (!files.length) return
 
 		const file = files[0]
@@ -376,8 +390,10 @@ export class ConfigureWalletComponent {
 			const fileData = event.target['result'] as string
 			try {
 				const importData = JSON.parse(fileData)
-				if ((!importData.seed && !importData.privateKey && !importData.expandedKey) ||
-					(!importData.hasOwnProperty('accountsIndex') && !importData.hasOwnProperty('indexes'))) {
+				if (
+					(!importData.seed && !importData.privateKey && !importData.expandedKey) ||
+					(!importData.hasOwnProperty('accountsIndex') && !importData.hasOwnProperty('indexes'))
+				) {
 					return this.notifications.sendError(`Bad import data `)
 				}
 
@@ -392,31 +408,33 @@ export class ConfigureWalletComponent {
 	}
 
 	// open qr reader modal
-	openQR (reference, type) {
+	openQR(reference, type) {
 		const qrResult = this.qrModalService.openQR(reference, type)
-		qrResult.then((data) => {
-			switch (data.reference) {
-				case 'seed1':
-					this.importSeedModel = data.content
-					break
-				case 'mnemo1':
-					this.importSeedMnemonicModel = data.content
-					break
-				case 'mnemo2':
-					this.importSeedBip39MnemonicModel = data.content
-					break
-				case 'priv1':
-					this.importPrivateKeyModel = data.content
-					break
-				case 'expanded1':
-					this.importExpandedKeyModel = data.content
-					break
-			}
-		}, () => { }
+		qrResult.then(
+			(data) => {
+				switch (data.reference) {
+					case 'seed1':
+						this.importSeedModel = data.content
+						break
+					case 'mnemo1':
+						this.importSeedMnemonicModel = data.content
+						break
+					case 'mnemo2':
+						this.importSeedBip39MnemonicModel = data.content
+						break
+					case 'priv1':
+						this.importPrivateKeyModel = data.content
+						break
+					case 'expanded1':
+						this.importExpandedKeyModel = data.content
+						break
+				}
+			},
+			() => {}
 		)
 	}
 
-	accountIndexChange (index) {
+	accountIndexChange(index) {
 		let invalid = false
 		if (this.util.string.isNumeric(index) && index % 1 === 0) {
 			index = parseInt(index, 10)

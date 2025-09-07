@@ -3,9 +3,6 @@ import { Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
-import { ClipboardModule } from 'ngx-clipboard'
-import { Subject, timer } from 'rxjs'
-import { debounce } from 'rxjs/operators'
 import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/elements'
 import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
@@ -14,8 +11,11 @@ import {
 	LedgerStatus,
 	NotificationsService,
 	RepresentativeService,
-	WalletService
+	WalletService,
 } from 'app/services'
+import { ClipboardModule } from 'ngx-clipboard'
+import { Subject, timer } from 'rxjs'
+import { debounce } from 'rxjs/operators'
 
 @Component({
 	selector: 'app-accounts',
@@ -32,10 +32,9 @@ import {
 		RaiPipe,
 		RouterLink,
 		TranslocoPipe,
-		UpperCasePipe
-	]
+		UpperCasePipe,
+	],
 })
-
 export class AccountsComponent implements OnInit {
 	private notificationService = inject(NotificationsService)
 	private representatives = inject(RepresentativeService)
@@ -53,14 +52,14 @@ export class AccountsComponent implements OnInit {
 	accountsChanged$ = new Subject()
 	reloadRepWarning$ = this.accountsChanged$.pipe(debounce(() => timer(5000)))
 
-	async ngOnInit () {
-		this.reloadRepWarning$.subscribe(a => {
+	async ngOnInit() {
+		this.reloadRepWarning$.subscribe((a) => {
 			this.representatives.detectChangeableReps()
 		})
 		this.sortAccounts()
 	}
 
-	async createAccount () {
+	async createAccount() {
 		if (this.walletService.isLocked) {
 			const wasUnlocked = await this.walletService.requestUnlock()
 
@@ -69,23 +68,29 @@ export class AccountsComponent implements OnInit {
 			}
 		}
 
-		if ((this.isLedgerWallet) && (this.ledger.ledger.status !== LedgerStatus.READY)) {
-			return this.notificationService.sendWarning(this.translocoService.translate('accounts.ledger-device-must-be-ready'))
+		if (this.isLedgerWallet && this.ledger.ledger.status !== LedgerStatus.READY) {
+			return this.notificationService.sendWarning(
+				this.translocoService.translate('accounts.ledger-device-must-be-ready')
+			)
 		}
 		if (!this.walletService.isConfigured) {
 			return this.notificationService.sendError(this.translocoService.translate('accounts.wallet-is-not-configured'))
 		}
 		if (this.walletService.accounts.length >= 20) {
-			return this.notificationService.sendWarning(this.translocoService.translate('accounts.you-can-only-track-up-to-x-accounts-at-a-time', { accounts: 20 }))
+			return this.notificationService.sendWarning(
+				this.translocoService.translate('accounts.you-can-only-track-up-to-x-accounts-at-a-time', { accounts: 20 })
+			)
 		}
 		// Advanced view, manual account index?
 		let accountIndex = null
 		if (this.viewAdvanced && this.newAccountIndex != null) {
 			const index = parseInt(this.newAccountIndex, 10)
 			if (index < 0) {
-				return this.notificationService.sendWarning(this.translocoService.translate('accounts.invalid-account-index-must-be-positive-number'))
+				return this.notificationService.sendWarning(
+					this.translocoService.translate('accounts.invalid-account-index-must-be-positive-number')
+				)
 			}
-			const existingAccount = this.walletService.accounts.find(a => a.index === index)
+			const existingAccount = this.walletService.accounts.find((a) => a.index === index)
 			if (existingAccount) {
 				return this.notificationService.sendWarning(
 					this.translocoService.translate('accounts.the-account-at-this-index-is-already-loaded')
@@ -102,11 +107,13 @@ export class AccountsComponent implements OnInit {
 			this.newAccountIndex = null
 			this.accountsChanged$.next(newAccount.id)
 		} catch (err) {
-			this.notificationService.sendError(this.translocoService.translate('accounts.unable-to-add-new-account', { error: err.message }))
+			this.notificationService.sendError(
+				this.translocoService.translate('accounts.unable-to-add-new-account', { error: err.message })
+			)
 		}
 	}
 
-	sortAccounts () {
+	sortAccounts() {
 		// if (this.walletService.isLocked()) return this.notificationService.sendError(`Wallet is locked.`)
 		// if (!this.walletService.isConfigured()) return this.notificationService.sendError(`Wallet is not configured`)
 		// if (this.walletService.accounts.length <= 1) {
@@ -122,8 +129,8 @@ export class AccountsComponent implements OnInit {
 		// this.notificationService.sendSuccess(`Successfully sorted accounts by index!`)
 	}
 
-	navigateToAccount (account) {
-		const isSmallViewport = (window.innerWidth < 940)
+	navigateToAccount(account) {
+		const isSmallViewport = window.innerWidth < 940
 
 		if (isSmallViewport === true) {
 			this.walletService.selectedAccountId = account?.id ?? null
@@ -132,15 +139,17 @@ export class AccountsComponent implements OnInit {
 			this.walletService.saveWalletExport()
 		}
 
-		this.router.navigate([`accounts/${account.id}`], { queryParams: { 'compact': 1 } })
+		this.router.navigate([`accounts/${account.id}`], { queryParams: { compact: 1 } })
 	}
 
-	copied () {
+	copied() {
 		this.notificationService.removeNotification('success-copied')
-		this.notificationService.sendSuccess(this.translocoService.translate('general.successfully-copied-to-clipboard'), { identifier: 'success-copied' })
+		this.notificationService.sendSuccess(this.translocoService.translate('general.successfully-copied-to-clipboard'), {
+			identifier: 'success-copied',
+		})
 	}
 
-	async deleteAccount (account) {
+	async deleteAccount(account) {
 		if (this.walletService.isLocked) {
 			const wasUnlocked = await this.walletService.requestUnlock()
 
@@ -156,22 +165,32 @@ export class AccountsComponent implements OnInit {
 			)
 			this.accountsChanged$.next(account.id)
 		} catch (err) {
-			this.notificationService.sendError(this.translocoService.translate('accounts.unable-to-delete-account', { error: err.message }))
+			this.notificationService.sendError(
+				this.translocoService.translate('accounts.unable-to-delete-account', { error: err.message })
+			)
 		}
 	}
 
-	async showLedgerAddress (account) {
+	async showLedgerAddress(account) {
 		if (this.ledger.ledger.status !== LedgerStatus.READY) {
-			return this.notificationService.sendWarning(this.translocoService.translate('accounts.ledger-device-must-be-ready'))
+			return this.notificationService.sendWarning(
+				this.translocoService.translate('accounts.ledger-device-must-be-ready')
+			)
 		}
-		this.notificationService.sendInfo(this.translocoService.translate('accounts.confirming-account-address-on-ledger-device'), { identifier: 'ledger-account', length: 0 })
+		this.notificationService.sendInfo(
+			this.translocoService.translate('accounts.confirming-account-address-on-ledger-device'),
+			{ identifier: 'ledger-account', length: 0 }
+		)
 		try {
 			await this.ledger.getLedgerAccount(account.index, true)
-			this.notificationService.sendSuccess(this.translocoService.translate('accounts.account-address-confirmed-on-ledger'))
+			this.notificationService.sendSuccess(
+				this.translocoService.translate('accounts.account-address-confirmed-on-ledger')
+			)
 		} catch (err) {
-			this.notificationService.sendError(this.translocoService.translate('accounts.account-address-denied-if-it-is-wrong-do-not-use-the-wallet'))
+			this.notificationService.sendError(
+				this.translocoService.translate('accounts.account-address-denied-if-it-is-wrong-do-not-use-the-wallet')
+			)
 		}
 		this.notificationService.removeNotification('ledger-account')
 	}
-
 }

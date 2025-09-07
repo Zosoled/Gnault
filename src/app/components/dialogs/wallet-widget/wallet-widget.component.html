@@ -1,8 +1,63 @@
-<div *ngIf="walletService.isLedger">
-	<div
-		class="nav-status-row"
-		*ngIf="ledgerStatus.status === 'not-connected' || !ledgerStatus.status"
-	>
+@if (walletService.isLedger) {
+	<div>
+		@if (ledgerStatus.status === 'not-connected' || !ledgerStatus.status) {
+			<div class="nav-status-row">
+				<div class="status-icon">
+					<span
+						class="uk-text-warning"
+						uk-icon="icon: warning; ratio: 1.2;"
+					></span>
+				</div>
+				<div class="status-labels">
+					<div class="label primary uk-text-warning">Ledger disconnected</div>
+					<div class="label secondary">
+						<a (click)="reloadLedger()">Reconnect</a> or
+						<a
+							href="https://docs.nault.cc/2020/08/04/ledger-guide.html#troubleshooting"
+							target="_blank"
+							rel="noopener noreferrer"
+							>view Troubleshooting Guide</a
+						>
+					</div>
+				</div>
+			</div>
+		}
+		@if (ledgerStatus.status === 'locked') {
+			<div class="nav-status-row">
+				<div class="status-icon">
+					<span
+						class="uk-text-warning"
+						uk-icon="icon: warning; ratio: 1.2;"
+					></span>
+				</div>
+				<div class="status-labels">
+					<div class="label primary uk-text-warning">Ledger locked</div>
+					<div class="label secondary">
+						Unlock the device, then <a (click)="reloadLedger()">click here</a> to reconnect
+					</div>
+				</div>
+			</div>
+		}
+		@if (ledgerStatus.status === 'ready') {
+			<div
+				class="nav-status-row interactable"
+				(click)="reloadLedger()"
+			>
+				<div class="status-icon">
+					<span
+						class="uk-text-success"
+						uk-icon="icon: bolt; ratio: 1.2;"
+					></span>
+				</div>
+				<div class="status-labels">
+					<div class="label primary uk-text-success">Ledger Ready</div>
+				</div>
+			</div>
+		}
+	</div>
+}
+@if (powAlert) {
+	<div class="nav-status-row">
 		<div class="status-icon">
 			<span
 				class="uk-text-warning"
@@ -10,111 +65,69 @@
 			></span>
 		</div>
 		<div class="status-labels">
-			<div class="label primary uk-text-warning">Ledger disconnected</div>
-			<div class="label secondary"><a (click)="reloadLedger()">Reconnect</a> or <a
-					href="https://docs.nault.cc/2020/08/04/ledger-guide.html#troubleshooting"
-					target="_blank"
-					rel="noopener noreferrer"
-				>view Troubleshooting Guide</a></div>
-		</div>
-	</div>
-	<div
-		class="nav-status-row"
-		*ngIf="( ledgerStatus.status === 'locked' )"
-	>
-		<div class="status-icon">
-			<span
-				class="uk-text-warning"
-				uk-icon="icon: warning; ratio: 1.2;"
-			></span>
-		</div>
-		<div class="status-labels">
-			<div class="label primary uk-text-warning">Ledger locked</div>
-			<div class="label secondary">Unlock the device, then <a (click)="reloadLedger()">click here</a> to reconnect</div>
-		</div>
-	</div>
-	<div
-		class="nav-status-row interactable"
-		(click)="reloadLedger()"
-		*ngIf="( ledgerStatus.status === 'ready' )"
-	>
-		<div class="status-icon">
-			<span
-				class="uk-text-success"
-				uk-icon="icon: bolt; ratio: 1.2;"
-			></span>
-		</div>
-		<div class="status-labels">
-			<div class="label primary uk-text-success">Ledger Ready</div>
-		</div>
-	</div>
-</div>
-<div
-	class="nav-status-row"
-	*ngIf="powAlert"
->
-	<div class="status-icon">
-		<span
-			class="uk-text-warning"
-			uk-icon="icon: warning; ratio: 1.2;"
-		></span>
-	</div>
-	<div class="status-labels">
-		<div class="label primary uk-text-warning">Proof of Work is taking a while...</div>
-		<div class="label secondary">
-			<a
-				routerLink="/configure-app"
-				routerLinkActive="active"
-			>Change PoW method</a> or <a (click)="cancelPow()">cancel PoW</a>
-		</div>
-	</div>
-</div>
-<ng-container *ngIf="walletService.isConfigured && !walletService.isLedger">
-	<div
-		class="nav-status-row half-muted interactable"
-		(click)="unlockWallet()"
-		*ngIf="walletService.isLocked"
-	>
-		<div class="status-icon">
-			<span
-				uk-icon="icon: lock; ratio: 1.2;"
-				class="uk-text-top"
-			></span>
-		</div>
-		<div class="status-labels">
-			<div class="label primary half-muted">
-				{{ 'accounts.wallet-locked' | transloco }}
+			<div class="label primary uk-text-warning">Proof of Work is taking a while...</div>
+			<div class="label secondary">
+				<a
+					routerLink="/configure-app"
+					routerLinkActive="active"
+					>Change PoW method</a
+				>
+				or <a (click)="cancelPow()">cancel PoW</a>
 			</div>
 		</div>
 	</div>
-	<div
-		class="nav-status-row half-muted interactable"
-		(click)="lockWallet()"
-		*ngIf="!walletService.isLocked"
+}
+@if (walletService.isConfigured && !walletService.isLedger) {
+	@if (walletService.isLocked) {
+		<div
+			class="nav-status-row half-muted interactable"
+			(click)="unlockWallet()"
+		>
+			<div class="status-icon">
+				<span
+					uk-icon="icon: lock; ratio: 1.2;"
+					class="uk-text-top"
+				></span>
+			</div>
+			<div class="status-labels">
+				<div class="label primary half-muted">
+					{{ 'accounts.wallet-locked' | transloco }}
+				</div>
+			</div>
+		</div>
+	}
+	@if (!walletService.isLocked) {
+		<div
+			class="nav-status-row half-muted interactable"
+			(click)="lockWallet()"
+		>
+			<div class="status-icon">
+				<span
+					uk-icon="icon: unlock; ratio: 1.2;"
+					class="uk-text-top"
+				></span>
+			</div>
+			<div class="status-labels">
+				<div class="label primary half-muted">{{ 'accounts.wallet-unlocked' | transloco }}</div>
+			</div>
+		</div>
+	}
+}
+@if (!walletService.isConfigured) {
+	<a
+		[routerLink]="['/configure-wallet']"
+		class="nav-status-row interactable"
 	>
 		<div class="status-icon">
 			<span
-				uk-icon="icon: unlock; ratio: 1.2;"
-				class="uk-text-top"
+				class="uk-text-warning"
+				uk-icon="icon: warning; ratio: 1.2;"
 			></span>
 		</div>
 		<div class="status-labels">
-			<div class="label primary half-muted">{{ 'accounts.wallet-unlocked' | transloco }}</div>
+			<div class="label primary uk-text-warning">
+				{{ 'configure-wallet.new-wallet.configure-new-wallet' | transloco }}
+			</div>
 		</div>
-	</div>
-</ng-container>
-<a
-	[routerLink]="['/configure-wallet']"
-	class="nav-status-row interactable"
-	*ngIf="!walletService.isConfigured"
->
-	<div class="status-icon">
-		<span
-			class="uk-text-warning"
-			uk-icon="icon: warning; ratio: 1.2;"
-		></span>
-	</div>
-	<div class="status-labels">
-		<div class="label primary uk-text-warning">{{ 'configure-wallet.new-wallet.configure-new-wallet' | transloco }}</div>
-	</div>
-</a>
+	</a>
+}

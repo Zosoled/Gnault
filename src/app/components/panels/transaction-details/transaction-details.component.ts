@@ -2,16 +2,10 @@ import { CommonModule, DatePipe, DecimalPipe } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { ActivatedRoute, ChildActivationEnd, Router, RouterLink } from '@angular/router'
 import { TranslocoService } from '@jsverse/transloco'
-import { ClipboardModule } from 'ngx-clipboard'
-import { AmountSplitPipe, RaiPipe } from 'app/pipes'
-import {
-	AddressBookService,
-	ApiService,
-	AppSettingsService,
-	NotificationsService,
-	WalletService
-} from 'app/services'
 import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/elements'
+import { AmountSplitPipe, RaiPipe } from 'app/pipes'
+import { AddressBookService, ApiService, AppSettingsService, NotificationsService, WalletService } from 'app/services'
+import { ClipboardModule } from 'ngx-clipboard'
 
 @Component({
 	selector: 'app-transaction-details',
@@ -26,10 +20,9 @@ import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/e
 		NanoAccountIdComponent,
 		NanoIdenticonComponent,
 		RaiPipe,
-		RouterLink
-	]
+		RouterLink,
+	],
 })
-
 export class TransactionDetailsComponent implements OnInit {
 	private walletService = inject(WalletService)
 	private route = inject(ActivatedRoute)
@@ -61,8 +54,8 @@ export class TransactionDetailsComponent implements OnInit {
 	amount = 0n
 	successorHash = ''
 
-	async ngOnInit () {
-		this.routerSub = this.router.events.subscribe(event => {
+	async ngOnInit() {
+		this.routerSub = this.router.events.subscribe((event) => {
 			if (event instanceof ChildActivationEnd) {
 				// Reload the state when navigating to itself from the transactions page
 				this.loadTransaction()
@@ -71,7 +64,7 @@ export class TransactionDetailsComponent implements OnInit {
 		await this.loadTransaction()
 	}
 
-	async loadTransaction () {
+	async loadTransaction() {
 		const hash = this.route.snapshot.params.transaction
 		let legacyFromAccount = ''
 
@@ -111,7 +104,7 @@ export class TransactionDetailsComponent implements OnInit {
 
 		const blockType = hashData.contents.type
 		if (blockType === 'state') {
-			const isOpen = (hashData.contents.previous === HASH_ONLY_ZEROES)
+			const isOpen = hashData.contents.previous === HASH_ONLY_ZEROES
 
 			if (isOpen) {
 				this.blockType = 'open'
@@ -171,34 +164,28 @@ export class TransactionDetailsComponent implements OnInit {
 		}
 		this.toAccountID = toAccount
 		this.fromAccountID = fromAccount
-		this.fromAddressBook = (
-			this.addressBook.getAccountName(fromAccount)
-			|| this.getAccountLabel(fromAccount, null)
-		)
-		this.toAddressBook = (
-			this.addressBook.getAccountName(toAccount)
-			|| this.getAccountLabel(toAccount, null)
-		)
+		this.fromAddressBook = this.addressBook.getAccountName(fromAccount) || this.getAccountLabel(fromAccount, null)
+		this.toAddressBook = this.addressBook.getAccountName(toAccount) || this.getAccountLabel(toAccount, null)
 		this.loadingBlock = false
 	}
 
-	getAccountLabel (accountID, defaultLabel) {
-		const walletAccount = this.walletService.accounts.find(a => a.id === accountID)
+	getAccountLabel(accountID, defaultLabel) {
+		const walletAccount = this.walletService.accounts.find((a) => a.id === accountID)
 		if (walletAccount == null) {
 			return defaultLabel
 		}
-		return (this.translocoService.translate('general.account') + ' #' + walletAccount.index)
+		return this.translocoService.translate('general.account') + ' #' + walletAccount.index
 	}
 
-	getBalanceFromHex (balance) {
+	getBalanceFromHex(balance) {
 		return BigInt(`0x${balance}`)
 	}
 
-	getBalanceFromDec (balance) {
+	getBalanceFromDec(balance) {
 		return BigInt(balance)
 	}
 
-	copied () {
+	copied() {
 		this.notifications.removeNotification('success-copied')
 		this.notifications.sendSuccess(`Successfully copied to clipboard!`, { identifier: 'success-copied' })
 	}

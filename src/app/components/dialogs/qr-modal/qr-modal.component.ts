@@ -1,11 +1,10 @@
-import { CommonModule } from '@angular/common'
 import { Component, Input, OnInit, inject } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 import { BarcodeFormat } from '@zxing/library'
 import { ZXingScannerModule } from '@zxing/ngx-scanner'
+import { NotificationsService, UtilService } from 'app/services'
 import { Wallet } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
-import { NotificationsService, UtilService } from 'app/services'
 
 export type QRType = 'account' | 'hash' | 'mnemonic' | 'generic'
 
@@ -13,12 +12,8 @@ export type QRType = 'account' | 'hash' | 'mnemonic' | 'generic'
 	selector: 'app-qr-modal',
 	templateUrl: './qr-modal.component.html',
 	styleUrls: ['./qr-modal.component.css'],
-	imports: [
-		CommonModule,
-		ZXingScannerModule
-	]
+	imports: [ZXingScannerModule],
 })
-
 export class QrModalComponent implements OnInit {
 	@Input() title = 'QR Scanner'
 	@Input() reference: string
@@ -44,14 +39,14 @@ export class QrModalComponent implements OnInit {
 	torchAvailable$ = new BehaviorSubject<boolean>(false)
 	tryHarder = false
 
-	ngOnInit (): void { }
+	ngOnInit(): void {}
 
-	onCamerasFound (devices: MediaDeviceInfo[]): void {
+	onCamerasFound(devices: MediaDeviceInfo[]): void {
 		this.availableDevices = devices
 		this.hasDevices = Boolean(devices && devices.length)
 	}
 
-	async onCodeResult (resultString: string) {
+	async onCodeResult(resultString: string) {
 		let type: QRType = null
 		let content = ''
 		// account
@@ -63,7 +58,7 @@ export class QrModalComponent implements OnInit {
 				await Wallet.load('BLAKE2b', '', resultString)
 				type = 'mnemonic'
 				content = resultString
-			} catch (err) { }
+			} catch (err) {}
 		} else if (resultString.length === 128) {
 			// includes deterministic R value material which we ignore
 			resultString = resultString.substring(0, 64)
@@ -90,33 +85,36 @@ export class QrModalComponent implements OnInit {
 		}
 
 		// check that the result is valid and matched the requested type
-		if (type != null && type === this.type || this.type === 'generic') {
+		if ((type != null && type === this.type) || this.type === 'generic') {
 			this.activeModal.close({ reference: this.reference, content: content })
 		} else {
-			this.notifcationService.sendWarning('This QR code is not recognized.', { length: 5000, identifier: 'qr-not-recognized' })
+			this.notifcationService.sendWarning('This QR code is not recognized.', {
+				length: 5000,
+				identifier: 'qr-not-recognized',
+			})
 			return
 		}
 	}
 
-	onDeviceSelectChange (target: EventTarget) {
-		const { value } = (target as HTMLSelectElement)
-		const device = this.availableDevices.find(x => x.deviceId === value)
+	onDeviceSelectChange(target: EventTarget) {
+		const { value } = target as HTMLSelectElement
+		const device = this.availableDevices.find((x) => x.deviceId === value)
 		this.currentDevice = device || null
 	}
 
-	onHasPermission (has: boolean) {
+	onHasPermission(has: boolean) {
 		this.hasPermission = has
 	}
 
-	onTorchCompatible (isCompatible: boolean): void {
+	onTorchCompatible(isCompatible: boolean): void {
 		this.torchAvailable$.next(isCompatible || false)
 	}
 
-	toggleTorch (): void {
+	toggleTorch(): void {
 		this.torchEnabled = !this.torchEnabled
 	}
 
-	toggleTryHarder (): void {
+	toggleTryHarder(): void {
 		this.tryHarder = !this.tryHarder
 	}
 }

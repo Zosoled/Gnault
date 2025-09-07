@@ -19,15 +19,17 @@
 					</div>
 					<div
 						class="block-qr"
-						[ngStyle]="{'width': width+'px'}"
+						[ngStyle]="{ width: width + 'px' }"
 					>
-						<img
-							*ngIf="qrCodeImageBlock"
-							[src]="qrCodeImageBlock"
-							alt="QR code"
-						>
+						@if (qrCodeImageBlock) {
+							<img
+								[src]="qrCodeImageBlock"
+								alt="QR code"
+							/>
+						}
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+</div>

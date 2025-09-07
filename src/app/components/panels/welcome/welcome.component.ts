@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { RouterLink } from '@angular/router'
 import { TranslocoPipe } from '@jsverse/transloco'
@@ -10,14 +9,8 @@ import { environment } from 'environments/environment'
 	selector: 'app-welcome',
 	templateUrl: './welcome.component.html',
 	styleUrls: ['./welcome.component.css'],
-	imports: [
-		CommonModule,
-		GnaultLogoElementComponent,
-		RouterLink,
-		TranslocoPipe
-	]
+	imports: [GnaultLogoElementComponent, RouterLink, TranslocoPipe],
 })
-
 export class WelcomeComponent implements OnInit {
 	private walletService = inject(WalletService)
 	settingsService = inject(AppSettingsService)
@@ -26,5 +19,5 @@ export class WelcomeComponent implements OnInit {
 	wallet = this.walletService.wallet
 	isConfigured = this.walletService.isConfigured
 
-	ngOnInit () { }
+	ngOnInit() {}
 }

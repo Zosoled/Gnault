@@ -1,23 +1,16 @@
-import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { TranslocoPipe } from '@jsverse/transloco'
-import { Wallet } from 'libnemo'
-import { ClipboardModule } from 'ngx-clipboard'
 import { NanoAccountIdComponent } from 'app/components/elements'
 import { NotificationsService } from 'app/services'
+import { Wallet } from 'libnemo'
+import { ClipboardModule } from 'ngx-clipboard'
 
 @Component({
 	selector: 'app-keygenerator',
 	templateUrl: './keygenerator.component.html',
 	styleUrls: ['./keygenerator.component.css'],
-	imports: [
-		ClipboardModule,
-		CommonModule,
-		NanoAccountIdComponent,
-		TranslocoPipe
-	]
+	imports: [ClipboardModule, NanoAccountIdComponent, TranslocoPipe],
 })
-
 export class KeygeneratorComponent implements OnInit {
 	private notificationService = inject(NotificationsService)
 
@@ -27,9 +20,9 @@ export class KeygeneratorComponent implements OnInit {
 	account = ''
 	newWalletMnemonicLines = []
 
-	ngOnInit (): void { }
+	ngOnInit(): void {}
 
-	async generate () {
+	async generate() {
 		// generate random bytes and create seed/mnemonic
 		const wallet = await Wallet.create('BLAKE2b', '')
 		await wallet.unlock('')
@@ -53,7 +46,7 @@ export class KeygeneratorComponent implements OnInit {
 		this.newWalletMnemonicLines = lines
 	}
 
-	copied () {
+	copied() {
 		this.notificationService.removeNotification('success-copied')
 		this.notificationService.sendSuccess(`Successfully copied to clipboard!`, { identifier: 'success-copied' })
 	}

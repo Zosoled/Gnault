@@ -1,28 +1,15 @@
-import { CommonModule } from '@angular/common'
-import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core'
+import { Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
-import {
-	AppSettingsService,
-	LedgerService,
-	NotificationsService,
-	PowService,
-	WalletService
-} from 'app/services'
+import { AppSettingsService, LedgerService, NotificationsService, PowService, WalletService } from 'app/services'
 
 @Component({
 	selector: 'app-wallet-widget',
 	templateUrl: './wallet-widget.component.html',
 	styleUrls: ['./wallet-widget.component.css'],
-	imports: [
-		CommonModule,
-		FormsModule,
-		RouterLink,
-		TranslocoPipe
-	]
+	imports: [FormsModule, RouterLink, TranslocoPipe],
 })
-
 export class WalletWidgetComponent implements OnInit {
 	private notificationService = inject(NotificationsService)
 	private powService = inject(PowService)
@@ -38,13 +25,13 @@ export class WalletWidgetComponent implements OnInit {
 	}
 	powAlert = false
 
-	ngOnInit () {
+	ngOnInit() {
 		this.ledgerService.ledgerStatus$.subscribe((ledgerStatus) => {
 			this.ledgerStatus = ledgerStatus
 		})
 
 		// Detect if a PoW is taking too long and alert
-		this.powService.powAlert$.subscribe(async shouldAlert => {
+		this.powService.powAlert$.subscribe(async (shouldAlert) => {
 			if (shouldAlert) {
 				this.powAlert = true
 			} else {
@@ -53,7 +40,7 @@ export class WalletWidgetComponent implements OnInit {
 		})
 	}
 
-	async lockWallet () {
+	async lockWallet() {
 		const locked = await this.walletService.lockWallet()
 		if (locked) {
 			this.notificationService.sendSuccess(this.translocoService.translate('accounts.wallet-locked'))
@@ -62,7 +49,7 @@ export class WalletWidgetComponent implements OnInit {
 		}
 	}
 
-	async reloadLedger () {
+	async reloadLedger() {
 		this.notificationService.sendInfo(`Checking Ledger Status...`, { identifier: 'ledger-status', length: 0 })
 		try {
 			await this.ledgerService.loadLedger()
@@ -79,14 +66,14 @@ export class WalletWidgetComponent implements OnInit {
 		}
 	}
 
-	async unlockWallet () {
+	async unlockWallet() {
 		const isUnlocked = await this.walletService.requestUnlock()
 		if (isUnlocked === false) {
 			return
 		}
 	}
 
-	cancelPow () {
+	cancelPow() {
 		this.powService.cancelAllPow(true)
 	}
 }

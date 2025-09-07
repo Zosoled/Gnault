@@ -1,25 +1,14 @@
-import { CommonModule } from '@angular/common'
 import { AfterViewInit, Component, ElementRef, ViewChild, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
-import { Wallet } from 'libnemo'
-import {
-	NotificationsService,
-	UtilService,
-	WalletService
-} from 'app/services'
+import { NotificationsService, WalletService } from 'app/services'
 
 @Component({
 	selector: 'app-set-password-dialog',
 	templateUrl: './set-password-dialog.component.html',
 	styleUrls: ['./set-password-dialog.component.css'],
-	imports: [
-		CommonModule,
-		FormsModule,
-		TranslocoPipe
-	]
+	imports: [FormsModule, TranslocoPipe],
 })
-
 export class SetPasswordDialogComponent implements AfterViewInit {
 	private svcNotifications = inject(NotificationsService)
 	private svcTransloco = inject(TranslocoService)
@@ -37,15 +26,15 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 	@ViewChild('newPasswordInput') newPasswordInput: ElementRef
 	@ViewChild('confirmPasswordInput') confirmPasswordInput: ElementRef
 
-	ngAfterViewInit () {
+	ngAfterViewInit() {
 		const UIkit = (window as any).UIkit
 		this.modal = UIkit.modal(this.dialog.nativeElement)
 		UIkit.util.on(this.dialog.nativeElement, 'hidden', () => {
 			this.onModalHidden()
 		})
-		this.svcWallet.isChangePasswordRequested$.subscribe(async isRequested => {
+		this.svcWallet.isChangePasswordRequested$.subscribe(async (isRequested) => {
 			if (isRequested) {
-				this.modal ? this.showModal() : this.isPending = true
+				this.modal ? this.showModal() : (this.isPending = true)
 			}
 		})
 		if (this.isPending) {
@@ -54,7 +43,7 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 		}
 	}
 
-	showModal () {
+	showModal() {
 		this.newPassword = ''
 		this.confirmPassword = ''
 		this.isNotMatch = false
@@ -64,7 +53,7 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 		this.newPasswordInput.nativeElement.focus()
 	}
 
-	onModalHidden () {
+	onModalHidden() {
 		this.newPassword = ''
 		this.confirmPassword = ''
 		this.isNotMatch = false
@@ -73,7 +62,7 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 		this.svcWallet.isChangePasswordRequested$.next(false)
 	}
 
-	async update () {
+	async update() {
 		if (this.newPassword.length < 6) {
 			this.isTooShort = true
 		} else if (this.newPassword !== this.confirmPassword) {

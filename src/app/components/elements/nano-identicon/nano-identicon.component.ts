@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { AfterViewInit, Component, ElementRef, Input, OnChanges, ViewChild } from '@angular/core'
 import { createIcon } from 'assets/nanoidenticons.min.cjs'
 
@@ -6,11 +5,8 @@ import { createIcon } from 'assets/nanoidenticons.min.cjs'
 	selector: 'app-nano-identicon',
 	templateUrl: './nano-identicon.component.html',
 	styleUrls: ['./nano-identicon.component.css'],
-	imports: [
-		CommonModule
-	]
+	imports: [],
 })
-
 export class NanoIdenticonComponent implements OnChanges, AfterViewInit {
 	@Input() accountID: string
 	@Input() scale: string
@@ -20,18 +16,19 @@ export class NanoIdenticonComponent implements OnChanges, AfterViewInit {
 	renderedIdenticon = ''
 	imageLoadErrorOccurred = false
 
-	ngOnChanges () {
+	ngOnChanges() {
 		this.renderNanoidenticon()
 	}
 
-	ngAfterViewInit () {
+	ngAfterViewInit() {
 		this.renderNanoidenticon()
 	}
 
-	renderNanoidenticon () {
-		if (this.canvasContainer == null
-			|| this.settingIdenticonsStyle !== 'nanoidenticons'
-			|| this.renderedIdenticon === this.accountID
+	renderNanoidenticon() {
+		if (
+			this.canvasContainer == null ||
+			this.settingIdenticonsStyle !== 'nanoidenticons' ||
+			this.renderedIdenticon === this.accountID
 		) {
 			return
 		}
