@@ -1,13 +1,5 @@
 import { CommonModule } from '@angular/common'
-import {
-	AfterViewInit,
-	Component,
-	ElementRef,
-	HostListener,
-	Renderer2,
-	ViewChild,
-	inject
-} from '@angular/core'
+import { AfterViewInit, Component, ElementRef, HostListener, Renderer2, ViewChild, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink, RouterOutlet } from '@angular/router'
 import { SwUpdate } from '@angular/service-worker'
@@ -19,13 +11,9 @@ import {
 	NotificationsComponent,
 	SetPasswordDialogComponent,
 	UnlockWalletDialogComponent,
-	WalletWidgetComponent
+	WalletWidgetComponent,
 } from 'app/components'
-import {
-	AmountSplitPipe,
-	FiatPipe,
-	RaiPipe
-} from 'app/pipes'
+import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AddressBookService,
 	AppSettingsService,
@@ -38,7 +26,7 @@ import {
 	UtilService,
 	WalletService,
 	WebsocketService,
-	WorkPoolService
+	WorkPoolService,
 } from 'app/services'
 import { environment } from 'environments/environment'
 
@@ -61,15 +49,14 @@ import { environment } from 'environments/environment'
 		TranslocoPipe,
 		WalletWidgetComponent,
 		UnlockWalletDialogComponent,
-		GnaultLogoElementComponent
-	]
+		GnaultLogoElementComponent,
+	],
 })
-
 export class AppComponent implements AfterViewInit {
-	@HostListener('document:mousedown', ['$event']) onGlobalClick (event): void {
+	@HostListener('document:mousedown', ['$event']) onGlobalClick(event): void {
 		if (
-			this.selectButton.nativeElement.contains(event.target) === false
-			&& this.accountsDropdown.nativeElement.contains(event.target) === false
+			this.selectButton.nativeElement.contains(event.target) === false &&
+			this.accountsDropdown.nativeElement.contains(event.target) === false
 		) {
 			this.showAccountsDropdown = false
 		}
@@ -96,7 +83,7 @@ export class AppComponent implements AfterViewInit {
 	svcPrice = inject(PriceService)
 	svcWallet = inject(WalletService)
 
-	nanoPrice = this.svcPrice.price
+	nanoPrice = this.svcPrice.lastPrice
 	node = this.svcNode.node
 	wallet = this.svcWallet.wallet
 
@@ -110,22 +97,30 @@ export class AppComponent implements AfterViewInit {
 	searchData = ''
 	donationAccount = environment.donationAddress
 
-	get innerHeight () { return window.innerHeight }
-	get innerHeightWithoutMobileBar () { return this.innerHeight - (window.innerWidth < 940 ? 50 : 0) }
-	get isConfigured () { return this.svcWallet.isConfigured }
+	get innerHeight() {
+		return window.innerHeight
+	}
 
-	constructor () {
+	get innerHeightWithoutMobileBar() {
+		return this.innerHeight - (window.innerWidth < 940 ? 50 : 0)
+	}
+
+	get isConfigured() {
+		return this.svcWallet.isConfigured
+	}
+
+	constructor() {
 		this.router.events.subscribe(() => {
 			this.closeNav()
 		})
-		this.svcWallet.refresh$.subscribe(isRefreshed => {
+		this.svcWallet.refresh$.subscribe((isRefreshed) => {
 			if (isRefreshed) {
 				this.isWalletRefreshed = true
 			}
 		})
 	}
 
-	async ngAfterViewInit () {
+	async ngAfterViewInit() {
 		this.svcAppSettings.loadAppSettings()
 		this.svcTransloco.setActiveLang(this.svcAppSettings.settings.language)
 
@@ -150,9 +145,15 @@ export class AppComponent implements AfterViewInit {
 		}
 
 		// Navigate to accounts page if there is wallet, but only if coming from home. On desktop app the path ends with index.html
-		if (this.svcWallet.isConfigured && (window.location.pathname === '/' || window.location.pathname.endsWith('index.html'))) {
+		if (
+			this.svcWallet.isConfigured &&
+			(window.location.pathname === '/' || window.location.pathname.endsWith('index.html'))
+		) {
 			if (this.svcWallet.selectedAccountId) {
-				this.router.navigate([`accounts/${this.svcWallet.selectedAccountId}`], { queryParams: { 'compact': 1 }, replaceUrl: true })
+				this.router.navigate([`accounts/${this.svcWallet.selectedAccountId}`], {
+					queryParams: { compact: 1 },
+					replaceUrl: true,
+				})
 			} else {
 				this.router.navigate(['accounts'], { replaceUrl: true })
 			}
@@ -160,7 +161,7 @@ export class AppComponent implements AfterViewInit {
 
 		// update selected account object with the latest balance, receivable, etc
 		if (this.svcWallet.selectedAccountId) {
-			const currentUpdatedAccount = this.svcWallet.accounts.find(a => a.id === this.svcWallet.selectedAccountId)
+			const currentUpdatedAccount = this.svcWallet.accounts.find((a) => a.id === this.svcWallet.selectedAccountId)
 			this.svcWallet.selectedAccount = currentUpdatedAccount
 		}
 
@@ -197,10 +198,23 @@ export class AppComponent implements AfterViewInit {
 
 		// If the wallet is locked and there is a receivable balance, show a warning to unlock the wallet
 		// (if not receive priority is set to manual)
-		if (this.svcWallet.isLocked && this.svcWallet.hasReceivableTransactions() && this.svcAppSettings.settings.receivableOption !== 'manual') {
-			this.svcNotification.sendWarning(`New incoming transaction(s) - Unlock the wallet to receive`, { length: 10000, identifier: 'receivable-locked' })
-		} else if (this.svcWallet.hasReceivableTransactions() && this.svcAppSettings.settings.receivableOption === 'manual') {
-			this.svcNotification.sendWarning(`Incoming transaction(s) found - Set to be received manually`, { length: 10000, identifier: 'receivable-locked' })
+		if (
+			this.svcWallet.isLocked &&
+			this.svcWallet.hasReceivableTransactions() &&
+			this.svcAppSettings.settings.receivableOption !== 'manual'
+		) {
+			this.svcNotification.sendWarning(`New incoming transaction(s) - Unlock the wallet to receive`, {
+				length: 10000,
+				identifier: 'receivable-locked',
+			})
+		} else if (
+			this.svcWallet.hasReceivableTransactions() &&
+			this.svcAppSettings.settings.receivableOption === 'manual'
+		) {
+			this.svcNotification.sendWarning(`Incoming transaction(s) found - Set to be received manually`, {
+				length: 10000,
+				identifier: 'receivable-locked',
+			})
 		}
 
 		// When the page closes, determine if we should lock the wallet
@@ -215,7 +229,8 @@ export class AppComponent implements AfterViewInit {
 
 		// handle deeplinks
 		this.svcDesktop.on('deeplink', (e, deeplink) => {
-			if (!this.svcDeeplink.navigate(deeplink)) this.svcNotification.sendWarning('This URI has an invalid address.', { length: 5000 })
+			if (!this.svcDeeplink.navigate(deeplink))
+				this.svcNotification.sendWarning('This URI has an invalid address.', { length: 5000 })
 		})
 		this.svcDesktop.send('deeplink-ready')
 
@@ -247,7 +262,9 @@ export class AppComponent implements AfterViewInit {
 			// Determine if we have been inactive for longer than our lock setting
 			if (this.inactiveSeconds >= this.svcAppSettings.settings.lockInactivityMinutes * 60) {
 				this.svcWallet.lockWallet()
-				this.svcNotification.sendSuccess(`Wallet locked after ${this.svcAppSettings.settings.lockInactivityMinutes} minutes of inactivity`)
+				this.svcNotification.sendSuccess(
+					`Wallet locked after ${this.svcAppSettings.settings.lockInactivityMinutes} minutes of inactivity`
+				)
 			}
 		}, 1000)
 
@@ -255,13 +272,16 @@ export class AppComponent implements AfterViewInit {
 			if (!this.svcAppSettings.settings.serverAPI) return
 			await this.updateFiatPrices()
 		} catch (err) {
-			this.svcNotification.sendWarning(`There was an issue retrieving latest nano price.  Ensure your AdBlocker is disabled on this page then reload to see accurate FIAT values.`, { length: 0, identifier: `price-adblock` })
+			this.svcNotification.sendWarning(
+				`There was an issue retrieving latest nano price.  Ensure your AdBlocker is disabled on this page then reload to see accurate FIAT values.`,
+				{ length: 0, identifier: `price-adblock` }
+			)
 		}
 	}
 
 	// Checked saved data (wallet, address book, representative list, etc.) for
 	// hardcoded `xrb_` address prefixes and updates them to `nano_` for v19 RPC.
-	async patchXrbToNanoPrefixData () {
+	async patchXrbToNanoPrefixData() {
 		await this.svcWallet.patchOldSavedData()
 		this.svcAddressBook.patchXrbPrefixData()
 		this.svcRepresentative.patchXrbPrefixData()
@@ -269,16 +289,16 @@ export class AppComponent implements AfterViewInit {
 		this.svcAppSettings.setAppSetting('walletVersion', 2)
 	}
 
-	applySwUpdate () {
+	applySwUpdate() {
 		this.updates.activateUpdate()
 	}
 
-	toggleNav () {
+	toggleNav() {
 		this.navExpanded = !this.navExpanded
 		this.onNavExpandedChange()
 	}
 
-	closeNav () {
+	closeNav() {
 		if (this.navExpanded === false) {
 			return
 		}
@@ -287,24 +307,28 @@ export class AppComponent implements AfterViewInit {
 		this.onNavExpandedChange()
 	}
 
-	onNavExpandedChange () {
+	onNavExpandedChange() {
 		this.navAnimating = true
-		setTimeout(() => { this.navAnimating = false }, 350)
+		setTimeout(() => {
+			this.navAnimating = false
+		}, 350)
 	}
 
-	toggleLightMode () {
+	toggleLightMode() {
 		if (this.canToggleLightMode === false) {
 			return
 		}
 
 		this.canToggleLightMode = false
-		setTimeout(() => { this.canToggleLightMode = true }, 300)
+		setTimeout(() => {
+			this.canToggleLightMode = true
+		}, 300)
 
 		this.svcAppSettings.setAppSetting('lightModeEnabled', !this.svcAppSettings.settings.lightModeEnabled)
 		this.updateAppTheme()
 	}
 
-	updateAppTheme () {
+	updateAppTheme() {
 		if (this.svcAppSettings.settings.lightModeEnabled) {
 			this.renderer.addClass(document.body, 'light-mode')
 			this.renderer.removeClass(document.body, 'dark-mode')
@@ -314,7 +338,7 @@ export class AppComponent implements AfterViewInit {
 		}
 	}
 
-	toggleAccountsDropdown () {
+	toggleAccountsDropdown() {
 		if (this.showAccountsDropdown === true) {
 			this.showAccountsDropdown = false
 			return
@@ -324,7 +348,7 @@ export class AppComponent implements AfterViewInit {
 		this.accountsDropdown.nativeElement.scrollTop = 0
 	}
 
-	selectAccount (account) {
+	selectAccount(account) {
 		// note: account is null when user is switching to 'Total Balance'
 		this.svcWallet.selectedAccountId = account?.id ?? null
 		this.svcWallet.selectedAccount = account
@@ -333,14 +357,13 @@ export class AppComponent implements AfterViewInit {
 		this.svcWallet.saveWalletExport()
 	}
 
-	performSearch () {
+	performSearch() {
 		const searchData = this.searchData.trim()
 		if (!searchData.length) return
 
-		const isValidNanoAccount = (
-			(searchData.startsWith('xrb_') || searchData.startsWith('nano_'))
-			&& this.svcUtil.account.isValidAccount(searchData)
-		)
+		const isValidNanoAccount =
+			(searchData.startsWith('xrb_') || searchData.startsWith('nano_')) &&
+			this.svcUtil.account.isValidAccount(searchData)
 
 		if (isValidNanoAccount === true) {
 			this.router.navigate(['account', searchData])
@@ -360,11 +383,11 @@ export class AppComponent implements AfterViewInit {
 		this.svcNotification.sendWarning(`Invalid nano address or block hash! Please double check your input`)
 	}
 
-	updateIdleTime () {
+	updateIdleTime() {
 		this.inactiveSeconds = 0 // Action has happened, reset the inactivity timer
 	}
 
-	retryConnection () {
+	retryConnection() {
 		if (!this.svcAppSettings.settings.serverAPI) {
 			this.svcNotification.sendInfo(`Wallet server settings is set to offline mode. Please change server first!`)
 			return
@@ -373,7 +396,7 @@ export class AppComponent implements AfterViewInit {
 		this.svcNotification.sendInfo(`Attempting to reconnect to nano node`)
 	}
 
-	async updateFiatPrices () {
+	async updateFiatPrices() {
 		const displayCurrency = this.svcAppSettings.getAppSetting(`displayCurrency`) || 'USD'
 		await this.svcPrice.fetchPrice(displayCurrency)
 		this.svcWallet.reloadFiatBalances()

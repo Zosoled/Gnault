@@ -11,7 +11,7 @@
 			uk-close
 		></button>
 		<div class="uk-modal-header">
-			<h2 class="uk-modal-title">{{ 'general.unlock' | transloco}}</h2>
+			<h2 class="uk-modal-title">{{ 'general.unlock' | transloco }}</h2>
 		</div>
 		<form>
 			<div class="uk-modal-body">
@@ -19,7 +19,7 @@
 					autocomplete="username"
 					hidden="true"
 					type="text"
-				>
+				/>
 				<input
 					#input
 					type="password"
@@ -31,14 +31,17 @@
 					[class]="{ 'form-control': true, 'uk-input': true, 'password-input': true, 'uk-form-danger': isIncorrect }"
 					[placeholder]="isIncorrect ? 'Incorrect password' : 'Enter wallet password'"
 					(keyup.enter)="unlock()"
-					(input)="isIncorrect=false;isFocused=true;"
-					(focusout)="isFocused=false;"
-				><!-- noformat -->
-				 @if (!isFocused && password.length > 0 && password.length < 6) {
+					(input)="isIncorrect = false; isFocused = true"
+					(focusout)="isFocused = false"
+				/>
+				@if (!isFocused && password.length > 0 && password.length < 6) {
 					<span class="password-hint">
-						{{ 'configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long' | transloco: { minLength: 6 } }}
+						{{
+							'configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long'
+								| transloco: { minLength: 6 }
+						}}
 					</span>
-				}<!-- noformat -->
+				}
 			</div>
 			<div class="uk-modal-footer uk-text-right nlt-button-group">
 				<button

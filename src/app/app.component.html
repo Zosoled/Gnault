@@ -4,11 +4,11 @@
 	(mousemove)="updateIdleTime()"
 	(keypress)="updateIdleTime()"
 	[style.height]="`${innerHeight}px`"
-	style="overflow-y: hidden;"
+	style="overflow-y: hidden"
 >
 	<div
 		class="uk-width-1-1"
-		style="position: relative; overflow-y: hidden;"
+		style="position: relative; overflow-y: hidden"
 	>
 		<!-- Mobile top bar -->
 		<div
@@ -26,60 +26,66 @@
 			</div>
 			<div
 				class="uk-width-expand"
-				style="text-align: right;"
-			>
-			</div>
+				style="text-align: right"
+			></div>
 		</div>
 		<!-- Accounts dropdown -->
 		<div
 			#accountsDropdown
-			[class]="[ 'accounts-dropdown', showAccountsDropdown ? 'visible' : 'hidden' ]"
+			[class]="['accounts-dropdown', showAccountsDropdown ? 'visible' : 'hidden']"
 		>
 			<div class="header">Currently Selected</div>
-			<div
-				class="account active"
-				*ngIf="svcWallet.selectedAccount !== null"
-			> <!-- active nano_ account -->
-				<div class="name-column">
-					<div class="name">
-						{{ svcWallet.selectedAccount.addressBookName ? svcWallet.selectedAccount.addressBookName : (('general.account' | transloco) + ' #' + svcWallet.selectedAccount.index) }}
+			@if (svcWallet.selectedAccount !== null) {
+				<div class="account active">
+					<!-- active nano_ account -->
+					<div class="name-column">
+						<div class="name">
+							{{
+								svcWallet.selectedAccount.addressBookName
+									? svcWallet.selectedAccount.addressBookName
+									: ('general.account' | transloco) + ' #' + svcWallet.selectedAccount.index
+							}}
+						</div>
+						<div class="address nano-address-monospace">
+							{{ svcWallet.selectedAccount.id }}
+						</div>
 					</div>
-					<div class="address nano-address-monospace">
-						{{ svcWallet.selectedAccount.id }}
+					<div class="balance-column">
+						@if (svcWallet.isBalanceUpdating === false) {
+							<ng-container>
+								<div class="balance primary">
+									{{ svcWallet.selectedAccount.balance | rai: 'nano,true' | amountsplit: 0
+									}}{{ svcWallet.selectedAccount.balance | rai: 'nano,false' | amountsplit: 1 }}
+								</div>
+								<div class="balance converted">
+									{{ svcWallet.selectedAccount.balanceFiat | fiat: svcAppSettings.settings.displayCurrency }}
+								</div>
+							</ng-container>
+						} @else {
+							<ng-template #balanceLoading>
+								<div class="balance loading">
+									<div uk-spinner="ratio: 0.5;"></div>
+								</div>
+							</ng-template>
+						}
 					</div>
 				</div>
-				<div class="balance-column"><!-- noformat -->
-					@if (svcWallet.isBalanceUpdating === false) {
-						<ng-container>
-							<div class="balance primary">
-								{{ svcWallet.selectedAccount.balance | rai: 'nano,true' | amountsplit: 0 }}{{ svcWallet.selectedAccount.balance | rai: 'nano,false' | amountsplit: 1 }}
-							</div>
-							<div class="balance converted">
-								{{ svcWallet.selectedAccount.balanceFiat | fiat: svcAppSettings.settings.displayCurrency }}
-							</div>
-						</ng-container>
-						} @else {
-						<ng-template #balanceLoading>
-							<div class="balance loading">
-								<div uk-spinner="ratio: 0.5;"></div>
-							</div>
-						</ng-template>
-					}
-				<!-- noformat --></div>
-			</div>
+			}
 			<div
-				[class]="[ 'account', (svcWallet.selectedAccount === null) ? 'active' : 'inactive' ]"
+				[class]="['account', svcWallet.selectedAccount === null ? 'active' : 'inactive']"
 				(click)="selectAccount(null)"
-			> <!-- active/inactive total balance -->
+			>
+				<!-- active/inactive total balance -->
 				<div class="name-column">
 					<div class="name">Total Balance</div>
-					<div class="address"> </div>
+					<div class="address"></div>
 				</div>
-				<div class="balance-column"><!-- noformat -->
+				<div class="balance-column">
 					@if (this.isWalletRefreshed === false) {
 						<ng-container>
 							<div class="balance primary">
-								{{ svcWallet.balance | rai: 'nano,true' | amountsplit: 0 }}{{ svcWallet.balance | rai: 'nano,false' | amountsplit: 1 }}
+								{{ svcWallet.balance | rai: 'nano,true' | amountsplit: 0
+								}}{{ svcWallet.balance | rai: 'nano,false' | amountsplit: 1 }}
 							</div>
 							<div class="balance converted">
 								{{ svcWallet.balance | rai: 'nano,true' | fiat: svcAppSettings.settings.displayCurrency }}
@@ -92,31 +98,44 @@
 							</div>
 						</ng-template>
 					}
-				<!-- noformat --></div>
+				</div>
 			</div>
-			<ng-container *ngFor="let account of svcWallet.accounts"> <!-- inactive accounts -->
+			<ng-container *ngFor="let account of svcWallet.accounts">
+				<!-- inactive accounts -->
 				<div
 					class="account inactive"
 					(click)="selectAccount(account)"
-					*ngIf="( (svcWallet.selectedAccount === null) || (svcWallet.selectedAccount.id !== account.id) )"
+					*ngIf="svcWallet.selectedAccount === null || svcWallet.selectedAccount.id !== account.id"
 				>
 					<div class="name-column">
-						<div class="name">{{ account.addressBookName ? account.addressBookName : (('general.account' | transloco) + ' #' + account.index) }}</div>
+						<div class="name">
+							{{
+								account.addressBookName
+									? account.addressBookName
+									: ('general.account' | transloco) + ' #' + account.index
+							}}
+						</div>
 						<div class="address nano-address-monospace">{{ account.id }}</div>
 					</div>
 					<div class="balance-column">
-						<ng-container *ngIf="(svcWallet.isBalanceUpdating === false) else balanceLoading">
+						<ng-container *ngIf="svcWallet.isBalanceUpdating === false; else balanceLoading">
 							<div class="balance primary">
 								<span
 									class="incoming-label"
 									*ngIf="account.receivable > 0"
 								>
 									<span class="text-snippet">{{ 'general.new' | transloco }}</span>
-									<span class="text-full">+{{ account.receivable | rai: 'mnano,true' | amountsplit: 0 }}{{account.receivable | rai: 'mnano,true' | amountsplit: 1 }} XNO</span>
+									<span class="text-full"
+										>+{{ account.receivable | rai: 'mnano,true' | amountsplit: 0
+										}}{{ account.receivable | rai: 'mnano,true' | amountsplit: 1 }} XNO</span
+									>
 								</span>
-								{{ account.balance | rai: 'mnano,true' | amountsplit: 0 }}{{ account.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO
+								{{ account.balance | rai: 'mnano,true' | amountsplit: 0
+								}}{{ account.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO
 							</div>
-							<div class="balance converted">{{ account.balanceFiat | fiat: svcAppSettings.settings.displayCurrency }}</div>
+							<div class="balance converted">
+								{{ account.balanceFiat | fiat: svcAppSettings.settings.displayCurrency }}
+							</div>
 						</ng-container>
 						<ng-template #balanceLoading>
 							<div class="balance loading">
@@ -140,31 +159,28 @@
 				<div class="nav-header">
 					<div uk-grid>
 						<div class="uk-width-expand">
-							<div [class]="[ 'nano-card', (svcWallet.selectedAccount === null) ? 'is-wallet' : 'is-card' ]">
+							<div [class]="['nano-card', svcWallet.selectedAccount === null ? 'is-wallet' : 'is-card']">
 								<div class="logo"></div>
 								<div class="card-contents">
 									<div class="account-name-container">
 										<a
-											[routerLink]="(
-												(svcWallet.selectedAccount !== null)
-													? '/account/' + svcWallet.selectedAccount.id
-													: '/accounts'
-											)"
+											[routerLink]="
+												svcWallet.selectedAccount !== null ? '/account/' + svcWallet.selectedAccount.id : '/accounts'
+											"
 											[queryParams]="{ compact: '1' }"
 											class="name"
 										>
-											{{ svcWallet.selectedAccount !== null
-												? (
-													svcWallet.selectedAccount.addressBookName
+											{{
+												svcWallet.selectedAccount !== null
+													? svcWallet.selectedAccount.addressBookName
 														? svcWallet.selectedAccount.addressBookName
-														: (('general.account' | transloco) + ' #' + svcWallet.selectedAccount.index)
-													)
-												: 'Total Balance'
+														: ('general.account' | transloco) + ' #' + svcWallet.selectedAccount.index
+													: 'Total Balance'
 											}}
 										</a>
 										<div
 											#selectButton
-											[class]="[ 'select-button', showAccountsDropdown ? 'open' : 'closed' ]"
+											[class]="['select-button', showAccountsDropdown ? 'open' : 'closed']"
 											(click)="toggleAccountsDropdown()"
 										>
 											<div class="circle"></div>
@@ -173,20 +189,33 @@
 										</div>
 									</div>
 									<div class="account-balances">
-										<ng-container *ngIf="( ( node.status && (svcWallet.isBalanceInitialized === true) ) || !isConfigured ) else balancesLoading">
+										<ng-container
+											*ngIf="
+												(node.status && svcWallet.isBalanceInitialized === true) || !isConfigured;
+												else balancesLoading
+											"
+										>
 											<div class="balance-container primary">
 												<div class="currency-name">Ӿ</div>
 												<div class="amount-container">
 													<div class="amount-integer">
-														{{ (svcWallet.selectedAccount !== null
-															? svcWallet.selectedAccount.balance
-															: svcWallet.balance) | rai: 'mnano,true' | amountsplit: 0
+														{{
+															(svcWallet.selectedAccount !== null
+																? svcWallet.selectedAccount.balance
+																: svcWallet.balance
+															)
+																| rai: 'mnano,true'
+																| amountsplit: 0
 														}}
 													</div>
 													<div class="amount-fractional">
-														{{ (svcWallet.selectedAccount !== null
-															? svcWallet.selectedAccount.balance
-															: svcWallet.balance) | rai: 'mnano,true' | amountsplit: 1
+														{{
+															(svcWallet.selectedAccount !== null
+																? svcWallet.selectedAccount.balance
+																: svcWallet.balance
+															)
+																| rai: 'mnano,true'
+																| amountsplit: 1
 														}}
 													</div>
 													<div
@@ -207,15 +236,23 @@
 												</div>
 												<div class="amount-container">
 													<div class="amount-integer">
-														{{ (svcWallet.selectedAccount !== null
-															? svcWallet.selectedAccount.balanceFiat
-															: svcWallet.balance) | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 0
+														{{
+															(svcWallet.selectedAccount !== null
+																? svcWallet.selectedAccount.balanceFiat
+																: svcWallet.balance
+															)
+																| fiat: svcAppSettings.settings.displayCurrency
+																| amountsplit: 0
 														}}
 													</div>
 													<div class="amount-fractional">
-														{{ (svcWallet.selectedAccount !== null
-															? svcWallet.selectedAccount.balanceFiat
-															: svcWallet.balance) | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 1
+														{{
+															(svcWallet.selectedAccount !== null
+																? svcWallet.selectedAccount.balanceFiat
+																: svcWallet.balance
+															)
+																| fiat: svcAppSettings.settings.displayCurrency
+																| amountsplit: 1
 														}}
 													</div>
 												</div>
@@ -224,7 +261,7 @@
 										<ng-template #balancesLoading>
 											<div
 												class="spinner-container"
-												*ngIf="(node.status !== false)"
+												*ngIf="node.status !== false"
 											>
 												<div uk-spinner="ratio: 0.6;"></div>
 											</div>
@@ -232,8 +269,14 @@
 									</div>
 								</div>
 							</div>
-							<ng-container *ngIf="(svcWallet.selectedAccount !== null) ? svcWallet.selectedAccount.receivable > 0 : svcWallet.hasReceivableTransactions()">
-								<ng-container *ngIf="svcWallet.isProcessingReceivable else notProcessingReceivable">
+							<ng-container
+								*ngIf="
+									svcWallet.selectedAccount !== null
+										? svcWallet.selectedAccount.receivable > 0
+										: svcWallet.hasReceivableTransactions()
+								"
+							>
+								<ng-container *ngIf="svcWallet.isProcessingReceivable; else notProcessingReceivable">
 									<div
 										class="nav-action-receive"
 										*ngIf="svcWallet.isProcessingReceivable"
@@ -242,13 +285,13 @@
 											class="icon"
 											uk-icon="icon: chevron-up; ratio: 1.2;"
 										></div>
-										<div class="label">
-											<span uk-spinner="ratio: 0.5;"></span>Processing Transactions...
-										</div>
+										<div class="label"><span uk-spinner="ratio: 0.5;"></span>Processing Transactions...</div>
 									</div>
 								</ng-container>
 								<ng-template #notProcessingReceivable>
-									<ng-container *ngIf=" (svcAppSettings.settings.receivableOption !== 'manual') else manuallyReceivingReceivable ">
+									<ng-container
+										*ngIf="svcAppSettings.settings.receivableOption !== 'manual'; else manuallyReceivingReceivable"
+									>
 										<div
 											class="nav-action-receive user-action-required uk-animation-slide-left"
 											*ngIf="svcWallet.isLocked"
@@ -276,22 +319,25 @@
 											<a
 												routerLink="/receive"
 												class="name"
-											>Incoming Balance</a>
+												>Incoming Balance</a
+											>
 										</div>
 										<div class="account-balances">
 											<div class="balance-container primary">
 												<div class="currency-name">XNO</div>
 												<div class="amount-container">
 													<div class="amount-integer">
-														{{ (svcWallet.selectedAccount
-															? svcWallet.selectedAccount.receivable
-															: svcWallet.receivable) | rai: 'mnano,true' | amountsplit: 0
+														{{
+															(svcWallet.selectedAccount ? svcWallet.selectedAccount.receivable : svcWallet.receivable)
+																| rai: 'mnano,true'
+																| amountsplit: 0
 														}}
 													</div>
 													<div class="amount-fractional">
-														{{ (svcWallet.selectedAccount
-															? svcWallet.selectedAccount.receivable
-															: svcWallet.receivable) | rai: 'mnano,true' | amountsplit: 1
+														{{
+															(svcWallet.selectedAccount ? svcWallet.selectedAccount.receivable : svcWallet.receivable)
+																| rai: 'mnano,true'
+																| amountsplit: 1
 														}}
 													</div>
 												</div>
@@ -300,18 +346,28 @@
 												class="balance-container converted"
 												*ngIf="svcAppSettings.settings.displayCurrency"
 											>
-												<div class="currency-name"><span class="estimate-symbol">~</span>{{ svcAppSettings.settings.displayCurrency }}</div>
+												<div class="currency-name">
+													<span class="estimate-symbol">~</span>{{ svcAppSettings.settings.displayCurrency }}
+												</div>
 												<div class="amount-container">
 													<div class="amount-integer">
-														{{ (svcWallet.selectedAccount
-															? svcWallet.selectedAccount.receivableFiat
-															: svcWallet.receivable) | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 0
+														{{
+															(svcWallet.selectedAccount
+																? svcWallet.selectedAccount.receivableFiat
+																: svcWallet.receivable
+															)
+																| fiat: svcAppSettings.settings.displayCurrency
+																| amountsplit: 0
 														}}
 													</div>
 													<div class="amount-fractional">
-														{{ (svcWallet.selectedAccount
-															? svcWallet.selectedAccount.receivableFiat
-															: svcWallet.receivable) | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 1
+														{{
+															(svcWallet.selectedAccount
+																? svcWallet.selectedAccount.receivableFiat
+																: svcWallet.receivable
+															)
+																| fiat: svcAppSettings.settings.displayCurrency
+																| amountsplit: 1
 														}}
 													</div>
 												</div>
@@ -323,7 +379,7 @@
 							</ng-container>
 							<div
 								class="nav-status-row"
-								*ngIf="(node.status === false) && isConfigured"
+								*ngIf="node.status === false && isConfigured"
 							>
 								<div class="status-icon">
 									<span
@@ -336,14 +392,19 @@
 									*ngIf="svcAppSettings.settings.serverAPI"
 								>
 									<div class="label primary uk-text-danger">Unable to connect to the server</div>
-									<div class="label secondary"><a (click)="retryConnection()">Refresh</a> or <a routerLink="/configure-app">select a different server</a></div>
+									<div class="label secondary">
+										<a (click)="retryConnection()">Refresh</a> or
+										<a routerLink="/configure-app">select a different server</a>
+									</div>
 								</div>
 								<div
 									class="status-labels"
 									*ngIf="!svcAppSettings.settings.serverAPI"
 								>
 									<div class="label primary uk-text-danger">Wallet is in offline mode</div>
-									<div class="label secondary"><a routerLink="/configure-app">Select a server</a> to interact with the network</div>
+									<div class="label secondary">
+										<a routerLink="/configure-app">Select a server</a> to interact with the network
+									</div>
 								</div>
 							</div>
 							<app-change-rep-widget *ngIf="isConfigured"></app-change-rep-widget>
@@ -520,7 +581,7 @@
 							[(ngModel)]="searchData"
 							name="searchData"
 							(keyup.enter)="performSearch()"
-						>
+						/>
 					</form>
 				</div>
 				<div
@@ -580,7 +641,7 @@
 					</div>
 					<div class="uk-width-1-3 uk-text-center dark-mode-column">
 						<div
-							[class]="{'dark-mode-click-area': true, 'enabled': !svcAppSettings.settings.lightModeEnabled}"
+							[class]="{ 'dark-mode-click-area': true, enabled: !svcAppSettings.settings.lightModeEnabled }"
 							(click)="toggleLightMode()"
 						>
 							<div class="dark-mode-area">
@@ -619,15 +680,20 @@
 					class="footer footer-attribution uk-margin-remove-top"
 					uk-grid
 				>
-					<div class="attribution uk-width-1-1 uk-text-center"> Forked from <a
+					<div class="attribution uk-width-1-1 uk-text-center">
+						Forked from
+						<a
 							href="https://github.com/Nault/Nault"
 							target="_blank"
 							rel="noopener noreferrer"
-						>Nault</a>, a fork of <a
+							>Nault</a
+						>, a fork of
+						<a
 							href="https://github.com/cronoh/nanovault"
 							target="_blank"
 							rel="noopener noreferrer"
-						>NanoVault</a>
+							>NanoVault</a
+						>
 					</div>
 				</div>
 			</div>
