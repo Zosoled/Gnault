@@ -8,7 +8,7 @@ export type LedgerConnectionType = 'usb' | 'bluetooth'
 interface AppSettings {
 	language: string
 	displayDenomination: string
-	walletStore: string
+	walletStorage: string
 	displayCurrency: string
 	defaultRepresentative: string | null
 	lockOnClose: number
@@ -34,7 +34,7 @@ export class AppSettingsService {
 	settings: AppSettings = {
 		language: null,
 		displayDenomination: 'mnano',
-		walletStore: 'localStorage',
+		walletStorage: 'localStorage',
 		displayCurrency: 'USD',
 		defaultRepresentative: null,
 		lockOnClose: 1,
@@ -108,19 +108,20 @@ export class AppSettingsService {
 			ws: null,
 			auth: null,
 			shouldRandom: false,
-		}
+		},
 	]
 
 	// Simplified list for comparison in other classes
-	knownApiEndpoints = this.serverOptions.reduce((acc, server) => {
-		if (!server.api) return acc
-		acc.push(server.api.replace(/https?:\/\//g, ''))
-		return acc
-	}, [
-		'node.somenano.com'
-	])
+	knownApiEndpoints = this.serverOptions.reduce(
+		(acc, server) => {
+			if (!server.api) return acc
+			acc.push(server.api.replace(/https?:\/\//g, ''))
+			return acc
+		},
+		['node.somenano.com']
+	)
 
-	loadAppSettings () {
+	loadAppSettings() {
 		let settings: AppSettings = this.settings
 		const settingsStore = localStorage.getItem(this.storeKey)
 		if (settingsStore) {
@@ -132,9 +133,9 @@ export class AppSettingsService {
 			const browserCultureLang = getBrowserCultureLang()
 			const browserLang = getBrowserLang()
 
-			if (this.translate.getAvailableLangs().some(lang => lang['id'] === browserCultureLang)) {
+			if (this.translate.getAvailableLangs().some((lang) => lang['id'] === browserCultureLang)) {
 				this.settings.language = browserCultureLang
-			} else if (this.translate.getAvailableLangs().some(lang => lang['id'] === browserCultureLang)) {
+			} else if (this.translate.getAvailableLangs().some((lang) => lang['id'] === browserCultureLang)) {
 				this.settings.language = browserLang
 			} else {
 				this.settings.language = this.translate.getDefaultLang()
@@ -147,10 +148,10 @@ export class AppSettingsService {
 		return this.settings
 	}
 
-	loadServerSettings () {
-		const matchingServerOption = this.serverOptions.find(d => d.value === this.settings.serverName)
+	loadServerSettings() {
+		const matchingServerOption = this.serverOptions.find((d) => d.value === this.settings.serverName)
 		if (this.settings.serverName === 'random' || !matchingServerOption) {
-			const availableServers = this.serverOptions.filter(server => server.shouldRandom)
+			const availableServers = this.serverOptions.filter((server) => server.shouldRandom)
 			const randomServerOption = availableServers[Math.floor(Math.random() * availableServers.length)]
 			console.log('SETTINGS: Random', randomServerOption)
 
@@ -172,20 +173,20 @@ export class AppSettingsService {
 		}
 	}
 
-	saveAppSettings () {
+	saveAppSettings() {
 		localStorage.setItem(this.storeKey, JSON.stringify(this.settings))
 	}
 
-	getAppSetting (key) {
+	getAppSetting(key) {
 		return this.settings[key] || null
 	}
 
-	setAppSetting (key, value) {
+	setAppSetting(key, value) {
 		this.settings[key] = value
 		this.saveAppSettings()
 	}
 
-	setAppSettings (settingsObject) {
+	setAppSettings(settingsObject) {
 		for (const key in settingsObject) {
 			if (!settingsObject.hasOwnProperty(key)) continue
 			this.settings[key] = settingsObject[key]
@@ -193,12 +194,12 @@ export class AppSettingsService {
 		this.saveAppSettings()
 	}
 
-	clearAppSettings () {
+	clearAppSettings() {
 		localStorage.removeItem(this.storeKey)
 		this.settings = {
 			language: 'en',
 			displayDenomination: 'mnano',
-			walletStore: 'localStorage',
+			walletStorage: 'localStorage',
 			displayCurrency: 'USD',
 			defaultRepresentative: null,
 			lockOnClose: 1,

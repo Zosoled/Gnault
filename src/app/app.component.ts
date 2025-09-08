@@ -126,16 +126,10 @@ export class AppComponent implements AfterViewInit {
 
 		this.updateAppTheme()
 
-		// RPC v19: Patch `xrb_` address prefixes to `nano_`
-		// If wallet version >= 2, data is already patched
-		if (this.svcAppSettings.settings.walletVersion < 2) {
-			await this.patchXrbToNanoPrefixData()
-		}
-
 		this.svcAddressBook.loadAddressBook()
 		this.svcWorkPool.loadWorkCache()
 
-		await this.svcWallet.loadStoredWallet()
+		await this.svcWallet.loadWallet()
 
 		// Subscribe to any transaction tracking
 		for (const entry of this.svcAddressBook.addressBook) {
@@ -149,8 +143,8 @@ export class AppComponent implements AfterViewInit {
 			this.svcWallet.isConfigured &&
 			(window.location.pathname === '/' || window.location.pathname.endsWith('index.html'))
 		) {
-			if (this.svcWallet.selectedAccountId) {
-				this.router.navigate([`accounts/${this.svcWallet.selectedAccountId}`], {
+			if (this.svcWallet.selectedAccountAddress) {
+				this.router.navigate([`accounts/${this.svcWallet.selectedAccountAddress}`], {
 					queryParams: { compact: 1 },
 					replaceUrl: true,
 				})
@@ -160,8 +154,8 @@ export class AppComponent implements AfterViewInit {
 		}
 
 		// update selected account object with the latest balance, receivable, etc
-		if (this.svcWallet.selectedAccountId) {
-			const currentUpdatedAccount = this.svcWallet.accounts.find((a) => a.id === this.svcWallet.selectedAccountId)
+		if (this.svcWallet.selectedAccountAddress) {
+			const currentUpdatedAccount = this.svcWallet.accounts.find((a) => a.id === this.svcWallet.selectedAccountAddress)
 			this.svcWallet.selectedAccount = currentUpdatedAccount
 		}
 
@@ -279,16 +273,6 @@ export class AppComponent implements AfterViewInit {
 		}
 	}
 
-	// Checked saved data (wallet, address book, representative list, etc.) for
-	// hardcoded `xrb_` address prefixes and updates them to `nano_` for v19 RPC.
-	async patchXrbToNanoPrefixData() {
-		await this.svcWallet.patchOldSavedData()
-		this.svcAddressBook.patchXrbPrefixData()
-		this.svcRepresentative.patchXrbPrefixData()
-		// Update wallet version so we do not patch in the future
-		this.svcAppSettings.setAppSetting('walletVersion', 2)
-	}
-
 	applySwUpdate() {
 		this.updates.activateUpdate()
 	}
@@ -350,7 +334,7 @@ export class AppComponent implements AfterViewInit {
 
 	selectAccount(account) {
 		// note: account is null when user is switching to 'Total Balance'
-		this.svcWallet.selectedAccountId = account?.id ?? null
+		this.svcWallet.selectedAccountAddress = account?.id ?? null
 		this.svcWallet.selectedAccount = account
 		this.svcWallet.selectedAccount$.next(account)
 		this.toggleAccountsDropdown()

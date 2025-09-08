@@ -278,7 +278,7 @@ export class ConfigureAppComponent implements OnInit {
 		const matchingIdenticonOptions = this.identiconOptions.find((d) => d.value === settings.identiconsStyle)
 		this.selectedIdenticonOption = matchingIdenticonOptions.value || this.identiconOptions[0].value
 
-		const matchingStorage = this.storageOptions.find((d) => d.value === settings.walletStore)
+		const matchingStorage = this.storageOptions.find((d) => d.value === settings.walletStorage)
 		this.selectedStorage = matchingStorage.value || this.storageOptions[0].value
 
 		const matchingInactivityMinutes = this.inactivityOptions.find((d) => d.value === settings.lockInactivityMinutes)
@@ -365,7 +365,7 @@ export class ConfigureAppComponent implements OnInit {
 
 	async updateWalletSettings() {
 		const newStorage = this.selectedStorage
-		const resaveWallet = this.appSettings.settings.walletStore !== newStorage
+		const resaveWallet = this.appSettings.settings.walletStorage !== newStorage
 
 		// ask for user confirmation before clearing the wallet cache
 		if (resaveWallet && newStorage === this.storageOptions[1].value) {

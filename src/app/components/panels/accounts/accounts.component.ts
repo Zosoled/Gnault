@@ -133,7 +133,7 @@ export class AccountsComponent implements OnInit {
 		const isSmallViewport = window.innerWidth < 940
 
 		if (isSmallViewport === true) {
-			this.walletService.selectedAccountId = account?.id ?? null
+			this.walletService.selectedAccountAddress = account?.id ?? null
 			this.walletService.selectedAccount = account
 			this.walletService.selectedAccount$.next(account)
 			this.walletService.saveWalletExport()
