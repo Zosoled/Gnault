@@ -1,7 +1,6 @@
 {
 	"compileOnSave": false,
 	"compilerOptions": {
-		"checkJs": true,
 		"skipLibCheck": true,
 		"importHelpers": true,
 		"outDir": "./dist/out-tsc",
