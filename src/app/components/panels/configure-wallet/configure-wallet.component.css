@@ -1,3 +1,19 @@
+:host {
+	height: 100%;
+	max-height: 100%;
+}
+
+svg {
+	height: 100%;
+	width: 100%;
+}
+
+text {
+	fill: #ffffffff;
+	font-family: monospace;
+	mix-blend-mode: difference;
+}
+
 .new-wallet-seed {
 	word-wrap: anywhere;
 }
@@ -15,7 +31,7 @@ pre.mnemonic span.mnemonic-word {
 }
 
 pre.mnemonic span.mnemonic-word::before {
-	content: counter(listing) ". ";
+	content: counter(listing) '. ';
 	display: inline-block;
 	/* doesn't work */
 	width: 8em;
@@ -27,12 +43,36 @@ pre.mnemonic span.mnemonic-word::before {
 	text-align: right;
 }
 
-.mne-num {
-	color: #CCC;
-	display: inline-block;
-	width: 13px;
-	font-size: 10px;
+.mne-box {
+	border: 1px solid #ffffff33;
+	border-spacing: 0;
+	border-collapse: collapse;
+	color: #ccc;
+	margin: 0;
+	margin-bottom: 1rem;
+	mix-blend-mode: difference;
+	padding: 0.5rem;
 	text-align: left;
+	width: 100%;
+}
+
+.mne-row {
+	border: 0;
+	display: table-row;
+}
+
+.mne-cell {
+	border-bottom: 1px dashed #ffffff33;
+	display: table-cell;
+	font-family: monospace;
+	padding: 0.5rem;
+}
+
+.mne-num {
+	color: #ffffff66;
+	mix-blend-mode: difference;
+	display: inline-block;
+	width: 20%;
 	/* iOS Safari */
 	-webkit-touch-callout: none;
 	/* Safari */
@@ -47,17 +87,11 @@ pre.mnemonic span.mnemonic-word::before {
 	user-select: none;
 }
 
-.mne-box {
-	max-width: 410px;
-}
-
-.mne-cont {
-	display: block;
-}
-
 .mne-word {
+	color: #ffffffff;
 	display: inline-block;
-	min-width: 100px;
+	mix-blend-mode: difference;
+	width: 80%;
 }
 
 .landing-container > div {
@@ -85,7 +119,7 @@ pre.mnemonic span.mnemonic-word::before {
 	transform: scale(1.1);
 }
 .landing-container > div > .wallet-option:hover > .icon > svg {
-	color: #FFF;
+	color: #fff;
 }
 .landing-container > div > .wallet-option:hover > .icon > .mnemonic > .mnemonic-row {
 	border-bottom-color: rgba(255, 255, 255, 0.4);
