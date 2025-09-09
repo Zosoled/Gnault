@@ -58,7 +58,7 @@
 									}}{{ svcWallet.selectedAccount.balance | rai: 'nano,false' | amountsplit: 1 }}
 								</div>
 								<div class="balance converted">
-									{{ svcWallet.selectedAccount.balanceFiat | fiat: svcAppSettings.settings.displayCurrency }}
+									{{ svcWallet.selectedAccount.balance | fiat: svcAppSettings.settings.displayCurrency }}
 								</div>
 							</ng-container>
 						} @else {
@@ -415,8 +415,6 @@
 								<app-change-rep-widget></app-change-rep-widget>
 							}
 							<app-wallet-widget></app-wallet-widget>
-							<app-unlock-wallet-dialog></app-unlock-wallet-dialog>
-							<app-set-password-dialog></app-set-password-dialog>
 						</div>
 					</div>
 				</div>
@@ -717,3 +715,5 @@
 	</div>
 </div>
 <app-notifications></app-notifications>
+<app-set-password-dialog></app-set-password-dialog>
+<app-unlock-wallet-dialog></app-unlock-wallet-dialog>

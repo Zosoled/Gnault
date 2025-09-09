@@ -487,7 +487,7 @@
 											class="uk-textarea"
 											rows="2"
 											[(ngModel)]="importSeedBip39MnemonicModel"
-											placeholder="12,15,18,21 or 24-words secret recovery BIP39 mnemonic"
+											placeholder="12-, 15-, 18-, 21-, or 24-word secret recovery BIP39 mnemonic"
 											autocomplete="off"
 										></textarea>
 									</div>
@@ -848,20 +848,37 @@
 			<div uk-grid>
 				<div class="uk-width-1-4@m">{{ 'configure-wallet.new-wallet.secret-recovery-mnemonic' | transloco }}</div>
 				<div class="uk-width-3-4@m">
-					<pre class="mne-box">
-                          @for (line of newWalletMnemonicLines; let l = $index; track l) {
-                            <span class="mne-cont">
-                              @for (word of line; let i = $index; track i) {
-                                <span class="mne-word">
-                                  <span class="mne-num">
-                                    {{ (l * 4) + i + 1 }}
-                                  </span>
-                                  {{ word }}
-                                </span>
-                              }
-                            </span>
-                          }
-                        </pre>
+					<table class="mne-box">
+						@for (line of newWalletMnemonicLines; let l = $index; track l) {
+							<tr class="mne-row">
+								@for (word of line; let i = $index; track i) {
+									<td class="mne-cell">
+										<svg
+											viewBox="0 0 32 32"
+											width="50%"
+											class="mne-num"
+										>
+											<text
+												x="0"
+												y="25"
+											>{{ l * 4 + i + 1 }}</text>
+										</svg>
+										<svg
+											viewBox="0 0 75 25"
+											height="auto"
+											width="100%"
+											class="mne-word"
+										>
+											<text
+												x="0"
+												y="18"
+											>{{ word }}</text>
+										</svg>
+									</td>
+								}
+							</tr>
+						}
+					</table>
 					<button
 						class="uk-button uk-button-secondary uk-text-center nlt-icon-button"
 						type="button"

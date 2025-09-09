@@ -1,12 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core'
 import { Tools } from 'libnemo'
 
-@Pipe({
-	name: 'rai'
-})
-
+@Pipe({ name: 'rai' })
 export class RaiPipe implements PipeTransform {
-	transform (v: unknown, args: unknown): any {
+	transform(v: unknown, args: unknown): any {
 		if (typeof v !== 'bigint' && typeof v !== 'string') {
 			throw new TypeError(`expected bigint or string; actual ${typeof v}`)
 		}

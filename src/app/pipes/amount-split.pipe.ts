@@ -1,10 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core'
 
-@Pipe({
-	name: 'amountsplit'
-})
+@Pipe({ name: 'amountsplit' })
 export class AmountSplitPipe implements PipeTransform {
-	transform (input: string, idx: number): string {
+	transform(input: string, idx: number): string {
 		const splitAmount = input.split('.')[idx]
 
 		if (idx === 0) {
@@ -24,6 +22,6 @@ export class AmountSplitPipe implements PipeTransform {
 			return ''
 		}
 
-		return ('.' + fractionalAmount)
+		return '.' + fractionalAmount
 	}
 }

@@ -41,6 +41,7 @@ import { environment } from 'environments/environment'
 		FiatPipe,
 		InstallWidgetComponent,
 		FormsModule,
+		GnaultLogoElementComponent,
 		NotificationsComponent,
 		RaiPipe,
 		RouterLink,
@@ -49,7 +50,6 @@ import { environment } from 'environments/environment'
 		TranslocoPipe,
 		WalletWidgetComponent,
 		UnlockWalletDialogComponent,
-		GnaultLogoElementComponent,
 	],
 })
 export class AppComponent implements AfterViewInit {
@@ -381,7 +381,7 @@ export class AppComponent implements AfterViewInit {
 	}
 
 	async updateFiatPrices() {
-		const displayCurrency = this.svcAppSettings.getAppSetting(`displayCurrency`) || 'USD'
+		const displayCurrency = this.svcAppSettings.getAppSetting('displayCurrency') || 'USD'
 		await this.svcPrice.fetchPrice(displayCurrency)
 		this.svcWallet.reloadFiatBalances()
 		setTimeout(() => this.updateFiatPrices(), this.fiatTimeout)
