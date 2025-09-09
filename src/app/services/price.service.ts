@@ -31,15 +31,14 @@ export class PriceService {
 	 * @returns Market price for requested currency
 	 */
 	async fetchPrice(currency?: string): Promise<number> {
-		//
 		if (PriceService.lastUpdate < Date.now() - 60000) {
 			const request = this.http.get(`${PriceService.apiUrl}`)
 			const response: any = await firstValueFrom(request)
-			const { current_price, last_updated } = response.market_data
-			if (new Date(last_updated)) {
-				this.prices = current_price
+			const lastUpdated = new Date(response.market_data.last_updated).getTime()
+			if (lastUpdated > PriceService.lastUpdate) {
+				this.prices = response.market_data.current_price
 				this.currencies = Object.keys(this.prices)
-				PriceService.lastUpdate = last_updated
+				PriceService.lastUpdate = lastUpdated
 				this.savePrice()
 			}
 		}
