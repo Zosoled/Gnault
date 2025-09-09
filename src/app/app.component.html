@@ -58,7 +58,7 @@
 									}}{{ svcWallet.selectedAccount.balance | rai: 'nano,false' | amountsplit: 1 }}
 								</div>
 								<div class="balance converted">
-									{{ svcWallet.selectedAccount.balanceFiat | fiat: svcAppSettings.settings.displayCurrency }}
+									{{ svcWallet.selectedAccount.balance | fiat: svcAppSettings.settings.displayCurrency }}
 								</div>
 							</ng-container>
 						} @else {

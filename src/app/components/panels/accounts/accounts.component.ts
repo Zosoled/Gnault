@@ -44,6 +44,8 @@ export class AccountsComponent implements OnInit {
 	settings = inject(AppSettingsService)
 	walletService = inject(WalletService)
 
+	isSingleKeyWallet
+
 	accounts = this.walletService.accounts
 	isLedgerWallet = this.walletService.isLedger
 	viewAdvanced = false

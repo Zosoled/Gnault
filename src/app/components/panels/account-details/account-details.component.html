@@ -1075,7 +1075,7 @@
 												class="uk-form-icon uk-link-reset uk-link-muted"
 												style="padding-left: 7px;"
 												uk-tooltip
-												title="Last Price: {{ price.price.lastPrice | fiat: settings.settings.displayCurrency }} / XNO"
+												title="Last Price: {{ price.lastPrice | fiat: settings.settings.displayCurrency }} / XNO"
 											>{{ settings.settings.displayCurrency | currencySymbol }}</a>
 											<input
 												[(ngModel)]="amountFiat"

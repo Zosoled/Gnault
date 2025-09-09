@@ -79,6 +79,8 @@ export class WalletService {
 	private svcWebsocket = inject(WebsocketService)
 	private svcWorkPool = inject(WorkPoolService)
 
+	type
+
 	wallet?: Wallet
 	balance = 0n
 	receivable = 0n
@@ -321,6 +323,7 @@ export class WalletService {
 			this.wallet.unlock()
 		}
 
+		debugger
 		if (walletJson.accounts?.length > 0) {
 			walletJson.accounts.forEach((account) => this.loadWalletAccount(account.index, account.id))
 		}
@@ -568,8 +571,9 @@ export class WalletService {
 
 	// Reset wallet to a base state, without changing reference to the main object
 	resetWallet() {
-		if (this.wallet.accounts.length) {
-			this.svcWebsocket.unsubscribeAccounts(this.accounts.map((a) => a.id)) // Unsubscribe from old accounts
+		if (this.accounts?.length) {
+			// Unsubscribe from old accounts
+			this.svcWebsocket.unsubscribeAccounts(this.accounts.map((a) => a.id))
 		}
 		this.isLocked = false
 		this.isLocked$.next(false)
@@ -584,7 +588,7 @@ export class WalletService {
 	}
 
 	get isConfigured() {
-		return this.wallet == null || this.wallet.type === 'Ledger'
+		return this.wallet != null
 	}
 
 	get isLedger() {
@@ -767,7 +771,7 @@ export class WalletService {
 	}
 
 	async loadWalletAccount(accountIndex, accountID) {
-		const account = await this.wallet.account(accountIndex)
+		const account = await this.wallet?.account(accountIndex)
 		const addressBookName = this.svcAddressBook.getAccountName(accountID)
 
 		this.accounts.push(account)
@@ -933,7 +937,8 @@ export class WalletService {
 	async saveWalletExport(): Promise<void> {
 		const exportData = await this.generateWalletExport()
 		const { walletStorage } = this.svcAppSettings.settings
-		globalThis[walletStorage]?.setItem?.(storeKey, JSON.stringify(exportData)) || this.removeWalletData()
+		const storage = globalThis[walletStorage]
+		storage ? storage.setItem(storeKey, JSON.stringify(exportData)) : this.removeWalletData()
 	}
 
 	removeWalletData() {
@@ -942,18 +947,14 @@ export class WalletService {
 	}
 
 	async generateWalletExport() {
-		const data: any = {
-			type: this.wallet.type,
-			accounts: this.accounts.map((a) => ({
-				address: a.address,
-				index: a.index,
-			})),
-			selectedAccountAddress: this.selectedAccount?.id ?? null,
-			locked: true,
-		}
 		const backup = await Wallet.backup()
 		const walletData = backup.find((v) => v.id === this.wallet.id)
-		data.seed = walletData
+		const data: any = {
+			...walletData,
+			accounts: this.accounts.map((a) => ({ id: a.id, index: a.index })),
+			selectedAccountAddress: this.selectedAccount?.address,
+			locked: true,
+		}
 		return data
 	}
 

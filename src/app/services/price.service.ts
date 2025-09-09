@@ -25,18 +25,23 @@ export class PriceService {
 
 	/**
 	 * Gets the current market prices and optionally returns the exchange rate for
-	 * a given currency. CoinGecko updates prices every 60 seconds.
+	 * a given currency. CoinGecko updates prices roughly every 60 seconds.
 	 *
 	 * @param {string} [currency] Code for requested exchange rate currency
 	 * @returns Market price for requested currency
 	 */
 	async fetchPrice(currency?: string): Promise<number> {
+		//
 		if (PriceService.lastUpdate < Date.now() - 60000) {
 			const request = this.http.get(`${PriceService.apiUrl}`)
 			const response: any = await firstValueFrom(request)
-			this.prices = response.market_data.current_price
-			this.currencies = Object.keys(this.prices)
-			this.savePrice()
+			const { current_price, last_updated } = response.market_data
+			if (new Date(last_updated)) {
+				this.prices = current_price
+				this.currencies = Object.keys(this.prices)
+				PriceService.lastUpdate = last_updated
+				this.savePrice()
+			}
 		}
 		this.lastPrice = this.prices[currency]
 		this.lastPrice$.next(this.lastPrice)

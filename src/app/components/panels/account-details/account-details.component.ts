@@ -1,23 +1,10 @@
 import { CommonModule, DecimalPipe, formatDate } from '@angular/common'
-import { Component, OnDestroy, OnInit, inject } from '@angular/core'
+import { Component, inject, OnDestroy, OnInit } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, ChildActivationEnd, NavigationEnd, Router, RouterLink } from '@angular/router'
 import { translate, TranslocoPipe } from '@jsverse/transloco'
-import { Account, Block, Tools } from 'libnemo'
-import { ClipboardModule } from 'ngx-clipboard'
-import * as QRCode from 'qrcode'
-import { BehaviorSubject } from 'rxjs'
-import {
-	NanoAccountIdComponent,
-	NanoIdenticonComponent,
-	NanoTransactionMobileComponent
-} from 'app/components/elements'
-import {
-	AmountSplitPipe,
-	CurrencySymbolPipe,
-	FiatPipe,
-	RaiPipe
-} from 'app/pipes'
+import { NanoAccountIdComponent, NanoIdenticonComponent, NanoTransactionMobileComponent } from 'app/components/elements'
+import { AmountSplitPipe, CurrencySymbolPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AddressBookService,
 	ApiService,
@@ -29,8 +16,12 @@ import {
 	QrModalService,
 	RepresentativeService,
 	UtilService,
-	WalletService
+	WalletService,
 } from 'app/services'
+import { Account, Block, Tools } from 'libnemo'
+import { ClipboardModule } from 'ngx-clipboard'
+import * as QRCode from 'qrcode'
+import { BehaviorSubject } from 'rxjs'
 
 @Component({
 	selector: 'app-account-details',
@@ -49,8 +40,8 @@ import {
 		NanoTransactionMobileComponent,
 		RaiPipe,
 		RouterLink,
-		TranslocoPipe
-	]
+		TranslocoPipe,
+	],
 })
 export class AccountDetailsComponent implements OnInit, OnDestroy {
 	private router = inject(ActivatedRoute)
@@ -146,7 +137,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	representativesOverview = []
 	// End remote signing
 
-	constructor () {
+	constructor() {
 		const route = this.route
 
 		// to detect when the account changes if the view is already active
@@ -157,28 +148,30 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		})
 	}
 
-	async ngOnInit () {
+	async ngOnInit() {
 		const params = this.router.snapshot.queryParams
 		if ('sign' in params) {
 			this.remoteVisible = params.sign === '1'
 			this.showAdvancedOptions = params.sign === '1'
 		}
 
-		this.showFullDetailsOnSmallViewports = (params.compact !== '1')
+		this.showFullDetailsOnSmallViewports = params.compact !== '1'
 
-		this.routerSub = this.route.events.subscribe(event => {
+		this.routerSub = this.route.events.subscribe((event) => {
 			if (event instanceof ChildActivationEnd) {
 				this.loadAccountDetails() // Reload the state when navigating to itself from the transactions page
-				this.showFullDetailsOnSmallViewports = (this.router.snapshot.queryParams.compact !== '1')
+				this.showFullDetailsOnSmallViewports = this.router.snapshot.queryParams.compact !== '1'
 				this.mobileTransactionMenuModal.hide()
 			}
 		})
-		this.priceSub = this.price.lastPrice$.subscribe(event => {
-			this.account.balanceFiat = parseFloat(Tools.convert(this.account.balance || 0, 'raw', 'nano')) * this.price.price.lastPrice
-			this.account.receivableFiat = parseFloat(Tools.convert(this.account.receivable || 0, 'raw', 'nano')) * this.price.price.lastPrice
+		this.priceSub = this.price.lastPrice$.subscribe((event) => {
+			this.account.balanceFiat =
+				parseFloat(Tools.convert(this.account.balance || 0, 'raw', 'nano')) * this.price.lastPrice
+			this.account.receivableFiat =
+				parseFloat(Tools.convert(this.account.receivable || 0, 'raw', 'nano')) * this.price.lastPrice
 		})
 
-		this.svcWallet.isReceivableBlocksUpdated$.subscribe(async receivableBlockUpdate => {
+		this.svcWallet.isReceivableBlocksUpdated$.subscribe(async (receivableBlockUpdate) => {
 			this.onReceivableBlockUpdate(receivableBlockUpdate)
 		})
 
@@ -198,7 +191,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 
 		this.populateRepresentativeList()
 
-		this.repSvc.walletReps$.subscribe(async reps => {
+		this.repSvc.walletReps$.subscribe(async (reps) => {
 			if (reps[0] === null) {
 				// initial state from new BehaviorSubject([null])
 				return
@@ -209,10 +202,10 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		})
 	}
 
-	async populateRepresentativeList () {
+	async populateRepresentativeList() {
 		// add trusted/regular local reps to the list
 		const localReps = this.repSvc.getSortedRepresentatives()
-		this.representativeList.push(...localReps.filter(rep => (!rep.warn)))
+		this.representativeList.push(...localReps.filter((rep) => !rep.warn))
 
 		if (this.settings.settings.serverAPI) {
 			const verifiedReps = await this.ninja.recommendedRandomized()
@@ -221,7 +214,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			for (const representative of verifiedReps) {
 				const temprep = {
 					id: representative.account,
-					name: representative.alias
+					name: representative.alias,
 				}
 
 				this.representativeList.push(temprep)
@@ -229,10 +222,10 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 
 		// add untrusted local reps to the list
-		this.representativeList.push(...localReps.filter(rep => (rep.warn)))
+		this.representativeList.push(...localReps.filter((rep) => rep.warn))
 	}
 
-	clearAccountVars () {
+	clearAccountVars() {
 		this.accountHistory = []
 		this.receivableBlocks = []
 		this.accountID = ''
@@ -244,7 +237,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.qrCodeImage = null
 	}
 
-	clearRemoteVars () {
+	clearRemoteVars() {
 		this.amount = null
 		this.amountRaw = 0n
 		this.amountFiat = null
@@ -265,12 +258,13 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.representativeListMatch = ''
 	}
 
-	updateRepresentativeInfo () {
+	updateRepresentativeInfo() {
 		if (!this.account) {
 			return
 		}
-		const representativeFromOverview = this.representativesOverview
-			.find(rep => rep.account === this.account.representative)
+		const representativeFromOverview = this.representativesOverview.find(
+			(rep) => rep.account === this.account.representative
+		)
 		if (representativeFromOverview != null) {
 			this.repLabel = representativeFromOverview.label
 			this.repVotingWeight = representativeFromOverview.percent
@@ -287,26 +281,26 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.repLabel = null
 	}
 
-	onRefreshButtonClick () {
+	onRefreshButtonClick() {
 		if (!this.manualRefreshAllowed) return
 		this.loadAccountDetails()
 	}
 
-	isReceivableBlockUpdateRelevant (receivableBlockUpdate) {
+	isReceivableBlockUpdateRelevant(receivableBlockUpdate) {
 		if (receivableBlockUpdate.account !== this.accountID) {
 			return false
 		}
 
 		const sourceHashToFind = receivableBlockUpdate.sourceHash
 
-		const alreadyInReceivableBlocks = this.receivableBlocks.some(knownReceivableBlock => {
+		const alreadyInReceivableBlocks = this.receivableBlocks.some((knownReceivableBlock) => {
 			knownReceivableBlock.hash === sourceHashToFind
 		})
 
 		if (receivableBlockUpdate.hasBeenReceived) {
 			const destinationHashToFind = receivableBlockUpdate.destinationHash
 
-			const alreadyInAccountHistory = this.accountHistory.some(knownAccountHistoryBlock => {
+			const alreadyInAccountHistory = this.accountHistory.some((knownAccountHistoryBlock) => {
 				knownAccountHistoryBlock.hash === destinationHashToFind
 			})
 
@@ -320,7 +314,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		return true
 	}
 
-	onReceivableBlockUpdate (receivableBlockUpdate) {
+	onReceivableBlockUpdate(receivableBlockUpdate) {
 		if (receivableBlockUpdate === null) {
 			return
 		}
@@ -334,10 +328,8 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.loadAccountDetailsThrottled({ receivableBlockUpdate })
 	}
 
-	loadAccountDetailsThrottled (params) {
-		this.autoRefreshReasonBlockUpdate = params.receivableBlockUpdate != null
-			? params.receivableBlockUpdate
-			: null
+	loadAccountDetailsThrottled(params) {
+		this.autoRefreshReasonBlockUpdate = params.receivableBlockUpdate != null ? params.receivableBlockUpdate : null
 
 		if (!this.initialLoadDone) {
 			return
@@ -357,59 +349,46 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	enableManualRefreshDelayed (delayMS) {
+	enableManualRefreshDelayed(delayMS) {
 		if (this.timeoutIdAllowingManualRefresh != null) {
 			clearTimeout(this.timeoutIdAllowingManualRefresh)
 		}
 
-		this.timeoutIdAllowingManualRefresh =
-			setTimeout(
-				() => {
-					this.manualRefreshAllowed = true
-				},
-				delayMS
-			)
+		this.timeoutIdAllowingManualRefresh = setTimeout(() => {
+			this.manualRefreshAllowed = true
+		}, delayMS)
 	}
 
-	enableInstantAutoRefreshDelayed (delayMS) {
+	enableInstantAutoRefreshDelayed(delayMS) {
 		if (this.timeoutIdAllowingInstantAutoRefresh != null) {
 			clearTimeout(this.timeoutIdAllowingInstantAutoRefresh)
 		}
 
-		this.timeoutIdAllowingInstantAutoRefresh =
-			setTimeout(
-				() => {
-					this.instantAutoRefreshAllowed = true
-				},
-				delayMS
-			)
+		this.timeoutIdAllowingInstantAutoRefresh = setTimeout(() => {
+			this.instantAutoRefreshAllowed = true
+		}, delayMS)
 	}
 
-	loadAccountDetailsDelayed (delayMS) {
+	loadAccountDetailsDelayed(delayMS) {
 		if (this.timeoutIdQueuedAutoRefresh != null) {
 			clearTimeout(this.timeoutIdQueuedAutoRefresh)
 		}
 
-		this.timeoutIdQueuedAutoRefresh =
-			setTimeout(
-				() => {
-					if (this.autoRefreshReasonBlockUpdate !== null) {
-						const isUpdateStillRelevant =
-							this.isReceivableBlockUpdateRelevant(this.autoRefreshReasonBlockUpdate)
+		this.timeoutIdQueuedAutoRefresh = setTimeout(() => {
+			if (this.autoRefreshReasonBlockUpdate !== null) {
+				const isUpdateStillRelevant = this.isReceivableBlockUpdateRelevant(this.autoRefreshReasonBlockUpdate)
 
-						if (isUpdateStillRelevant === false) {
-							this.enableRefreshesEventually()
-							return
-						}
-					}
+				if (isUpdateStillRelevant === false) {
+					this.enableRefreshesEventually()
+					return
+				}
+			}
 
-					this.loadAccountDetails()
-				},
-				delayMS
-			)
+			this.loadAccountDetails()
+		}, delayMS)
 	}
 
-	onAccountDetailsLoadStart () {
+	onAccountDetailsLoadStart() {
 		this.instantAutoRefreshAllowed = false
 		this.manualRefreshAllowed = false
 
@@ -426,12 +405,12 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	enableRefreshesEventually () {
+	enableRefreshesEventually() {
 		this.enableInstantAutoRefreshDelayed(3000)
 		this.enableManualRefreshDelayed(5000)
 	}
 
-	onAccountDetailsLoadDone () {
+	onAccountDetailsLoadDone() {
 		if (this.shouldQueueAutoRefresh === true) {
 			this.shouldQueueAutoRefresh = false
 			this.loadAccountDetailsDelayed(3000)
@@ -441,7 +420,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.enableRefreshesEventually()
 	}
 
-	async loadAccountDetails () {
+	async loadAccountDetails() {
 		this.onAccountDetailsLoadStart()
 
 		this.receivableBlocks = []
@@ -506,18 +485,14 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 						account: transaction.source,
 						amount: transaction.amount,
 						local_timestamp: transaction.local_timestamp,
-						local_date_string: (transaction.local_timestamp
+						local_date_string: transaction.local_timestamp
 							? formatDate(transaction.local_timestamp * 1000, 'MMM d, y', 'en-US')
-							: 'N/A'
-						),
-						local_time_string: (transaction.local_timestamp
+							: 'N/A',
+						local_time_string: transaction.local_timestamp
 							? formatDate(transaction.local_timestamp * 1000, 'HH:mm:ss', 'en-US')
-							: ''
-						),
-						addressBookName: (
-							this.addressBook.getAccountName(transaction.source)
-							|| this.getAccountLabel(transaction.source, null)
-						),
+							: '',
+						addressBookName:
+							this.addressBook.getAccountName(transaction.source) || this.getAccountLabel(transaction.source, null),
 						hash: block,
 						loading: false,
 						received: false,
@@ -546,8 +521,10 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		// Set fiat values?
 		this.account.balanceRaw = BigInt(this.account.balance || 0)
 		this.account.receivableRaw = BigInt(this.account.receivable || 0)
-		this.account.balanceFiat = parseFloat(Tools.convert(this.account.balance || 0, 'raw', 'nano')) * this.price.price.lastPrice
-		this.account.receivableFiat = parseFloat(Tools.convert(this.account.receivable || 0, 'raw', 'nano')) * this.price.price.lastPrice
+		this.account.balanceFiat =
+			parseFloat(Tools.convert(this.account.balance || 0, 'raw', 'nano')) * this.price.lastPrice
+		this.account.receivableFiat =
+			parseFloat(Tools.convert(this.account.receivable || 0, 'raw', 'nano')) * this.price.lastPrice
 
 		await this.getAccountHistory(accountID)
 
@@ -561,17 +538,17 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.onAccountDetailsLoadDone()
 	}
 
-	getAccountLabel (accountID, defaultLabel) {
-		const walletAccount = this.svcWallet.accounts.find(a => a.id === accountID)
+	getAccountLabel(accountID, defaultLabel) {
+		const walletAccount = this.svcWallet.accounts.find((a) => a.id === accountID)
 
 		if (walletAccount == null) {
 			return defaultLabel
 		}
 
-		return (translate('general.account') + ' #' + walletAccount.index)
+		return translate('general.account') + ' #' + walletAccount.index
 	}
 
-	ngOnDestroy () {
+	ngOnDestroy() {
 		this.mobileAccountMenuModal.hide()
 		this.mobileTransactionMenuModal.hide()
 		if (this.routerSub) {
@@ -582,19 +559,19 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	async generateReceiveQR (accountID) {
+	async generateReceiveQR(accountID) {
 		const qrCode = await QRCode.toDataURL(`${accountID}`, { errorCorrectionLevel: 'M', scale: 16 })
 		this.qrCodeImage = qrCode
 	}
 
-	updateTodayYesterdayDateStrings () {
+	updateTodayYesterdayDateStrings() {
 		const unixTimeNow = Date.now()
 
 		this.dateStringToday = formatDate(unixTimeNow, 'MMM d, y', 'en-US')
 		this.dateStringYesterday = formatDate(unixTimeNow - 86400000, 'MMM d, y', 'en-US')
 	}
 
-	async getAccountHistory (accountID, resetPage = true) {
+	async getAccountHistory(accountID, resetPage = true) {
 		if (resetPage) {
 			this.accountHistory = []
 			this.pageSize = 25
@@ -614,15 +591,9 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		const accountConfirmationHeight = parseInt(this.account?.confirmation_height, 10) || null
 
 		if (Array.isArray(history?.history)) {
-			this.accountHistory = history.history.map(h => {
-				h.local_date_string = (h.local_timestamp
-					? formatDate(h.local_timestamp * 1000, 'MMM d, y', 'en-US')
-					: 'N/A'
-				)
-				h.local_time_string = (h.local_timestamp
-					? formatDate(h.local_timestamp * 1000, 'HH:mm:ss', 'en-US')
-					: ''
-				)
+			this.accountHistory = history.history.map((h) => {
+				h.local_date_string = h.local_timestamp ? formatDate(h.local_timestamp * 1000, 'MMM d, y', 'en-US') : 'N/A'
+				h.local_time_string = h.local_timestamp ? formatDate(h.local_timestamp * 1000, 'HH:mm:ss', 'en-US') : ''
 
 				if (h.type === 'state') {
 					if (h.subtype === 'open' || h.subtype === 'receive') {
@@ -632,18 +603,17 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 						// Remove a receivable block if this is a receive for it
 						const sourceHashToFind = h.link
 
-						this.receivableBlocks = this.receivableBlocks.filter(knownReceivableBlock => {
+						this.receivableBlocks = this.receivableBlocks.filter((knownReceivableBlock) => {
 							knownReceivableBlock.hash !== sourceHashToFind
 						})
 					} else if (h.subtype === 'change') {
 						h.link_as_account = h.representative
-						h.addressBookName = (
-							this.addressBook.getAccountName(h.link_as_account)
-							|| this.getAccountLabel(h.link_as_account, null)
-						)
+						h.addressBookName =
+							this.addressBook.getAccountName(h.link_as_account) || this.getAccountLabel(h.link_as_account, null)
 					} else {
 						h.link_as_account = Account.load(h.link).address
-						h.addressBookName = this.addressBook.getAccountName(h.link_as_account) || this.getAccountLabel(h.link_as_account, null)
+						h.addressBookName =
+							this.addressBook.getAccountName(h.link_as_account) || this.getAccountLabel(h.link_as_account, null)
 					}
 				} else {
 					h.addressBookName = this.addressBook.getAccountName(h.account) || this.getAccountLabel(h.account, null)
@@ -653,13 +623,12 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			})
 
 			// Currently not supporting non-state rep change or state epoch blocks
-			this.accountHistory = this.accountHistory.filter(h => {
-				return h.type !== 'change'
-					&& h.subtype !== 'epoch'
+			this.accountHistory = this.accountHistory.filter((h) => {
+				return h.type !== 'change' && h.subtype !== 'epoch'
 			})
 
 			if (additionalBlocksInfo.length) {
-				const blocksInfo = await this.api.blocksInfo(additionalBlocksInfo.map(b => b.link))
+				const blocksInfo = await this.api.blocksInfo(additionalBlocksInfo.map((b) => b.link))
 
 				if (accountID !== this.accountID) {
 					// Navigated to a different account while block info was loading
@@ -669,21 +638,19 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 				for (const block in blocksInfo.blocks) {
 					if (!blocksInfo.blocks.hasOwnProperty(block)) continue
 
-					const matchingBlock = additionalBlocksInfo.find(a => a.link === block)
+					const matchingBlock = additionalBlocksInfo.find((a) => a.link === block)
 					if (!matchingBlock) continue
-					const accountHistoryBlock = this.accountHistory.find(h => h.hash === matchingBlock.hash)
+					const accountHistoryBlock = this.accountHistory.find((h) => h.hash === matchingBlock.hash)
 					if (!accountHistoryBlock) continue
 
 					const blockData = blocksInfo.blocks[block]
 
 					accountHistoryBlock.link_as_account = blockData.block_account
-					accountHistoryBlock.addressBookName = (
-						this.addressBook.getAccountName(blockData.block_account)
-						|| this.getAccountLabel(blockData.block_account, null)
-					)
+					accountHistoryBlock.addressBookName =
+						this.addressBook.getAccountName(blockData.block_account) ||
+						this.getAccountLabel(blockData.block_account, null)
 				}
 			}
-
 		} else {
 			this.accountHistory = []
 		}
@@ -691,14 +658,14 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.loadingTxList = false
 	}
 
-	async loadMore () {
+	async loadMore() {
 		if (this.pageSize <= this.maxPageSize) {
 			this.pageSize += 25
 			await this.getAccountHistory(this.accountID, false)
 		}
 	}
 
-	async saveAddressBook () {
+	async saveAddressBook() {
 		// Trim and remove duplicate spaces
 		this.addressBookModel = this.addressBookModel.trim().replace(/ +/g, ' ')
 
@@ -722,14 +689,19 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		// Make sure no other entries are using that name
 		const accountIdWithSameName = this.addressBook.getAccountIdByName(this.addressBookModel)
 
-		if ((accountIdWithSameName !== null) && (accountIdWithSameName !== this.accountID)) {
+		if (accountIdWithSameName !== null && accountIdWithSameName !== this.accountID) {
 			return this.notify.sendError(translate('address-book.this-name-is-already-in-use-please-use-a-unique-name'))
 		}
 
 		try {
 			const currentBalanceTracking = this.addressBook.getBalanceTrackingById(this.accountID)
 			const currentTransactionTracking = this.addressBook.getTransactionTrackingById(this.accountID)
-			await this.addressBook.saveAddress(this.accountID, this.addressBookModel, currentBalanceTracking, currentTransactionTracking)
+			await this.addressBook.saveAddress(
+				this.accountID,
+				this.addressBookModel,
+				currentBalanceTracking,
+				currentTransactionTracking
+			)
 		} catch (err) {
 			this.notify.sendError(translate('address-book.unable-to-save-entry', { message: err.message }))
 			return
@@ -741,15 +713,16 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.showEditAddressBook = false
 	}
 
-	searchRepresentatives () {
-		if (this.representativeModel !== '' && !this.util.account.isValidAccount(this.representativeModel)) this.repStatus = 0
+	searchRepresentatives() {
+		if (this.representativeModel !== '' && !this.util.account.isValidAccount(this.representativeModel))
+			this.repStatus = 0
 		else this.repStatus = null
 
 		this.showRepresentatives = true
 		const search = this.representativeModel || ''
 
 		const matches = this.representativeList
-			.filter(a => a.name.toLowerCase().indexOf(search.toLowerCase()) !== -1)
+			.filter((a) => a.name.toLowerCase().indexOf(search.toLowerCase()) !== -1)
 			// remove duplicate accounts
 			.filter((item, pos, self) => this.util.array.findWithAttr(self, 'id', item.id) === pos)
 			.slice(0, 5)
@@ -757,15 +730,15 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.representativeResults$.next(matches)
 	}
 
-	selectRepresentative (rep) {
+	selectRepresentative(rep) {
 		this.showRepresentatives = false
 		this.representativeModel = rep
 		this.searchRepresentatives()
 		this.validateRepresentative()
 	}
 
-	async validateRepresentative () {
-		setTimeout(() => this.showRepresentatives = false, 400)
+	async validateRepresentative() {
+		setTimeout(() => (this.showRepresentatives = false), 400)
 		this.representativeModel = this.representativeModel.replace(/ /g, '')
 
 		if (this.representativeModel === '') {
@@ -785,14 +758,14 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	copied () {
+	copied() {
 		this.notify.removeNotification('success-copied')
 		this.notify.sendSuccess(translate('general.successfully-copied-to-clipboard'), { identifier: 'success-copied' })
 	}
 
 	// Remote signing methods
 	// An update to the Nano amount, sync the fiat value
-	syncFiatPrice () {
+	syncFiatPrice() {
 		if (!this.validateAmount()) return
 		const rawAmount = BigInt(this.amount ?? 0) + this.amountRaw
 		if (rawAmount <= 0n) {
@@ -800,52 +773,48 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			return
 		}
 		const precision = this.settings.settings.displayCurrency === 'BTC' ? 6 : 2
-		const fiatAmount = (parseFloat(Tools.convert(rawAmount, 'raw', 'nano')) * this.price.price.lastPrice).toFixed(precision)
+		const fiatAmount = (parseFloat(Tools.convert(rawAmount, 'raw', 'nano')) * this.price.lastPrice).toFixed(precision)
 		this.amountFiat = parseFloat(fiatAmount)
 	}
 
 	// An update to the fiat amount, sync the nano value based on currently selected denomination
-	async syncNanoPrice () {
+	async syncNanoPrice() {
 		if (!this.amountFiat) {
 			this.amount = ''
 			return
 		}
 		if (!this.util.string.isNumeric(this.amountFiat)) return
-		const fx = (this.amountFiat / this.price.price.lastPrice).toString()
+		const fx = (this.amountFiat / this.price.lastPrice).toString()
 		const nanoPrice: string = await Tools.convert(fx, 'mnano', 'nano')
 		this.amount = Number(nanoPrice).toPrecision(3)
 	}
 
-	searchAddressBook () {
+	searchAddressBook() {
 		this.showAddressBook = true
 		const search = this.toAccountID || ''
 		const addressBook = this.addressBook.addressBook
 
-		const matches = addressBook
-			.filter(a => a.name.toLowerCase().indexOf(search.toLowerCase()) !== -1)
-			.slice(0, 5)
+		const matches = addressBook.filter((a) => a.name.toLowerCase().indexOf(search.toLowerCase()) !== -1).slice(0, 5)
 
 		this.addressBookResults$.next(matches)
 	}
 
-	selectBookEntry (account) {
+	selectBookEntry(account) {
 		this.showAddressBook = false
 		this.toAccountID = account
 		this.searchAddressBook()
 		this.validateDestination()
 	}
 
-	async validateDestination () {
+	async validateDestination() {
 		// The timeout is used to solve a bug where the results get hidden too fast and the click is never registered
-		setTimeout(() => this.showAddressBook = false, 400)
+		setTimeout(() => (this.showAddressBook = false), 400)
 
 		// Remove spaces from the account id
 		this.toAccountID = this.toAccountID.replace(/ /g, '')
 
-		this.addressBookMatch = (
-			this.addressBook.getAccountName(this.toAccountID)
-			|| this.getAccountLabel(this.toAccountID, null)
-		)
+		this.addressBookMatch =
+			this.addressBook.getAccountName(this.toAccountID) || this.getAccountLabel(this.toAccountID, null)
 
 		// const accountInfo = await this.walletService.walletApi.accountInfo(this.toAccountID)
 		this.toAccountStatus = null
@@ -864,7 +833,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	validateAmount () {
+	validateAmount() {
 		if (this.util.account.isValidNanoAmount(this.amount)) {
 			this.amountStatus = 1
 			return true
@@ -874,20 +843,20 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	async setMaxAmount () {
+	async setMaxAmount() {
 		this.amountRaw = BigInt(this.account?.balance || 0n)
 		this.amount = parseFloat(Tools.convert(this.account?.balance, 'raw', 'nano')).toFixed(6)
 		this.syncFiatPrice()
 	}
 
-	showMobileMenuForTransaction (transaction) {
+	showMobileMenuForTransaction(transaction) {
 		this.notify.removeNotification('success-copied')
 
 		this.mobileTransactionData = transaction
 		this.mobileTransactionMenuModal.show()
 	}
 
-	onReceiveFundsPress (receivableTransaction) {
+	onReceiveFundsPress(receivableTransaction) {
 		if (receivableTransaction.loading || receivableTransaction.received) {
 			return
 		}
@@ -895,7 +864,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.receiveReceivableBlock(receivableTransaction)
 	}
 
-	async receiveReceivableBlock (receivableBlock) {
+	async receiveReceivableBlock(receivableBlock) {
 		const sourceBlock = receivableBlock.hash
 
 		if (this.svcWallet.isLocked) {
@@ -912,8 +881,11 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		let hasShownErrorNotification = false
 
 		try {
-			createdReceiveBlockHash =
-				await this.nanoBlock.generateReceive(this.walletAccount, sourceBlock, this.svcWallet.isLedger)
+			createdReceiveBlockHash = await this.nanoBlock.generateReceive(
+				this.walletAccount,
+				sourceBlock,
+				this.svcWallet.isLedger
+			)
 		} catch (err) {
 			this.notify.sendError('Error receiving transaction: ' + err.message)
 			hasShownErrorNotification = true
@@ -941,7 +913,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.loadAccountDetailsThrottled({})
 	}
 
-	async generateSend () {
+	async generateSend() {
 		if (!this.accountID || !this.toAccountID) {
 			return this.notify.sendWarning(`From and to account are required`)
 		}
@@ -970,16 +942,15 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.amountRaw = this.rawAmount
 
 		// Determine fiat value of the amount
-		this.amountFiat = parseFloat(Tools.convert(rawAmount, 'raw', 'nano')) * this.price.price.lastPrice
+		this.amountFiat = parseFloat(Tools.convert(rawAmount, 'raw', 'nano')) * this.price.lastPrice
 
-		const defaultRepresentative = this.settings.settings.defaultRepresentative || this.nanoBlock.getRandomRepresentative()
+		const defaultRepresentative =
+			this.settings.settings.defaultRepresentative || this.nanoBlock.getRandomRepresentative()
 		const representative = from.representative || defaultRepresentative
-		const block = new Block(
-			this.accountID,
-			from.balance,
-			from.frontier,
-			representative
-		).send(Account.load(this.toAccountID).publicKey, this.rawAmount)
+		const block = new Block(this.accountID, from.balance, from.frontier, representative).send(
+			Account.load(this.toAccountID).publicKey,
+			this.rawAmount
+		)
 		this.blockHash = block.hash
 		console.log('Created block', block)
 		console.log('Block hash: ' + this.blockHash)
@@ -1003,7 +974,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.qrCodeImageBlock = qrCode
 	}
 
-	async generateReceive (receivableHash) {
+	async generateReceive(receivableHash) {
 		this.qrCodeImageBlockReceive = null
 		this.qrString = null
 		this.blockHashReceive = null
@@ -1017,22 +988,19 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		const openEquiv = !toAcct || !toAcct.frontier // if open block
 
 		const previousBlock = toAcct.frontier || this.zeroHash // set to zeroes if open block
-		const defaultRepresentative = this.settings.settings.defaultRepresentative || this.nanoBlock.getRandomRepresentative()
+		const defaultRepresentative =
+			this.settings.settings.defaultRepresentative || this.nanoBlock.getRandomRepresentative()
 		const representative = toAcct.representative || defaultRepresentative
 
 		const srcBlockInfo = await this.api.blocksInfo([receivableHash])
 		const srcAmount = BigInt(srcBlockInfo.blocks[receivableHash].amount)
-		const newBalance = openEquiv
-			? srcAmount
-			: BigInt(toAcct.balance) + srcAmount
+		const newBalance = openEquiv ? srcAmount : BigInt(toAcct.balance) + srcAmount
 		const newBalanceDecimal = newBalance.toString(10)
 
-		const block = new Block(
-			this.accountID,
-			toAcct.balance,
-			previousBlock,
-			representative
-		).receive(receivableHash, srcAmount)
+		const block = new Block(this.accountID, toAcct.balance, previousBlock, representative).receive(
+			receivableHash,
+			srcAmount
+		)
 
 		this.blockHashReceive = block.hash
 		console.log('Created block', block)
@@ -1058,11 +1026,11 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		if (blockDataPrevious) {
 			qrData = {
 				block: block.toJSON(),
-				previous: blockDataPrevious
+				previous: blockDataPrevious,
 			}
 		} else {
 			qrData = {
-				block: block.toJSON()
+				block: block.toJSON(),
 			}
 		}
 
@@ -1073,7 +1041,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.qrCodeImageBlockReceive = qrCode
 	}
 
-	async generateChange () {
+	async generateChange() {
 		if (!this.util.account.isValidAccount(this.representativeModel)) {
 			return this.notify.sendError(`Not a valid representative account`)
 		}
@@ -1088,11 +1056,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		const balance = BigInt(account.balance)
 		const balanceDecimal = balance.toString(10)
 
-		const block = new Block(
-			this.accountID,
-			balanceDecimal,
-			account.frontier
-		).change(this.representativeModel)
+		const block = new Block(this.accountID, balanceDecimal, account.frontier).change(this.representativeModel)
 		this.blockHash = block.hash
 
 		console.log('Created block', block)
@@ -1112,16 +1076,17 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 
 		// Nano signing standard
-		this.qrString = 'nanosign:{"block":' + JSON.stringify(block.toJSON()) + ',"previous":' + JSON.stringify(blockDataPrevious) + '}'
+		this.qrString =
+			'nanosign:{"block":' + JSON.stringify(block.toJSON()) + ',"previous":' + JSON.stringify(blockDataPrevious) + '}'
 		const qrCode = await QRCode.toDataURL(this.qrString, { errorCorrectionLevel: 'L', scale: 16 })
 		this.qrCodeImageBlock = qrCode
 	}
 
-	showRemote (state: boolean) {
+	showRemote(state: boolean) {
 		this.remoteVisible = !state
 	}
 
-	showRemoteModal () {
+	showRemoteModal() {
 		const UIkit = window['UIkit']
 		const modal = UIkit.modal('#block-modal')
 		modal.show()
@@ -1129,27 +1094,28 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	}
 
 	// open qr reader modal
-	openQR (reference, type) {
+	openQR(reference, type) {
 		const qrResult = this.qrModalSvc.openQR(reference, type)
-		qrResult.then((data) => {
-			switch (data.reference) {
-				case 'account1':
-					this.toAccountID = data.content
-					this.validateDestination()
-					break
-				case 'rep1':
-					this.representativeModel = data.content
-					this.validateRepresentative()
-					break
-			}
-		}, () => { }
+		qrResult.then(
+			(data) => {
+				switch (data.reference) {
+					case 'account1':
+						this.toAccountID = data.content
+						this.validateDestination()
+						break
+					case 'rep1':
+						this.representativeModel = data.content
+						this.validateRepresentative()
+						break
+				}
+			},
+			() => {}
 		)
 	}
 
-	resetRaw () {
+	resetRaw() {
 		this.amountRaw = 0n
 	}
 
 	// End remote signing methods
-
 }
