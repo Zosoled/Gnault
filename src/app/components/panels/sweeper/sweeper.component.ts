@@ -523,8 +523,8 @@ export class SweeperComponent implements OnInit {
 							const end = parseInt(this.endIndex, 10)
 							const wallet = await Wallet.load('BLAKE2b', '', seed)
 							const accounts = await wallet.accounts(start, end)
-							for (const account of accounts) {
-								privKeys.push([account.privateKey, 'blake2b', account.index])
+							for (const [index, account] of accounts) {
+								privKeys.push([account.privateKey, 'blake2b', index])
 							}
 						}
 						// also check all indexes using bip39/44 derivation
