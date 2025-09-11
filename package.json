@@ -92,21 +92,21 @@
 	},
 	"overrides": {
 		"@abandonware/bluetooth-hci-socket": {
-			"@mapbox/node-pre-gyp": "^2.0.0"
-		},
-		"electron-winstaller": {
-			"@electron/asar": "^4.0.1"
+			"@mapbox/node-pre-gyp": "2.0.0"
 		},
 		"@jsverse/transloco": {
-			"replace-in-file": "^8.3.0"
+			"replace-in-file": "8.3.0"
+		},
+		"electron-winstaller": {
+			"@electron/asar": "4.0.1"
 		},
 		"app-builder-lib": {
-			"@electron/asar": "^4.0.1",
-			"@electron/rebuild": "^4.0.1",
-			"@electron/universal": "^3.0.1"
+			"@electron/asar": "4.0.1",
+			"@electron/rebuild": "4.0.1",
+			"@electron/universal": "3.0.1"
 		},
 		"temp": {
-			"rimraf": "^6.0.1"
+			"rimraf": "6.0.1"
 		}
 	},
 	"build": {
