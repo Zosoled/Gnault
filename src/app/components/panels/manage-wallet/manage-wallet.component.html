@@ -68,67 +68,6 @@
 		@if (!walletService.isLedger) {
 			<div class="uk-card uk-card-default uk-margin">
 				<div class="uk-card-header">
-					<h3 class="uk-card-title">Backup Wallet</h3>
-				</div>
-				<div class="uk-card-body">
-					@if (walletService.isLocked && walletService.type === 'seed') {
-						<p><span uk-icon="icon: lock;"></span> Unlock wallet to access the secret recovery seed/mnemonic.</p>
-					}
-					@if (
-						walletService.isLocked && (walletService.type === 'privateKey' || walletService.type === 'expandedKey')
-					) {
-						<p><span uk-icon="icon: lock;"></span> Unlock wallet to access the private key.</p>
-					}
-					@if (!walletService.isLocked && walletService.type === 'seed') {
-						<p>
-							To backup your wallet's secret recovery mnemonic,
-							<a
-								[title]="'configure-wallet.new-wallet.copy-secret-recovery-mnemonic' | transloco"
-								ngxClipboard
-								[cbContent]="seedMnemonic()"
-								(cbOnSuccess)="notifications.sendSuccess('Wallet mnemonic copied to clipboard!')"
-								uk-tooltip
-								>click here</a
-							>
-							to copy it to your clipboard.
-						</p>
-					}
-					@if (!walletService.isLocked && walletService.type === 'seed') {
-						<p>
-							To backup your wallet's secret recovery seed,
-							<a
-								[title]="'configure-wallet.new-wallet.copy-secret-recovery-seed' | transloco"
-								ngxClipboard
-								[cbContent]="walletService.wallet.seed"
-								(cbOnSuccess)="notifications.sendSuccess('Wallet seed copied to clipboard!')"
-								uk-tooltip
-								>click here</a
-							>
-							to copy it to your clipboard.<br />
-						</p>
-					}
-					@if (
-						!walletService.isLocked && (walletService.type === 'privateKey' || walletService.type === 'expandedKey')
-					) {
-						<p>
-							To backup your wallet account's private key,
-							<a
-								title="Copy Private Key"
-								ngxClipboard
-								[cbContent]="wallet.seed"
-								(cbOnSuccess)="notifications.sendSuccess('Private Key copied to clipboard!')"
-								uk-tooltip
-								>click here</a
-							>
-							to copy it to your clipboard.<br />
-						</p>
-					}
-				</div>
-			</div>
-		}
-		@if (!walletService.isLedger) {
-			<div class="uk-card uk-card-default uk-margin">
-				<div class="uk-card-header">
 					<h3 class="uk-card-title">Export Gnault Wallet</h3>
 				</div>
 				@if (walletService.isLocked) {

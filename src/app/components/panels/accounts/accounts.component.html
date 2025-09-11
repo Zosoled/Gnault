@@ -74,7 +74,7 @@
 								'uk-width-1-5@m': true,
 								'uk-width-1-4': true,
 								'uk-text-right': true,
-								'hidden-column': isSingleKeyWallet || !viewAdvanced,
+								'hidden-column': !viewAdvanced,
 							}"
 						></th>
 					</tr>
@@ -216,7 +216,7 @@
 								</div>
 								<div
 									class="compact-account-actions"
-									[class.hidden-section]="isSingleKeyWallet || !viewAdvanced"
+									[class.hidden-section]="!viewAdvanced"
 								>
 									<ng-template [ngTemplateOutlet]="accountActions"></ng-template>
 								</div>
@@ -228,7 +228,7 @@
 								[class]="{
 									'account-actions-column': true,
 									'uk-text-right': true,
-									'hidden-column': isSingleKeyWallet || !viewAdvanced,
+									'hidden-column': !viewAdvanced,
 								}"
 							>
 								<div class="uk-float-right">
@@ -251,26 +251,24 @@
 					}
 				</tbody>
 			</table>
-			@if (!isSingleKeyWallet) {
-				<table class="uk-table uk-table-striped uk-table-small">
-					<thead>
-						<tr class="uk-alert uk-alert-primary missing-accounts-hint">
-							<td
-								colspan="4"
-								style="text-align: center"
+			<table class="uk-table uk-table-striped uk-table-small">
+				<thead>
+					<tr class="uk-alert uk-alert-primary missing-accounts-hint">
+						<td
+							colspan="4"
+							style="text-align: center"
+						>
+							<span uk-icon="icon: info"></span>{{ 'accounts.missing-accounts.1' | transloco }}
+							<a
+								class="hint-action"
+								(click)="createAccount()"
+								>{{ 'accounts.missing-accounts.2-link' | transloco }}</a
 							>
-								<span uk-icon="icon: info"></span> {{ 'accounts.missing-accounts.1' | transloco }}
-								<a
-									class="hint-action"
-									(click)="createAccount()"
-									>{{ 'accounts.missing-accounts.2-link' | transloco }}</a
-								>
-								{{ 'accounts.missing-accounts.3' | transloco }}
-							</td>
-						</tr>
-					</thead>
-				</table>
-			}
+							{{ 'accounts.missing-accounts.3' | transloco }}
+						</td>
+					</tr>
+				</thead>
+			</table>
 		</div>
 	</div>
 </div>
