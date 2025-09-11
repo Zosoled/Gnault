@@ -85,7 +85,7 @@ export class AppComponent implements AfterViewInit {
 
 	nanoPrice = this.svcPrice.lastPrice
 	node = this.svcNode.node
-	wallet = this.svcWallet.wallet
+	wallet = this.svcWallet.selectedWallet
 
 	fiatTimeout = 5 * 60 * 1000 // Update fiat prices every 5 minutes
 	inactiveSeconds = 0

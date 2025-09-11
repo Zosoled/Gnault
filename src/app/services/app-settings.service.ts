@@ -198,9 +198,9 @@ export class AppSettingsService {
 		localStorage.removeItem(this.storeKey)
 		this.settings = {
 			language: 'en',
-			displayDenomination: 'mnano',
+			displayDenomination: 'nano',
 			walletStorage: 'localStorage',
-			displayCurrency: 'USD',
+			displayCurrency: 'usd',
 			defaultRepresentative: null,
 			lockOnClose: 1,
 			lockInactivityMinutes: 30,

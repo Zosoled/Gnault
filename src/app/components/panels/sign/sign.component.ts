@@ -97,7 +97,7 @@ export class SignComponent implements OnInit {
 	signatureAccount = ''
 	signatureMessage = ''
 	signatureMessageSuccess = ''
-	wallet = this.walletService.wallet
+	wallet = this.walletService.selectedWallet
 	walletAccount = null
 	nullBlock = '0000000000000000000000000000000000000000000000000000000000000000'
 	qrString = null

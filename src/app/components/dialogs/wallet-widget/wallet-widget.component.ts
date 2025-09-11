@@ -41,10 +41,10 @@ export class WalletWidgetComponent implements OnInit {
 	}
 
 	async lockWallet() {
-		const locked = await this.walletService.lockWallet()
-		if (locked) {
+		try {
+			await this.walletService.lockWallet()
 			this.notificationService.sendSuccess(this.translocoService.translate('accounts.wallet-locked'))
-		} else {
+		} catch (err) {
 			this.notificationService.sendError(`Unable to lock wallet`)
 		}
 	}

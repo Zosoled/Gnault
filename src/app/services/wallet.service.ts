@@ -79,7 +79,8 @@ export class WalletService {
 	private svcWebsocket = inject(WebsocketService)
 	private svcWorkPool = inject(WorkPoolService)
 
-	wallet?: Wallet
+	selectedWallet?: Wallet
+	wallets: Wallet[]
 	balance = 0n
 	receivable = 0n
 	hasReceivable = false
@@ -90,7 +91,9 @@ export class WalletService {
 	selectedAccountAddress = null
 	selectedAccount = null
 	selectedAccount$ = new BehaviorSubject(null)
-	isLocked = false
+	get isLocked(): boolean {
+		return this.selectedWallet?.isLocked
+	}
 	isLocked$ = new BehaviorSubject(false)
 	passwordUpdated$ = new BehaviorSubject(false)
 	isUnlockRequested$ = new BehaviorSubject(false)
@@ -310,15 +313,15 @@ export class WalletService {
 		const walletData = localStorage.getItem(storeKey)
 		if (!walletData) {
 			const wallets = await Wallet.restore()
-			this.wallet = wallets[0]
-			return this.wallet
+			this.selectedWallet = wallets[0]
+			return this.selectedWallet
 		}
 
 		const walletJson = JSON.parse(walletData)
-		this.wallet = await Wallet.restore(walletJson.selectedWalletId)
+		this.selectedWallet = await Wallet.restore(walletJson.selectedWalletId)
 
-		if (this.wallet.type === 'Ledger') {
-			this.wallet.unlock()
+		if (this.selectedWallet.type === 'Ledger') {
+			this.selectedWallet.unlock()
 		}
 
 		if (walletJson.accounts?.length > 0) {
@@ -327,7 +330,7 @@ export class WalletService {
 
 		this.selectedAccountAddress = walletJson.selectedAccountAddress
 
-		return this.wallet
+		return this.selectedWallet
 	}
 
 	// Using full list of indexes is the latest standard with back compatability with accountsIndex
@@ -343,7 +346,7 @@ export class WalletService {
 		if (type === 'Ledger') {
 			return
 		}
-		this.wallet = await Wallet.load(type, password, seed)
+		this.selectedWallet = await Wallet.load(type, password, seed)
 
 		if (walletType === 'seed') {
 			// Old method
@@ -370,7 +373,7 @@ export class WalletService {
 
 		await this.reloadBalances()
 
-		if (this.wallet.accounts.length) {
+		if (this.selectedWallet.accounts.length) {
 			this.svcWebsocket.subscribeAccounts(this.accounts.map((a) => a.id))
 		}
 
@@ -382,7 +385,7 @@ export class WalletService {
 			indexes: this.accounts.map((a) => a.index),
 		}
 		const backup = await Wallet.backup()
-		const secret = backup.find((wallet) => wallet.id === this.wallet.id) as {
+		const secret = backup.find((wallet) => wallet.id === this.selectedWallet.id) as {
 			id: string
 			type: WalletType
 			iv: ArrayBuffer
@@ -404,9 +407,9 @@ export class WalletService {
 		return `https://gnault.cc/import-wallet#${base64Data}`
 	}
 
-	async lockWallet() {
-		try {
-			this.wallet.lock()
+	async lockWallet(): Promise<void> {
+		if (this.selectedWallet) {
+			this.selectedWallet.lock()
 
 			// Remove secrets from accounts
 			this.accounts.forEach((a) => {
@@ -414,26 +417,21 @@ export class WalletService {
 				a.secret = null
 			})
 
-			this.isLocked = true
-			this.isLocked$.next(true)
+			this.isLocked$.next(this.selectedWallet.isLocked)
 
-			await this.saveWalletExport() // Save so that a refresh gives you a locked wallet
-
-			return true
-		} catch (err) {
-			return false
+			// Save so that a refresh gives you a locked wallet
+			await this.saveWalletExport()
 		}
 	}
 
 	async unlockWallet(password: string) {
 		try {
-			await this.wallet.unlock(password)
+			await this.selectedWallet.unlock(password)
 			this.accounts.forEach(async (a) => {
-				a = await this.wallet.account(a.index)
+				a = await this.selectedWallet.account(a.index)
 			})
 
-			this.isLocked = false
-			this.isLocked$.next(false)
+			this.isLocked$.next(this.selectedWallet.isLocked)
 
 			// If there is a notification to unlock, remove it
 			this.svcNotifications.removeNotification('receivable-locked')
@@ -453,7 +451,7 @@ export class WalletService {
 
 	async updatePassword(password: string) {
 		try {
-			await this.wallet.update(password)
+			await this.selectedWallet.update(password)
 			this.passwordUpdated$.next(true)
 			// Save so a refresh also gives you your unlocked wallet?
 			await this.saveWalletExport()
@@ -467,8 +465,8 @@ export class WalletService {
 
 	async setWallet(password: string, wallet: Wallet) {
 		this.resetWallet()
-		this.wallet = wallet
-		await this.wallet.unlock(password)
+		this.selectedWallet = wallet
+		await this.selectedWallet.unlock(password)
 		password = ''
 		await this.scanAccounts()
 	}
@@ -483,7 +481,7 @@ export class WalletService {
 
 		// Getting accounts...
 		for (let batchIdx = 0; batchIdx < batchesCount; batchIdx++) {
-			const batchAccounts = await this.wallet.accounts(batchIdx, batchIdx + ACCOUNTS_PER_API_REQUEST)
+			const batchAccounts = await this.selectedWallet.accounts(batchIdx, batchIdx + ACCOUNTS_PER_API_REQUEST)
 			const batchAccountsArray = []
 			for (let i = batchIdx; i < batchIdx + ACCOUNTS_PER_API_REQUEST; i++) {
 				batchAccountsArray.push(batchAccounts[i].address)
@@ -516,11 +514,11 @@ export class WalletService {
 
 	async createNewWallet(password: string) {
 		this.resetWallet()
-		this.wallet = await Wallet.create('BLAKE2b', password)
-		const unlockRequest = this.wallet.unlock(password)
+		this.selectedWallet = await Wallet.create('BLAKE2b', password)
+		const unlockRequest = this.selectedWallet.unlock(password)
 		password = ''
 		await unlockRequest
-		const { mnemonic, seed } = this.wallet
+		const { mnemonic, seed } = this.selectedWallet
 		this.addWalletAccount()
 		await this.reloadBalances()
 		return { mnemonic, seed }
@@ -528,7 +526,7 @@ export class WalletService {
 
 	async createLedgerWallet() {
 		await this.scanAccounts()
-		return this.wallet
+		return this.selectedWallet
 	}
 
 	async createWalletFromSingleKey(key: string, expanded: boolean) {
@@ -542,7 +540,7 @@ export class WalletService {
 	}
 
 	async createLedgerAccount(index) {
-		return await this.wallet.account(index)
+		return await this.selectedWallet.account(index)
 	}
 
 	createKeyedAccount(index, accountBytes, accountKeyPair) {
@@ -572,7 +570,6 @@ export class WalletService {
 			// Unsubscribe from old accounts
 			this.svcWebsocket.unsubscribeAccounts(this.accounts.map((a) => a.id))
 		}
-		this.isLocked = false
 		this.isLocked$.next(false)
 		this.accounts = []
 		this.balance = 0n
@@ -585,11 +582,11 @@ export class WalletService {
 	}
 
 	get isConfigured() {
-		return this.wallet != null
+		return this.selectedWallet != null
 	}
 
 	get isLedger() {
-		return this.wallet?.type === 'Ledger'
+		return this.selectedWallet?.type === 'Ledger'
 	}
 
 	hasReceivableTransactions() {
@@ -768,7 +765,7 @@ export class WalletService {
 	}
 
 	async loadWalletAccount(accountIndex, accountID) {
-		const account = await this.wallet?.account(accountIndex)
+		const account = await this.selectedWallet?.account(accountIndex)
 		const addressBookName = this.svcAddressBook.getAccountName(accountID)
 
 		this.accounts.push(account)
@@ -787,7 +784,7 @@ export class WalletService {
 			}
 			const newAccount: Account = this.isLedger
 				? await this.createLedgerAccount(index)
-				: await this.wallet.account(index)
+				: await this.selectedWallet.account(index)
 			this.accounts.push(newAccount)
 			this.svcWebsocket.subscribeAccounts([newAccount.id])
 			await this.saveWalletExport()
@@ -940,12 +937,12 @@ export class WalletService {
 
 	removeWalletData() {
 		localStorage.removeItem(storeKey)
-		this.wallet.destroy()
+		this.selectedWallet.destroy()
 	}
 
 	async generateWalletExport() {
 		const backup = await Wallet.backup()
-		const walletData = backup.find((v) => v.id === this.wallet.id)
+		const walletData = backup.find((v) => v.id === this.selectedWallet.id)
 		const data: any = {
 			...walletData,
 			accounts: this.accounts.map((a) => ({ id: a.id, index: a.index })),

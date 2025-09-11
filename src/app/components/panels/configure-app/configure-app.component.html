@@ -60,9 +60,9 @@
 										[(ngModel)]="selectedCurrency"
 										id="form-horizontal-select"
 									>
-										@for (currency of currencies; track currency) {
-											<option [value]="currency">
-												{{ currency }}
+										@for (currency of currencies | keyvalue; track currency) {
+											<option [value]="currency.key">
+												{{ currency.value }}
 											</option>
 										}
 									</select>

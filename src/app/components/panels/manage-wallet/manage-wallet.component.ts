@@ -22,7 +22,7 @@ export class ManageWalletComponent implements OnInit {
 	settings = inject(AppSettingsService)
 	walletService = inject(WalletService)
 
-	wallet = this.walletService.wallet
+	wallet = this.walletService.selectedWallet
 	accounts = this.walletService.accounts
 	newPassword = ''
 	confirmPassword = ''
@@ -51,7 +51,7 @@ export class ManageWalletComponent implements OnInit {
 	exportEnabled = true
 
 	async ngOnInit() {
-		this.wallet = this.walletService.wallet
+		this.wallet = this.walletService.selectedWallet
 
 		// Update selected account if changed in the sidebar
 		this.walletService.selectedAccount$.subscribe(async (acc) => {

@@ -2,9 +2,7 @@ import { CommonModule } from '@angular/common'
 import { Component, OnInit, ViewChild, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ActivatedRoute } from '@angular/router'
-import { TranslocoService, TranslocoPipe } from '@jsverse/transloco'
-import { Tools } from 'libnemo'
-import { BehaviorSubject } from 'rxjs'
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import { NanoAccountIdComponent } from 'app/components/elements'
 import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
 import {
@@ -17,24 +15,17 @@ import {
 	QrModalService,
 	RepresentativeService,
 	UtilService,
-	WalletService
+	WalletService,
 } from 'app/services'
+import { Tools } from 'libnemo'
+import { BehaviorSubject } from 'rxjs'
 
 @Component({
 	selector: 'app-representatives',
 	templateUrl: './representatives.component.html',
 	styleUrls: ['./representatives.component.css'],
-	imports: [
-		AmountSplitPipe,
-		CommonModule,
-		FormsModule,
-		NanoAccountIdComponent,
-		RaiPipe,
-		SqueezePipe,
-		TranslocoPipe
-	]
+	imports: [AmountSplitPipe, CommonModule, FormsModule, NanoAccountIdComponent, RaiPipe, SqueezePipe, TranslocoPipe],
 })
-
 export class RepresentativesComponent implements OnInit {
 	private router = inject(ActivatedRoute)
 	walletService = inject(WalletService)
@@ -77,11 +68,11 @@ export class RepresentativesComponent implements OnInit {
 
 	representativeList = []
 
-	async ngOnInit () {
+	async ngOnInit() {
 		this.representativeService.loadRepresentativeList()
 
 		// Listen for query parameters that set defaults
-		this.router.queryParams.subscribe(params => {
+		this.router.queryParams.subscribe((params) => {
 			this.hideOverview = params && params.hideOverview
 			this.showRecommendedReps = params && params.showRecommended
 
@@ -104,7 +95,7 @@ export class RepresentativesComponent implements OnInit {
 			return a.delegatedWeight < b.delegatedWeight ? -1 : 1
 		})
 		this.representativeOverview = repOverview
-		repOverview.forEach(o => this.fullAccounts.push(...o.accounts))
+		repOverview.forEach((o) => this.fullAccounts.push(...o.accounts))
 		this.loadingRepresentatives = false
 
 		this.populateRepresentativeList()
@@ -112,10 +103,10 @@ export class RepresentativesComponent implements OnInit {
 		await this.loadRecommendedReps()
 	}
 
-	async populateRepresentativeList () {
+	async populateRepresentativeList() {
 		// add trusted/regular local reps to the list
 		const localReps = this.representativeService.getSortedRepresentatives()
-		this.representativeList.push(...localReps.filter(rep => (!rep.warn)))
+		this.representativeList.push(...localReps.filter((rep) => !rep.warn))
 
 		if (this.settings.settings.serverAPI) {
 			const verifiedReps = await this.ninja.recommendedRandomized()
@@ -124,7 +115,7 @@ export class RepresentativesComponent implements OnInit {
 			for (const representative of verifiedReps) {
 				const temprep = {
 					id: representative.account,
-					name: representative.alias
+					name: representative.alias,
 				}
 
 				this.representativeList.push(temprep)
@@ -132,26 +123,26 @@ export class RepresentativesComponent implements OnInit {
 		}
 
 		// add untrusted local reps to the list
-		this.representativeList.push(...localReps.filter(rep => (rep.warn)))
+		this.representativeList.push(...localReps.filter((rep) => rep.warn))
 	}
 
-	getAccountLabel (account) {
+	getAccountLabel(account) {
 		const addressBookName = account.addressBookName
 
 		if (addressBookName != null) {
 			return addressBookName
 		}
 
-		const walletAccount = this.walletService.accounts.find(a => a.id === account.id)
+		const walletAccount = this.walletService.accounts.find((a) => a.id === account.id)
 
 		if (walletAccount == null) {
 			return this.translocoService.translate('general.account')
 		}
 
-		return (this.translocoService.translate('general.account') + ' #' + walletAccount.index)
+		return this.translocoService.translate('general.account') + ' #' + walletAccount.index
 	}
 
-	addSelectedAccounts (accounts) {
+	addSelectedAccounts(accounts) {
 		for (const account of accounts) {
 			this.newAccountID(account.id)
 		}
@@ -160,7 +151,7 @@ export class RepresentativesComponent implements OnInit {
 		setTimeout(() => this.repInput.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
 	}
 
-	newAccountID (accountID) {
+	newAccountID(accountID) {
 		if (accountID instanceof HTMLSelectElement) {
 			accountID = accountID.value
 		}
@@ -169,12 +160,12 @@ export class RepresentativesComponent implements OnInit {
 			return // Didn't select anything
 		}
 
-		const existingAccount = this.selectedAccounts.find(a => a.id === newAccount)
+		const existingAccount = this.selectedAccounts.find((a) => a.id === newAccount)
 		if (existingAccount) {
 			return // Already selected
 		}
 
-		const allExists = this.selectedAccounts.find(a => a.id === 'All Current Accounts')
+		const allExists = this.selectedAccounts.find((a) => a.id === 'All Current Accounts')
 		if (newAccount === 'all' && !allExists) {
 			this.selectedAccounts = [] // Reset the list before adding all
 		}
@@ -191,19 +182,19 @@ export class RepresentativesComponent implements OnInit {
 			this.selectedAccounts.push(walletAccount)
 		}
 
-		setTimeout(() => this.changeAccountID = null, 10)
+		setTimeout(() => (this.changeAccountID = null), 10)
 	}
 
-	removeSelectedAccount (account) {
+	removeSelectedAccount(account) {
 		this.selectedAccounts.splice(this.selectedAccounts.indexOf(account), 1) // Remove all from the list
 	}
 
-	searchRepresentatives () {
+	searchRepresentatives() {
 		this.showRepresentatives = true
 		const search = this.toRepresentativeID || ''
 
 		const matches = this.representativeList
-			.filter(a => a.name.toLowerCase().indexOf(search.toLowerCase()) !== -1)
+			.filter((a) => a.name.toLowerCase().indexOf(search.toLowerCase()) !== -1)
 			// remove duplicate accounts
 			.filter((item, pos, self) => this.util.array.findWithAttr(self, 'id', item.id) === pos)
 			.slice(0, 5)
@@ -211,15 +202,15 @@ export class RepresentativesComponent implements OnInit {
 		this.representativeResults$.next(matches)
 	}
 
-	selectRepresentative (rep) {
+	selectRepresentative(rep) {
 		this.showRepresentatives = false
 		this.toRepresentativeID = rep
 		this.searchRepresentatives()
 		this.validateRepresentative()
 	}
 
-	async validateRepresentative () {
-		setTimeout(() => this.showRepresentatives = false, 400)
+	async validateRepresentative() {
+		setTimeout(() => (this.showRepresentatives = false), 400)
 		this.toRepresentativeID = this.toRepresentativeID.replace(/ /g, '')
 
 		if (this.toRepresentativeID === '') {
@@ -239,15 +230,15 @@ export class RepresentativesComponent implements OnInit {
 		}
 	}
 
-	async loadRecommendedReps () {
+	async loadRecommendedReps() {
 		this.recommendedRepsLoading = true
 		try {
-			const scores = await this.ninja.recommended() as any[]
+			const scores = (await this.ninja.recommended()) as any[]
 			const totalSupply = 133248289
 
-			const reps = scores.map(rep => {
+			const reps = scores.map((rep) => {
 				const nanoWeight = parseFloat(Tools.convert(BigInt(rep.weight ?? 0n), 'raw', 'mnano'))
-				const percent = nanoWeight / totalSupply * 100
+				const percent = (nanoWeight / totalSupply) * 100
 
 				// rep.weight = nanoWeight.toString(10)
 				rep.weight = this.util.nano.mnanoToRaw(nanoWeight)
@@ -263,17 +254,16 @@ export class RepresentativesComponent implements OnInit {
 		} catch (err) {
 			this.recommendedRepsLoading = null
 		}
-
 	}
 
-	previousReps () {
+	previousReps() {
 		if (this.currentRepPage > 0) {
 			this.currentRepPage--
 			this.calculatePage()
 		}
 	}
-	nextReps () {
-		if (this.currentRepPage < (this.recommendedReps.length / this.repsPerPage) - 1) {
+	nextReps() {
+		if (this.currentRepPage < this.recommendedReps.length / this.repsPerPage - 1) {
 			this.currentRepPage++
 		} else {
 			this.currentRepPage = 0
@@ -281,21 +271,21 @@ export class RepresentativesComponent implements OnInit {
 		this.calculatePage()
 	}
 
-	calculatePage () {
+	calculatePage() {
 		this.recommendedRepsPaginated = this.recommendedReps.slice(
-			(this.currentRepPage * this.repsPerPage),
-			(this.currentRepPage * this.repsPerPage) + this.repsPerPage
+			this.currentRepPage * this.repsPerPage,
+			this.currentRepPage * this.repsPerPage + this.repsPerPage
 		)
 	}
 
-	selectRecommendedRep (rep) {
+	selectRecommendedRep(rep) {
 		this.selectedRecommendedRep = rep
 		this.toRepresentativeID = rep.account
 		this.showRecommendedReps = false
 		this.representativeListMatch = rep.alias // We will save if they use this, so this is a nice little helper
 	}
 
-	async changeRepresentatives () {
+	async changeRepresentatives() {
 		const accounts = this.selectedAccounts
 		const newRep = this.toRepresentativeID
 
@@ -321,13 +311,13 @@ export class RepresentativesComponent implements OnInit {
 			return this.notifications.sendWarning(`Representative is not a valid account`)
 		}
 
-		const accountsToChange = accounts.find(a => a.id === 'All Current Accounts')
+		const accountsToChange = accounts.find((a) => a.id === 'All Current Accounts')
 			? this.walletService.accounts
 			: accounts
 
 		// Remove any that don't need their represetatives to be changed
-		const accountsNeedingChange = accountsToChange.filter(account => {
-			const accountInfo = this.fullAccounts.find(a => a.id === account.id)
+		const accountsNeedingChange = accountsToChange.filter((account) => {
+			const accountInfo = this.fullAccounts.find((a) => a.id === account.id)
 			if (!accountInfo || accountInfo.error) {
 				return false // Cant find info, update the account
 			}
@@ -344,7 +334,7 @@ export class RepresentativesComponent implements OnInit {
 			return this.notifications.sendInfo(`None of the accounts selected need to be updated`)
 		}
 
-		const wallet = this.walletService.wallet
+		const wallet = this.walletService.selectedWallet
 
 		// Now loop and change them
 		for (const account of accountsNeedingChange) {
@@ -364,7 +354,11 @@ export class RepresentativesComponent implements OnInit {
 		}
 
 		// Determine if a recommended rep was selected, if so we save an entry in the rep list
-		if (this.selectedRecommendedRep && this.selectedRecommendedRep.account && this.selectedRecommendedRep.account === newRep) {
+		if (
+			this.selectedRecommendedRep &&
+			this.selectedRecommendedRep.account &&
+			this.selectedRecommendedRep.account === newRep
+		) {
 			this.representativeService.saveRepresentative(newRep, this.selectedRecommendedRep.alias, false, false)
 		}
 
@@ -392,16 +386,18 @@ export class RepresentativesComponent implements OnInit {
 	}
 
 	// open qr reader modal
-	openQR (reference, type) {
+	openQR(reference, type) {
 		const qrResult = this.qrModalService.openQR(reference, type)
-		qrResult.then((data) => {
-			switch (data.reference) {
-				case 'rep1':
-					this.toRepresentativeID = data.content
-					this.validateRepresentative()
-					break
-			}
-		}, () => { }
+		qrResult.then(
+			(data) => {
+				switch (data.reference) {
+					case 'rep1':
+						this.toRepresentativeID = data.content
+						this.validateRepresentative()
+						break
+				}
+			},
+			() => {}
 		)
 	}
 }

@@ -16,7 +16,7 @@ export class WelcomeComponent implements OnInit {
 	settingsService = inject(AppSettingsService)
 
 	donationAccount = environment.donationAddress
-	wallet = this.walletService.wallet
+	wallet = this.walletService.selectedWallet
 	isConfigured = this.walletService.isConfigured
 
 	ngOnInit() {}

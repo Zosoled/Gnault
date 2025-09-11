@@ -45,7 +45,7 @@ export class ConfigureAppComponent implements OnInit {
 	private qrModalService = inject(QrModalService)
 	private translocoService = inject(TranslocoService)
 
-	wallet = this.walletService.wallet
+	wallet = this.walletService.selectedWallet
 	languages = this.translocoService.getAvailableLangs() as [{ id: string; label: string }]
 	selectedLanguage = this.languages[0].id
 
@@ -67,41 +67,24 @@ export class ConfigureAppComponent implements OnInit {
 
 	currencies: Map<string, string> = new Map<string, string>([
 		['', this.translocoService.translate('configure-app.currencies.none')],
-		['usd', 'USD - US Dollar'],
+		['bch', 'BCH - Bitcoin Cash'],
+		['bnb', 'BNB - Binance Coin'],
 		['btc', 'BTC - Bitcoin'],
-		['aud', 'AUD - Australian Dollar'],
-		['brl', 'BRL - Brazilian Real'],
-		['cad', 'CAD - Canadian Dollar'],
-		['chf', 'CHF - Swiss Franc'],
-		['clp', 'CLP - Chilean Peso'],
-		['cny', 'CNY - Chinese Yuan'],
-		['czk', 'CZK - Czech Koruna'],
-		['dkk', 'DKK - Danish Krown'],
-		['eur', 'EUR - Euro'],
-		['gbp', 'GBP - British Pound'],
-		['hkd', 'HKD - Hong Kong Dollar'],
-		['huf', 'HUF - Hungarian Forint'],
-		['idr', 'IDR - Indonesian Rupiah'],
-		['ils', 'ILS - Israeli New Shekel'],
-		['inr', 'INR - Indian Rupee'],
-		['jpy', 'JPY - Japanese Yen'],
-		['krw', 'KRW - South Korean Won'],
-		['mxn', 'MXN - Mexican Peso'],
-		['myr', 'MYR - Malaysian Ringgit'],
-		['nok', 'NOK - Norwegian Krone'],
-		['nzd', 'NZD - New Zealand Dollar'],
-		['php', 'PHP - Philippine Piso'],
-		['pkr', 'PKR - Pakistani Rupee'],
-		['pln', 'PLN - Polish Zloty'],
-		['rub', 'RUB - Russian Ruble'],
-		['sek', 'SEK - Swedish Krona'],
-		['sgd', 'SGD - Singapore Dollar'],
-		['thb', 'THB - Thai Baht'],
-		['try', 'TRY - Turkish Lira'],
-		['twd', 'TWD - New Taiwan Dollar'],
-		['zar', 'ZAR - South African Rand'],
+		['dot', 'DOT - Polkadot'],
+		['eos', 'EOS - EOS'],
+		['eth', 'ETH - Ethereum'],
+		['ltc', 'LTC - Litecoin'],
+		['sol', 'SOL - Solana'],
+		['xag', 'XAG - Silver (Troy Ounce)'],
+		['xau', 'XAU - Gold (Troy Ounce)'],
+		['xlm', 'XLM - Stellar'],
+		['xrp', 'XRP - XRP'],
+		['yfi', 'YFI - yearn.finance'],
+		['bits', 'Bits'],
+		['link', 'Chainlink'],
+		['sats', 'Satoshis'],
 	])
-	selectedCurrency = this.currencies[0].value
+	selectedCurrency = this.currencies.get('')
 
 	nightModeOptions = [
 		{ name: this.translocoService.translate('configure-app.night-mode-options.enabled'), value: 'enabled' },
@@ -308,14 +291,16 @@ export class ConfigureAppComponent implements OnInit {
 
 	async loadCurrencies(): Promise<void> {
 		await this.svcPrice.fetchPrice()
+		debugger
 		this.svcPrice.currencies.forEach((currency) => {
-			if (this.currencies.get(currency) === undefined) {
-				const currencyName = new Intl.DisplayNames(['en'], { type: 'currency' }).of(currency)
+			if (this.currencies.get(currency) === undefined && currency.length === 3) {
+				const lang = this.appSettings.settings.language ?? 'en'
+				const currencyName = new Intl.DisplayNames([lang], { type: 'currency' }).of(currency)
 				this.currencies.set(currency, `${currency.toUpperCase()} - ${currencyName}`)
 			}
 		})
 		const matchingCurrency = this.currencies.get(this.appSettings.settings.displayCurrency)
-		this.selectedCurrency = matchingCurrency || this.currencies[0].value
+		this.selectedCurrency = matchingCurrency || this.currencies.get('')
 	}
 
 	async updateDisplaySettings() {

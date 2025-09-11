@@ -43,7 +43,7 @@ export class ConfigureWalletComponent {
 
 	panels = panels
 	activePanel = panels.landing
-	wallet = this.walletService.wallet
+	wallet = this.walletService.selectedWallet
 	get isConfigured() {
 		return this.walletService.isConfigured
 	}
