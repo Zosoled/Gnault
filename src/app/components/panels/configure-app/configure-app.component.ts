@@ -291,7 +291,6 @@ export class ConfigureAppComponent implements OnInit {
 
 	async loadCurrencies(): Promise<void> {
 		await this.svcPrice.fetchPrice()
-		debugger
 		this.svcPrice.currencies.forEach((currency) => {
 			if (this.currencies.get(currency) === undefined && currency.length === 3) {
 				const lang = this.appSettings.settings.language ?? 'en'
