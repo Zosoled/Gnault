@@ -66,25 +66,25 @@ export class ConfigureAppComponent implements OnInit {
 	selectedStorage = this.storageOptions[0].value
 
 	currencies: Map<string, string> = new Map<string, string>([
-		['', this.translocoService.translate('configure-app.currencies.none')],
+		['-', this.translocoService.translate('configure-app.currencies.none')],
 		['bch', 'BCH - Bitcoin Cash'],
+		['bits', 'BITS - Bitcoin (bits)'],
 		['bnb', 'BNB - Binance Coin'],
 		['btc', 'BTC - Bitcoin'],
 		['dot', 'DOT - Polkadot'],
 		['eos', 'EOS - EOS'],
 		['eth', 'ETH - Ethereum'],
+		['link', 'LINK - Chainlink'],
 		['ltc', 'LTC - Litecoin'],
+		['sats', 'SATS - Bitcoin (satoshis)'],
 		['sol', 'SOL - Solana'],
 		['xag', 'XAG - Silver (Troy Ounce)'],
 		['xau', 'XAU - Gold (Troy Ounce)'],
 		['xlm', 'XLM - Stellar'],
 		['xrp', 'XRP - XRP'],
 		['yfi', 'YFI - yearn.finance'],
-		['bits', 'Bits'],
-		['link', 'Chainlink'],
-		['sats', 'Satoshis'],
 	])
-	selectedCurrency = this.currencies.get('')
+	selectedCurrency = this.currencies.get('-')
 
 	nightModeOptions = [
 		{ name: this.translocoService.translate('configure-app.night-mode-options.enabled'), value: 'enabled' },
@@ -298,8 +298,9 @@ export class ConfigureAppComponent implements OnInit {
 				this.currencies.set(currency, `${currency.toUpperCase()} - ${currencyName}`)
 			}
 		})
+		debugger
 		const matchingCurrency = this.currencies.get(this.appSettings.settings.displayCurrency)
-		this.selectedCurrency = matchingCurrency || this.currencies.get('')
+		this.selectedCurrency = matchingCurrency || this.currencies.get('-')
 	}
 
 	async updateDisplaySettings() {
