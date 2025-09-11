@@ -47,7 +47,7 @@
 							}}
 						</div>
 						<div class="address nano-address-monospace">
-							{{ svcWallet.selectedAccount.id }}
+							{{ svcWallet.selectedAccount.address }}
 						</div>
 					</div>
 					<div class="balance-column">
@@ -103,7 +103,7 @@
 			@for (account of svcWallet.accounts; track account.address) {
 				<ng-container>
 					<!-- inactive accounts -->
-					@if (svcWallet.selectedAccount === null || svcWallet.selectedAccount.id !== account.id) {
+					@if (svcWallet.selectedAccount === null || svcWallet.selectedAccount.address !== account.address) {
 						<div
 							class="account inactive"
 							(click)="selectAccount(account)"
@@ -116,7 +116,7 @@
 											: ('general.account' | transloco) + ' #' + account.index
 									}}
 								</div>
-								<div class="address nano-address-monospace">{{ account.id }}</div>
+								<div class="address nano-address-monospace">{{ account.address }}</div>
 							</div>
 							<div class="balance-column">
 								@if (svcWallet.isBalanceUpdating === false) {
@@ -169,18 +169,15 @@
 								<div class="card-contents">
 									<div class="account-name-container">
 										<a
-											[routerLink]="
-												svcWallet.selectedAccount !== null ? '/account/' + svcWallet.selectedAccount.id : '/accounts'
-											"
+											[routerLink]="`/accounts/${svcWallet.selectedAccount?.address ?? ''}`"
 											[queryParams]="{ compact: '1' }"
 											class="name"
 										>
 											{{
-												svcWallet.selectedAccount !== null
-													? svcWallet.selectedAccount.addressBookName
-														? svcWallet.selectedAccount.addressBookName
-														: ('general.account' | transloco) + ' #' + svcWallet.selectedAccount.index
-													: 'Total Balance'
+												svcWallet.selectedAccount == null
+													? 'Total Balance'
+													: (svcWallet.selectedAccount?.addressBookName ??
+														('general.account' | transloco) + ' #' + svcWallet.selectedAccount.index)
 											}}
 										</a>
 										<div

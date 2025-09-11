@@ -776,9 +776,8 @@ export class WalletService {
 
 	// Derive an account and save it locally.
 	// If index is not provided, increment from greatest index currently saved
-	async addWalletAccount(index?: number) {
+	async addWalletAccount(index: number = 0) {
 		try {
-			index ??= 0
 			while (this.accounts.find((a) => a.index === index)) {
 				index++
 			}
@@ -945,6 +944,7 @@ export class WalletService {
 		const walletData = backup.find((v) => v.id === this.selectedWallet.id)
 		const data: any = {
 			...walletData,
+			selectedWalletId: this.selectedWallet.id,
 			accounts: this.accounts.map((a) => ({ id: a.id, index: a.index })),
 			selectedAccountAddress: this.selectedAccount?.address,
 			locked: true,

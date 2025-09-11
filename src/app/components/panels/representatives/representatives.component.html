@@ -117,7 +117,7 @@
 												</div>
 												<div class="representative-address uk-text-small uk-text-truncate">
 													<app-nano-account-id
-														[accountID]="rep.id"
+														[address]="rep.address"
 														middle="auto"
 														class="nano-address-monospace"
 													></app-nano-account-id>
@@ -154,7 +154,7 @@
 															</div>
 															<div class="descendant-address uk-text-truncate">
 																<app-nano-account-id
-																	[accountID]="delegatingAccount.id"
+																	[address]="delegatingAccount.address"
 																	middle="auto"
 																	class="nano-address-monospace"
 																></app-nano-account-id>
@@ -263,7 +263,7 @@
 																</div>
 																<div class="uk-text-truncate">
 																	<app-nano-account-id
-																		[accountID]="account.id"
+																		[address]="account.address"
 																		middle="auto"
 																		class="nano-address-monospace"
 																	></app-nano-account-id>

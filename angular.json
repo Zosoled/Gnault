@@ -43,7 +43,7 @@
 							],
 							"optimization": true,
 							"outputHashing": "all",
-							"sourceMap": true,
+							"sourceMap": false,
 							"namedChunks": false,
 							"extractLicenses": true,
 							"fileReplacements": [
@@ -79,7 +79,7 @@
 				"serve": {
 					"builder": "@angular-devkit/build-angular:dev-server",
 					"options": {
-						"buildTarget": "gnault:build:production"
+						"buildTarget": "gnault:build"
 					},
 					"configurations": {
 						"production": {

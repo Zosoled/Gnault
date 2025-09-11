@@ -189,7 +189,7 @@
 										class="nano-address-monospace uk-width-auto uk-text-small uk-text-truncate"
 										style="max-width: calc(100% - 60px);"
 									>
-										<app-nano-account-id [accountID]="accountID"></app-nano-account-id>
+										<app-nano-account-id [address]="accountID"></app-nano-account-id>
 									</div>
 									<div
 										class="nano-address-actions uk-width-auto"
@@ -270,7 +270,7 @@
 									[title]="account.representative"
 								>
 									<app-nano-account-id
-										[accountID]="account.representative"
+										[address]="account.representative"
 										middle="off"
 									></app-nano-account-id>
 								</div>
@@ -548,7 +548,7 @@
 										</div>
 										<div class="nano-address-clickable nano-address-monospace uk-text-truncate">
 											<app-nano-account-id
-												[accountID]="receivable.account"
+												[address]="receivable.account"
 												middle="auto"
 											></app-nano-account-id>
 										</div>
@@ -690,7 +690,7 @@
 										</div>
 										<div class="nano-address-clickable nano-address-monospace uk-text-truncate">
 											<app-nano-account-id
-												[accountID]="history.link_as_account || history.account"
+												[address]="history.link_as_account || history.account"
 												middle="auto"
 											></app-nano-account-id>
 										</div>
@@ -1283,7 +1283,7 @@
 					>
 						<span class="nano-address-monospace uk-width-auto">
 							<app-nano-account-id
-								[accountID]="accountID"
+								[address]="accountID"
 								middle="off"
 							></app-nano-account-id>
 						</span>

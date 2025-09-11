@@ -298,7 +298,6 @@ export class ConfigureAppComponent implements OnInit {
 				this.currencies.set(currency, `${currency.toUpperCase()} - ${currencyName}`)
 			}
 		})
-		debugger
 		const matchingCurrency = this.currencies.get(this.appSettings.settings.displayCurrency)
 		this.selectedCurrency = matchingCurrency || this.currencies.get('-')
 	}
