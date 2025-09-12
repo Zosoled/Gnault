@@ -232,6 +232,9 @@ export class ConfigureWalletComponent {
 				this.activePanel = panels.backup
 			}
 		} else {
+			// If a wallet already exists, confirm that the seed is saved
+			const confirmed = await this.confirmWalletOverwrite()
+			if (!confirmed) return
 			if (this.selectedImportOption === 'mnemonic' || this.selectedImportOption === 'seed') {
 				if (this.selectedImportOption === 'seed') {
 					const existingSeed = this.importSeedModel.trim()
@@ -294,13 +297,9 @@ export class ConfigureWalletComponent {
 				this.keyString = accounts[0].privateKey
 				this.isExpanded = false
 			}
-
-			// If a wallet already exists, confirm that the seed is saved
-			const confirmed = await this.confirmWalletOverwrite()
-			if (!confirmed) return
 			const isUpdated = await this.walletService.requestChangePassword()
 			if (isUpdated) {
-				this.activePanel = panels.backup
+				this.activePanel = panels.final
 			}
 		}
 	}
