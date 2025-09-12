@@ -25,7 +25,7 @@
 						class="name"
 						>{{ rep.label || ('change-rep-widget.unknown-rep' | transloco) }}</a
 					>
-					@if (!rep.percent.isZero()) {
+					@if (rep.percent > 0) {
 						<div class="weight-total">{{ rep.percent.toFixed(2) }}%</div>
 					}
 				</div>
@@ -131,24 +131,24 @@
 							}}
 						</p>
 					}
-					@switch (true) {
-						@case (rep.statusText == 'trusted') {
+					@switch (rep.statusText) {
+						@case ('trusted') {
 							<p>
 								{{ 'change-rep-widget.you-have-marked-this-representative-as-trusted' | transloco }}
 							</p>
 						}
-						@case (rep.statusText == 'ok') {
+						@case ('ok') {
 							<p class="uk-text-success">
 								<span uk-icon="icon: check;"></span
 								>{{ 'change-rep-widget.we-found-no-issues-with-uptime-or-weight' | transloco }}
 							</p>
 						}
-						@case (rep.statusText == 'warn') {
+						@case ('warn') {
 							<p>
 								{{ 'change-rep-widget.switching-to-a-different-representative-could-improve' | transloco }}
 							</p>
 						}
-						@case (rep.statusText == 'alert') {
+						@case ('alert') {
 							<p>
 								{{ 'change-rep-widget.it-is-highly-advised-to-switch-to-a-different-representative' | transloco }}
 							</p>
@@ -164,8 +164,7 @@
 			</div>
 		}
 	</div>
-} @else {
-	@if (!initialLoadComplete || selectedAccountHasRepresentative) {
+} @else if (!initialLoadComplete || selectedAccountHasRepresentative) {
 		<div class="nav-representative-info">
 			<div class="representative">
 				<h2>{{ 'general.representative' | transloco }}</h2>
@@ -193,7 +192,6 @@
 				</div>
 			</div>
 		</ng-template>
-	}
 }
 @if (showRepChangeRequired) {
 	<div

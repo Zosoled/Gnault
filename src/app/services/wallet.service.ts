@@ -88,9 +88,9 @@ export class WalletService {
 	isBalanceInitialized = false
 
 	accounts: Account[] = []
-	selectedAccountAddress = null
-	selectedAccount = null
-	selectedAccount$ = new BehaviorSubject(null)
+	selectedAccountAddress: string = null
+	selectedAccount: Account = null
+	selectedAccount$: BehaviorSubject<Account> = new BehaviorSubject(null)
 	get isLocked(): boolean {
 		return this.selectedWallet?.isLocked
 	}

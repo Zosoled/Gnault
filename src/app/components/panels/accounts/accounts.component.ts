@@ -13,6 +13,7 @@ import {
 	RepresentativeService,
 	WalletService,
 } from 'app/services'
+import { Account } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 import { Subject, timer } from 'rxjs'
 import { debounce } from 'rxjs/operators'
@@ -129,16 +130,19 @@ export class AccountsComponent implements OnInit {
 		// this.notificationService.sendSuccess(`Successfully sorted accounts by index!`)
 	}
 
-	navigateToAccount(account) {
-		const isSmallViewport = window.innerWidth < 940
+	navigateToAccount(account: Account) {
+		if (account == null) {
+			this.notificationService.sendError('Failed to navigate to account')
+			this.router.navigate(['accounts/'])
+		}
 
-		if (isSmallViewport === true) {
-			this.walletService.selectedAccountAddress = account?.id ?? null
+		// why only small screen sizes?
+		if (window.innerWidth < 940) {
+			this.walletService.selectedAccountAddress = account.address
 			this.walletService.selectedAccount = account
 			this.walletService.selectedAccount$.next(account)
 			this.walletService.saveWalletExport()
 		}
-
 		this.router.navigate([`accounts/${account.id}`], { queryParams: { compact: 1 } })
 	}
 

@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core'
 import { Router } from '@angular/router'
 import { TranslocoPipe } from '@jsverse/transloco'
 import { NanoBlockService, RepresentativeService, WalletService } from 'app/services'
+import { Account } from 'libnemo'
 
 @Component({
 	selector: 'app-change-rep-widget',
@@ -37,8 +38,8 @@ export class ChangeRepWidgetComponent implements OnInit {
 			this.initialLoadComplete = true
 		})
 
-		this.walletService.selectedAccount$.subscribe(async (acc) => {
-			this.selectedAccount = acc
+		this.walletService.selectedAccount$.subscribe((account: Account) => {
+			this.selectedAccount = account
 			this.updateDisplayedRepresentatives()
 		})
 
@@ -110,41 +111,34 @@ export class ChangeRepWidgetComponent implements OnInit {
 	}
 
 	updateSelectedAccountHasRep() {
-		if (this.selectedAccount !== null) {
-			if (this.selectedAccount !== null) {
-				this.selectedAccountHasRepresentative = !!this.selectedAccount.frontier
-				return
-			}
+		if (this.selectedAccount == null) {
 			const accounts = this.walletService.accounts
 			this.selectedAccountHasRepresentative = accounts.some((a) => a.frontier)
 		}
+		this.selectedAccountHasRepresentative = this.selectedAccount.frontier != null
 	}
 
 	getDisplayedRepresentatives(representatives: any[]) {
-		if (this.representatives.length === 0) {
+		if (this.representatives?.length === 0) {
 			return []
 		}
 
 		if (this.selectedAccount !== null) {
 			const selectedAccountRep = this.representatives.filter((rep) =>
-				rep.accounts.some((a) => a.id === this.selectedAccount.id)
+				rep.accounts.some((a) => a.address === this.selectedAccount.address)
 			)[0]
 
 			if (selectedAccountRep == null) {
 				return []
 			}
-
 			const displayedRepsAllAccounts = [Object.assign({}, selectedAccountRep)]
-
 			return this.includeRepRequiringChange(displayedRepsAllAccounts)
 		}
 
-		const sortedRepresentatives: any[] = [...representatives]
-
-		sortedRepresentatives.sort((a, b) => b.delegatedWeight.minus(a.delegatedWeight))
+		// sort by ascending delegated voting weight
+		const sortedRepresentatives: any[] = [...representatives].sort((a, b) => b.delegatedWeight - a.delegatedWeight)
 
 		const displayedReps = [Object.assign({}, sortedRepresentatives[0])]
-
 		return this.includeRepRequiringChange(displayedReps)
 	}
 
