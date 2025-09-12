@@ -1,27 +1,21 @@
 import { Pipe, PipeTransform } from '@angular/core'
 
+/**
+ * Splits a number at the decimal point and returns either the integer or the
+ * fraction.
+ */
 @Pipe({ name: 'amountsplit' })
 export class AmountSplitPipe implements PipeTransform {
-	transform(input: string, idx: number): string {
-		const splitAmount = input.split('.')[idx]
+	transform(input: string, index: number): string {
+		const splitAmount = input.split('.')[index]
 
-		if (idx === 0) {
-			// Integer
-			return splitAmount.replace('BTC ', '')
+		// Integer
+		if (index === 0) {
+			return splitAmount.replace('BTC ', '').trim()
 		}
 
-		// Fractional
-
-		if (splitAmount == null) {
-			return ''
-		}
-
-		const fractionalAmount = splitAmount.replace(/0+$/g, '')
-
-		if (fractionalAmount === '') {
-			return ''
-		}
-
-		return '.' + fractionalAmount
+		// Fraction
+		const fractionalAmount = (splitAmount ?? '').replace(/0+$/g, '').trim()
+		return fractionalAmount === '' ? '' : `.${fractionalAmount}`
 	}
 }
