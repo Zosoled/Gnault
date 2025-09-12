@@ -517,14 +517,6 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			this.account.receivable = receivableRaw
 		}
 
-		// Set fiat values?
-		this.account.balanceRaw = BigInt(this.account.balance || 0)
-		this.account.receivableRaw = BigInt(this.account.receivable || 0)
-		this.account.balanceFiat =
-			parseFloat(Tools.convert(this.account.balance || 0, 'raw', 'nano')) * this.svcPrice.lastPrice
-		this.account.receivableFiat =
-			parseFloat(Tools.convert(this.account.receivable || 0, 'raw', 'nano')) * this.svcPrice.lastPrice
-
 		await this.getAccountHistory(accountID)
 
 		if (accountID !== this.address) {
