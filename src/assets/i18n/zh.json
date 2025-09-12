@@ -345,6 +345,10 @@
 		"wallet-must-be-unlocked": "钱包必须解锁",
 		"yes": "是"
 	},
+	"nav": {
+		"accounts": "帐户",
+		"wallets": "钱包"
+	},
 	"receive": {
 		"all-accounts": "所有账户",
 		"amount-of-x": "{{ currency }} 金额",

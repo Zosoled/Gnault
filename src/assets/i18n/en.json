@@ -348,7 +348,8 @@
 	"nav": {
 		"accounts": "Accounts",
 		"receive": "Receive",
-		"send": "Send"
+		"send": "Send",
+		"wallets": "Wallets"
 	},
 	"receive": {
 		"all-accounts": "All Accounts",

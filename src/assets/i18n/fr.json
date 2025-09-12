@@ -345,6 +345,10 @@
 		"wallet-must-be-unlocked": "Le portefeuille doit être déverrouillé",
 		"yes": "Oui"
 	},
+	"nav": {
+		"accounts": "Comptes",
+		"wallets": "Portefeuilles"
+	},
 	"receive": {
 		"all-accounts": "Tous les comptes",
 		"amount-of-x": "Montant de {{ currency }}",

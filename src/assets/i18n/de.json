@@ -342,6 +342,10 @@
 		"wallet-must-be-unlocked": "Wallet muss entsperrt sein",
 		"yes": "Ja"
 	},
+	"nav": {
+		"accounts": "Konten",
+		"wallets": "Brieftaschen"
+	},
 	"receive": {
 		"all-accounts": "Alle Konten",
 		"amount-of-x": "Betrag in {{ currency }}",

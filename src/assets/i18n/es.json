@@ -345,6 +345,10 @@
 		"wallet-must-be-unlocked": "La billetera debe estar desbloqueada",
 		"yes": "Sí"
 	},
+	"nav": {
+		"accounts": "Cuentas",
+		"wallets": "Billeteras"
+	},
 	"receive": {
 		"all-accounts": "Todas las cuentas",
 		"amount-of-x": "Cantidad de {{ currency }}",

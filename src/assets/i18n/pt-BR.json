@@ -345,6 +345,10 @@
 		"wallet-must-be-unlocked": "A carteira deve estar desbloqueada",
 		"yes": "Sim"
 	},
+	"nav": {
+		"accounts": "Contas",
+		"wallets": "Carteiras"
+	},
 	"receive": {
 		"all-accounts": "Todas as Contas",
 		"amount-of-x": "Valor de {{ currency }}",
