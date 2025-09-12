@@ -17,6 +17,7 @@ export class PriceService {
 
 	currencies: string[] = []
 	lastPrice: number = 0
+	oneNano = 10n ** 30n
 	prices: Map<string, number>
 
 	constructor() {

@@ -114,8 +114,9 @@ export class ChangeRepWidgetComponent implements OnInit {
 		if (this.selectedAccount == null) {
 			const accounts = this.walletService.accounts
 			this.selectedAccountHasRepresentative = accounts.some((a) => a.frontier)
+		} else {
+			this.selectedAccountHasRepresentative = this.selectedAccount.frontier != null
 		}
-		this.selectedAccountHasRepresentative = this.selectedAccount.frontier != null
 	}
 
 	getDisplayedRepresentatives(representatives: any[]) {

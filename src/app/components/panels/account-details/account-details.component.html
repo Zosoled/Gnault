@@ -1194,7 +1194,7 @@
 														class="uk-form-icon uk-link-reset uk-link-muted"
 														style="padding-left: 7px"
 														uk-tooltip
-														title="Last Price: {{ 1e30 | fiat: svcAppSettings.settings.displayCurrency }} / XNO"
+														title="Last Price: {{ svcPrice.oneNano| fiat: svcAppSettings.settings.displayCurrency }} / XNO"
 														>{{ svcAppSettings.settings.displayCurrency | currencySymbol }}</a
 													>
 													<input
