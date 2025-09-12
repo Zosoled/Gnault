@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common'
 import { AfterViewInit, Component, ElementRef, HostListener, Renderer2, ViewChild, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink, RouterOutlet } from '@angular/router'
@@ -37,7 +36,6 @@ import { environment } from 'environments/environment'
 	imports: [
 		AmountSplitPipe,
 		ChangeRepWidgetComponent,
-		CommonModule,
 		FiatPipe,
 		InstallWidgetComponent,
 		FormsModule,
