@@ -42,17 +42,17 @@
 									}
 								</div>
 							</div>
-							@if (settings.settings.displayCurrency) {
+							@if (svcAppSettings.settings.displayCurrency) {
 								<div class="balance-container converted">
 									<div class="currency-name">
-										<span class="estimate-symbol">~</span>{{ settings.settings.displayCurrency }}
+										<span class="estimate-symbol">~</span>{{ svcAppSettings.settings.displayCurrency }}
 									</div>
 									<div class="amount-container">
 										<div class="amount-integer">
-											{{ account.balanceFiat | fiat: settings.settings.displayCurrency | amountsplit: 0 }}
+											{{ account.balanceFiat | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 0 }}
 										</div>
 										<div class="amount-fractional">
-											{{ account.balanceFiat | fiat: settings.settings.displayCurrency | amountsplit: 1 }}
+											{{ account.balanceFiat | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 1 }}
 										</div>
 									</div>
 								</div>
@@ -82,11 +82,11 @@
 		>
 			<div class="account-details-header uk-card-header uk-visible-toggle">
 				<div uk-grid>
-					@if (settings.settings.identiconsStyle !== 'none') {
+					@if (svcAppSettings.settings.identiconsStyle !== 'none') {
 						<app-nano-identicon
 							scale="12"
-							[accountID]="accountID"
-							[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+							[accountID]="address"
+							[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 							class="nano-identicon"
 						></app-nano-identicon>
 					}
@@ -179,7 +179,7 @@
 										class="nano-address-monospace uk-width-auto uk-text-small uk-text-truncate"
 										style="max-width: calc(100% - 60px)"
 									>
-										<app-nano-account-id [address]="accountID"></app-nano-account-id>
+										<app-nano-account-id [address]="address"></app-nano-account-id>
 									</div>
 									<div
 										class="nano-address-actions uk-width-auto"
@@ -189,7 +189,7 @@
 											<li>
 												<a
 													ngxClipboard
-													[cbContent]="accountID"
+													[cbContent]="address"
 													(cbOnSuccess)="copied()"
 													uk-icon="icon: copy"
 													[title]="'general.copy' | transloco"
@@ -212,7 +212,7 @@
 					</div>
 				</div>
 			</div>
-			@if (settings.settings.serverAPI) {
+			@if (svcAppSettings.settings.serverAPI) {
 				<div class="uk-card-header uk-form-horizontal uk-width-expand">
 					<div uk-grid>
 						<div class="representative-details uk-width-1-1@s uk-width-1-2@l">
@@ -256,7 +256,7 @@
 																		title="Change Representative"
 																		uk-tooltip
 																		routerLink="/representatives"
-																		[queryParams]="{ hideOverview: true, showRecommended: true, accounts: accountID }"
+																		[queryParams]="{ hideOverview: true, showRecommended: true, accounts: address }"
 																	></a>
 																</li>
 															}
@@ -269,7 +269,7 @@
 												[title]="account.representative"
 											>
 												<app-nano-account-id
-													[address]="account.representative"
+													[address]="account.representative.address"
 													middle="off"
 												></app-nano-account-id>
 											</div>
@@ -335,7 +335,7 @@
 								</div>
 								<div class="account-amounts-converted text-half-muted">
 									@if (account) {
-										{{ account.balance | fiat: settings.settings.displayCurrency }}
+										{{ account.balance ?? 0 | fiat: svcAppSettings.settings.displayCurrency }}
 									}
 								</div>
 							} @else {
@@ -350,7 +350,7 @@
 					</div>
 				</div>
 			}
-			@if (settings.settings.serverAPI) {
+			@if (svcAppSettings.settings.serverAPI) {
 				<div class="uk-card-header uk-form-horizontal">
 					<div
 						class="details-header advanced-options-link"
@@ -432,7 +432,7 @@
 						<app-nano-transaction-mobile
 							[transaction]="transaction"
 							[isHidden]="transaction.received"
-							[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+							[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 							(click)="showMobileMenuForTransaction(transaction)"
 						></app-nano-transaction-mobile>
 					</ng-container>
@@ -467,7 +467,7 @@
 						}
 						<app-nano-transaction-mobile
 							[transaction]="transaction"
-							[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+							[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 							(click)="showMobileMenuForTransaction(transaction)"
 						></app-nano-transaction-mobile>
 					</ng-container>
@@ -554,11 +554,11 @@
 											uk-tooltip
 										>
 											<div class="identicon-name-row uk-text-truncate">
-												@if (settings.settings.identiconsStyle !== 'none') {
+												@if (svcAppSettings.settings.identiconsStyle !== 'none') {
 													<app-nano-identicon
 														scale="6"
 														[accountID]="receivable.account"
-														[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+														[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 														class="nano-identicon"
 													></app-nano-identicon>
 												}
@@ -723,11 +723,11 @@
 											uk-tooltip
 										>
 											<div class="identicon-name-row uk-text-truncate">
-												@if (settings.settings.identiconsStyle !== 'none') {
+												@if (svcAppSettings.settings.identiconsStyle !== 'none') {
 													<app-nano-identicon
 														scale="6"
 														[accountID]="history.link_as_account || history.account"
-														[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+														[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 														class="nano-identicon"
 													></app-nano-identicon>
 												}
@@ -1184,7 +1184,7 @@
 												></a>
 											</div>
 										}
-										@if (settings.settings.displayCurrency) {
+										@if (svcAppSettings.settings.displayCurrency) {
 											<div
 												class="uk-width-1-1"
 												style="margin-top: 10px"
@@ -1194,8 +1194,8 @@
 														class="uk-form-icon uk-link-reset uk-link-muted"
 														style="padding-left: 7px"
 														uk-tooltip
-														title="Last Price: {{ 1e30 | fiat: settings.settings.displayCurrency }} / XNO"
-														>{{ settings.settings.displayCurrency | currencySymbol }}</a
+														title="Last Price: {{ 1e30 | fiat: svcAppSettings.settings.displayCurrency }} / XNO"
+														>{{ svcAppSettings.settings.displayCurrency | currencySymbol }}</a
 													>
 													<input
 														[(ngModel)]="amountFiat"
@@ -1204,7 +1204,7 @@
 														class="uk-input"
 														id="form-horizontal-text-fiat"
 														type="text"
-														placeholder="Amount of {{ settings.settings.displayCurrency }} to send"
+														placeholder="Amount of {{ svcAppSettings.settings.displayCurrency }} to send"
 													/>
 												</div>
 											</div>
@@ -1424,7 +1424,7 @@
 					>
 						<span class="nano-address-monospace uk-width-auto">
 							<app-nano-account-id
-								[address]="accountID"
+								[address]="address"
 								middle="off"
 							></app-nano-account-id>
 						</span>
@@ -1436,7 +1436,7 @@
 								<li>
 									<a
 										ngxClipboard
-										[cbContent]="accountID"
+										[cbContent]="address"
 										(cbOnSuccess)="copied()"
 										uk-icon="icon: copy"
 										[title]="'general.copy' | transloco"
@@ -1471,7 +1471,7 @@
 				<hr />
 				<div
 					class="menu-option"
-					[routerLink]="'/account/' + accountID"
+					[routerLink]="`/account/${address}`"
 					(click)="mobileAccountMenuModal.hide()"
 				>
 					<span
@@ -1508,7 +1508,7 @@
 					<app-nano-transaction-mobile
 						[isInteractable]="false"
 						[transaction]="mobileTransactionData"
-						[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+						[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 					></app-nano-transaction-mobile>
 				}
 			</div>
@@ -1573,7 +1573,7 @@
 								routerLink="/send"
 								[queryParams]="{
 									to: mobileTransactionData.account,
-									amount: util.nano.rawToMnano(mobileTransactionData.amount),
+									amount: svcUtil.nano.rawToMnano(mobileTransactionData.amount),
 								}"
 								(click)="mobileTransactionMenuModal.hide()"
 							>
