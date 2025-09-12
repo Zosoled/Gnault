@@ -80,7 +80,7 @@ export class WalletService {
 	private svcWorkPool = inject(WorkPoolService)
 
 	selectedWallet?: Wallet
-	wallets: Wallet[]
+	wallets: Wallet[] = []
 	balance = 0n
 	receivable = 0n
 	hasReceivable = false
@@ -336,8 +336,8 @@ export class WalletService {
 	// Using full list of indexes is the latest standard with back compatability with accountsIndex
 	async loadImportedWallet(
 		type: WalletType,
-		seed: string,
 		password: string,
+		seed: string,
 		accountsIndex: number,
 		indexes: Array<number>,
 		walletType: WalletKeyType
@@ -346,7 +346,11 @@ export class WalletService {
 		if (type === 'Ledger') {
 			return
 		}
-		this.selectedWallet = await Wallet.load(type, password, seed)
+		const wallet = await Wallet.load(type, password, seed)
+		await wallet.unlock(password)
+		password = ''
+		this.selectedWallet = wallet
+		this.wallets.push(wallet)
 
 		if (walletType === 'seed') {
 			// Old method
@@ -449,7 +453,7 @@ export class WalletService {
 		}
 	}
 
-	async updatePassword(password: string) {
+	async setPassword(password: string) {
 		try {
 			await this.selectedWallet.update(password)
 			this.passwordUpdated$.next(true)

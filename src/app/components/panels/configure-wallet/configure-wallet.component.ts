@@ -240,14 +240,13 @@ export class ConfigureWalletComponent {
 					this.importSeed = existingSeed
 				} else if (this.selectedImportOption === 'mnemonic') {
 					// Clean the value by trimming it and removing newlines
-					const mnemonic = this.importSeedMnemonicModel.toLowerCase().trim().replace(/\n/g, ``)
-
+					const mnemonic = this.importSeedMnemonicModel.toLowerCase().replace(/\n/g, '').trim()
 					const words = mnemonic.split(' ')
 					if (words.length < 20) return this.notifications.sendError(`Mnemonic is too short, double check it!`)
 
 					// Try and decode the mnemonic
 					try {
-						await Wallet.load('BLAKE2b', '', mnemonic).then((wallet) => wallet.destroy())
+						this.walletService.loadImportedWallet('BLAKE2b', '', mnemonic, 0, [0], 'seed')
 					} catch (err) {
 						return this.notifications.sendError(`Unable to decode mnemonic, double check it!`)
 					}

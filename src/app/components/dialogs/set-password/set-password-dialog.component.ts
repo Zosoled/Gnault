@@ -68,13 +68,17 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 		} else if (this.newPassword !== this.confirmPassword) {
 			this.isNotMatch = true
 		} else {
-			const updated = await this.svcWallet.updatePassword(this.newPassword)
-			this.newPassword = this.confirmPassword = ''
-			if (updated) {
+			try {
+				const updated = await this.svcWallet.setPassword(this.newPassword)
+				if (!updated) {
+					throw new Error('Failed to update password')
+				}
 				this.modal.hide()
 				this.svcNotifications.sendSuccess(this.svcTransloco.translate('configure-wallet.set-wallet-password.success'))
-			} else {
+			} catch (err) {
 				this.svcNotifications.sendError(this.svcTransloco.translate('configure-wallet.set-wallet-password.error'))
+			} finally {
+				this.newPassword = this.confirmPassword = ''
 			}
 		}
 	}

@@ -104,8 +104,8 @@ export class ImportWalletComponent implements OnInit {
 			this.notifications.sendInfo(`Loading all accounts for the wallet...`)
 			const isImported = await this.walletService.loadImportedWallet(
 				type,
-				decryptedSecret,
 				this.walletPassword,
+				decryptedSecret,
 				this.importData.accountsIndex || 0,
 				this.importData.indexes || null,
 				walletType
