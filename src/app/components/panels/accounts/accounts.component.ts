@@ -83,7 +83,7 @@ export class AccountsComponent implements OnInit {
 			)
 		}
 		// Advanced view, manual account index?
-		let accountIndex = null
+		let accountIndex: number = 0
 		if (this.viewAdvanced && this.newAccountIndex != null) {
 			const index = parseInt(this.newAccountIndex, 10)
 			if (index < 0) {

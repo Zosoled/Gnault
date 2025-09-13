@@ -111,31 +111,15 @@
 	padding-top: 20px;
 }
 
-.account-item-apply-colors() {
+.wallet-item-apply-colors() {
 	>.name-column {
 		>.name {
-			color: @account-text-color-primary;
-		}
-
-		>.address {
-			color: @account-text-color-secondary;
-		}
-	}
-
-	>.balance-column {
-		>.balance {
-			&.primary {
-				color: @account-text-color-primary;
-			}
-
-			&.converted {
-				color: @account-text-color-secondary;
-			}
+			color: @wallet-text-color-primary;
 		}
 	}
 }
 
-.accounts-dropdown {
+.wallets-dropdown {
 	position: absolute;
 	width: 30%;
 	min-width: 300px;
@@ -177,7 +161,7 @@
 		padding: 8px;
 	}
 
-	>.account {
+	>.wallet {
 		display: flex;
 		justify-content: space-between;
 		background: @nav-tooltip-color-background;
@@ -190,22 +174,23 @@
 		&.active {
 			border-bottom-width: 4px;
 			cursor: default;
+			font-weight: bold;
 		}
 
 		&:last-child {
 			border-bottom: none;
 		}
 
-		@account-text-color-primary: #E1E6F7;
-		@account-text-color-secondary: #A3B0D6;
-		.account-item-apply-colors();
+		@wallet-text-color-primary: #E1E6F7;
+		@wallet-text-color-secondary: #A3B0D6;
+		.wallet-item-apply-colors();
 
 		&:not(.active):hover {
 			background: #D0D9F5;
 
-			@account-text-color-primary: @nav-tooltip-color-background;
-			@account-text-color-secondary: #535869;
-			.account-item-apply-colors();
+			@wallet-text-color-primary: @nav-tooltip-color-background;
+			@wallet-text-color-secondary: #535869;
+			.wallet-item-apply-colors();
 		}
 
 		>.name-column {
@@ -217,67 +202,6 @@
 				padding-bottom: 4px;
 				transition: color 100ms ease-in-out;
 				.truncated-text();
-			}
-
-			>.address {
-				font-size: 12px;
-				padding-bottom: 2px;
-				transition: color 100ms ease-in-out;
-				.truncated-text();
-			}
-		}
-
-		>.balance-column {
-			display: flex;
-			flex-direction: column;
-			align-items: flex-end;
-			justify-content: center;
-			margin-left: 20px;
-
-			>.balance {
-				&.primary {
-					font-size: 14px;
-					font-weight: 500;
-					padding-bottom: 4px;
-					white-space: nowrap;
-					transition: color 100ms ease-in-out;
-
-					>.incoming-label {
-						background: @global-primary-background;
-						border-radius: 10px;
-						font-size: 10px;
-						padding: 2px 8px;
-						margin-right: 3px;
-						vertical-align: 1px;
-						text-transform: uppercase;
-						color: #FFF;
-
-						>.text-full {
-							display: none;
-						}
-
-						>.text-snippet {
-							display: inline-block;
-						}
-
-						@media (min-width: 1500px) {
-							>.text-full {
-								display: inline-block;
-							}
-
-							>.text-snippet {
-								display: none;
-							}
-						}
-					}
-				}
-
-				&.converted {
-					font-size: 12px;
-					white-space: nowrap;
-					padding-bottom: 2px;
-					transition: color 100ms ease-in-out;
-				}
 			}
 		}
 	}

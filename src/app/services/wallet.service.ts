@@ -80,7 +80,10 @@ export class WalletService {
 	private svcWorkPool = inject(WorkPoolService)
 
 	selectedWallet?: Wallet
+	selectedWallet$: BehaviorSubject<Wallet> = new BehaviorSubject(null)
 	wallets: Wallet[] = []
+	wallets$: BehaviorSubject<Wallet[]> = new BehaviorSubject([])
+	walletNames: Map<string, string> = new Map()
 	balance = 0n
 	receivable = 0n
 	hasReceivable = false
@@ -307,30 +310,31 @@ export class WalletService {
 	 *
 	 * @returns
 	 */
-	async loadWallet() {
+	async loadWallet(): Promise<void> {
 		this.resetWallet()
 
-		const walletData = localStorage.getItem(storeKey)
-		if (!walletData) {
-			const wallets = await Wallet.restore()
-			this.selectedWallet = wallets[0]
-			return this.selectedWallet
+		this.wallets = await Wallet.restore()
+		debugger
+		this.wallets$.next(this.wallets)
+
+		const { walletStorage } = this.svcAppSettings.settings
+		const storage = globalThis[walletStorage]
+		const walletData = storage.getItem(storeKey)
+
+		if (walletData) {
+			const walletJson = JSON.parse(walletData)
+			this.selectedWallet = await Wallet.restore(walletJson.selectedWalletId)
+
+			if (this.selectedWallet.type === 'Ledger') {
+				this.selectedWallet.unlock()
+			}
+
+			if (walletJson.accounts?.length > 0) {
+				walletJson.accounts.forEach((account) => this.loadWalletAccount(account.index, account.id))
+			}
+
+			this.selectedAccountAddress = walletJson.selectedAccountAddress
 		}
-
-		const walletJson = JSON.parse(walletData)
-		this.selectedWallet = await Wallet.restore(walletJson.selectedWalletId)
-
-		if (this.selectedWallet.type === 'Ledger') {
-			this.selectedWallet.unlock()
-		}
-
-		if (walletJson.accounts?.length > 0) {
-			walletJson.accounts.forEach((account) => this.loadWalletAccount(account.index, account.id))
-		}
-
-		this.selectedAccountAddress = walletJson.selectedAccountAddress
-
-		return this.selectedWallet
 	}
 
 	// Using full list of indexes is the latest standard with back compatability with accountsIndex
@@ -351,6 +355,7 @@ export class WalletService {
 		password = ''
 		this.selectedWallet = wallet
 		this.wallets.push(wallet)
+		this.wallets$.next(this.wallets)
 
 		if (walletType === 'seed') {
 			// Old method

@@ -1,3 +1,4 @@
+import { AsyncPipe } from '@angular/common'
 import { AfterViewInit, Component, ElementRef, HostListener, Renderer2, ViewChild, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink, RouterOutlet } from '@angular/router'
@@ -28,6 +29,7 @@ import {
 	WorkPoolService,
 } from 'app/services'
 import { environment } from 'environments/environment'
+import { Wallet } from 'libnemo'
 
 @Component({
 	selector: 'app',
@@ -35,6 +37,7 @@ import { environment } from 'environments/environment'
 	styleUrls: ['./app.component.less'],
 	imports: [
 		AmountSplitPipe,
+		AsyncPipe,
 		ChangeRepWidgetComponent,
 		FiatPipe,
 		InstallWidgetComponent,
@@ -54,13 +57,13 @@ export class AppComponent implements AfterViewInit {
 	@HostListener('document:mousedown', ['$event']) onGlobalClick(event): void {
 		if (
 			this.selectButton.nativeElement.contains(event.target) === false &&
-			this.accountsDropdown.nativeElement.contains(event.target) === false
+			this.walletsDropdown.nativeElement.contains(event.target) === false
 		) {
-			this.showAccountsDropdown = false
+			this.isWalletsDropdownVisible = false
 		}
 	}
 	@ViewChild('selectButton') selectButton: ElementRef
-	@ViewChild('accountsDropdown') accountsDropdown: ElementRef
+	@ViewChild('walletsDropdown') walletsDropdown: ElementRef
 
 	private renderer = inject(Renderer2)
 	private router = inject(Router)
@@ -90,7 +93,7 @@ export class AppComponent implements AfterViewInit {
 	isWalletRefreshed = false
 	navExpanded = false
 	navAnimating = false
-	showAccountsDropdown = false
+	isWalletsDropdownVisible = false
 	canToggleLightMode = true
 	searchData = ''
 	donationAccount = environment.donationAddress
@@ -320,22 +323,20 @@ export class AppComponent implements AfterViewInit {
 		}
 	}
 
-	toggleAccountsDropdown() {
-		if (this.showAccountsDropdown === true) {
-			this.showAccountsDropdown = false
-			return
+	toggleWalletsDropdown() {
+		if (this.isWalletsDropdownVisible) {
+			this.isWalletsDropdownVisible = false
+		} else {
+			this.isWalletsDropdownVisible = true
+			this.walletsDropdown.nativeElement.scrollTop = 0
 		}
-
-		this.showAccountsDropdown = true
-		this.accountsDropdown.nativeElement.scrollTop = 0
 	}
 
-	selectAccount(account) {
-		// note: account is null when user is switching to 'Total Balance'
-		this.svcWallet.selectedAccountAddress = account?.id ?? null
-		this.svcWallet.selectedAccount = account
-		this.svcWallet.selectedAccount$.next(account)
-		this.toggleAccountsDropdown()
+	selectWallet(wallet: Wallet | null) {
+		// note: wallet is null when user is switching to 'Total Balance'
+		this.svcWallet.selectedWallet = wallet
+		this.svcWallet.selectedWallet$.next(wallet)
+		this.toggleWalletsDropdown()
 		this.svcWallet.saveWalletExport()
 	}
 

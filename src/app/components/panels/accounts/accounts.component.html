@@ -144,7 +144,7 @@
 								<div uk-grid>
 									<a
 										(click)="navigateToAccount(account); $event.stopPropagation()"
-										[routerLink]="'/account/' + account.id"
+										[routerLink]="`/accounts/${account.address}`"
 										[queryParams]="{ compact: '1' }"
 										[class]="[
 											'uk-width-auto',
@@ -157,7 +157,7 @@
 											@if (settings.settings.identiconsStyle !== 'none') {
 												<app-nano-identicon
 													scale="12"
-													[accountID]="account.id"
+													[address]="account.address"
 													[settingIdenticonsStyle]="settings.settings.identiconsStyle"
 													class="nano-identicon"
 												></app-nano-identicon>

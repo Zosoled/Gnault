@@ -8,7 +8,7 @@ import { createIcon } from 'assets/nanoidenticons.min.cjs'
 	imports: [],
 })
 export class NanoIdenticonComponent implements OnChanges, AfterViewInit {
-	@Input() accountID: string
+	@Input() address: string
 	@Input() scale: string
 	@Input() settingIdenticonsStyle: string
 	@ViewChild('canvasContainer') canvasContainer: ElementRef
@@ -28,14 +28,14 @@ export class NanoIdenticonComponent implements OnChanges, AfterViewInit {
 		if (
 			this.canvasContainer == null ||
 			this.settingIdenticonsStyle !== 'nanoidenticons' ||
-			this.renderedIdenticon === this.accountID
+			this.renderedIdenticon === this.address
 		) {
 			return
 		}
-		this.renderedIdenticon = this.accountID
+		this.renderedIdenticon = this.address
 		const scale = parseInt(this.scale) * Math.max(1, window.devicePixelRatio)
 		const canvas = createIcon({
-			seed: this.accountID,
+			seed: this.address,
 			scale,
 		})
 		const canvasContainerNative = this.canvasContainer.nativeElement

@@ -8,7 +8,7 @@
 	@if (!imageLoadErrorOccurred) {
 		<img
 			class="natricon"
-			[src]="'https://natricon.com/api/v1/nano?address=' + accountID"
+			[src]="`https://natricon.com/api/v1/nano?address=${address}`"
 			(error)="imageLoadErrorOccurred = true"
 		/>
 	}

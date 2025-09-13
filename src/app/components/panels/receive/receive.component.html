@@ -351,7 +351,7 @@
 													@if (svcAppSettings.settings.identiconsStyle !== 'none') {
 														<app-nano-identicon
 															scale="6"
-															[accountID]="receivable.account"
+															[address]="receivable.account"
 															[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 															class="nano-identicon"
 														></app-nano-identicon>
@@ -415,7 +415,7 @@
 														@if (svcAppSettings.settings.identiconsStyle !== 'none') {
 															<app-nano-identicon
 																scale="6"
-																[accountID]="receivable.destination"
+																[address]="receivable.destination"
 																[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 																class="nano-identicon"
 															></app-nano-identicon>
@@ -691,7 +691,7 @@
 					@if (svcAppSettings.settings.identiconsStyle !== 'none') {
 						<app-nano-identicon
 							scale="6"
-							[accountID]="receivableAccountModel"
+							[address]="receivableAccountModel"
 							[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 							class="nano-identicon"
 						></app-nano-identicon>

@@ -369,7 +369,7 @@
 													@if (svcAppSettings.settings.identiconsStyle !== 'none') {
 														<app-nano-identicon
 															scale="12"
-															[accountID]="fromAccountID"
+															[address]="fromAccountID"
 															[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 															class="nano-identicon"
 														></app-nano-identicon>
@@ -458,7 +458,7 @@
 													@if (svcAppSettings.settings.identiconsStyle !== 'none') {
 														<app-nano-identicon
 															scale="12"
-															[accountID]="getDestinationID()"
+															[address]="getDestinationID()"
 															[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 															class="nano-identicon"
 														></app-nano-identicon>
