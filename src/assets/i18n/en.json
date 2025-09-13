@@ -28,7 +28,6 @@
 		"account-address-confirmed-on-ledger": "Account address confirmed on Ledger",
 		"account-address-denied-if-it-is-wrong-do-not-use-the-wallet": "Account address denied - if it is wrong do not use the wallet!",
 		"add-new-account": "Add New Account",
-		"advanced-mode": "Advanced Mode",
 		"confirm-address-on-ledger": "Confirm Address On Ledger",
 		"confirming-account-address-on-ledger-device": "Confirming account address on Ledger device...",
 		"hide-account": "Hide Account",
@@ -39,7 +38,6 @@
 			"2-link": "Add new account",
 			"3": "to import a previously used address."
 		},
-		"simple-mode": "Simple Mode",
 		"successfully-created-new-account": "Successfully created new account {{ account }}",
 		"successfully-removed-account": "Successfully removed account {{ account }}",
 		"the-account-at-this-index-is-already-loaded": "The account at this index is already loaded",
@@ -296,6 +294,7 @@
 		"actions": "Actions",
 		"address": "Address",
 		"address-book": "Address Book",
+		"advanced-mode": "Advanced Mode",
 		"advanced-tools": "Advanced Tools",
 		"amount": "Amount",
 		"app-settings": "App Settings",
@@ -335,6 +334,7 @@
 		"settings": "Settings",
 		"show-more": "Show More",
 		"show-qr-code": "Show QR Code",
+		"simple-mode": "Simple Mode",
 		"successfully-copied-to-clipboard": "Successfully copied to clipboard!",
 		"uncemented-blocks": "Uncemented Blocks",
 		"unknown": "Unknown",
@@ -342,6 +342,7 @@
 		"update": "Update",
 		"view-details": "View Details",
 		"view-on-network-explorer": "View on Network Explorer",
+		"wallet": "Wallet",
 		"wallet-must-be-unlocked": "Wallet must be unlocked",
 		"yes": "Yes"
 	},
@@ -377,6 +378,15 @@
 	"reset-wallet": {
 		"before-continuing-make-sure-you-have-saved-the-nano-seed": "Before continuing, make sure you have saved the secret recovery seed and/or mnemonic of your current wallet.",
 		"you-will-not-be-able-to-recover-the-funds-without-a-backup": "YOU WILL NOT BE ABLE TO RECOVER THE FUNDS without a backup of your currently configured wallet."
+	},
+	"wallets": {
+		"add-new-wallet": "Add New Wallet",
+		"hide-wallet": "Hide Wallet",
+		"you-dont-have-any-wallets-yet": {
+			"1": "You don't have any wallets yet.",
+			"2-link": "Click here to create one",
+			"3": "."
+		}
 	},
 	"welcome": {
 		"a-secure-open-source-wallet-for-nano": "A secure open source wallet for nano",
