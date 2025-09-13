@@ -62,20 +62,15 @@ export class AccountsComponent implements OnInit {
 
 	async createAccount() {
 		if (this.walletService.isLocked) {
-			const wasUnlocked = await this.walletService.requestUnlock()
-
-			if (wasUnlocked === false) {
+			await this.walletService.requestUnlock()
+			if (this.walletService.isLocked) {
 				return
 			}
 		}
-
 		if (this.isLedgerWallet && this.ledger.ledger.status !== LedgerStatus.READY) {
 			return this.notificationService.sendWarning(
 				this.translocoService.translate('accounts.ledger-device-must-be-ready')
 			)
-		}
-		if (!this.walletService.isConfigured) {
-			return this.notificationService.sendError(this.translocoService.translate('accounts.wallet-is-not-configured'))
 		}
 		if (this.walletService.accounts.length >= 20) {
 			return this.notificationService.sendWarning(

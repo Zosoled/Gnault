@@ -97,7 +97,7 @@ export class WalletService {
 	get isLocked(): boolean {
 		return this.selectedWallet?.isLocked
 	}
-	isLocked$ = new BehaviorSubject(false)
+	isLocked$ = new BehaviorSubject(true)
 	passwordUpdated$ = new BehaviorSubject(false)
 	isUnlockRequested$ = new BehaviorSubject(false)
 	isChangePasswordRequested$ = new BehaviorSubject(false)
@@ -314,7 +314,6 @@ export class WalletService {
 		this.resetWallet()
 
 		this.wallets = await Wallet.restore()
-		debugger
 		this.wallets$.next(this.wallets)
 
 		const { walletStorage } = this.svcAppSettings.settings
@@ -433,7 +432,7 @@ export class WalletService {
 		}
 	}
 
-	async unlockWallet(password: string) {
+	async unlockWallet(password: string): Promise<boolean> {
 		try {
 			await this.selectedWallet.unlock(password)
 			this.accounts.forEach(async (a) => {
@@ -579,7 +578,7 @@ export class WalletService {
 			// Unsubscribe from old accounts
 			this.svcWebsocket.unsubscribeAccounts(this.accounts.map((a) => a.id))
 		}
-		this.isLocked$.next(false)
+		this.isLocked$.next(true)
 		this.accounts = []
 		this.balance = 0n
 		this.receivable = 0n
@@ -993,9 +992,9 @@ export class WalletService {
 		this.refresh$.next(false)
 	}
 
-	requestUnlock() {
+	requestUnlock(): Promise<boolean> {
 		this.isUnlockRequested$.next(true)
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve): void => {
 			let subscriptionForUnlock
 			let subscriptionForCancel
 			const removeSubscriptions = () => {
@@ -1006,13 +1005,13 @@ export class WalletService {
 					subscriptionForCancel.unsubscribe()
 				}
 			}
-			subscriptionForUnlock = this.isLocked$.subscribe(async (isLocked) => {
+			subscriptionForUnlock = this.isLocked$.subscribe((isLocked) => {
 				if (isLocked === false) {
 					removeSubscriptions()
-					resolve(true)
+					resolve(false)
 				}
 			})
-			subscriptionForCancel = this.isUnlockRequested$.subscribe(async (wasRequested) => {
+			subscriptionForCancel = this.isUnlockRequested$.subscribe((wasRequested) => {
 				if (wasRequested === false) {
 					removeSubscriptions()
 					resolve(false)
