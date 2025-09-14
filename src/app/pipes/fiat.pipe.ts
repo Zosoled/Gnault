@@ -17,6 +17,9 @@ export class FiatPipe extends CurrencyPipe implements PipeTransform {
 		if (currencyCode === '') {
 			return ''
 		}
+		if (typeof value === 'string') {
+			value = value.replace(/0+(.)/, '$1')
+		}
 		value = Tools.convert(value, 'raw', 'nano', 'number') * this.svcPrice.lastPrice
 		if (currencyCode === 'BTC') {
 			return `BTC ${Number(value || 0).toFixed(6)}`
