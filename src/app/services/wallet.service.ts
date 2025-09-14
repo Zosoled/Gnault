@@ -329,7 +329,7 @@ export class WalletService {
 			}
 
 			if (walletJson.accounts?.length > 0) {
-				walletJson.accounts.forEach((account) => this.loadWalletAccount(account.index, account.id))
+				walletJson.accounts.forEach((a) => this.loadWalletAccount(a))
 			}
 
 			this.selectedAccountAddress = walletJson.selectedAccountAddress
@@ -608,7 +608,6 @@ export class WalletService {
 
 	reloadFiatBalances() {
 		const fiatPrice = this.svcPrice.lastPrice
-
 		this.accounts.forEach((account) => {
 			account.balanceFiat = parseFloat(Tools.convert(account.balance, 'raw', 'nano')) * fiatPrice
 			account.receivableFiat = parseFloat(Tools.convert(account.receivable, 'raw', 'nano')) * fiatPrice
@@ -628,9 +627,12 @@ export class WalletService {
 		this.isBalanceUpdating = true
 		const fiatPrice = this.svcPrice.lastPrice
 
-		const accountIDs = this.accounts.map((a) => a.id)
-		const accounts = await this.svcApi.accountsBalances(accountIDs)
-		const frontiers = await this.svcApi.accountsFrontiers(accountIDs)
+		await this.accounts.map(async (a) => {
+			await this.selectedWallet.refresh(this.svcAppSettings.settings.serverAPI, a.index)
+		})
+		const addresses = await this.accounts.map((a) => a.address)
+		const accounts = await this.svcApi.accountsBalances(addresses)
+		const frontiers = await this.svcApi.accountsFrontiers(addresses)
 		// const allFrontiers = []
 		// for (const account in frontiers.frontiers) {
 		//   allFrontiers.push({ account, frontier: frontiers.frontiers[account] })
@@ -772,13 +774,10 @@ export class WalletService {
 		this.publishBalanceRefresh()
 	}
 
-	async loadWalletAccount(accountIndex, accountID) {
-		const account = await this.selectedWallet?.account(accountIndex)
-		const addressBookName = this.svcAddressBook.getAccountName(accountID)
-
+	async loadWalletAccount(account: Account): Promise<Account> {
+		const addressBookName = this.svcAddressBook.getAccountName(account.address)
 		this.accounts.push(account)
-		this.svcWebsocket.subscribeAccounts([accountID])
-
+		this.svcWebsocket.subscribeAccounts([account.address])
 		return account
 	}
 
@@ -953,7 +952,7 @@ export class WalletService {
 		const data: any = {
 			...walletData,
 			selectedWalletId: this.selectedWallet.id,
-			accounts: this.accounts.map((a) => ({ id: a.id, index: a.index })),
+			accounts: this.accounts.map((a) => a.toJSON()),
 			selectedAccountAddress: this.selectedAccount?.address,
 			locked: true,
 		}
