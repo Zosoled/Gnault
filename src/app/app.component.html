@@ -153,14 +153,14 @@
 														<div class="amount-container">
 															<div class="amount-integer">
 																{{
-																	svcWallet.selectedAccount?.balanceFiat ?? svcWallet.balance ?? 0
+																	svcWallet.selectedAccount?.balance ?? svcWallet.balance ?? 0
 																		| fiat: svcAppSettings.settings.displayCurrency
 																		| amountsplit: 0
 																}}
 															</div>
 															<div class="amount-fractional">
 																{{
-																	svcWallet.selectedAccount?.balanceFiat ?? svcWallet.balance ?? 0
+																	svcWallet.selectedAccount?.balance ?? svcWallet.balance ?? 0
 																		| fiat: svcAppSettings.settings.displayCurrency
 																		| amountsplit: 1
 																}}
