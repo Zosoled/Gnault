@@ -770,8 +770,11 @@ export class WalletService {
 		this.publishBalanceRefresh()
 	}
 
-	async loadWalletAccount(account: Account): Promise<Account> {
-		const addressBookName = this.svcAddressBook.getAccountName(account.address)
+	async loadWalletAccount(a: any): Promise<Account> {
+		const addressBookName = this.svcAddressBook.getAccountName(a.address)
+		const account = Account.load({ index: a.index, publicKey: a.publicKey })
+		delete a.address
+		Object.assign(a, account)
 		this.accounts.push(account)
 		this.svcWebsocket.subscribeAccounts([account.address])
 		return account
