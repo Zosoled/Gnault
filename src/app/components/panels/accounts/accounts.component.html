@@ -91,22 +91,26 @@
 													{{ 'general.new' | transloco }}
 												</div>
 												<div class="text-full">
-													+{{ account.receivable | rai: 'mnano,true' | amountsplit: 0
-													}}{{ account.receivable | rai: 'mnano,true' | amountsplit: 1 }} XNO
+													+{{ account?.receivable ?? 0 | rai: 'nano,true' | amountsplit: 0
+													}}{{ account?.receivable ?? 0 | rai: 'nano,true' | amountsplit: 1 }} XNO
 												</div>
 											</div>
 										}
 										<span
 											class="amounts"
-											[title]="account.balance > 0 ? '+' + account.balance.toString() + ' raw' : ''"
+											[title]="account?.balance > 0 ? `+${account.balance.toString()} raw` : ''"
 										>
-											<span class="amount-integer">{{ account.balance | rai: 'nano,true' | amountsplit: 0 }}</span>
-											<span class="amount-fractional">{{ account.balance | rai: 'nano,true' | amountsplit: 1 }}</span>
+											<span class="amount-integer">{{
+												account?.balance ?? 0 | rai: 'nano,true' | amountsplit: 0
+											}}</span>
+											<span class="amount-fractional">{{
+												account?.balance ?? 0 | rai: 'nano,true' | amountsplit: 1
+											}}</span>
 											<span class="currency-name">XNO</span>
 										</span>
 									</div>
 									<div class="account-amounts-converted uk-width-1-1 text-half-muted">
-										{{ account.balanceFiat | fiat: settings.settings.displayCurrency }}
+										{{ account?.balance ?? 0 | fiat: settings.settings.displayCurrency }}
 									</div>
 								} @else {
 									<div class="account-amounts-primary uk-width-1-1">
