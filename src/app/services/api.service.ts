@@ -11,9 +11,7 @@ export class ApiService {
 	storeKey: 'Gnault-ActiveDifficulty' = 'Gnault-ActiveDifficulty'
 	private async request(action, data, skipError, url = '', validateResponse?, attempts = 0): Promise<any> {
 		if (attempts > 9) {
-			const msg = 'No response from repeated requests to server'
-			console.error(msg)
-			throw new Error(msg)
+			throw new Error('No response from repeated requests to server')
 		}
 		data.action = action
 		const apiUrl = url || this.appSettings.settings.serverAPI
