@@ -1,8 +1,9 @@
 import * as angularPlugin from '@angular-eslint/eslint-plugin'
 import * as angularTemplateParser from '@angular-eslint/template-parser'
-import * as prettierPlugin from 'eslint-plugin-prettier'
 import * as tsPlugin from '@typescript-eslint/eslint-plugin'
 import * as typescriptParser from '@typescript-eslint/parser'
+import * as eslintConfigPrettier from 'eslint-config-prettier'
+import * as prettierPlugin from 'eslint-plugin-prettier'
 import * as eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 
 export default [
@@ -67,4 +68,5 @@ export default [
 		},
 	},
 	eslintPluginPrettierRecommended,
+	eslintConfigPrettier,
 ]
