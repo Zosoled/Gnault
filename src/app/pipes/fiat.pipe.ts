@@ -21,6 +21,6 @@ export class FiatPipe extends CurrencyPipe implements PipeTransform {
 		if (currencyCode === 'BTC') {
 			return `BTC ${Number(value || 0).toFixed(6)}`
 		}
-		return super.transform(value, currencyCode, 'symbol-narrow', digits, locale)
+		return super.transform(value, currencyCode.toUpperCase(), 'symbol-narrow', digits, locale)
 	}
 }
