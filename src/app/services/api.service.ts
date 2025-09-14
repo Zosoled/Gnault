@@ -88,36 +88,46 @@ export class ApiService {
 		return await this.request('accounts_frontiers', { accounts }, false)
 	}
 	async accountsReceivable(accounts: string[], count: number = 50): Promise<{ blocks: any }> {
-		return await this.request(
-			'accounts_receivable',
-			{ accounts, count, source: true, include_only_confirmed: true },
-			false
-		)
+		const data = { accounts, count, source: true, include_only_confirmed: true }
+		let response
+		try {
+			response = await this.request('accounts_receivable', data, false)
+		} catch {
+			response = await this.request('accounts_pending', data, false)
+		}
+		return response
 	}
 	async accountsReceivableLimit(accounts: string[], threshold: string, count: number = 50): Promise<{ blocks: any }> {
-		return await this.request(
-			'accounts_receivable',
-			{ accounts, count, threshold, source: true, include_only_confirmed: true },
-			false
-		)
+		const data = { accounts, count, threshold, source: true, include_only_confirmed: true }
+		try {
+			return await this.request('accounts_receivable', data, false)
+		} catch {
+			return await this.request('accounts_pending', data, false)
+		}
 	}
 	async accountsReceivableSorted(accounts: string[], count: number = 50): Promise<{ blocks: any }> {
-		return await this.request(
-			'accounts_receivable',
-			{ accounts, count, source: true, include_only_confirmed: true, sorting: true },
-			false
-		)
+		const data = { accounts, count, source: true, include_only_confirmed: true, sorting: true }
+		let response
+		try {
+			response = await this.request('accounts_receivable', data, false)
+		} catch {
+			response = await this.request('accounts_pending', data, false)
+		}
+		return response
 	}
 	async accountsReceivableLimitSorted(
 		accounts: string[],
 		threshold: string,
 		count: number = 50
 	): Promise<{ blocks: any }> {
-		return await this.request(
-			'accounts_receivable',
-			{ accounts, count, threshold, source: true, include_only_confirmed: true, sorting: true },
-			false
-		)
+		const data = { accounts, count, threshold, source: true, include_only_confirmed: true, sorting: true }
+		let response
+		try {
+			response = await this.request('accounts_receivable', data, false)
+		} catch {
+			response = await this.request('accounts_pending', data, false)
+		}
+		return response
 	}
 	async delegatorsCount(account: string): Promise<{ count: string }> {
 		return await this.request('delegators_count', { account }, false)
