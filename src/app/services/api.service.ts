@@ -89,27 +89,27 @@ export class ApiService {
 		const data = { accounts, count, source: true, include_only_confirmed: true }
 		let response
 		try {
-			response = await this.request('accounts_receivable', data, false)
-		} catch {
 			response = await this.request('accounts_pending', data, false)
+		} catch {
+			response = await this.request('accounts_receivable', data, false)
 		}
 		return response
 	}
 	async accountsReceivableLimit(accounts: string[], threshold: string, count: number = 50): Promise<{ blocks: any }> {
 		const data = { accounts, count, threshold, source: true, include_only_confirmed: true }
 		try {
-			return await this.request('accounts_receivable', data, false)
-		} catch {
 			return await this.request('accounts_pending', data, false)
+		} catch {
+			return await this.request('accounts_receivable', data, false)
 		}
 	}
 	async accountsReceivableSorted(accounts: string[], count: number = 50): Promise<{ blocks: any }> {
 		const data = { accounts, count, source: true, include_only_confirmed: true, sorting: true }
 		let response
 		try {
-			response = await this.request('accounts_receivable', data, false)
-		} catch {
 			response = await this.request('accounts_pending', data, false)
+		} catch {
+			response = await this.request('accounts_receivable', data, false)
 		}
 		return response
 	}
@@ -121,9 +121,9 @@ export class ApiService {
 		const data = { accounts, count, threshold, source: true, include_only_confirmed: true, sorting: true }
 		let response
 		try {
-			response = await this.request('accounts_receivable', data, false)
-		} catch {
 			response = await this.request('accounts_pending', data, false)
+		} catch {
+			response = await this.request('accounts_receivable', data, false)
 		}
 		return response
 	}
