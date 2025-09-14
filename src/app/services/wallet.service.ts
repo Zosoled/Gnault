@@ -673,7 +673,7 @@ export class WalletService {
 			let receivable
 
 			if (this.svcAppSettings.settings.minimumReceive) {
-				const minAmount = this.svcUtil.nano.mnanoToRaw(this.svcAppSettings.settings.minimumReceive)
+				const minAmount = this.svcUtil.nano.nanoToRaw(this.svcAppSettings.settings.minimumReceive)
 				receivable = await this.svcApi.accountsReceivableLimitSorted(
 					this.accounts.map((a) => a.address),
 					minAmount
@@ -742,7 +742,6 @@ export class WalletService {
 				const walletAccount = this.accounts.find((a) => a.address === address)
 				if (!walletAccount) continue
 				walletAccount.receivable = 0n
-				walletAccount.receivableFiat = 0
 				walletAccount.receivePow = false
 			}
 		}
