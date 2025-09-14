@@ -41,17 +41,17 @@ export class LedgerService {
 		nano: null,
 		transport: null,
 	}
-	constructor() {}
+	constructor () { }
 
 	// Reset connection to the ledger device, update the status
-	resetLedger(errorMessage = '') {
+	resetLedger (errorMessage = '') {
 		this.ledger.transport = null
 		this.ledger.nano = null
 		this.setLedgerStatus(LedgerStatus.NOT_CONNECTED, errorMessage)
 	}
 
 	// Open a connection to the usb device and initialize up the Nano Ledger library
-	async loadTransport(bluetooth: boolean) {
+	async loadTransport (bluetooth: boolean) {
 		return new Promise((resolve, reject) => {
 			const transport = bluetooth ? TransportNodeBle : TransportNodeHid
 			let found = false
@@ -83,14 +83,14 @@ export class LedgerService {
 		})
 	}
 
-	async loadAppConfig(): Promise<any> {
+	async loadAppConfig (): Promise<any> {
 		return new Promise((resolve, reject) => {
 			this.ledger.nano.getAppConfiguration().then(resolve).catch(reject)
 		})
 	}
 
 	// Try connecting to the ledger device and sending a command to it
-	async loadLedger(bluetooth = false) {
+	async loadLedger (bluetooth = false) {
 		if (!this.ledger.transport) {
 			try {
 				await this.loadTransport(bluetooth)
@@ -134,7 +134,7 @@ export class LedgerService {
 		return false
 	}
 
-	async getLedgerAccount(accountIndex, showOnScreen = false) {
+	async getLedgerAccount (accountIndex, showOnScreen = false) {
 		try {
 			this.queryingLedger = true
 			const account = await this.ledger.nano.getAddress(this.ledgerPath(accountIndex), showOnScreen)
@@ -161,7 +161,7 @@ export class LedgerService {
 		}
 	}
 
-	async cacheBlock(accountIndex, cacheData, signature) {
+	async cacheBlock (accountIndex, cacheData, signature) {
 		try {
 			this.queryingLedger = true
 			const cacheResponse = await this.ledger.nano.cacheBlock(this.ledgerPath(accountIndex), cacheData, signature)
@@ -181,7 +181,7 @@ export class LedgerService {
 		}
 	}
 
-	async signBlock(accountIndex, blockData) {
+	async signBlock (accountIndex, blockData) {
 		try {
 			this.queryingLedger = true
 			const signResponse = await this.ledger.nano.signBlock(this.ledgerPath(accountIndex), blockData)
@@ -201,16 +201,16 @@ export class LedgerService {
 		}
 	}
 
-	setLedgerStatus(status, statusText = '') {
+	setLedgerStatus (status, statusText = '') {
 		this.ledger.status = status
 		this.ledgerStatus$.next({ status: this.ledger.status, statusText })
 	}
 
-	ledgerPath(accountIndex) {
+	ledgerPath (accountIndex) {
 		return `${this.walletPrefix}${accountIndex}'`
 	}
 
-	pollLedgerStatus() {
+	pollLedgerStatus () {
 		if (!this.pollingLedger) return
 		setTimeout(async () => {
 			await this.checkLedgerStatus()
@@ -218,7 +218,7 @@ export class LedgerService {
 		}, this.pollInterval)
 	}
 
-	async checkLedgerStatus() {
+	async checkLedgerStatus () {
 		if (this.ledger.status !== LedgerStatus.READY) return
 		if (this.queryingLedger) return // Already querying ledger, skip this iteration
 
@@ -239,7 +239,7 @@ export class LedgerService {
 let sendingWindow = null
 
 // Create a copy of the ledger service and register listeners with the browser window
-export function initialize() {
+export function initialize () {
 	console.log('Ledger service initializing')
 	const Ledger = new LedgerService()
 

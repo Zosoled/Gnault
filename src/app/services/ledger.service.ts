@@ -3,7 +3,7 @@ import Transport from '@ledgerhq/hw-transport'
 import TransportBLE from '@ledgerhq/hw-transport-web-ble'
 import TransportHID from '@ledgerhq/hw-transport-webhid'
 import TransportUSB from '@ledgerhq/hw-transport-webusb'
-import { ApiService, AppSettingsService, DesktopService, NotificationsService } from 'app/services'
+import { ApiService, AppSettingsService, DesktopService } from 'app/services'
 import { environment } from 'environments/environment'
 import Nano from 'hw-app-nano'
 import { Wallet } from 'libnemo'
@@ -42,7 +42,6 @@ const zeroBlock = '0000000000000000000000000000000000000000000000000000000000000
 export class LedgerService {
 	private api = inject(ApiService)
 	private desktop = inject(DesktopService)
-	private notifications = inject(NotificationsService)
 	private appSettings = inject(AppSettingsService)
 
 	walletPrefix = `44'/165'/`
@@ -73,7 +72,7 @@ export class LedgerService {
 	ledgerStatus$: Subject<{ status: string; statusText: string }> = new Subject()
 	desktopMessage$ = new Subject()
 
-	constructor() {
+	constructor () {
 		const appSettings = this.appSettings
 
 		if (this.isDesktop) {
@@ -88,7 +87,7 @@ export class LedgerService {
 	}
 
 	// Scraps binding to any existing transport/nano object
-	resetLedger() {
+	resetLedger () {
 		this.ledger.transport = null
 		this.ledger.nano = null
 	}
@@ -97,7 +96,7 @@ export class LedgerService {
 	 * Prepare the main listener for events from the desktop client.
 	 * Dispatches new messages via the main Observables
 	 */
-	configureDesktop() {
+	configureDesktop () {
 		this.desktop.connect()
 		this.desktop.on('ledger', (event, message) => {
 			if (!message || !message.event) return
@@ -121,7 +120,7 @@ export class LedgerService {
 	/**
 	 * Check which transport protocols are supported by the browser
 	 */
-	async checkBrowserSupport() {
+	async checkBrowserSupport () {
 		await Promise.all([
 			TransportHID.isSupported().then((supported) => (this.supportsWebHID = supported)),
 			TransportUSB.isSupported().then((supported) => (this.supportsWebUSB = supported)),
@@ -133,7 +132,7 @@ export class LedgerService {
 	/**
 	 * Detect the optimal USB transport protocol for the current browser and OS
 	 */
-	detectUsbTransport() {
+	detectUsbTransport () {
 		if (this.supportsWebUSB) {
 			// Prefer WebUSB
 			this.transportMode = 'USB'
@@ -149,7 +148,7 @@ export class LedgerService {
 	 * Enable or disable bluetooth communication, if supported
 	 * @param enabled   The bluetooth enabled state
 	 */
-	enableBluetoothMode(enabled: boolean) {
+	enableBluetoothMode (enabled: boolean) {
 		if (this.supportsBluetooth && enabled) {
 			this.transportMode = 'Bluetooth'
 			this.DynamicTransport = TransportBLE
@@ -164,7 +163,7 @@ export class LedgerService {
 	 * @param {any} filterFn
 	 * @returns {Promise<any>}
 	 */
-	async getDesktopResponse(eventType, filterFn?) {
+	async getDesktopResponse (eventType, filterFn?) {
 		return new Promise((resolve, reject) => {
 			const sub = this.desktopMessage$.subscribe(
 				(response: any) => {
@@ -194,7 +193,7 @@ export class LedgerService {
 		})
 	}
 
-	async getLedgerAccountDesktop(accountIndex, showOnScreen) {
+	async getLedgerAccountDesktop (accountIndex, showOnScreen) {
 		if (this.queryingDesktopLedger) {
 			throw new Error(`Already querying desktop device, please wait`)
 		}
@@ -213,7 +212,7 @@ export class LedgerService {
 		}
 	}
 
-	async updateCacheDesktop(accountIndex, cacheData, signature) {
+	async updateCacheDesktop (accountIndex, cacheData, signature) {
 		if (this.queryingDesktopLedger) {
 			throw new Error(`Already querying desktop device, please wait`)
 		}
@@ -232,7 +231,7 @@ export class LedgerService {
 		}
 	}
 
-	async signBlockDesktop(accountIndex, blockData) {
+	async signBlockDesktop (accountIndex, blockData) {
 		if (this.queryingDesktopLedger) {
 			throw new Error(`Already querying desktop device, please wait`)
 		}
@@ -251,7 +250,7 @@ export class LedgerService {
 		}
 	}
 
-	async loadTransport() {
+	async loadTransport () {
 		return new Promise((resolve, reject) => {
 			this.DynamicTransport.create(3000, this.waitTimeout)
 				.then((trans) => {
@@ -270,7 +269,7 @@ export class LedgerService {
 	 * @param {boolean} hideNotifications
 	 * @returns {Promise<any>}
 	 */
-	async loadLedger(hideNotifications = false) {
+	async loadLedger (hideNotifications = false) {
 		try {
 			const wallet = await Wallet.create('Ledger')
 			const result = await wallet.unlock()
@@ -404,7 +403,7 @@ export class LedgerService {
 
 	// }
 
-	async updateCache(accountIndex, blockHash) {
+	async updateCache (accountIndex, blockHash) {
 		if (this.ledger.status !== LedgerStatus.READY) {
 			await this.loadLedger() // Make sure ledger is ready
 		}
@@ -427,7 +426,7 @@ export class LedgerService {
 		}
 	}
 
-	async updateCacheOffline(accountIndex, blockData) {
+	async updateCacheOffline (accountIndex, blockData) {
 		if (this.ledger.status !== LedgerStatus.READY) {
 			await this.loadLedger() // Make sure ledger is ready
 		}
@@ -446,7 +445,7 @@ export class LedgerService {
 		}
 	}
 
-	async signBlock(accountIndex: number, blockData: any) {
+	async signBlock (accountIndex: number, blockData: any) {
 		if (this.ledger.status !== LedgerStatus.READY) {
 			await this.loadLedger() // Make sure ledger is ready
 		}
@@ -457,11 +456,11 @@ export class LedgerService {
 		}
 	}
 
-	ledgerPath(accountIndex: number) {
+	ledgerPath (accountIndex: number) {
 		return `${this.walletPrefix}${accountIndex}'`
 	}
 
-	async getLedgerAccountWeb(accountIndex: number, showOnScreen = false) {
+	async getLedgerAccountWeb (accountIndex: number, showOnScreen = false) {
 		try {
 			return await this.ledger.nano.getAddress(this.ledgerPath(accountIndex), showOnScreen)
 		} catch (err) {
@@ -469,7 +468,7 @@ export class LedgerService {
 		}
 	}
 
-	async getLedgerAccount(accountIndex: number, showOnScreen = false) {
+	async getLedgerAccount (accountIndex: number, showOnScreen = false) {
 		if (this.isDesktop) {
 			return await this.getLedgerAccountDesktop(accountIndex, showOnScreen)
 		} else {
@@ -477,7 +476,7 @@ export class LedgerService {
 		}
 	}
 
-	pollLedgerStatus() {
+	pollLedgerStatus () {
 		if (!this.pollingLedger) return
 		setTimeout(async () => {
 			if (!this.pollingLedger) return
@@ -486,7 +485,7 @@ export class LedgerService {
 		}, this.pollInterval)
 	}
 
-	async checkLedgerStatus() {
+	async checkLedgerStatus () {
 		if (this.ledger.status !== LedgerStatus.READY) {
 			return
 		}
