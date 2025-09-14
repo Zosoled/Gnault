@@ -1,11 +1,10 @@
 import { HttpClient } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core'
-import { NotificationsService, UtilService } from 'app/services'
+import { UtilService } from 'app/services'
 
 @Injectable({ providedIn: 'root' })
 export class NinjaService {
 	private http = inject(HttpClient)
-	private notifications = inject(NotificationsService)
 	private util = inject(UtilService)
 
 	// URL to representative health check API
@@ -15,16 +14,16 @@ export class NinjaService {
 	// null - loading, false - offline, true - online
 	status = null
 
-	async recommended (): Promise<any> {
+	async recommended(): Promise<any> {
 		if (this.ninjaUrl === '') {
 			return Promise.resolve(null)
 		}
-		this.http.post(this.ninjaUrl, { action: 'representatives_online' }).subscribe(res => {
+		this.http.post(this.ninjaUrl, { action: 'representatives_online' }).subscribe((res) => {
 			return res
 		})
 	}
 
-	async recommendedRandomized (): Promise<any> {
+	async recommendedRandomized(): Promise<any> {
 		const onlineReps = await this.recommended()
 		if (onlineReps == null) {
 			return []
@@ -52,7 +51,7 @@ export class NinjaService {
 		return shuffledReps
 	}
 
-	async getSuggestedRep (): Promise<any> {
+	async getSuggestedRep(): Promise<any> {
 		const randomReps = await this.recommendedRandomized()
 		return randomReps[0]
 	}
@@ -60,7 +59,7 @@ export class NinjaService {
 	// Expected to return:
 	// false, if the representative never voted as part of nano consensus
 	// null, if the representative state is unknown (any other error)
-	async getAccount (account: string): Promise<any> {
+	async getAccount(account: string): Promise<any> {
 		if (this.ninjaUrl === '') {
 			return Promise.resolve(null)
 		}
@@ -68,30 +67,22 @@ export class NinjaService {
 		const REQUEST_TIMEOUT_MS = 10000
 
 		const options = {
-			action: "account_info",
+			action: 'account_info',
 			account: account,
 			receivable: true,
 			representative: true,
-			weight: true
+			weight: true,
 		}
-		const successPromise =
-			this.http.post(this.ninjaUrl, options).subscribe(res => {
-				return res
-			})
+		const successPromise = this.http.post(this.ninjaUrl, options).subscribe((res) => {
+			return res
+		})
 
-		const timeoutPromise =
-			new Promise(resolve => {
-				setTimeout(
-					() => {
-						resolve(null)
-					},
-					REQUEST_TIMEOUT_MS
-				)
-			})
+		const timeoutPromise = new Promise((resolve) => {
+			setTimeout(() => {
+				resolve(null)
+			}, REQUEST_TIMEOUT_MS)
+		})
 
-		return await Promise.race([
-			successPromise,
-			timeoutPromise
-		])
+		return await Promise.race([successPromise, timeoutPromise])
 	}
 }

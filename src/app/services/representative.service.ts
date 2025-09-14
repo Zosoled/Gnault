@@ -22,7 +22,7 @@ export interface RepresentativeStatus {
 }
 
 export interface RepresentativeOverview {
-	id: string
+	address: string
 	weight: bigint
 	accounts: WalletApiAccount[]
 }
@@ -35,7 +35,7 @@ export interface StoredRepresentative {
 }
 
 export interface RepresentativeApiOverview extends BaseApiAccount {
-	account: string
+	address: string
 	accounts: WalletApiAccount[]
 	delegatedWeight: bigint
 }
@@ -117,19 +117,17 @@ export class RepresentativeService {
 		const onlineReps = await this.getOnlineRepresentatives()
 		const quorum = await this.svcApi.confirmationQuorum()
 
-		this.onlineStakeTotal = quorum ? parseFloat(Tools.convert(quorum.online_stake_total, 'raw', 'mnano')) : null
+		this.onlineStakeTotal = quorum ? parseFloat(Tools.convert(quorum.online_stake_total, 'raw', 'nano')) : null
 
 		const allReps = []
 
 		// Now, loop through each representative and determine some details about it
 		for (const representative of representatives) {
-			const repOnline = onlineReps.indexOf(representative.account) !== -1
-			const knownRep = this.getRepresentative(representative.account)
-			const knownRepNinja = await this.svcNinja.getAccount(representative.account)
-			console.log('knownRepNinja: ' + Object.getOwnPropertyNames(knownRepNinja))
-			// console.log('knownRepNinja: ' + JSON.stringify(knownRepNinja, null, 4))
+			const repOnline = onlineReps.indexOf(representative.address) !== -1
+			const knownRep = this.getRepresentative(representative.address)
+			const knownRepNinja = await this.svcNinja.getAccount(representative.address)
 
-			const nanoWeight = Tools.convert(representative.weight || 0n, 'raw', 'mnano')
+			const nanoWeight = Tools.convert(representative.weight || 0n, 'raw', 'nano')
 			const percent = this.onlineStakeTotal ? (parseFloat(nanoWeight) / this.onlineStakeTotal) * 100 : 0
 
 			const repStatus: RepresentativeStatus = {
@@ -166,7 +164,7 @@ export class RepresentativeService {
 			}
 
 			// Check hardcoded NF reps (override below if trusted but leave markedAsNF intact)
-			const nf = this.nfReps.find((bad) => bad.id === representative.account)
+			const nf = this.nfReps.find((bad) => bad.address === representative.address)
 			if (nf) {
 				repStatus.markedAsNF = true
 				repStatus.changeRequired = true
@@ -210,7 +208,7 @@ export class RepresentativeService {
 					repStatus.changeRequired = true
 				}
 
-				let uptimeIntervalValue = knownRepNinja.uptime_over.week
+				// let uptimeIntervalValue = knownRepNinja.uptime_over.week
 
 				// temporary fix for knownRepNinja.uptime_over.week always returning 0
 				// uptimeIntervalValue = knownRepNinja.uptime_over.month
@@ -218,14 +216,14 @@ export class RepresentativeService {
 				// /temporary fix
 
 				// consider uptime value at least 1/<interval days> of daily uptime
-				uptimeIntervalValue = Math.max(uptimeIntervalValue, knownRepNinja.uptime_over.day / uptimeIntervalDays)
+				// uptimeIntervalValue = Math.max(uptimeIntervalValue, knownRepNinja.uptime_over.day / uptimeIntervalDays)
 
 				if (repOnline === true) {
 					// consider uptime value at least 1% if the rep is currently online
-					uptimeIntervalValue = Math.max(uptimeIntervalValue, 1)
+					// uptimeIntervalValue = Math.max(uptimeIntervalValue, 1)
 				}
 
-				repStatus.uptime = uptimeIntervalValue
+				// repStatus.uptime = uptimeIntervalValue
 				repStatus.score = knownRepNinja.score
 
 				if (repStatus.uptime && repStatus.uptime !== 'good') {
@@ -249,7 +247,7 @@ export class RepresentativeService {
 			}
 
 			const additionalData = {
-				id: representative.account,
+				address: representative.address,
 				percent: percent,
 				statusText: status,
 				label: label,
@@ -263,7 +261,6 @@ export class RepresentativeService {
 
 		this.walletReps = allReps
 		this.walletReps$.next(allReps)
-
 		return allReps
 	}
 
@@ -278,13 +275,13 @@ export class RepresentativeService {
 		for (const account of accounts) {
 			if (!account || !account.representative) continue // Account doesn't exist yet
 
-			const existingRep = representatives.find((rep) => rep.id === account.representative)
+			const existingRep = representatives.find((rep) => rep.address === account.representative)
 			if (existingRep) {
 				existingRep.weight += BigInt(account.balance)
 				existingRep.accounts.push(account)
 			} else {
 				const newRep = {
-					id: account.representative,
+					address: account.representative,
 					weight: BigInt(account.balance),
 					accounts: [account],
 				}
@@ -322,8 +319,8 @@ export class RepresentativeService {
 	async getRepresentativesDetails(representatives: RepresentativeOverview[]): Promise<RepresentativeApiOverview[]> {
 		const repInfos = await Promise.all(
 			representatives.map((rep) =>
-				this.svcApi.accountInfo(rep.id).then((res: RepresentativeApiOverview) => {
-					res.account = rep.id
+				this.svcApi.accountInfo(rep.address).then((res: RepresentativeApiOverview) => {
+					res.address = rep.address
 					res.delegatedWeight = rep.weight
 					res.accounts = rep.accounts
 					return res
@@ -437,35 +434,35 @@ export class RepresentativeService {
 	// Bad representatives hardcoded to be avoided. Not visible in the user rep list
 	nfReps = [
 		{
-			id: 'nano_3arg3asgtigae3xckabaaewkx3bzsh7nwz7jkmjos79ihyaxwphhm6qgjps4',
+			address: 'nano_3arg3asgtigae3xckabaaewkx3bzsh7nwz7jkmjos79ihyaxwphhm6qgjps4',
 			name: 'Nano Foundation #1',
 		},
 		{
-			id: 'nano_1stofnrxuz3cai7ze75o174bpm7scwj9jn3nxsn8ntzg784jf1gzn1jjdkou',
+			address: 'nano_1stofnrxuz3cai7ze75o174bpm7scwj9jn3nxsn8ntzg784jf1gzn1jjdkou',
 			name: 'Nano Foundation #2',
 		},
 		{
-			id: 'nano_1q3hqecaw15cjt7thbtxu3pbzr1eihtzzpzxguoc37bj1wc5ffoh7w74gi6p',
+			address: 'nano_1q3hqecaw15cjt7thbtxu3pbzr1eihtzzpzxguoc37bj1wc5ffoh7w74gi6p',
 			name: 'Nano Foundation #3',
 		},
 		{
-			id: 'nano_3dmtrrws3pocycmbqwawk6xs7446qxa36fcncush4s1pejk16ksbmakis78m',
+			address: 'nano_3dmtrrws3pocycmbqwawk6xs7446qxa36fcncush4s1pejk16ksbmakis78m',
 			name: 'Nano Foundation #4',
 		},
 		{
-			id: 'nano_3hd4ezdgsp15iemx7h81in7xz5tpxi43b6b41zn3qmwiuypankocw3awes5k',
+			address: 'nano_3hd4ezdgsp15iemx7h81in7xz5tpxi43b6b41zn3qmwiuypankocw3awes5k',
 			name: 'Nano Foundation #5',
 		},
 		{
-			id: 'nano_1awsn43we17c1oshdru4azeqjz9wii41dy8npubm4rg11so7dx3jtqgoeahy',
+			address: 'nano_1awsn43we17c1oshdru4azeqjz9wii41dy8npubm4rg11so7dx3jtqgoeahy',
 			name: 'Nano Foundation #6',
 		},
 		{
-			id: 'nano_1anrzcuwe64rwxzcco8dkhpyxpi8kd7zsjc1oeimpc3ppca4mrjtwnqposrs',
+			address: 'nano_1anrzcuwe64rwxzcco8dkhpyxpi8kd7zsjc1oeimpc3ppca4mrjtwnqposrs',
 			name: 'Nano Foundation #7',
 		},
 		{
-			id: 'nano_1hza3f7wiiqa7ig3jczyxj5yo86yegcmqk3criaz838j91sxcckpfhbhhra1',
+			address: 'nano_1hza3f7wiiqa7ig3jczyxj5yo86yegcmqk3criaz838j91sxcckpfhbhhra1',
 			name: 'Nano Foundation #8',
 		},
 	]

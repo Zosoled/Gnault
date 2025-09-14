@@ -11,12 +11,12 @@ import { Account } from 'libnemo'
 	imports: [TranslocoPipe],
 })
 export class ChangeRepWidgetComponent implements OnInit {
-	private walletService = inject(WalletService)
-	private blockService = inject(NanoBlockService)
-	private repService = inject(RepresentativeService)
 	private router = inject(Router)
+	private svcNanoBlock = inject(NanoBlockService)
+	private svcRepresentative = inject(RepresentativeService)
+	private svcWallet = inject(WalletService)
 
-	changeableRepresentatives = this.repService.changeableReps
+	changeableRepresentatives = this.svcRepresentative.changeableReps
 	displayedRepresentatives = []
 	representatives = []
 	showRepChangeRequired = false
@@ -26,7 +26,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 	initialLoadComplete = false
 
 	async ngOnInit() {
-		this.repService.walletReps$.subscribe(async (reps) => {
+		this.svcRepresentative.walletReps$.subscribe(async (reps) => {
 			if (reps[0] === null) {
 				// initial state from new BehaviorSubject([null])
 				return
@@ -38,26 +38,26 @@ export class ChangeRepWidgetComponent implements OnInit {
 			this.initialLoadComplete = true
 		})
 
-		this.walletService.selectedAccount$.subscribe((account: Account) => {
+		this.svcWallet.selectedAccount$.subscribe((account: Account) => {
 			this.selectedAccount = account
 			this.updateDisplayedRepresentatives()
 		})
 
 		// Detect if a wallet is reset
-		this.walletService.newWallet$.subscribe((shouldReload) => {
+		this.svcWallet.newWallet$.subscribe((shouldReload) => {
 			if (shouldReload) {
 				this.resetRepresentatives()
 			}
 		})
 
 		// Detect if a new open block is received
-		this.blockService.newOpenBlock$.subscribe(async (shouldReload) => {
+		this.svcNanoBlock.newOpenBlock$.subscribe(async (shouldReload) => {
 			if (shouldReload) {
-				await this.repService.getRepresentativesOverview() // calls walletReps$.next
+				await this.svcRepresentative.getRepresentativesOverview() // calls walletReps$.next
 			}
 		})
 
-		this.repService.changeableReps$.subscribe(async (reps) => {
+		this.svcRepresentative.changeableReps$.subscribe(async (reps) => {
 			// Includes both acceptable and bad reps
 			// When user clicks 'Rep Change Required' action, acceptable reps will also be included
 			this.changeableRepresentatives = reps
@@ -68,10 +68,10 @@ export class ChangeRepWidgetComponent implements OnInit {
 			this.updateDisplayedRepresentatives()
 		})
 
-		this.selectedAccount = this.walletService.selectedAccount
+		this.selectedAccount = this.svcWallet.selectedAccount
 		this.updateSelectedAccountHasRep()
 		// calls walletReps$.next
-		await this.repService.getRepresentativesOverview()
+		await this.svcRepresentative.getRepresentativesOverview()
 	}
 
 	async resetRepresentatives() {
@@ -83,12 +83,12 @@ export class ChangeRepWidgetComponent implements OnInit {
 		this.showRepChangeRequired = false
 		this.updateDisplayedRepresentatives()
 		// calls walletReps$.next
-		await this.repService.getRepresentativesOverview()
+		await this.svcRepresentative.getRepresentativesOverview()
 		console.log('Representatives reloaded')
 	}
 
 	async updateChangeableRepresentatives() {
-		await this.repService.detectChangeableReps(this.representatives)
+		await this.svcRepresentative.detectChangeableReps(this.representatives)
 	}
 
 	updateDisplayedRepresentatives() {
@@ -112,7 +112,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 
 	updateSelectedAccountHasRep() {
 		if (this.selectedAccount == null) {
-			const accounts = this.walletService.accounts
+			const accounts = this.svcWallet.accounts
 			this.selectedAccountHasRepresentative = accounts.some((a) => a.frontier)
 		} else {
 			this.selectedAccountHasRepresentative = this.selectedAccount.frontier != null

@@ -58,7 +58,7 @@ export interface BaseApiAccount {
 
 export interface WalletApiAccount extends BaseApiAccount {
 	addressBookName?: string | null
-	id?: string
+	address?: string
 	error?: string
 }
 
@@ -954,11 +954,11 @@ export class WalletService {
 	async getAccountsDetails(): Promise<WalletApiAccount[]> {
 		return await Promise.all(
 			this.accounts.map((account) =>
-				this.svcApi.accountInfo(account.id).then((res) => {
+				this.svcApi.accountInfo(account.address).then((res) => {
 					try {
 						const ret = {
 							...res,
-							id: account.id,
+							address: account.address,
 							addressBookName: account.addressBookName,
 						}
 						return ret
