@@ -9,7 +9,12 @@ export class ApiService {
 	private node = inject(NodeService)
 
 	storeKey: 'Gnault-ActiveDifficulty' = 'Gnault-ActiveDifficulty'
-	private async request(action, data, skipError, url = '', validateResponse?): Promise<any> {
+	private async request(action, data, skipError, url = '', validateResponse?, attempts = 0): Promise<any> {
+		if (attempts > 9) {
+			const msg = 'No response from repeated requests to server'
+			console.error(msg)
+			throw new Error(msg)
+		}
 		data.action = action
 		const apiUrl = url || this.appSettings.settings.serverAPI
 		if (!apiUrl) {
@@ -63,7 +68,7 @@ export class ApiService {
 					// choose a new backend and do the request again
 					this.appSettings.loadServerSettings()
 					await this.sleep(1000) // delay if all servers are down
-					return this.request(action, data, skipError, '', validateResponse)
+					return this.request(action, data, skipError, '', validateResponse, attempts + 1)
 				} else {
 					// hard exit
 					if (err.status === 429) {
