@@ -3,7 +3,7 @@
 		@for (rep of displayedRepresentatives; let repIdx = $index; track repIdx) {
 			<div
 				class="representative"
-				(mouseover)="showRepHelp = rep.id"
+				(mouseover)="showRepHelp = rep.address"
 				(mouseout)="showRepHelp = null"
 			>
 				<h2>
@@ -61,7 +61,7 @@
 						</div>
 					}
 				}
-				<div [class]="['representative-help-tooltip', showRepHelp == rep.id ? 'visible' : 'hidden']">
+				<div [class]="['representative-help-tooltip', showRepHelp == rep.address ? 'visible' : 'hidden']">
 					<p class="primary">
 						{{
 							'change-rep-widget.rep-represents-you'
