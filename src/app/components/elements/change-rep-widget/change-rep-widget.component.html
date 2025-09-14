@@ -165,33 +165,33 @@
 		}
 	</div>
 } @else if (!initialLoadComplete || selectedAccountHasRepresentative) {
+	<div class="nav-representative-info">
+		<div class="representative">
+			<h2>{{ 'general.representative' | transloco }}</h2>
+			<div class="representative-name-row">
+				<div class="name no-interact">{{ 'general.loading' | transloco }}</div>
+			</div>
+			<div class="representative-health-row health-unknown health-loading">
+				<div uk-spinner="ratio: 0.5;"></div>
+				<div class="label">{{ 'change-rep-widget.checking-status' | transloco }}</div>
+			</div>
+		</div>
+	</div>
+} @else {
+	<ng-template #selectedAccountHasNoRep>
 		<div class="nav-representative-info">
 			<div class="representative">
 				<h2>{{ 'general.representative' | transloco }}</h2>
 				<div class="representative-name-row">
-					<div class="name no-interact">{{ 'general.loading' | transloco }}</div>
+					<div class="name no-interact">{{ 'change-rep-widget.representative-none' | transloco }}</div>
 				</div>
-				<div class="representative-health-row health-unknown health-loading">
-					<div uk-spinner="ratio: 0.5;"></div>
-					<div class="label">{{ 'change-rep-widget.checking-status' | transloco }}</div>
+				<div class="representative-health-row health-unknown">
+					<div class="health-icon"></div>
+					<div class="label">{{ 'change-rep-widget.receive-a-transaction-to-configure' | transloco }}</div>
 				</div>
 			</div>
 		</div>
-	} @else {
-		<ng-template #selectedAccountHasNoRep>
-			<div class="nav-representative-info">
-				<div class="representative">
-					<h2>{{ 'general.representative' | transloco }}</h2>
-					<div class="representative-name-row">
-						<div class="name no-interact">{{ 'change-rep-widget.representative-none' | transloco }}</div>
-					</div>
-					<div class="representative-health-row health-unknown">
-						<div class="health-icon"></div>
-						<div class="label">{{ 'change-rep-widget.receive-a-transaction-to-configure' | transloco }}</div>
-					</div>
-				</div>
-			</div>
-		</ng-template>
+	</ng-template>
 }
 @if (showRepChangeRequired) {
 	<div
