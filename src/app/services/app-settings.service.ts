@@ -35,7 +35,7 @@ export class AppSettingsService {
 		language: null,
 		displayDenomination: 'mnano',
 		walletStorage: 'localStorage',
-		displayCurrency: 'USD',
+		displayCurrency: 'usd',
 		defaultRepresentative: null,
 		lockOnClose: 1,
 		lockInactivityMinutes: 30,
