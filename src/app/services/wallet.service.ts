@@ -606,14 +606,6 @@ export class WalletService {
 		// }
 	}
 
-	reloadFiatBalances() {
-		const fiatPrice = this.svcPrice.lastPrice
-		this.accounts.forEach((account) => {
-			account.balanceFiat = parseFloat(Tools.convert(account.balance, 'raw', 'nano')) * fiatPrice
-			account.receivableFiat = parseFloat(Tools.convert(account.receivable, 'raw', 'nano')) * fiatPrice
-		})
-	}
-
 	resetBalances() {
 		this.balance = 0n
 		this.receivable = 0n
@@ -627,9 +619,6 @@ export class WalletService {
 		this.isBalanceUpdating = true
 		const fiatPrice = this.svcPrice.lastPrice
 
-		await this.accounts.map(async (a) => {
-			await this.selectedWallet.refresh(this.svcAppSettings.settings.serverAPI, a.index)
-		})
 		const addresses = await this.accounts.map((a) => a.address)
 		const accounts = await this.svcApi.accountsBalances(addresses)
 		const frontiers = await this.svcApi.accountsFrontiers(addresses)
@@ -652,19 +641,21 @@ export class WalletService {
 
 		this.clearReceivableBlocks()
 
-		for (const accountID in accounts.balances) {
-			if (!accounts.balances.hasOwnProperty(accountID)) continue
+		for (const address in accounts.balances) {
+			if (!accounts.balances.hasOwnProperty(address)) {
+				continue
+			}
 
-			const walletAccount = this.accounts.find((a) => a.id === accountID)
+			const walletAccount = this.accounts.find((a) => a.address === address)
 
-			if (!walletAccount) continue
+			if (!walletAccount) {
+				continue
+			}
 
-			walletAccount.balanceNano = accounts.balances[accountID].balance ?? 0n
-			const accountBalanceReceivableInclUnconfirmed = accounts.balances[accountID].receivable ?? 0n
+			walletAccount.balance = accounts.balances[address].balance ?? 0n
+			const accountBalanceReceivableInclUnconfirmed = accounts.balances[address].receivable ?? 0n
 
-			walletAccount.balanceFiat = parseFloat(Tools.convert(walletAccount.balance, 'raw', 'nano')) * fiatPrice
-
-			const walletAccountFrontier = frontiers.frontiers?.[accountID]
+			const walletAccountFrontier = frontiers.frontiers?.[address]
 			const walletAccountFrontierIsValidHash = this.svcUtil.nano.isValidHash(walletAccountFrontier)
 
 			walletAccount.frontier = walletAccountFrontierIsValidHash === true ? walletAccountFrontier : null

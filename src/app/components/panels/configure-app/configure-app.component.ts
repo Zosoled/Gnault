@@ -316,17 +316,14 @@ export class ConfigureAppComponent implements OnInit {
 		this.appSettings.setAppSetting('identiconsStyle', this.selectedIdenticonOption)
 
 		const newCurrency = this.selectedCurrency
-		// const updatePrefixes = this.appSettings.settings.displayPrefix !== this.selectedPrefix
 		const reloadFiat = this.appSettings.settings.displayCurrency !== newCurrency
 		this.notifications.sendSuccess(
 			this.translocoService.translate('configure-app.app-display-settings-successfully-updated')
 		)
 
 		if (reloadFiat) {
-			// Reload prices with our currency, then call to reload fiat balances.
-			await this.svcPrice.fetchPrice(newCurrency)
 			this.appSettings.setAppSetting('displayCurrency', newCurrency)
-			this.walletService.reloadFiatBalances()
+			await this.svcPrice.fetchPrice(newCurrency)
 		}
 
 		this.appSettings.setAppSetting('language', this.selectedLanguage)
