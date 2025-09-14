@@ -1,19 +1,15 @@
-import { Injectable, inject } from '@angular/core'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
-import {
-	AppSettingsService,
-	NodeService,
-	TxType
-} from 'app/services'
+import { Injectable, inject } from '@angular/core'
+import { AppSettingsService, NodeService, TxType } from 'app/services'
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
 	private http = inject(HttpClient)
-	private node = inject(NodeService)
 	private appSettings = inject(AppSettingsService)
+	private node = inject(NodeService)
 
 	storeKey: 'Gnault-ActiveDifficulty' = 'Gnault-ActiveDifficulty'
-	private async request (action, data, skipError, url = '', validateResponse?): Promise<any> {
+	private async request(action, data, skipError, url = '', validateResponse?): Promise<any> {
 		data.action = action
 		const apiUrl = url || this.appSettings.settings.serverAPI
 		if (!apiUrl) {
@@ -29,22 +25,18 @@ export class ApiService {
 			responseType: 'json',
 		}
 		if (this.appSettings.settings.serverAuth != null && this.appSettings.settings.serverAuth !== '') {
-			options =
-				Object.assign(
-					{},
-					options,
-					{
-						headers: new HttpHeaders()
-							.set('Authorization', this.appSettings.settings.serverAuth)
-					}
-				)
+			options = Object.assign({}, options, {
+				headers: new HttpHeaders().set('Authorization', this.appSettings.settings.serverAuth),
+			})
 		}
 
-		return await this.http.post(apiUrl, data, options).toPromise()
-			.then(res => {
+		return await this.http
+			.post(apiUrl, data, options)
+			.toPromise()
+			.then((res) => {
 				if (typeof validateResponse === 'function') {
 					const { err } = validateResponse(res)
-					const isValidResponse = (err == null)
+					const isValidResponse = err == null
 
 					if (isValidResponse === false) {
 						throw {
@@ -58,15 +50,11 @@ export class ApiService {
 				this.node.setOnline()
 				return res
 			})
-			.catch(async err => {
+			.catch(async (err) => {
 				if (skipError) return
 
 				if (err.isValidationFailure === true) {
-					console.log(
-						'Node response failed validation.',
-						err.reason,
-						err.res
-					)
+					console.log('Node response failed validation.', err.reason, err.res)
 				} else {
 					console.log('Node responded with error', err.status)
 				}
@@ -88,45 +76,61 @@ export class ApiService {
 			})
 	}
 
-	async accountsBalances (accounts: string[]): Promise<{ balances: any }> {
+	async accountsBalances(accounts: string[]): Promise<{ balances: any }> {
 		return await this.request('accounts_balances', { accounts }, false)
 	}
-	async accountsFrontiers (accounts: string[]): Promise<{ frontiers: any }> {
+	async accountsFrontiers(accounts: string[]): Promise<{ frontiers: any }> {
 		return await this.request('accounts_frontiers', { accounts }, false)
 	}
-	async accountsReceivable (accounts: string[], count: number = 50): Promise<{ blocks: any }> {
-		return await this.request('accounts_receivable', { accounts, count, source: true, include_only_confirmed: true }, false)
-	}
-	async accountsReceivableLimit (accounts: string[], threshold: string, count: number = 50): Promise<{ blocks: any }> {
-		return await this.request('accounts_receivable', { accounts, count, threshold, source: true, include_only_confirmed: true }, false)
-	}
-	async accountsReceivableSorted (accounts: string[], count: number = 50): Promise<{ blocks: any }> {
-		return await this.request('accounts_receivable',
-			{ accounts, count, source: true, include_only_confirmed: true, sorting: true }, false
+	async accountsReceivable(accounts: string[], count: number = 50): Promise<{ blocks: any }> {
+		return await this.request(
+			'accounts_receivable',
+			{ accounts, count, source: true, include_only_confirmed: true },
+			false
 		)
 	}
-	async accountsReceivableLimitSorted (accounts: string[], threshold: string, count: number = 50): Promise<{ blocks: any }> {
-		return await this.request('accounts_receivable',
-			{ accounts, count, threshold, source: true, include_only_confirmed: true, sorting: true }, false
+	async accountsReceivableLimit(accounts: string[], threshold: string, count: number = 50): Promise<{ blocks: any }> {
+		return await this.request(
+			'accounts_receivable',
+			{ accounts, count, threshold, source: true, include_only_confirmed: true },
+			false
 		)
 	}
-	async delegatorsCount (account: string): Promise<{ count: string }> {
+	async accountsReceivableSorted(accounts: string[], count: number = 50): Promise<{ blocks: any }> {
+		return await this.request(
+			'accounts_receivable',
+			{ accounts, count, source: true, include_only_confirmed: true, sorting: true },
+			false
+		)
+	}
+	async accountsReceivableLimitSorted(
+		accounts: string[],
+		threshold: string,
+		count: number = 50
+	): Promise<{ blocks: any }> {
+		return await this.request(
+			'accounts_receivable',
+			{ accounts, count, threshold, source: true, include_only_confirmed: true, sorting: true },
+			false
+		)
+	}
+	async delegatorsCount(account: string): Promise<{ count: string }> {
 		return await this.request('delegators_count', { account }, false)
 	}
-	async representativesOnline (): Promise<{ representatives: any }> {
+	async representativesOnline(): Promise<{ representatives: any }> {
 		return await this.request('representatives_online', {}, false)
 	}
 
-	async blocksInfo (blocks): Promise<{ blocks: any, error?: string }> {
+	async blocksInfo(blocks): Promise<{ blocks: any; error?: string }> {
 		return await this.request('blocks_info', { hashes: blocks, receivable: true, source: true }, false)
 	}
-	async blockInfo (hash): Promise<any> {
+	async blockInfo(hash): Promise<any> {
 		return await this.request('block_info', { hash: hash }, false)
 	}
-	async blockCount (): Promise<{ count: number, unchecked: number, cemented: number }> {
+	async blockCount(): Promise<{ count: number; unchecked: number; cemented: number }> {
 		return await this.request('block_count', { include_cemented: 'true' }, false)
 	}
-	async workGenerate (hash, difficulty, workServer = ''): Promise<{ work: string }> {
+	async workGenerate(hash, difficulty, workServer = ''): Promise<{ work: string }> {
 		const validateResponse = (res) => {
 			if (res.work == null) {
 				return {
@@ -155,10 +159,14 @@ export class ApiService {
 
 		return await this.request('work_generate', { hash, difficulty }, workServer !== '', workServer, validateResponse)
 	}
-	async process (block, subtype: TxType): Promise<{ hash: string, error?: string }> {
-		return await this.request('process', { block: JSON.stringify(block), watch_work: 'false', subtype: TxType[subtype] }, false)
+	async process(block, subtype: TxType): Promise<{ hash: string; error?: string }> {
+		return await this.request(
+			'process',
+			{ block: JSON.stringify(block), watch_work: 'false', subtype: TxType[subtype] },
+			false
+		)
 	}
-	async accountHistory (account, count = 25, raw = false, offset = 0, reverse = false): Promise<{ history: any }> {
+	async accountHistory(account, count = 25, raw = false, offset = 0, reverse = false): Promise<{ history: any }> {
 		// use unlimited count if 0
 		if (count === 0) {
 			return await this.request('account_history', { account, raw, offset, reverse }, false)
@@ -166,38 +174,59 @@ export class ApiService {
 			return await this.request('account_history', { account, count, raw, offset, reverse }, false)
 		}
 	}
-	async accountInfo (account): Promise<any> {
+	async accountInfo(account): Promise<any> {
 		return await this.request('account_info', { account, receivable: true, representative: true, weight: true }, false)
 	}
-	async receivable (account, count): Promise<any> {
+	async receivable(account, count): Promise<any> {
 		return await this.request('receivable', { account, count, source: true, include_only_confirmed: true }, false)
 	}
-	async receivableLimit (account, count, threshold): Promise<any> {
-		return await this.request('receivable', { account, count, threshold, source: true, include_only_confirmed: true }, false)
+	async receivableLimit(account, count, threshold): Promise<any> {
+		return await this.request(
+			'receivable',
+			{ account, count, threshold, source: true, include_only_confirmed: true },
+			false
+		)
 	}
-	async receivableSorted (account, count): Promise<any> {
-		return await this.request('receivable', { account, count, source: true, include_only_confirmed: true, sorting: true }, false)
+	async receivableSorted(account, count): Promise<any> {
+		return await this.request(
+			'receivable',
+			{ account, count, source: true, include_only_confirmed: true, sorting: true },
+			false
+		)
 	}
-	async receivableLimitSorted (account, count, threshold): Promise<any> {
-		return await this.request('receivable', { account, count, threshold, source: true, include_only_confirmed: true, sorting: true }, false)
+	async receivableLimitSorted(account, count, threshold): Promise<any> {
+		return await this.request(
+			'receivable',
+			{ account, count, threshold, source: true, include_only_confirmed: true, sorting: true },
+			false
+		)
 	}
-	async version (): Promise<{
-		rpc_version: number, store_version: number, protocol_version: number, node_vendor: string, network: string,
-		network_identifier: string, build_info: string
+	async version(): Promise<{
+		rpc_version: number
+		store_version: number
+		protocol_version: number
+		node_vendor: string
+		network: string
+		network_identifier: string
+		build_info: string
 	}> {
 		return await this.request('version', {}, true)
 	}
-	async confirmationQuorum (): Promise<{
-		quorum_delta: string, online_weight_quorum_percent: number, online_weight_minimum: string,
-		online_stake_total: string, trended_stake_total: string, peers_stake_total: string
+	async confirmationQuorum(): Promise<{
+		quorum_delta: string
+		online_weight_quorum_percent: number
+		online_weight_minimum: string
+		online_stake_total: string
+		trended_stake_total: string
+		peers_stake_total: string
 	}> {
 		return await this.request('confirmation_quorum', {}, true)
 	}
-	public deleteCache () {
+	public deleteCache() {
 		localStorage.removeItem(this.storeKey)
 	}
 
-	sleep (ms) {
-		return new Promise(resolve => setTimeout(resolve, ms))
+	sleep(ms) {
+		return new Promise((resolve) => setTimeout(resolve, ms))
 	}
 }
