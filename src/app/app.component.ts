@@ -380,7 +380,7 @@ export class AppComponent implements AfterViewInit {
 	}
 
 	async updateFiatPrices() {
-		const displayCurrency = this.svcAppSettings.getAppSetting('displayCurrency') || 'USD'
+		const displayCurrency = this.svcAppSettings.getAppSetting('displayCurrency') ?? 'usd'
 		await this.svcPrice.fetchPrice(displayCurrency)
 		this.svcWallet.reloadFiatBalances()
 		setTimeout(() => this.updateFiatPrices(), this.fiatTimeout)
