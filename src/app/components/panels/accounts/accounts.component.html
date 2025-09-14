@@ -56,7 +56,7 @@
 						<th
 							scope="col"
 							class="account-column uk-width-3-5@m uk-width-1-2"
-							[class.identicons-enabled]="settings.settings.identiconsStyle !== 'none'"
+							[class.identicons-enabled]="svcAppSettings.settings.identiconsStyle !== 'none'"
 						>
 							{{ 'general.account' | transloco }}
 						</th>
@@ -83,7 +83,7 @@
 					@for (account of accounts; track account.address) {
 						<tr class="uk-visible-toggle">
 							<ng-template #accountAmounts>
-								@if (walletService.isBalanceUpdating === false) {
+								@if (svcWallet.isBalanceUpdating === false) {
 									<div class="account-amounts-primary uk-width-1-1">
 										@if (account.receivable > 0) {
 											<div class="incoming-label">
@@ -110,7 +110,7 @@
 										</span>
 									</div>
 									<div class="account-amounts-converted uk-width-1-1 text-half-muted">
-										{{ account?.balance ?? 0 | fiat: settings.settings.displayCurrency }}
+										{{ account?.balance ?? 0 | fiat: svcAppSettings.settings.displayCurrency }}
 									</div>
 								} @else {
 									<div class="account-amounts-primary uk-width-1-1">
@@ -143,7 +143,7 @@
 							</ng-template>
 							<td
 								class="account-column uk-visible-toggle uk-text-truncate"
-								[class.identicons-enabled]="settings.settings.identiconsStyle !== 'none'"
+								[class.identicons-enabled]="svcAppSettings.settings.identiconsStyle !== 'none'"
 							>
 								<div uk-grid>
 									<a
@@ -158,11 +158,11 @@
 										]"
 									>
 										<div class="uk-flex">
-											@if (settings.settings.identiconsStyle !== 'none') {
+											@if (svcAppSettings.settings.identiconsStyle !== 'none') {
 												<app-nano-identicon
 													scale="12"
 													[address]="account.address"
-													[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+													[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
 													class="nano-identicon"
 												></app-nano-identicon>
 											}

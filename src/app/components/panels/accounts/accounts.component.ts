@@ -37,16 +37,17 @@ import { debounce } from 'rxjs/operators'
 	],
 })
 export class AccountsComponent implements OnInit {
-	private notificationService = inject(NotificationsService)
-	private representatives = inject(RepresentativeService)
 	private router = inject(Router)
-	private ledger = inject(LedgerService)
-	private translocoService = inject(TranslocoService)
-	settings = inject(AppSettingsService)
-	walletService = inject(WalletService)
+	private svcLedger = inject(LedgerService)
+	private svcNotifications = inject(NotificationsService)
+	private svcRepresentative = inject(RepresentativeService)
+	private svcTransloco = inject(TranslocoService)
 
-	accounts = this.walletService.accounts
-	isLedgerWallet = this.walletService.isLedger
+	svcAppSettings = inject(AppSettingsService)
+	svcWallet = inject(WalletService)
+
+	accounts = this.svcWallet.accounts
+	isLedgerWallet = this.svcWallet.isLedger
 	viewAdvanced = false
 	newAccountIndex = null
 	// When we change the accounts, redetect changable reps (Debounce by 5 seconds)
@@ -55,26 +56,24 @@ export class AccountsComponent implements OnInit {
 
 	async ngOnInit() {
 		this.reloadRepWarning$.subscribe((a) => {
-			this.representatives.detectChangeableReps()
+			this.svcRepresentative.detectChangeableReps()
 		})
 		this.sortAccounts()
 	}
 
 	async createAccount() {
-		if (this.walletService.isLocked) {
-			await this.walletService.requestUnlock()
-			if (this.walletService.isLocked) {
+		if (this.svcWallet.isLocked) {
+			await this.svcWallet.requestUnlock()
+			if (this.svcWallet.isLocked) {
 				return
 			}
 		}
-		if (this.isLedgerWallet && this.ledger.ledger.status !== LedgerStatus.READY) {
-			return this.notificationService.sendWarning(
-				this.translocoService.translate('accounts.ledger-device-must-be-ready')
-			)
+		if (this.isLedgerWallet && this.svcLedger.ledger.status !== LedgerStatus.READY) {
+			return this.svcNotifications.sendWarning(this.svcTransloco.translate('accounts.ledger-device-must-be-ready'))
 		}
-		if (this.walletService.accounts.length >= 20) {
-			return this.notificationService.sendWarning(
-				this.translocoService.translate('accounts.you-can-only-track-up-to-x-accounts-at-a-time', { accounts: 20 })
+		if (this.svcWallet.accounts.length >= 20) {
+			return this.svcNotifications.sendWarning(
+				this.svcTransloco.translate('accounts.you-can-only-track-up-to-x-accounts-at-a-time', { accounts: 20 })
 			)
 		}
 		// Advanced view, manual account index?
@@ -82,29 +81,29 @@ export class AccountsComponent implements OnInit {
 		if (this.viewAdvanced && this.newAccountIndex != null) {
 			const index = parseInt(this.newAccountIndex, 10)
 			if (index < 0) {
-				return this.notificationService.sendWarning(
-					this.translocoService.translate('accounts.invalid-account-index-must-be-positive-number')
+				return this.svcNotifications.sendWarning(
+					this.svcTransloco.translate('accounts.invalid-account-index-must-be-positive-number')
 				)
 			}
-			const existingAccount = this.walletService.accounts.find((a) => a.index === index)
+			const existingAccount = this.svcWallet.accounts.find((a) => a.index === index)
 			if (existingAccount) {
-				return this.notificationService.sendWarning(
-					this.translocoService.translate('accounts.the-account-at-this-index-is-already-loaded')
+				return this.svcNotifications.sendWarning(
+					this.svcTransloco.translate('accounts.the-account-at-this-index-is-already-loaded')
 				)
 			}
 			accountIndex = index
 		}
 		try {
-			const newAccount = await this.walletService.addWalletAccount(accountIndex)
-			await this.walletService.reloadBalances()
-			this.notificationService.sendSuccess(
-				this.translocoService.translate('accounts.successfully-created-new-account', { account: newAccount.id })
+			const newAccount = await this.svcWallet.addWalletAccount(accountIndex)
+			await this.svcWallet.reloadBalances()
+			this.svcNotifications.sendSuccess(
+				this.svcTransloco.translate('accounts.successfully-created-new-account', { account: newAccount.id })
 			)
 			this.newAccountIndex = null
 			this.accountsChanged$.next(newAccount.id)
 		} catch (err) {
-			this.notificationService.sendError(
-				this.translocoService.translate('accounts.unable-to-add-new-account', { error: err.message })
+			this.svcNotifications.sendError(
+				this.svcTransloco.translate('accounts.unable-to-add-new-account', { error: err.message })
 			)
 		}
 	}
@@ -115,42 +114,42 @@ export class AccountsComponent implements OnInit {
 		// if (this.walletService.accounts.length <= 1) {
 		// return this.notificationService.sendWarning(`You need at least 2 accounts to sort them`)
 		// }
-		if (this.walletService.isLocked || !this.walletService.isConfigured || this.walletService.accounts.length <= 1) {
+		if (this.svcWallet.isLocked || !this.svcWallet.isConfigured || this.svcWallet.accounts.length <= 1) {
 			return
 		}
-		this.walletService.accounts = this.walletService.accounts.sort((a, b) => a.index - b.index)
+		this.svcWallet.accounts = this.svcWallet.accounts.sort((a, b) => a.index - b.index)
 		// this.accounts = this.walletService.accounts
 		// Save new sorted accounts list
-		this.walletService.saveWalletExport()
+		this.svcWallet.saveWalletExport()
 		// this.notificationService.sendSuccess(`Successfully sorted accounts by index!`)
 	}
 
 	navigateToAccount(account: Account) {
 		if (account == null) {
-			this.notificationService.sendError('Failed to navigate to account')
+			this.svcNotifications.sendError('Failed to navigate to account')
 			this.router.navigate(['accounts/'])
 		}
 
 		// why only small screen sizes?
 		if (window.innerWidth < 940) {
-			this.walletService.selectedAccountAddress = account.address
-			this.walletService.selectedAccount = account
-			this.walletService.selectedAccount$.next(account)
-			this.walletService.saveWalletExport()
+			this.svcWallet.selectedAccountAddress = account.address
+			this.svcWallet.selectedAccount = account
+			this.svcWallet.selectedAccount$.next(account)
+			this.svcWallet.saveWalletExport()
 		}
 		this.router.navigate([`accounts/${account.id}`], { queryParams: { compact: 1 } })
 	}
 
 	copied() {
-		this.notificationService.removeNotification('success-copied')
-		this.notificationService.sendSuccess(this.translocoService.translate('general.successfully-copied-to-clipboard'), {
+		this.svcNotifications.removeNotification('success-copied')
+		this.svcNotifications.sendSuccess(this.svcTransloco.translate('general.successfully-copied-to-clipboard'), {
 			identifier: 'success-copied',
 		})
 	}
 
 	async deleteAccount(account) {
-		if (this.walletService.isLocked) {
-			const wasUnlocked = await this.walletService.requestUnlock()
+		if (this.svcWallet.isLocked) {
+			const wasUnlocked = await this.svcWallet.requestUnlock()
 
 			if (wasUnlocked === false) {
 				return
@@ -158,38 +157,34 @@ export class AccountsComponent implements OnInit {
 		}
 
 		try {
-			await this.walletService.removeWalletAccount(account.id)
-			this.notificationService.sendSuccess(
-				this.translocoService.translate('accounts.successfully-removed-account', { account: account.id })
+			await this.svcWallet.removeWalletAccount(account.id)
+			this.svcNotifications.sendSuccess(
+				this.svcTransloco.translate('accounts.successfully-removed-account', { account: account.id })
 			)
 			this.accountsChanged$.next(account.id)
 		} catch (err) {
-			this.notificationService.sendError(
-				this.translocoService.translate('accounts.unable-to-delete-account', { error: err.message })
+			this.svcNotifications.sendError(
+				this.svcTransloco.translate('accounts.unable-to-delete-account', { error: err.message })
 			)
 		}
 	}
 
 	async showLedgerAddress(account) {
-		if (this.ledger.ledger.status !== LedgerStatus.READY) {
-			return this.notificationService.sendWarning(
-				this.translocoService.translate('accounts.ledger-device-must-be-ready')
-			)
+		if (this.svcLedger.ledger.status !== LedgerStatus.READY) {
+			return this.svcNotifications.sendWarning(this.svcTransloco.translate('accounts.ledger-device-must-be-ready'))
 		}
-		this.notificationService.sendInfo(
-			this.translocoService.translate('accounts.confirming-account-address-on-ledger-device'),
+		this.svcNotifications.sendInfo(
+			this.svcTransloco.translate('accounts.confirming-account-address-on-ledger-device'),
 			{ identifier: 'ledger-account', length: 0 }
 		)
 		try {
-			await this.ledger.getLedgerAccount(account.index, true)
-			this.notificationService.sendSuccess(
-				this.translocoService.translate('accounts.account-address-confirmed-on-ledger')
-			)
+			await this.svcLedger.getLedgerAccount(account.index, true)
+			this.svcNotifications.sendSuccess(this.svcTransloco.translate('accounts.account-address-confirmed-on-ledger'))
 		} catch (err) {
-			this.notificationService.sendError(
-				this.translocoService.translate('accounts.account-address-denied-if-it-is-wrong-do-not-use-the-wallet')
+			this.svcNotifications.sendError(
+				this.svcTransloco.translate('accounts.account-address-denied-if-it-is-wrong-do-not-use-the-wallet')
 			)
 		}
-		this.notificationService.removeNotification('ledger-account')
+		this.svcNotifications.removeNotification('ledger-account')
 	}
 }
