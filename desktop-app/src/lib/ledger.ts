@@ -2,7 +2,7 @@ import Transport from '@ledgerhq/hw-transport'
 import TransportNodeBle from '@ledgerhq/hw-transport-node-ble'
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
 import { ipcMain } from 'electron'
-import Nano from 'hw-app-nano'
+import { Ledger } from 'libnemo'
 import * as rx from 'rxjs'
 
 const STATUS_CODES = {
@@ -44,10 +44,22 @@ export class LedgerService {
 	constructor () { }
 
 	// Reset connection to the ledger device, update the status
-	resetLedger (errorMessage = '') {
-		this.ledger.transport = null
-		this.ledger.nano = null
-		this.setLedgerStatus(LedgerStatus.NOT_CONNECTED, errorMessage)
+	resetLedger () {
+		setTimeout(async () => {
+			const hidDevices = await globalThis.navigator.hid.getDevices()
+			for (const device of hidDevices) {
+				if (device.vendorId === Ledger.UsbVendorId) {
+					device.forget()
+				}
+			}
+			const usbDevices = await globalThis.navigator.usb.getDevices()
+			for (const device of usbDevices) {
+				if (device.vendorId === Ledger.UsbVendorId) {
+					device.forget()
+				}
+			}
+		})
+		this.ledgerStatus$.next(Ledger.status)
 	}
 
 	// Open a connection to the usb device and initialize up the Nano Ledger library
@@ -60,9 +72,7 @@ export class LedgerService {
 					found = true
 					if (sub) sub.unsubscribe()
 					clearTimeout(timeoutId)
-					this.ledger.transport = await transport.open(e.descriptor)
-					this.ledger.nano = new Nano(this.ledger.transport)
-					resolve(this.ledger.transport)
+					Ledger.connect().then(resolve).catch(reject)
 				},
 				error: (e) => {
 					clearTimeout(timeoutId)
@@ -85,7 +95,7 @@ export class LedgerService {
 
 	async loadAppConfig (): Promise<any> {
 		return new Promise((resolve, reject) => {
-			this.ledger.nano.getAppConfiguration().then(resolve).catch(reject)
+			Ledger.connect().then(resolve).catch(reject)
 		})
 	}
 
@@ -137,7 +147,7 @@ export class LedgerService {
 	async getLedgerAccount (accountIndex, showOnScreen = false) {
 		try {
 			this.queryingLedger = true
-			const account = await this.ledger.nano.getAddress(this.ledgerPath(accountIndex), showOnScreen)
+			const account = await Ledger.account(accountIndex, showOnScreen)
 			this.queryingLedger = false
 
 			this.ledgerMessage$.next({ event: 'account-details', data: Object.assign({ accountIndex }, account) })
@@ -156,15 +166,16 @@ export class LedgerService {
 				return // We won't reset the ledger status in this instance
 			}
 
-			this.resetLedger(data.errorMessage) // Apparently ledger not working?
+			console.error(data.errorMessage)
+			this.resetLedger() // Apparently ledger not working?
 			throw err
 		}
 	}
 
-	async cacheBlock (accountIndex, cacheData, signature) {
+	async cacheBlock (accountIndex, cacheData) {
 		try {
 			this.queryingLedger = true
-			const cacheResponse = await this.ledger.nano.cacheBlock(this.ledgerPath(accountIndex), cacheData, signature)
+			const cacheResponse = await Ledger.updateCache(accountIndex, cacheData)
 			this.queryingLedger = false
 
 			this.ledgerMessage$.next({ event: 'cache-block', data: Object.assign({ accountIndex }, cacheResponse) })
@@ -184,7 +195,7 @@ export class LedgerService {
 	async signBlock (accountIndex, blockData) {
 		try {
 			this.queryingLedger = true
-			const signResponse = await this.ledger.nano.signBlock(this.ledgerPath(accountIndex), blockData)
+			const signResponse = await Ledger.sign(accountIndex, blockData)
 			this.queryingLedger = false
 
 			this.ledgerMessage$.next({ event: 'sign-block', data: Object.assign({ accountIndex }, signResponse) })
@@ -270,7 +281,8 @@ export function initialize () {
 				Ledger.getLedgerAccount(data.data.accountIndex || 0, data.data.showOnScreen || false)
 				break
 			case 'cache-block':
-				Ledger.cacheBlock(data.data.accountIndex, data.data.cacheData, data.data.signature)
+				data.data.cacheData.signature = data.data.signature
+				Ledger.cacheBlock(data.data.accountIndex, data.data.cacheData)
 				break
 			case 'sign-block':
 				Ledger.signBlock(data.data.accountIndex, data.data.blockData)

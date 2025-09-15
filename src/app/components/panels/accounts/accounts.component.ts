@@ -8,12 +8,11 @@ import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AppSettingsService,
 	LedgerService,
-	LedgerStatus,
 	NotificationsService,
 	RepresentativeService,
-	WalletService,
+	WalletService
 } from 'app/services'
-import { Account } from 'libnemo'
+import { Account, Ledger } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 import { Subject, timer } from 'rxjs'
 import { debounce } from 'rxjs/operators'
@@ -54,21 +53,21 @@ export class AccountsComponent implements OnInit {
 	accountsChanged$ = new Subject()
 	reloadRepWarning$ = this.accountsChanged$.pipe(debounce(() => timer(5000)))
 
-	async ngOnInit() {
+	async ngOnInit () {
 		this.reloadRepWarning$.subscribe((a) => {
 			this.svcRepresentative.detectChangeableReps()
 		})
 		this.sortAccounts()
 	}
 
-	async createAccount() {
+	async createAccount () {
 		if (this.svcWallet.isLocked) {
 			await this.svcWallet.requestUnlock()
 			if (this.svcWallet.isLocked) {
 				return
 			}
 		}
-		if (this.isLedgerWallet && this.svcLedger.ledger.status !== LedgerStatus.READY) {
+		if (this.isLedgerWallet && Ledger.status !== 'CONNECTED') {
 			return this.svcNotifications.sendWarning(this.svcTransloco.translate('accounts.ledger-device-must-be-ready'))
 		}
 		if (this.svcWallet.accounts.length >= 20) {
@@ -108,7 +107,7 @@ export class AccountsComponent implements OnInit {
 		}
 	}
 
-	sortAccounts() {
+	sortAccounts () {
 		// if (this.walletService.isLocked()) return this.notificationService.sendError(`Wallet is locked.`)
 		// if (!this.walletService.isConfigured()) return this.notificationService.sendError(`Wallet is not configured`)
 		// if (this.walletService.accounts.length <= 1) {
@@ -124,7 +123,7 @@ export class AccountsComponent implements OnInit {
 		// this.notificationService.sendSuccess(`Successfully sorted accounts by index!`)
 	}
 
-	navigateToAccount(account: Account) {
+	navigateToAccount (account: Account) {
 		if (account == null) {
 			this.svcNotifications.sendError('Failed to navigate to account')
 			this.router.navigate(['accounts/'])
@@ -140,14 +139,14 @@ export class AccountsComponent implements OnInit {
 		this.router.navigate([`accounts/${account.id}`], { queryParams: { compact: 1 } })
 	}
 
-	copied() {
+	copied () {
 		this.svcNotifications.removeNotification('success-copied')
 		this.svcNotifications.sendSuccess(this.svcTransloco.translate('general.successfully-copied-to-clipboard'), {
 			identifier: 'success-copied',
 		})
 	}
 
-	async deleteAccount(account) {
+	async deleteAccount (account) {
 		if (this.svcWallet.isLocked) {
 			const wasUnlocked = await this.svcWallet.requestUnlock()
 
@@ -169,8 +168,8 @@ export class AccountsComponent implements OnInit {
 		}
 	}
 
-	async showLedgerAddress(account) {
-		if (this.svcLedger.ledger.status !== LedgerStatus.READY) {
+	async showLedgerAddress (account) {
+		if (Ledger.status !== 'CONNECTED') {
 			return this.svcNotifications.sendWarning(this.svcTransloco.translate('accounts.ledger-device-must-be-ready'))
 		}
 		this.svcNotifications.sendInfo(

@@ -554,7 +554,7 @@
 				>
 					<div class="uk-width-1-1">
 						<h3>Use Ledger Hardware Wallet</h3>
-						@if (ledger.status === ledgerStatus.NOT_CONNECTED) {
+						@if (ledgerStatus === 'DISCONNECTED') {
 							<div>
 								<p>
 									Make sure you have the nano app installed and running on your Ledger, then click one of the buttons
@@ -590,7 +590,7 @@
 						}
 						@if (ledgerService.supportsUSB) {
 							<div>
-								@if (ledger.status === ledgerStatus.NOT_CONNECTED) {
+								@if (ledgerStatus === 'DISCONNECTED') {
 									<div>
 										<div class="uk-alert uk-alert-warning nlt-inline-alert">
 											<div class="icon-column">
@@ -603,7 +603,7 @@
 										</div>
 									</div>
 								}
-								@if (ledger.status === ledgerStatus.LOCKED) {
+								@if (ledgerStatus === 'LOCKED') {
 									<div>
 										<div class="uk-alert uk-alert-warning nlt-inline-alert">
 											<div class="icon-column">
@@ -615,7 +615,7 @@
 										</div>
 									</div>
 								}
-								@if (ledger.status === ledgerStatus.READY) {
+								@if (ledgerStatus === 'CONNECTED') {
 									<div>
 										<div class="uk-alert uk-alert-success nlt-inline-alert">
 											<div class="icon-column">
@@ -627,11 +627,7 @@
 								}
 							</div>
 						}
-						@if (
-							ledgerService.isDesktop &&
-							!ledgerService.supportsBluetooth &&
-							ledger.status === ledgerStatus.NOT_CONNECTED
-						) {
+						@if (ledgerService.isDesktop && !ledgerService.supportsBluetooth && ledgerStatus === 'DISCONNECTED') {
 							<div>
 								<div class="uk-alert uk-alert-danger nlt-inline-alert">
 									<div class="icon-column">
@@ -759,7 +755,7 @@
 					Import From Seed
 				</button>
 			}
-			@if (selectedImportOption === 'ledger' && ledger.status === ledgerStatus.NOT_CONNECTED) {
+			@if (selectedImportOption === 'ledger' && ledgerStatus === 'DISCONNECTED') {
 				<button
 					[disabled]="!ledgerService.supportsUSB"
 					class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
@@ -768,7 +764,7 @@
 					Connect via USB
 				</button>
 			}
-			@if (selectedImportOption === 'ledger' && ledger.status === ledgerStatus.NOT_CONNECTED) {
+			@if (selectedImportOption === 'ledger' && ledgerStatus === 'DISCONNECTED') {
 				<button
 					[disabled]="!ledgerService.supportsBluetooth"
 					class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
@@ -777,7 +773,7 @@
 					Connect via Bluetooth
 				</button>
 			}
-			@if (selectedImportOption === 'ledger' && ledger.status !== ledgerStatus.NOT_CONNECTED) {
+			@if (selectedImportOption === 'ledger' && ledgerStatus === 'DISCONNECTED') {
 				<button
 					class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
 					(click)="importLedgerWallet(true)"
@@ -861,7 +857,9 @@
 											<text
 												x="0"
 												y="25"
-											>{{ l * 4 + i + 1 }}</text>
+											>
+												{{ l * 4 + i + 1 }}
+											</text>
 										</svg>
 										<svg
 											viewBox="0 0 75 25"
@@ -872,7 +870,9 @@
 											<text
 												x="0"
 												y="18"
-											>{{ word }}</text>
+											>
+												{{ word }}
+											</text>
 										</svg>
 									</td>
 								}

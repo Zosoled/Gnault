@@ -5,8 +5,7 @@ import TransportHID from '@ledgerhq/hw-transport-webhid'
 import TransportUSB from '@ledgerhq/hw-transport-webusb'
 import { ApiService, AppSettingsService, DesktopService } from 'app/services'
 import { environment } from 'environments/environment'
-import Nano from 'hw-app-nano'
-import { Wallet } from 'libnemo'
+import { Block, Ledger, Rpc } from 'libnemo'
 import { Subject } from 'rxjs'
 
 export const STATUS_CODES = {
@@ -44,18 +43,10 @@ export class LedgerService {
 	private desktop = inject(DesktopService)
 	private appSettings = inject(AppSettingsService)
 
-	walletPrefix = `44'/165'/`
-
 	waitTimeout = 30000
+	walletPrefix = `44'/165'/`
 	pollInterval = 5000
-
 	pollingLedger = false
-
-	ledger: LedgerData = {
-		status: LedgerStatus.NOT_CONNECTED,
-		nano: null,
-		transport: null,
-	}
 
 	// isDesktop = true
 	isDesktop = environment.desktop
@@ -69,7 +60,7 @@ export class LedgerService {
 	transportMode: 'USB' | 'HID' | 'Bluetooth'
 	DynamicTransport: typeof TransportUSB | typeof TransportHID | typeof TransportBLE
 
-	ledgerStatus$: Subject<{ status: string; statusText: string }> = new Subject()
+	ledgerStatus$: Subject<string> = new Subject()
 	desktopMessage$ = new Subject()
 
 	constructor () {
@@ -88,8 +79,20 @@ export class LedgerService {
 
 	// Scraps binding to any existing transport/nano object
 	resetLedger () {
-		this.ledger.transport = null
-		this.ledger.nano = null
+		setTimeout(async () => {
+			const hidDevices = await globalThis.navigator.hid.getDevices()
+			for (const device of hidDevices) {
+				if (device.vendorId === Ledger.UsbVendorId) {
+					device.forget()
+				}
+			}
+			const usbDevices = await globalThis.navigator.usb.getDevices()
+			for (const device of usbDevices) {
+				if (device.vendorId === Ledger.UsbVendorId) {
+					device.forget()
+				}
+			}
+		})
 	}
 
 	/**
@@ -101,11 +104,6 @@ export class LedgerService {
 		this.desktop.on('ledger', (event, message) => {
 			if (!message || !message.event) return
 			switch (message.event) {
-				case 'ledger-status':
-					this.ledger.status = message.data.status
-					this.ledgerStatus$.next({ status: message.data.status, statusText: message.data.statusText })
-					break
-
 				case 'account-details':
 				case 'cache-block':
 				case 'sign-block':
@@ -250,20 +248,6 @@ export class LedgerService {
 		}
 	}
 
-	async loadTransport () {
-		return new Promise((resolve, reject) => {
-			this.DynamicTransport.create(3000, this.waitTimeout)
-				.then((trans) => {
-					// LedgerLogs.listen((log: LedgerLog) => console.log(`Ledger: ${log.type}: ${log.message}`))
-					this.ledger.transport = trans
-					this.ledger.nano = new Nano(this.ledger.transport)
-
-					resolve(this.ledger.transport)
-				})
-				.catch(reject)
-		})
-	}
-
 	/**
 	 * Main ledger loading function. Can be called multiple times to attempt a reconnect.
 	 * @param {boolean} hideNotifications
@@ -271,11 +255,10 @@ export class LedgerService {
 	 */
 	async loadLedger (hideNotifications = false) {
 		try {
-			const wallet = await Wallet.create('Ledger')
-			const result = await wallet.unlock()
-			this.ledgerStatus$.next({ status: 'OK', statusText: 'ok' })
+			const status = await Ledger.connect()
+			this.ledgerStatus$.next(status)
 		} catch (err) {
-			this.ledgerStatus$.next({ status: err.message, statusText: err.message.toLowerCase() })
+			this.ledgerStatus$.next(err.message)
 		}
 	}
 	// async loadLedger(hideNotifications = false) {
@@ -404,67 +387,64 @@ export class LedgerService {
 	// }
 
 	async updateCache (accountIndex, blockHash) {
-		if (this.ledger.status !== LedgerStatus.READY) {
+		if (Ledger.status !== 'CONNECTED') {
 			await this.loadLedger() // Make sure ledger is ready
+		}
+		if (!this.isDesktop) {
+			return await Ledger.updateCache(accountIndex, blockHash, new Rpc(this.appSettings.settings.serverAPI))
 		}
 		const blockResponse = await this.api.blocksInfo([blockHash])
 		const blockData = blockResponse.blocks[blockHash]
 		if (!blockData) throw new Error(`Unable to load block data`)
 		blockData.contents = JSON.parse(blockData.contents)
+		const { account, balance, representative, previous, link, signature } = blockData.contents
 
-		const cacheData = {
-			representative: blockData.contents.representative,
-			balance: blockData.contents.balance,
-			previousBlock: blockData.contents.previous === zeroBlock ? null : blockData.contents.previous,
-			sourceBlock: blockData.contents.link,
-		}
+		const cacheData = new Block(account, balance, previous, representative)
+			.change(link)
+			.sign(signature)
 
 		if (this.isDesktop) {
 			return await this.updateCacheDesktop(accountIndex, cacheData, blockData.contents.signature)
 		} else {
-			return await this.ledger.nano.cacheBlock(this.ledgerPath(accountIndex), cacheData, blockData.contents.signature)
+			return await Ledger.updateCache(accountIndex, cacheData)
 		}
 	}
 
 	async updateCacheOffline (accountIndex, blockData) {
-		if (this.ledger.status !== LedgerStatus.READY) {
-			await this.loadLedger() // Make sure ledger is ready
+		if (Ledger.status !== 'CONNECTED') {
+			await this.loadLedger()
 		}
 
-		const cacheData = {
-			representative: blockData.representative,
-			balance: blockData.balance,
-			previousBlock: blockData.previous === zeroBlock ? null : blockData.previous,
-			sourceBlock: blockData.link,
-		}
+		const { balance, representative, previous, link, signature } = blockData
+
+		const cacheData = new Block(zeroBlock, balance, previous, representative)
+			.change(link)
+			.sign(signature)
 
 		if (this.isDesktop) {
 			return await this.updateCacheDesktop(accountIndex, cacheData, blockData.signature)
 		} else {
-			return await this.ledger.nano.cacheBlock(this.ledgerPath(accountIndex), cacheData, blockData.signature)
+			return await Ledger.updateCache(accountIndex, cacheData)
 		}
 	}
 
 	async signBlock (accountIndex: number, blockData: any) {
-		if (this.ledger.status !== LedgerStatus.READY) {
-			await this.loadLedger() // Make sure ledger is ready
+		if (Ledger.status !== 'CONNECTED') {
+			await this.loadLedger()
+		}
+		const { previousBlock, representative, balance, recipient, sourceBlock } = blockData
+		const block = new Block(zeroBlock, balance, previousBlock, representative)
+		if (sourceBlock) {
+			block.receive(sourceBlock, 0)
+		} else if (recipient) {
+			block.send(recipient, 0)
+		} else {
+			block.change(representative)
 		}
 		if (this.isDesktop) {
 			return await this.signBlockDesktop(accountIndex, blockData)
 		} else {
-			return await this.ledger.nano.signBlock(this.ledgerPath(accountIndex), blockData)
-		}
-	}
-
-	ledgerPath (accountIndex: number) {
-		return `${this.walletPrefix}${accountIndex}'`
-	}
-
-	async getLedgerAccountWeb (accountIndex: number, showOnScreen = false) {
-		try {
-			return await this.ledger.nano.getAddress(this.ledgerPath(accountIndex), showOnScreen)
-		} catch (err) {
-			throw err
+			return await Ledger.sign(accountIndex, block)
 		}
 	}
 
@@ -472,7 +452,7 @@ export class LedgerService {
 		if (this.isDesktop) {
 			return await this.getLedgerAccountDesktop(accountIndex, showOnScreen)
 		} else {
-			return await this.getLedgerAccountWeb(accountIndex, showOnScreen)
+			return await Ledger.account(accountIndex, showOnScreen)
 		}
 	}
 
@@ -486,27 +466,10 @@ export class LedgerService {
 	}
 
 	async checkLedgerStatus () {
-		if (this.ledger.status !== LedgerStatus.READY) {
+		if (Ledger.status !== 'CONNECTED') {
 			return
 		}
-
-		try {
-			const accountDetails = await this.getLedgerAccount(0)
-			this.ledger.status = LedgerStatus.READY
-		} catch (err) {
-			// Ignore race condition error, which means an action is pending on the ledger (such as block confirmation)
-			if (err.name !== 'TransportRaceCondition') {
-				console.log('Check ledger status failed ', JSON.stringify(err))
-				if (err.statusCode === STATUS_CODES.SECURITY_STATUS_NOT_SATISFIED) {
-					this.ledger.status = LedgerStatus.LOCKED
-				} else {
-					this.ledger.status = LedgerStatus.NOT_CONNECTED
-				}
-				this.pollingLedger = false
-				this.resetLedger()
-			}
-		}
-
-		this.ledgerStatus$.next({ status: this.ledger.status, statusText: `` })
+		const status = await Ledger.connect()
+		this.ledgerStatus$.next(status)
 	}
 }

@@ -4,13 +4,12 @@ import { Router, RouterLink } from '@angular/router'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import {
 	LedgerService,
-	LedgerStatus,
 	NotificationsService,
 	QrModalService,
 	UtilService,
-	WalletService,
+	WalletService
 } from 'app/services'
-import { Wallet } from 'libnemo'
+import { DeviceStatus, Ledger, Wallet } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 
 enum panels {
@@ -44,7 +43,7 @@ export class ConfigureWalletComponent {
 	panels = panels
 	activePanel = panels.landing
 	wallet = this.walletService.selectedWallet
-	get isConfigured() {
+	get isConfigured () {
 		return this.walletService.isConfigured
 	}
 	isNewWallet = true
@@ -77,13 +76,11 @@ export class ConfigureWalletComponent {
 	validatePasswordConfirm = false
 	validIndex = true
 	indexMax = INDEX_MAX
-
 	selectedImportOption = 'seed'
 
-	ledgerStatus = LedgerStatus
-	ledger = this.ledgerService.ledger
+	get ledgerStatus (): DeviceStatus { return Ledger.status }
 
-	constructor() {
+	constructor () {
 		if (this.route.getCurrentNavigation().extras.state && this.route.getCurrentNavigation().extras.state.seed) {
 			this.activePanel = panels.import
 			this.importSeedModel = this.route.getCurrentNavigation().extras.state.seed
@@ -96,7 +93,7 @@ export class ConfigureWalletComponent {
 		}
 	}
 
-	async importExistingWallet() {
+	async importExistingWallet () {
 		this.importSeed = ''
 		this.newPassword = ''
 
@@ -118,7 +115,7 @@ export class ConfigureWalletComponent {
 		this.walletService.publishNewWallet()
 	}
 
-	async importSingleKeyWallet() {
+	async importSingleKeyWallet () {
 		this.walletService.createWalletFromSingleKey(this.keyString, this.isExpanded)
 		this.newPassword = ''
 		this.route.navigate(['accounts']) // load accounts and watch them update in real-time
@@ -128,17 +125,17 @@ export class ConfigureWalletComponent {
 		this.walletService.publishNewWallet()
 	}
 
-	async connectLedgerByBluetooth() {
+	async connectLedgerByBluetooth () {
 		this.ledgerService.enableBluetoothMode(true)
 		await this.importLedgerWallet()
 	}
 
-	async connectLedgerByUsb() {
+	async connectLedgerByUsb () {
 		this.ledgerService.enableBluetoothMode(false)
 		await this.importLedgerWallet()
 	}
 
-	async importLedgerWallet(refreshOnly = false) {
+	async importLedgerWallet (refreshOnly = false) {
 		// If a wallet exists already, make sure they know they are overwriting it
 		if (!refreshOnly && this.isConfigured) {
 			const confirmed = await this.confirmWalletOverwrite()
@@ -154,7 +151,7 @@ export class ConfigureWalletComponent {
 		this.notifications.removeNotification('ledger-status')
 		this.notifications.removeNotification('ledger-error')
 
-		if (this.ledger.status === LedgerStatus.NOT_CONNECTED) {
+		if (Ledger.status === 'DISCONNECTED') {
 			this.ledgerService.resetLedger()
 			return this.notifications.sendWarning(
 				`Failed to connect the Ledger device. Make sure the nano app is running on the Ledger. If the error persists: Check the <a href="https://docs.nault.cc/2020/08/04/ledger-guide.html#troubleshooting" target="_blank" rel="noopener noreferrer">troubleshooting guide</a>`,
@@ -162,11 +159,11 @@ export class ConfigureWalletComponent {
 			)
 		}
 
-		if (this.ledger.status === LedgerStatus.LOCKED) {
+		if (Ledger.status === 'LOCKED') {
 			return this.notifications.sendWarning(`Unlock your Ledger device and open the nano app to continue`)
 		}
 
-		if (this.ledger.status === LedgerStatus.READY) {
+		if (Ledger.status === 'CONNECTED') {
 			this.notifications.sendSuccess(`Successfully connected to Ledger device`)
 		}
 
@@ -185,7 +182,7 @@ export class ConfigureWalletComponent {
 	}
 
 	// Send a confirmation dialog to the user if they already have a wallet configured
-	async confirmWalletOverwrite() {
+	async confirmWalletOverwrite () {
 		if (!this.isConfigured) return true
 
 		const UIkit = window['UIkit']
@@ -193,10 +190,10 @@ export class ConfigureWalletComponent {
 			const msg = this.walletService.isLedger
 				? '<p class="uk-alert uk-alert-info"><br><span class="uk-flex"><span uk-icon="icon: info; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">You are about to configure a new wallet, which will <b>disconnect your Ledger device from Gnault</b>.</span><br><br>If you need to use the Ledger wallet, simply import your device again.</p><br>'
 				: '<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">You are about to configure a new wallet, which will <b>replace your currently configured wallet</b>.</span><br><br><b style="font-size: 18px;">' +
-					this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
-					'</b><br><br><b style="font-size: 18px;">' +
-					this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
-					'</b></p><br>'
+				this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
+				'</b><br><br><b style="font-size: 18px;">' +
+				this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
+				'</b></p><br>'
 			await UIkit.modal.confirm(msg)
 			return true
 		} catch (err) {
@@ -209,7 +206,7 @@ export class ConfigureWalletComponent {
 		}
 	}
 
-	async setPasswordInit() {
+	async setPasswordInit () {
 		// if importing from existing, the format check must be done prior the password page
 		if (this.isNewWallet) {
 			const req = this.walletService.createNewWallet('')
@@ -304,7 +301,7 @@ export class ConfigureWalletComponent {
 		}
 	}
 
-	confirmNewSeed() {
+	confirmNewSeed () {
 		if (!this.hasConfirmedBackup) {
 			return this.notifications.sendWarning(`Please confirm you have saved a wallet backup!`)
 		}
@@ -316,7 +313,7 @@ export class ConfigureWalletComponent {
 		this.activePanel = panels.final
 	}
 
-	saveWalletPassword() {
+	saveWalletPassword () {
 		if (this.walletPasswordModel.length < 6) {
 			return this.notifications.sendWarning(
 				this.translocoService.translate(
@@ -347,14 +344,14 @@ export class ConfigureWalletComponent {
 		}
 	}
 
-	saveNewWallet() {
+	saveNewWallet () {
 		this.walletService.saveWalletExport()
 		this.walletService.publishNewWallet()
 
 		this.notifications.sendSuccess(`Successfully created new wallet! Do not lose the secret recovery seed/mnemonic!`)
 	}
 
-	setPanel(panel) {
+	setPanel (panel) {
 		this.activePanel = panel
 		if (panel === panels.landing) {
 			this.isNewWallet = true
@@ -363,7 +360,7 @@ export class ConfigureWalletComponent {
 		}
 	}
 
-	copiedNewWalletSeed() {
+	copiedNewWalletSeed () {
 		this.notifications.removeNotification('success-copied')
 		this.notifications.sendSuccess(
 			this.translocoService.translate('configure-wallet.new-wallet.successfully-copied-secret-recovery-seed'),
@@ -371,7 +368,7 @@ export class ConfigureWalletComponent {
 		)
 	}
 
-	copiedNewWalletMnemonic() {
+	copiedNewWalletMnemonic () {
 		this.notifications.removeNotification('success-copied')
 		this.notifications.sendSuccess(
 			this.translocoService.translate('configure-wallet.new-wallet.successfully-copied-secret-recovery-mnemonic'),
@@ -379,7 +376,7 @@ export class ConfigureWalletComponent {
 		)
 	}
 
-	importFromFile(files) {
+	importFromFile (files) {
 		if (!files.length) return
 
 		const file = files[0]
@@ -406,7 +403,7 @@ export class ConfigureWalletComponent {
 	}
 
 	// open qr reader modal
-	openQR(reference, type) {
+	openQR (reference, type) {
 		const qrResult = this.qrModalService.openQR(reference, type)
 		qrResult.then(
 			(data) => {
@@ -428,11 +425,11 @@ export class ConfigureWalletComponent {
 						break
 				}
 			},
-			() => {}
+			() => { }
 		)
 	}
 
-	accountIndexChange(index) {
+	accountIndexChange (index) {
 		let invalid = false
 		if (this.util.string.isNumeric(index) && index % 1 === 0) {
 			index = parseInt(index, 10)
