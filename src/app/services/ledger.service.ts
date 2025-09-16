@@ -3,16 +3,9 @@ import { default as Transport } from '@ledgerhq/hw-transport'
 import { default as TransportBLE } from '@ledgerhq/hw-transport-web-ble'
 import { default as TransportHID } from '@ledgerhq/hw-transport-webhid'
 import { default as TransportUSB } from '@ledgerhq/hw-transport-webusb'
-import { AppSettingsService, DesktopService } from 'app/services'
+import { DesktopService } from 'app/services'
 import { environment } from 'environments/environment'
 import { Subject } from 'rxjs'
-
-export const STATUS_CODES = {
-	SECURITY_STATUS_NOT_SATISFIED: 0x6982,
-	CONDITIONS_OF_USE_NOT_SATISFIED: 0x6985,
-	INVALID_SIGNATURE: 0x6a81,
-	CACHE_MISS: 0x6a82,
-}
 
 export const LedgerStatus = {
 	NOT_CONNECTED: 'not-connected',
@@ -34,12 +27,9 @@ export interface LedgerLog {
 	date: Date
 }
 
-const zeroBlock = '0000000000000000000000000000000000000000000000000000000000000000'
-
 @Injectable({ providedIn: 'root' })
 export class LedgerService {
 	private desktop = inject(DesktopService)
-	private appSettings = inject(AppSettingsService)
 
 	waitTimeout = 30000
 	walletPrefix = `44'/165'/`
@@ -49,11 +39,6 @@ export class LedgerService {
 	// isDesktop = true
 	isDesktop = environment.desktop
 	queryingDesktopLedger = false
-
-	supportsWebHID = false
-	supportsWebUSB = false
-	supportsBluetooth = false
-	supportsUSB = false
 
 	transportMode: 'USB' | 'HID' | 'Bluetooth'
 	DynamicTransport: typeof TransportUSB | typeof TransportHID | typeof TransportBLE
@@ -80,48 +65,6 @@ export class LedgerService {
 					this.desktopMessage$.next(message)
 			}
 		})
-		this.supportsUSB = true
-		this.supportsBluetooth = true
-	}
-
-	/**
-	 * Check which transport protocols are supported by the browser
-	 */
-	async checkBrowserSupport () {
-		await Promise.all([
-			TransportHID.isSupported().then((supported) => (this.supportsWebHID = supported)),
-			TransportUSB.isSupported().then((supported) => (this.supportsWebUSB = supported)),
-			TransportBLE.isSupported().then((supported) => (this.supportsBluetooth = supported)),
-		])
-		this.supportsUSB = this.supportsWebHID || this.supportsWebUSB
-	}
-
-	/**
-	 * Detect the optimal USB transport protocol for the current browser and OS
-	 */
-	detectUsbTransport () {
-		if (this.supportsWebUSB) {
-			// Prefer WebUSB
-			this.transportMode = 'USB'
-			this.DynamicTransport = TransportUSB
-		} else {
-			// Fallback to WebHID
-			this.transportMode = 'HID'
-			this.DynamicTransport = TransportHID
-		}
-	}
-
-	/**
-	 * Enable or disable bluetooth communication, if supported
-	 * @param enabled   The bluetooth enabled state
-	 */
-	enableBluetoothMode (enabled: boolean) {
-		if (this.supportsBluetooth && enabled) {
-			this.transportMode = 'Bluetooth'
-			this.DynamicTransport = TransportBLE
-		} else {
-			this.detectUsbTransport()
-		}
 	}
 
 	/**

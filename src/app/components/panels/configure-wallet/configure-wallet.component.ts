@@ -41,16 +41,18 @@ export class ConfigureWalletComponent {
 	ledgerService = inject(LedgerService)
 	walletService = inject(WalletService)
 
+	readonly isDesktop = environment.desktop
+	readonly isBluetoothSupported = this.isDesktop || typeof navigator?.bluetooth?.getDevices === 'function'
+	readonly isHidSupported = this.isDesktop || typeof navigator?.hid?.getDevices === 'function'
+	readonly isUsbSupported = this.isDesktop || typeof navigator?.usb?.getDevices === 'function'
+
 	panels = panels
 	activePanel = panels.landing
 	wallet = this.walletService.selectedWallet
-	get isBluetoothSupported () {
-		return environment.desktop || typeof navigator?.bluetooth?.getDevices === 'function'
-	}
 	get isConfigured () {
 		return this.walletService.isConfigured
 	}
-	isDesktop = environment.desktop
+
 	isNewWallet = true
 	hasConfirmedBackup = false
 	importSeed = ''

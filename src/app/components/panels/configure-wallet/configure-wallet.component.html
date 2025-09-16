@@ -554,27 +554,25 @@
 				>
 					<div class="uk-width-1-1">
 						<h3>Use Ledger Hardware Wallet</h3>
-						@if (ledgerStatus === 'DISCONNECTED') {
-							<div>
-								<p>
-									Make sure you have the nano app installed and running on your Ledger, then click one of the buttons
-									below to connect via either USB or Bluetooth.
-								</p>
-								@if (!isDesktop && !isBluetoothSupported) {
-									<p>Bluetooth is currently not supported by your browser, please use Chrome, Edge, Opera or Brave</p>
-								}
-								<p>
-									<a
-										href="https://docs.nault.cc/2020/08/04/ledger-guide.html"
-										target="_blank"
-										rel="noopener noreferrer"
-										>Ledger/Nault User Guide and Troubleshooting</a
-									>
-								</p>
-								<br />
-							</div>
-						}
-						@if (!ledgerService.supportsUSB) {
+						<div>
+							<p>
+								Make sure you have the nano app installed and running on your Ledger, then click one of the buttons
+								below to connect via either USB or Bluetooth.
+							</p>
+							@if (!isDesktop && !isBluetoothSupported) {
+								<p>Bluetooth is currently not supported by your browser, please use Chrome, Edge, Opera or Brave</p>
+							}
+							<p>
+								<a
+									href="https://docs.nault.cc/2020/08/04/ledger-guide.html"
+									target="_blank"
+									rel="noopener noreferrer"
+									>Ledger/Nault User Guide and Troubleshooting</a
+								>
+							</p>
+							<br />
+						</div>
+						@if (!isHidSupported && !isUsbSupported) {
 							<div>
 								<div class="uk-alert uk-alert-warning nlt-inline-alert">
 									<div class="icon-column">
@@ -588,22 +586,19 @@
 								</div>
 							</div>
 						}
-						@if (ledgerService.supportsUSB) {
+						@if (isHidSupported || isUsbSupported) {
 							<div>
-								@if (ledgerStatus === 'DISCONNECTED') {
+								@if (walletService.selectedWallet.type !== 'Ledger') {
 									<div>
 										<div class="uk-alert uk-alert-warning nlt-inline-alert">
 											<div class="icon-column">
 												<div uk-icon="icon: warning; ratio: 2;"></div>
 											</div>
-											<p>
-												<b>Ledger Device Not Connected</b><br />Make sure you have the nano app installed and running on
-												the device, then press connect.<br />
-											</p>
+											<p>>Make sure you have the nano app installed and running on the device, then press connect.</p>
 										</div>
 									</div>
 								}
-								@if (ledgerStatus === 'LOCKED') {
+								@if (walletService.selectedWallet.type === 'Ledger' && walletService.isLocked) {
 									<div>
 										<div class="uk-alert uk-alert-warning nlt-inline-alert">
 											<div class="icon-column">
@@ -615,7 +610,7 @@
 										</div>
 									</div>
 								}
-								@if (ledgerStatus === 'CONNECTED') {
+								@if (walletService.selectedWallet.type === 'Ledger' && !walletService.isLocked) {
 									<div>
 										<div class="uk-alert uk-alert-success nlt-inline-alert">
 											<div class="icon-column">
@@ -755,30 +750,22 @@
 					Import From Seed
 				</button>
 			}
-			@if (selectedImportOption === 'ledger' && ledgerStatus === 'DISCONNECTED') {
+			@if (selectedImportOption === 'ledger') {
 				<button
-					[disabled]="!ledgerService.supportsUSB"
+					[disabled]="!isHidSupported && !isUsbSupported"
 					class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
 					(click)="connectLedgerByUsb()"
 				>
 					Connect via USB
 				</button>
 			}
-			@if (selectedImportOption === 'ledger' && ledgerStatus === 'DISCONNECTED') {
+			@if (selectedImportOption === 'ledger') {
 				<button
 					[disabled]="!isBluetoothSupported"
 					class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
 					(click)="connectLedgerByBluetooth()"
 				>
 					Connect via Bluetooth
-				</button>
-			}
-			@if (selectedImportOption === 'ledger' && ledgerStatus === 'DISCONNECTED') {
-				<button
-					class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
-					(click)="importLedgerWallet(true)"
-				>
-					Refresh Ledger Status
 				</button>
 			}
 			@if (selectedImportOption === 'privateKey') {
