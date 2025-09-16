@@ -72,7 +72,7 @@ export class LedgerService {
 	 * Dispatches new messages via the main Observables
 	 */
 	configureDesktop () {
-		this.desktop.on('ledger', (event, message) => {
+		this.desktop.on('ledger', (message) => {
 			switch (message?.event) {
 				case 'account-details':
 				case 'cache-block':

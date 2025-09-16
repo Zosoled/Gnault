@@ -223,7 +223,7 @@ export class AppComponent implements AfterViewInit {
 		})
 
 		// handle deeplinks
-		this.svcDesktop.on('deeplink', (e, deeplink) => {
+		this.svcDesktop.on('deeplink', (deeplink) => {
 			if (!this.svcDeeplink.navigate(deeplink))
 				this.svcNotification.sendWarning('This URI has an invalid address.', { length: 5000 })
 		})
