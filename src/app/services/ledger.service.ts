@@ -103,13 +103,13 @@ export class LedgerService {
 		})
 	}
 
-	async getLedgerAccountDesktop (accountIndex, showOnScreen) {
+	async getLedgerAccountDesktop (accountIndex) {
 		if (this.queryingDesktopLedger) {
 			throw new Error(`Already querying desktop device, please wait`)
 		}
 		this.queryingDesktopLedger = true
 
-		this.desktop.send('ledger', { event: 'account-details', data: { accountIndex, showOnScreen } })
+		this.desktop.send('ledger', { event: 'account-details', data: { accountIndex } })
 
 		try {
 			const details = await this.getDesktopResponse('account-details', (a) => a.accountIndex === accountIndex)

@@ -1,8 +1,6 @@
 import Transport from '@ledgerhq/hw-transport'
-import TransportNodeBle from '@ledgerhq/hw-transport-node-ble'
-import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
 import { ipcMain } from 'electron'
-import { Ledger } from 'libnemo'
+import { Wallet } from 'libnemo'
 import * as rx from 'rxjs'
 
 const STATUS_CODES = {
@@ -29,7 +27,7 @@ export interface LedgerData {
  * talks to the USB device directly and relays messages over Electron IPC
  */
 export class LedgerService {
-	walletPrefix = `44'/165'/`
+	wallet: Wallet
 	waitTimeout = 30000
 	pollInterval = 5000
 	pollingLedger = false
@@ -41,75 +39,25 @@ export class LedgerService {
 		nano: null,
 		transport: null,
 	}
-	constructor () { }
 
 	// Reset connection to the ledger device, update the status
 	resetLedger () {
-		setTimeout(async () => {
-			const hidDevices = await globalThis.navigator.hid.getDevices()
-			for (const device of hidDevices) {
-				if (device.vendorId === Ledger.UsbVendorId) {
-					device.forget()
-				}
-			}
-			const usbDevices = await globalThis.navigator.usb.getDevices()
-			for (const device of usbDevices) {
-				if (device.vendorId === Ledger.UsbVendorId) {
-					device.forget()
-				}
-			}
-		})
-		this.ledgerStatus$.next(Ledger.status)
-	}
-
-	// Open a connection to the usb device and initialize up the Nano Ledger library
-	async loadTransport (bluetooth: boolean) {
-		return new Promise((resolve, reject) => {
-			const transport = bluetooth ? TransportNodeBle : TransportNodeHid
-			let found = false
-			const sub = transport.listen({
-				next: async (e) => {
-					found = true
-					if (sub) sub.unsubscribe()
-					clearTimeout(timeoutId)
-					Ledger.connect().then(resolve).catch(reject)
-				},
-				error: (e) => {
-					clearTimeout(timeoutId)
-					reject(e)
-				},
-				complete: () => {
-					clearTimeout(timeoutId)
-					if (!found) {
-						reject(new Error(transport.ErrorMessage_NoDeviceFound))
-					}
-				},
-			})
-
-			const timeoutId = setTimeout(() => {
-				sub.unsubscribe()
-				reject(new Error(transport.ErrorMessage_ListenTimeout))
-			}, this.waitTimeout)
-		})
-	}
-
-	async loadAppConfig (): Promise<any> {
-		return new Promise((resolve, reject) => {
-			Ledger.connect().then(resolve).catch(reject)
-		})
+		this.wallet.lock()
+		this.ledgerStatus$.next(this.wallet.isLocked)
 	}
 
 	// Try connecting to the ledger device and sending a command to it
 	async loadLedger (bluetooth = false) {
-		if (!this.ledger.transport) {
-			try {
-				await this.loadTransport(bluetooth)
-			} catch (err) {
-				console.log(`Error loading transport? `, err)
-				this.setLedgerStatus(LedgerStatus.NOT_CONNECTED, `Unable to load Ledger transport: ${err.message || err}`)
-				this.resetLedger()
-				return false
+		try {
+			this.wallet = await Wallet.create('Ledger')
+			if (bluetooth) {
+				await this.wallet.config({ connection: 'ble' })
 			}
+		} catch (err) {
+			console.error('`Error loading transport', err)
+			this.setLedgerStatus(err.message ?? err)
+			this.resetLedger()
+			return false
 		}
 
 		let resolved = false
@@ -144,10 +92,10 @@ export class LedgerService {
 		return false
 	}
 
-	async getLedgerAccount (accountIndex, showOnScreen = false) {
+	async getLedgerAccount (accountIndex: number) {
 		try {
 			this.queryingLedger = true
-			const account = await Ledger.account(accountIndex, showOnScreen)
+			const account = await this.wallet.account(accountIndex)
 			this.queryingLedger = false
 
 			this.ledgerMessage$.next({ event: 'account-details', data: Object.assign({ accountIndex }, account) })
@@ -175,7 +123,7 @@ export class LedgerService {
 	async cacheBlock (accountIndex, cacheData) {
 		try {
 			this.queryingLedger = true
-			const cacheResponse = await Ledger.updateCache(accountIndex, cacheData)
+			const cacheResponse = await this.wallet.sign(accountIndex, null, cacheData)
 			this.queryingLedger = false
 
 			this.ledgerMessage$.next({ event: 'cache-block', data: Object.assign({ accountIndex }, cacheResponse) })
@@ -195,7 +143,7 @@ export class LedgerService {
 	async signBlock (accountIndex, blockData) {
 		try {
 			this.queryingLedger = true
-			const signResponse = await Ledger.sign(accountIndex, blockData)
+			const signResponse = await this.wallet.sign(accountIndex, blockData)
 			this.queryingLedger = false
 
 			this.ledgerMessage$.next({ event: 'sign-block', data: Object.assign({ accountIndex }, signResponse) })
@@ -217,10 +165,6 @@ export class LedgerService {
 		this.ledgerStatus$.next({ status: this.ledger.status, statusText })
 	}
 
-	ledgerPath (accountIndex) {
-		return `${this.walletPrefix}${accountIndex}'`
-	}
-
 	pollLedgerStatus () {
 		if (!this.pollingLedger) return
 		setTimeout(async () => {
@@ -234,7 +178,7 @@ export class LedgerService {
 		if (this.queryingLedger) return // Already querying ledger, skip this iteration
 
 		try {
-			await this.getLedgerAccount(0, false)
+			await this.getLedgerAccount(0)
 			this.setLedgerStatus(LedgerStatus.READY)
 		} catch (err) {
 			if (err.statusCode === STATUS_CODES.SECURITY_STATUS_NOT_SATISFIED) {
@@ -255,16 +199,14 @@ export function initialize () {
 	const Ledger = new LedgerService()
 
 	// When the observable emits a new status, send it to the browser window
-	Ledger.ledgerStatus$.subscribe((newStatus) => {
+	Ledger.ledgerStatus$.subscribe((status) => {
 		if (!sendingWindow) return
-
-		sendingWindow.send('ledger', { event: 'ledger-status', data: newStatus })
+		sendingWindow.send('ledger', { event: 'ledger-status', data: status })
 	})
 
 	// When the observable emits a new message, send it to the browser window
 	Ledger.ledgerMessage$.subscribe((newMessage) => {
 		if (!sendingWindow) return
-
 		sendingWindow.send('ledger', newMessage)
 	})
 
@@ -278,7 +220,7 @@ export function initialize () {
 				Ledger.loadLedger(data.data.bluetooth)
 				break
 			case 'account-details':
-				Ledger.getLedgerAccount(data.data.accountIndex || 0, data.data.showOnScreen || false)
+				Ledger.getLedgerAccount(data.data.accountIndex || 0)
 				break
 			case 'cache-block':
 				data.data.cacheData.signature = data.data.signature
