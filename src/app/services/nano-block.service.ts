@@ -1,6 +1,4 @@
 import { Injectable, inject } from '@angular/core'
-import { Account, Block, Wallet } from 'libnemo'
-import { BehaviorSubject } from 'rxjs'
 import {
 	ApiService,
 	AppSettingsService,
@@ -12,6 +10,8 @@ import {
 	WalletAccount,
 	WorkPoolService
 } from 'app/services'
+import { Account, Block, Wallet } from 'libnemo'
+import { BehaviorSubject } from 'rxjs'
 
 @Injectable({ providedIn: 'root' })
 export class NanoBlockService {
@@ -72,10 +72,8 @@ export class NanoBlockService {
 			}
 			try {
 				this.sendLedgerNotification()
-				await this.ledgerService.updateCache(walletAccount.index, toAcct.frontier)
-				const sig = await this.ledgerService.signBlock(walletAccount.index, ledgerBlock)
+				await wallet.sign(walletAccount.index, blockData as unknown as Block, toAcct.frontier)
 				this.clearLedgerNotification()
-				blockData.signature = sig.signature
 			} catch (err) {
 				this.clearLedgerNotification()
 				this.sendLedgerDeniedNotification()
@@ -221,10 +219,9 @@ export class NanoBlockService {
 			}
 			try {
 				this.sendLedgerNotification()
-				await this.ledgerService.updateCache(walletAccount.index, fromAccount.frontier)
-				const sig = await this.ledgerService.signBlock(walletAccount.index, ledgerBlock)
+				const signature = await wallet.sign(walletAccount.index, ledgerBlock as unknown as Block, fromAccount.frontier)
 				this.clearLedgerNotification()
-				blockData.signature = sig.signature
+				blockData.signature = signature
 			} catch (err) {
 				this.clearLedgerNotification()
 				this.sendLedgerDeniedNotification(err)
@@ -294,13 +291,9 @@ export class NanoBlockService {
 			}
 			try {
 				this.sendLedgerNotification()
-				// On new accounts, we do not need to cache anything
-				if (!openEquiv) {
-					await this.ledgerService.updateCache(walletAccount.index, toAcct.frontier)
-				}
-				const sig = await this.ledgerService.signBlock(walletAccount.index, ledgerBlock)
+				const signature = await wallet.sign(walletAccount.index, ledgerBlock, toAcct.frontier)
 				this.notifications.removeNotification('ledger-sign')
-				blockData.signature = sig.signature.toUpperCase()
+				blockData.signature = signature.toUpperCase()
 			} catch (err) {
 				this.notifications.removeNotification('ledger-sign')
 				this.notifications.sendWarning(err.message || `Transaction denied on Ledger device`)
@@ -378,17 +371,9 @@ export class NanoBlockService {
 			try {
 				const wallet = await Wallet.create('Ledger')
 				this.sendLedgerNotification()
-				// On new accounts, we do not need to cache anything
-				if (!openEquiv) {
-					try {
-						// await wallet.ledger.updateCache(walletAccount.index, prevBlock)
-						await this.ledgerService.updateCacheOffline(walletAccount.index, prevBlock)
-					} catch (err) { console.log(err) }
-				}
 				// const sig = await wallet.ledger.sign(walletAccount.index, ledgerBlock)
-				const { signature } = await this.ledgerService.signBlock(walletAccount.index, ledgerBlock)
+				await wallet.sign(walletAccount.index, ledgerBlock, prevBlock as unknown as Block)
 				this.clearLedgerNotification()
-				block.signature = signature
 			} catch (err) {
 				this.clearLedgerNotification()
 				this.sendLedgerDeniedNotification(err)

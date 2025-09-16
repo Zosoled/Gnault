@@ -1,6 +1,6 @@
 @if (walletService.isLedger) {
 	<div>
-		@if (ledgerStatus.status === 'not-connected' || !ledgerStatus.status) {
+		@if (ledgerStatus === 'DISCONNECTED' || !ledgerStatus) {
 			<div class="nav-status-row">
 				<div class="status-icon">
 					<span
@@ -22,7 +22,7 @@
 				</div>
 			</div>
 		}
-		@if (ledgerStatus.status === 'locked') {
+		@if (ledgerStatus === 'LOCKED') {
 			<div class="nav-status-row">
 				<div class="status-icon">
 					<span
@@ -38,7 +38,7 @@
 				</div>
 			</div>
 		}
-		@if (ledgerStatus.status === 'ready') {
+		@if (ledgerStatus === 'CONNECTED') {
 			<div
 				class="nav-status-row interactable"
 				(click)="reloadLedger()"

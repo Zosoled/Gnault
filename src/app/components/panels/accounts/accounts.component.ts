@@ -12,7 +12,7 @@ import {
 	RepresentativeService,
 	WalletService
 } from 'app/services'
-import { Account, Ledger } from 'libnemo'
+import { Account } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 import { Subject, timer } from 'rxjs'
 import { debounce } from 'rxjs/operators'
@@ -67,7 +67,7 @@ export class AccountsComponent implements OnInit {
 				return
 			}
 		}
-		if (this.isLedgerWallet && Ledger.status !== 'CONNECTED') {
+		if (this.isLedgerWallet && this.svcWallet.isLocked) {
 			return this.svcNotifications.sendWarning(this.svcTransloco.translate('accounts.ledger-device-must-be-ready'))
 		}
 		if (this.svcWallet.accounts.length >= 20) {
@@ -169,7 +169,7 @@ export class AccountsComponent implements OnInit {
 	}
 
 	async showLedgerAddress (account) {
-		if (Ledger.status !== 'CONNECTED') {
+		if (this.svcWallet.isLocked) {
 			return this.svcNotifications.sendWarning(this.svcTransloco.translate('accounts.ledger-device-must-be-ready'))
 		}
 		this.svcNotifications.sendInfo(
@@ -177,7 +177,7 @@ export class AccountsComponent implements OnInit {
 			{ identifier: 'ledger-account', length: 0 }
 		)
 		try {
-			await this.svcLedger.getLedgerAccount(account.index, true)
+			await this.svcWallet.selectedWallet.account(account.index)
 			this.svcNotifications.sendSuccess(this.svcTransloco.translate('accounts.account-address-confirmed-on-ledger'))
 		} catch (err) {
 			this.svcNotifications.sendError(

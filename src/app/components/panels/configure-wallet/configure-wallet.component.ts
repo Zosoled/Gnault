@@ -9,7 +9,7 @@ import {
 	UtilService,
 	WalletService
 } from 'app/services'
-import { DeviceStatus, Ledger, Wallet } from 'libnemo'
+import { Wallet } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 
 enum panels {
@@ -78,8 +78,6 @@ export class ConfigureWalletComponent {
 	indexMax = INDEX_MAX
 	selectedImportOption = 'seed'
 
-	get ledgerStatus (): DeviceStatus { return Ledger.status }
-
 	constructor () {
 		if (this.route.getCurrentNavigation().extras.state && this.route.getCurrentNavigation().extras.state.seed) {
 			this.activePanel = panels.import
@@ -135,50 +133,24 @@ export class ConfigureWalletComponent {
 		await this.importLedgerWallet()
 	}
 
-	async importLedgerWallet (refreshOnly = false) {
-		// If a wallet exists already, make sure they know they are overwriting it
-		if (!refreshOnly && this.isConfigured) {
-			const confirmed = await this.confirmWalletOverwrite()
-			if (!confirmed) {
-				return
-			}
-			this.walletService.resetWallet()
-		}
-
-		// Determine status of ledger device using ledger service
+	async importLedgerWallet () {
 		this.notifications.sendInfo(`Checking for Ledger device...`, { identifier: 'ledger-status', length: 0 })
-		await this.ledgerService.loadLedger(true)
-		this.notifications.removeNotification('ledger-status')
-		this.notifications.removeNotification('ledger-error')
-
-		if (Ledger.status === 'DISCONNECTED') {
-			this.ledgerService.resetLedger()
+		try {
+			// Create new ledger wallet
+			const newWallet = await this.walletService.createLedgerWallet()
+			// We skip the password panel
+			this.route.navigate(['accounts']) // load accounts and watch them update in real-time
+			this.walletService.publishNewWallet()
+			this.notifications.sendSuccess(`Successfully connected to Ledger device`)
+		} catch (err) {
 			return this.notifications.sendWarning(
 				`Failed to connect the Ledger device. Make sure the nano app is running on the Ledger. If the error persists: Check the <a href="https://docs.nault.cc/2020/08/04/ledger-guide.html#troubleshooting" target="_blank" rel="noopener noreferrer">troubleshooting guide</a>`,
 				{ identifier: 'ledger-error', length: 0 }
 			)
+		} finally {
+			this.notifications.removeNotification('ledger-status')
+			this.notifications.removeNotification('ledger-error')
 		}
-
-		if (Ledger.status === 'LOCKED') {
-			return this.notifications.sendWarning(`Unlock your Ledger device and open the nano app to continue`)
-		}
-
-		if (Ledger.status === 'CONNECTED') {
-			this.notifications.sendSuccess(`Successfully connected to Ledger device`)
-		}
-
-		if (refreshOnly) {
-			return
-		}
-
-		// We skip the password panel
-		this.route.navigate(['accounts']) // load accounts and watch them update in real-time
-
-		// Create new ledger wallet
-		const newWallet = await this.walletService.createLedgerWallet()
-		this.notifications.sendSuccess(`Successfully loaded ledger device!`)
-
-		this.walletService.publishNewWallet()
 	}
 
 	// Send a confirmation dialog to the user if they already have a wallet configured

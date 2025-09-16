@@ -19,13 +19,10 @@ export class WalletWidgetComponent implements OnInit {
 	settings = inject(AppSettingsService)
 	walletService = inject(WalletService)
 
-	ledgerStatus = {
-		status: 'not-connected',
-		statusText: '',
-	}
+	ledgerStatus = 'DISCONNECTED'
 	powAlert = false
 
-	ngOnInit() {
+	ngOnInit () {
 		this.ledgerService.ledgerStatus$.subscribe((ledgerStatus) => {
 			this.ledgerStatus = ledgerStatus
 		})
@@ -40,7 +37,7 @@ export class WalletWidgetComponent implements OnInit {
 		})
 	}
 
-	async lockWallet() {
+	async lockWallet () {
 		try {
 			await this.walletService.lockWallet()
 			this.notificationService.sendSuccess(this.translocoService.translate('accounts.wallet-locked'))
@@ -49,14 +46,14 @@ export class WalletWidgetComponent implements OnInit {
 		}
 	}
 
-	async reloadLedger() {
+	async reloadLedger () {
 		this.notificationService.sendInfo(`Checking Ledger Status...`, { identifier: 'ledger-status', length: 0 })
 		try {
-			await this.ledgerService.loadLedger()
+			await this.walletService.selectedWallet.config({ connection: undefined })
 			this.notificationService.removeNotification('ledger-status')
-			if (this.ledgerStatus.status === 'CONNECTED') {
+			if (this.ledgerStatus === 'CONNECTED') {
 				this.notificationService.sendSuccess(`Successfully connected to Ledger device`)
-			} else if (this.ledgerStatus.status === 'LOCKED') {
+			} else if (this.ledgerStatus === 'LOCKED') {
 				this.notificationService.sendError(`Ledger device locked. Unlock and try again.`)
 			}
 		} catch (err) {
@@ -66,14 +63,14 @@ export class WalletWidgetComponent implements OnInit {
 		}
 	}
 
-	async unlockWallet() {
+	async unlockWallet () {
 		const isUnlocked = await this.walletService.requestUnlock()
 		if (isUnlocked === false) {
 			return
 		}
 	}
 
-	cancelPow() {
+	cancelPow () {
 		this.powService.cancelAllPow(true)
 	}
 }
