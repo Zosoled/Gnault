@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core'
 import {
 	ApiService,
 	AppSettingsService,
-	LedgerService,
 	NotificationsService,
 	StateBlock,
 	TxType,
@@ -15,12 +14,12 @@ import { BehaviorSubject } from 'rxjs'
 
 @Injectable({ providedIn: 'root' })
 export class NanoBlockService {
-	private api = inject(ApiService)
-	private util = inject(UtilService)
-	private workPool = inject(WorkPoolService)
-	private notifications = inject(NotificationsService)
-	private ledgerService = inject(LedgerService)
-	settings = inject(AppSettingsService)
+	private svcApi = inject(ApiService)
+	private svcNotifications = inject(NotificationsService)
+	private svcUtil = inject(UtilService)
+	private svcWorkPool = inject(WorkPoolService)
+
+	svcAppSettings = inject(AppSettingsService)
 
 	representativeAccounts = [
 		'nano_1x7biz69cem95oo7gxkrw6kzhfywq4x5dupw4z1bdzkb74dk9kpxwzjbdhhs', // NanoCrawler
@@ -45,7 +44,7 @@ export class NanoBlockService {
 
 	async generateChange (wallet: Wallet, walletAccount, representativeAccount, ledger = false) {
 		const account = Account.load(walletAccount.id)
-		const toAcct = await this.api.accountInfo(account.address)
+		const toAcct = await this.svcApi.accountInfo(account.address)
 		if (!toAcct) throw new Error(`Account must have an open block first`)
 
 		await this.validateAccount(toAcct, account.publicKey)
@@ -84,18 +83,18 @@ export class NanoBlockService {
 			await wallet.sign(walletAccount.index, blockData as unknown as Block)
 		}
 
-		if (!this.workPool.workExists(toAcct.frontier)) {
-			this.notifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
+		if (!this.svcWorkPool.workExists(toAcct.frontier)) {
+			this.svcNotifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
 		}
 
-		blockData.work = await this.workPool.getWork(toAcct.frontier, 1)
-		this.notifications.removeNotification('pow')
+		blockData.work = await this.svcWorkPool.getWork(toAcct.frontier, 1)
+		this.svcNotifications.removeNotification('pow')
 
-		const processResponse = await this.api.process(blockData, TxType.change)
+		const processResponse = await this.svcApi.process(blockData, TxType.change)
 		if (processResponse && processResponse.hash) {
 			walletAccount.frontier = processResponse.hash
-			this.workPool.addWorkToCache(processResponse.hash, 1) // Add new hash into the work pool, high PoW threshold for change block
-			this.workPool.removeFromCache(toAcct.frontier)
+			this.svcWorkPool.addWorkToCache(processResponse.hash, 1) // Add new hash into the work pool, high PoW threshold for change block
+			this.svcWorkPool.removeFromCache(toAcct.frontier)
 			return processResponse.hash
 		} else {
 			return null
@@ -192,13 +191,13 @@ export class NanoBlockService {
 
 	async generateSend (wallet: Wallet, walletAccount, toAccountID, rawAmount, ledger = false) {
 		const account = Account.load(walletAccount.id)
-		const fromAccount = await this.api.accountInfo(account.address)
+		const fromAccount = await this.svcApi.accountInfo(account.address)
 		if (!fromAccount) throw new Error(`Unable to get account information for ${account.address}`)
 
 		const remaining = BigInt(fromAccount.balance) - rawAmount
 		const remainingDecimal = remaining.toString(10)
 
-		const representative = fromAccount.representative || (this.settings.settings.defaultRepresentative || this.getRandomRepresentative())
+		const representative = fromAccount.representative || (this.svcAppSettings.settings.defaultRepresentative || this.getRandomRepresentative())
 		const blockData = {
 			type: 'state',
 			account: walletAccount.id,
@@ -232,35 +231,35 @@ export class NanoBlockService {
 			await wallet.sign(account.index, blockData as unknown as Block)
 		}
 
-		if (!this.workPool.workExists(fromAccount.frontier)) {
-			this.notifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
+		if (!this.svcWorkPool.workExists(fromAccount.frontier)) {
+			this.svcNotifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
 		}
 
-		blockData.work = await this.workPool.getWork(fromAccount.frontier, 1)
-		this.notifications.removeNotification('pow')
+		blockData.work = await this.svcWorkPool.getWork(fromAccount.frontier, 1)
+		this.svcNotifications.removeNotification('pow')
 
-		const processResponse = await this.api.process(blockData, TxType.send)
+		const processResponse = await this.svcApi.process(blockData, TxType.send)
 		if (!processResponse || !processResponse.hash) throw new Error(processResponse.error || `Node returned an error`)
 
 		walletAccount.frontier = processResponse.hash
-		this.workPool.addWorkToCache(processResponse.hash, 1) // Add new hash into the work pool, high PoW threshold for send block
-		this.workPool.removeFromCache(fromAccount.frontier)
+		this.svcWorkPool.addWorkToCache(processResponse.hash, 1) // Add new hash into the work pool, high PoW threshold for send block
+		this.svcWorkPool.removeFromCache(fromAccount.frontier)
 
 		return processResponse.hash
 	}
 
 	async generateReceive (wallet, walletAccount, sourceBlock, ledger = false) {
 		const account = Account.load(walletAccount)
-		const toAcct = await this.api.accountInfo(account.address)
+		const toAcct = await this.svcApi.accountInfo(account.address)
 
 		let workBlock = null
 
 		const openEquiv = !toAcct || !toAcct.frontier
 
 		const previousBlock = toAcct.frontier || this.zeroHash
-		const representative = toAcct.representative || (this.settings.settings.defaultRepresentative || this.getRandomRepresentative())
+		const representative = toAcct.representative || (this.svcAppSettings.settings.defaultRepresentative || this.getRandomRepresentative())
 
-		const srcBlockInfo = await this.api.blocksInfo([sourceBlock])
+		const srcBlockInfo = await this.svcApi.blocksInfo([sourceBlock])
 		const srcAmount = BigInt(srcBlockInfo.blocks[sourceBlock].amount)
 		const newBalance = openEquiv
 			? srcAmount
@@ -292,11 +291,11 @@ export class NanoBlockService {
 			try {
 				this.sendLedgerNotification()
 				const signature = await wallet.sign(walletAccount.index, ledgerBlock, toAcct.frontier)
-				this.notifications.removeNotification('ledger-sign')
+				this.svcNotifications.removeNotification('ledger-sign')
 				blockData.signature = signature.toUpperCase()
 			} catch (err) {
-				this.notifications.removeNotification('ledger-sign')
-				this.notifications.sendWarning(err.message || `Transaction denied on Ledger device`)
+				this.svcNotifications.removeNotification('ledger-sign')
+				this.svcNotifications.sendWarning(err.message || `Transaction denied on Ledger device`)
 				return
 			}
 		} else {
@@ -307,14 +306,14 @@ export class NanoBlockService {
 		workBlock = openEquiv
 			? Account.load(walletAccount.id).publicKey
 			: previousBlock
-		if (!this.workPool.workExists(workBlock)) {
-			this.notifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
+		if (!this.svcWorkPool.workExists(workBlock)) {
+			this.svcNotifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
 		}
 
 		console.log('Get work for receive block')
-		blockData.work = await this.workPool.getWork(workBlock, 1 / 64) // low PoW threshold since receive block
-		this.notifications.removeNotification('pow')
-		const processResponse = await this.api.process(
+		blockData.work = await this.svcWorkPool.getWork(workBlock, 1 / 64) // low PoW threshold since receive block
+		this.svcNotifications.removeNotification('pow')
+		const processResponse = await this.svcApi.process(
 			blockData,
 			openEquiv
 				? TxType.open
@@ -325,7 +324,7 @@ export class NanoBlockService {
 			// Add new hash into the work pool, high PoW threshold since we don't know what the next one will be
 			// Skip adding new work cache directly, let reloadBalances() check for receivable and decide instead
 			// this.workPool.addWorkToCache(processResponse.hash, 1)
-			this.workPool.removeFromCache(workBlock)
+			this.svcWorkPool.removeFromCache(workBlock)
 
 			// update the rep view via subscription
 			if (openEquiv) {
@@ -388,15 +387,15 @@ export class NanoBlockService {
 			const workBlock = openEquiv
 				? Account.load(walletAccount.id).publicKey
 				: block.previous
-			if (!this.workPool.workExists(workBlock)) {
-				this.notifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
+			if (!this.svcWorkPool.workExists(workBlock)) {
+				this.svcNotifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
 			}
 			const difficulty = (type === TxType.receive || type === TxType.open)
 				? 1 / 64
 				: 1
-			block.work = await this.workPool.getWork(workBlock, difficulty)
-			this.notifications.removeNotification('pow')
-			this.workPool.removeFromCache(workBlock)
+			block.work = await this.svcWorkPool.getWork(workBlock, difficulty)
+			this.svcNotifications.removeNotification('pow')
+			this.svcWorkPool.removeFromCache(workBlock)
 		}
 		return block // return signed block (with or without work)
 	}
@@ -414,7 +413,7 @@ export class NanoBlockService {
 			}
 			return
 		}
-		const blockResponse = await this.api.blocksInfo([accountInfo.frontier])
+		const blockResponse = await this.svcApi.blocksInfo([accountInfo.frontier])
 		const blockData = blockResponse.blocks[accountInfo.frontier]
 		if (!blockData) throw new Error(`Unable to load frontier block data`)
 		blockData.contents = JSON.parse(blockData.contents)
@@ -426,7 +425,7 @@ export class NanoBlockService {
 		if (blockData.contents.type !== 'state') {
 			throw new Error(`Frontier block wasn't a state block, which shouldn't be possible`)
 		}
-		if (this.util.hex.fromUint8(this.util.nano.hashStateBlock(blockData.contents)) !== accountInfo.frontier) {
+		if (this.svcUtil.hex.fromUint8(this.svcUtil.nano.hashStateBlock(blockData.contents)) !== accountInfo.frontier) {
 			throw new Error(`Frontier hash didn't match block data`)
 		}
 
@@ -445,15 +444,15 @@ export class NanoBlockService {
 	}
 
 	sendLedgerDeniedNotification (err = null) {
-		this.notifications.sendWarning(err && err.message || `Transaction denied on Ledger device`)
+		this.svcNotifications.sendWarning(err && err.message || `Transaction denied on Ledger device`)
 	}
 
 	sendLedgerNotification () {
-		this.notifications.sendInfo(`Waiting for confirmation on Ledger Device...`, { identifier: 'ledger-sign', length: 0 })
+		this.svcNotifications.sendInfo(`Waiting for confirmation on Ledger Device...`, { identifier: 'ledger-sign', length: 0 })
 	}
 
 	clearLedgerNotification () {
-		this.notifications.removeNotification('ledger-sign')
+		this.svcNotifications.removeNotification('ledger-sign')
 	}
 
 	getRandomRepresentative () {
