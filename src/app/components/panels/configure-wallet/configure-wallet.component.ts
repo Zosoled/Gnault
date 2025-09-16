@@ -9,6 +9,7 @@ import {
 	UtilService,
 	WalletService
 } from 'app/services'
+import { environment } from 'environments/environment'
 import { Wallet } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 
@@ -43,9 +44,13 @@ export class ConfigureWalletComponent {
 	panels = panels
 	activePanel = panels.landing
 	wallet = this.walletService.selectedWallet
+	get isBluetoothSupported () {
+		return environment.desktop || typeof navigator?.bluetooth?.getDevices === 'function'
+	}
 	get isConfigured () {
 		return this.walletService.isConfigured
 	}
+	isDesktop = environment.desktop
 	isNewWallet = true
 	hasConfirmedBackup = false
 	importSeed = ''
@@ -124,20 +129,18 @@ export class ConfigureWalletComponent {
 	}
 
 	async connectLedgerByBluetooth () {
-		this.ledgerService.enableBluetoothMode(true)
-		await this.importLedgerWallet()
+		await this.importLedgerWallet(true)
 	}
 
 	async connectLedgerByUsb () {
-		this.ledgerService.enableBluetoothMode(false)
-		await this.importLedgerWallet()
+		await this.importLedgerWallet(false)
 	}
 
-	async importLedgerWallet () {
+	async importLedgerWallet (bluetooth: boolean) {
 		this.notifications.sendInfo(`Checking for Ledger device...`, { identifier: 'ledger-status', length: 0 })
 		try {
 			// Create new ledger wallet
-			const newWallet = await this.walletService.createLedgerWallet()
+			const newWallet = await this.walletService.createLedgerWallet(bluetooth)
 			// We skip the password panel
 			this.route.navigate(['accounts']) // load accounts and watch them update in real-time
 			this.walletService.publishNewWallet()

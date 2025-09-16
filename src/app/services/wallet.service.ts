@@ -537,9 +537,12 @@ export class WalletService {
 		return { mnemonic, seed }
 	}
 
-	async createLedgerWallet () {
+	async createLedgerWallet (bluetooth: boolean) {
 		this.resetWallet()
 		this.selectedWallet = await Wallet.create('Ledger')
+		if (bluetooth) {
+			await this.selectedWallet.config({ connection: 'ble' })
+		}
 		await this.scanAccounts()
 		return this.selectedWallet
 	}

@@ -3,7 +3,7 @@ import { default as Transport } from '@ledgerhq/hw-transport'
 import { default as TransportBLE } from '@ledgerhq/hw-transport-web-ble'
 import { default as TransportHID } from '@ledgerhq/hw-transport-webhid'
 import { default as TransportUSB } from '@ledgerhq/hw-transport-webusb'
-import { ApiService, AppSettingsService, DesktopService } from 'app/services'
+import { AppSettingsService, DesktopService } from 'app/services'
 import { environment } from 'environments/environment'
 import { Subject } from 'rxjs'
 
@@ -38,7 +38,6 @@ const zeroBlock = '0000000000000000000000000000000000000000000000000000000000000
 
 @Injectable({ providedIn: 'root' })
 export class LedgerService {
-	private api = inject(ApiService)
 	private desktop = inject(DesktopService)
 	private appSettings = inject(AppSettingsService)
 
