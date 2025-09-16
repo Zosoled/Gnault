@@ -54,7 +54,7 @@ import { Wallet } from 'libnemo'
 	],
 })
 export class AppComponent implements AfterViewInit {
-	@HostListener('document:mousedown', ['$event']) onGlobalClick(event): void {
+	@HostListener('document:mousedown', ['$event']) onGlobalClick (event): void {
 		if (
 			this.selectButton.nativeElement.contains(event.target) === false &&
 			this.walletsDropdown.nativeElement.contains(event.target) === false
@@ -98,19 +98,19 @@ export class AppComponent implements AfterViewInit {
 	searchData = ''
 	donationAccount = environment.donationAddress
 
-	get innerHeight() {
+	get innerHeight () {
 		return window.innerHeight
 	}
 
-	get innerHeightWithoutMobileBar() {
+	get innerHeightWithoutMobileBar () {
 		return this.innerHeight - (window.innerWidth < 940 ? 50 : 0)
 	}
 
-	get isConfigured() {
+	get isConfigured () {
 		return this.svcWallet.isConfigured
 	}
 
-	constructor() {
+	constructor () {
 		this.router.events.subscribe(() => {
 			this.closeNav()
 		})
@@ -121,7 +121,7 @@ export class AppComponent implements AfterViewInit {
 		})
 	}
 
-	async ngAfterViewInit() {
+	async ngAfterViewInit () {
 		this.svcAppSettings.loadAppSettings()
 		this.svcTransloco.setActiveLang(this.svcAppSettings.settings.language)
 
@@ -274,16 +274,16 @@ export class AppComponent implements AfterViewInit {
 		}
 	}
 
-	applySwUpdate() {
+	applySwUpdate () {
 		this.updates.activateUpdate()
 	}
 
-	toggleNav() {
+	toggleNav () {
 		this.navExpanded = !this.navExpanded
 		this.onNavExpandedChange()
 	}
 
-	closeNav() {
+	closeNav () {
 		if (this.navExpanded === false) {
 			return
 		}
@@ -292,14 +292,14 @@ export class AppComponent implements AfterViewInit {
 		this.onNavExpandedChange()
 	}
 
-	onNavExpandedChange() {
+	onNavExpandedChange () {
 		this.navAnimating = true
 		setTimeout(() => {
 			this.navAnimating = false
 		}, 350)
 	}
 
-	toggleLightMode() {
+	toggleLightMode () {
 		if (this.canToggleLightMode === false) {
 			return
 		}
@@ -313,7 +313,7 @@ export class AppComponent implements AfterViewInit {
 		this.updateAppTheme()
 	}
 
-	updateAppTheme() {
+	updateAppTheme () {
 		if (this.svcAppSettings.settings.lightModeEnabled) {
 			this.renderer.addClass(document.body, 'light-mode')
 			this.renderer.removeClass(document.body, 'dark-mode')
@@ -323,7 +323,7 @@ export class AppComponent implements AfterViewInit {
 		}
 	}
 
-	toggleWalletsDropdown() {
+	toggleWalletsDropdown () {
 		if (this.isWalletsDropdownVisible) {
 			this.isWalletsDropdownVisible = false
 		} else {
@@ -332,7 +332,7 @@ export class AppComponent implements AfterViewInit {
 		}
 	}
 
-	selectWallet(wallet: Wallet | null) {
+	selectWallet (wallet: Wallet | null) {
 		// note: wallet is null when user is switching to 'Total Balance'
 		this.svcWallet.selectedWallet = wallet
 		this.svcWallet.selectedWallet$.next(wallet)
@@ -340,7 +340,7 @@ export class AppComponent implements AfterViewInit {
 		this.svcWallet.saveWalletExport()
 	}
 
-	performSearch() {
+	performSearch () {
 		const searchData = this.searchData.trim()
 		if (!searchData.length) return
 
@@ -366,11 +366,11 @@ export class AppComponent implements AfterViewInit {
 		this.svcNotification.sendWarning(`Invalid nano address or block hash! Please double check your input`)
 	}
 
-	updateIdleTime() {
+	updateIdleTime () {
 		this.inactiveSeconds = 0 // Action has happened, reset the inactivity timer
 	}
 
-	retryConnection() {
+	retryConnection () {
 		if (!this.svcAppSettings.settings.serverAPI) {
 			this.svcNotification.sendInfo(`Wallet server settings is set to offline mode. Please change server first!`)
 			return
@@ -379,7 +379,7 @@ export class AppComponent implements AfterViewInit {
 		this.svcNotification.sendInfo(`Attempting to reconnect to nano node`)
 	}
 
-	async updateFiatPrices() {
+	async updateFiatPrices () {
 		const displayCurrency = this.svcAppSettings.getAppSetting('displayCurrency') ?? 'usd'
 		await this.svcPrice.fetchPrice(displayCurrency)
 		setTimeout(() => this.updateFiatPrices(), this.fiatTimeout)
