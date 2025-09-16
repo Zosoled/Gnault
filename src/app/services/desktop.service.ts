@@ -10,7 +10,7 @@ export class DesktopService {
 	}
 
 	on (channel: string, listener): void {
-		this.ipc.on(channel, listener)
+		this.ipc.on(channel, (_, ...args) => listener(...args))
 	}
 
 	send (channel: string, ...args: any[]): void {
