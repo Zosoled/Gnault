@@ -16,17 +16,11 @@ export class DesktopService {
 		}
 	}
 
-	connect () { }
-
-	on (channel: string, listener) {
-		if (!this._ipc) return false
-		this._ipc.on(channel, listener)
-		return true
+	on (channel: string, listener): void {
+		this._ipc?.on(channel, listener)
 	}
 
-	send (channel: string, ...args) {
-		if (!this._ipc) return false
-		this._ipc.send(channel, ...args)
-		return true
+	send (channel: string, ...args: any[]): void {
+		this._ipc?.send(channel, ...args)
 	}
 }

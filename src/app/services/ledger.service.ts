@@ -62,16 +62,8 @@ export class LedgerService {
 	desktopMessage$ = new Subject()
 
 	constructor () {
-		const appSettings = this.appSettings
-
 		if (this.isDesktop) {
 			this.configureDesktop()
-		} else {
-			this.checkBrowserSupport().then(() => {
-				if (appSettings.getAppSetting('ledgerReconnect') === 'bluetooth') {
-					this.enableBluetoothMode(true)
-				}
-			})
 		}
 	}
 
@@ -80,15 +72,12 @@ export class LedgerService {
 	 * Dispatches new messages via the main Observables
 	 */
 	configureDesktop () {
-		this.desktop.connect()
 		this.desktop.on('ledger', (event, message) => {
-			if (!message || !message.event) return
-			switch (message.event) {
+			switch (message?.event) {
 				case 'account-details':
 				case 'cache-block':
 				case 'sign-block':
 					this.desktopMessage$.next(message)
-					break
 			}
 		})
 		this.supportsUSB = true

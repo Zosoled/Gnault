@@ -13,7 +13,6 @@ interface AppSettings {
 	defaultRepresentative: string | null
 	lockOnClose: number
 	lockInactivityMinutes: number
-	ledgerReconnect: LedgerConnectionType
 	powSource: PoWSource
 	customWorkServer: string
 	receivableOption: string
@@ -39,7 +38,6 @@ export class AppSettingsService {
 		defaultRepresentative: null,
 		lockOnClose: 1,
 		lockInactivityMinutes: 30,
-		ledgerReconnect: 'usb',
 		powSource: 'server',
 		customWorkServer: '',
 		receivableOption: 'amount',
@@ -121,7 +119,7 @@ export class AppSettingsService {
 		['node.somenano.com']
 	)
 
-	loadAppSettings() {
+	loadAppSettings () {
 		let settings: AppSettings = this.settings
 		const settingsStore = localStorage.getItem(this.storeKey)
 		if (settingsStore) {
@@ -148,7 +146,7 @@ export class AppSettingsService {
 		return this.settings
 	}
 
-	loadServerSettings() {
+	loadServerSettings () {
 		const matchingServerOption = this.serverOptions.find((d) => d.value === this.settings.serverName)
 		if (this.settings.serverName === 'random' || !matchingServerOption) {
 			const availableServers = this.serverOptions.filter((server) => server.shouldRandom)
@@ -173,20 +171,20 @@ export class AppSettingsService {
 		}
 	}
 
-	saveAppSettings() {
+	saveAppSettings () {
 		localStorage.setItem(this.storeKey, JSON.stringify(this.settings))
 	}
 
-	getAppSetting(key) {
+	getAppSetting (key) {
 		return this.settings[key] || null
 	}
 
-	setAppSetting(key, value) {
+	setAppSetting (key, value) {
 		this.settings[key] = value
 		this.saveAppSettings()
 	}
 
-	setAppSettings(settingsObject) {
+	setAppSettings (settingsObject) {
 		for (const key in settingsObject) {
 			if (!settingsObject.hasOwnProperty(key)) continue
 			this.settings[key] = settingsObject[key]
@@ -194,7 +192,7 @@ export class AppSettingsService {
 		this.saveAppSettings()
 	}
 
-	clearAppSettings() {
+	clearAppSettings () {
 		localStorage.removeItem(this.storeKey)
 		this.settings = {
 			language: 'en',
@@ -204,7 +202,6 @@ export class AppSettingsService {
 			defaultRepresentative: null,
 			lockOnClose: 1,
 			lockInactivityMinutes: 30,
-			ledgerReconnect: 'usb',
 			powSource: 'server',
 			customWorkServer: '',
 			receivableOption: 'amount',
