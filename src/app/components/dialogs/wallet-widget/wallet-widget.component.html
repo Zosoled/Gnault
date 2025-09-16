@@ -1,4 +1,4 @@
-@if (walletService.isLedger) {
+@if (svcWallet.isLedger) {
 	<div>
 		@if (ledgerStatus === 'DISCONNECTED' || !ledgerStatus) {
 			<div class="nav-status-row">
@@ -77,8 +77,8 @@
 		</div>
 	</div>
 }
-@if (walletService.isConfigured && !walletService.isLedger) {
-	@if (walletService.isLocked) {
+@if (svcWallet.isConfigured && !svcWallet.isLedger) {
+	@if (svcWallet.isLocked) {
 		<div
 			class="nav-status-row half-muted interactable"
 			(click)="unlockWallet()"
@@ -96,7 +96,7 @@
 			</div>
 		</div>
 	}
-	@if (!walletService.isLocked) {
+	@if (!svcWallet.isLocked) {
 		<div
 			class="nav-status-row half-muted interactable"
 			(click)="lockWallet()"
@@ -113,7 +113,7 @@
 		</div>
 	}
 }
-@if (!walletService.isConfigured) {
+@if (!svcWallet.isConfigured) {
 	<a
 		[routerLink]="['/configure-wallet']"
 		class="nav-status-row interactable"

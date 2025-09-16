@@ -11,24 +11,24 @@ import { AppSettingsService, LedgerService, NotificationsService, PowService, Wa
 	imports: [FormsModule, RouterLink, TranslocoPipe],
 })
 export class WalletWidgetComponent implements OnInit {
-	private notificationService = inject(NotificationsService)
-	private powService = inject(PowService)
-	private translocoService = inject(TranslocoService)
+	private svcNotifications = inject(NotificationsService)
+	private svcPow = inject(PowService)
+	private svcTransloco = inject(TranslocoService)
 
-	ledgerService = inject(LedgerService)
-	settings = inject(AppSettingsService)
-	walletService = inject(WalletService)
+	svcLedger = inject(LedgerService)
+	svcAppSettings = inject(AppSettingsService)
+	svcWallet = inject(WalletService)
 
 	ledgerStatus = 'DISCONNECTED'
 	powAlert = false
 
 	ngOnInit () {
-		this.ledgerService.ledgerStatus$.subscribe((ledgerStatus) => {
+		this.svcLedger.ledgerStatus$.subscribe((ledgerStatus) => {
 			this.ledgerStatus = ledgerStatus
 		})
 
 		// Detect if a PoW is taking too long and alert
-		this.powService.powAlert$.subscribe(async (shouldAlert) => {
+		this.svcPow.powAlert$.subscribe(async (shouldAlert) => {
 			if (shouldAlert) {
 				this.powAlert = true
 			} else {
@@ -39,38 +39,38 @@ export class WalletWidgetComponent implements OnInit {
 
 	async lockWallet () {
 		try {
-			await this.walletService.lockWallet()
-			this.notificationService.sendSuccess(this.translocoService.translate('accounts.wallet-locked'))
+			await this.svcWallet.lockWallet()
+			this.svcNotifications.sendSuccess(this.svcTransloco.translate('accounts.wallet-locked'))
 		} catch (err) {
-			this.notificationService.sendError(`Unable to lock wallet`)
+			this.svcNotifications.sendError(`Unable to lock wallet`)
 		}
 	}
 
 	async reloadLedger () {
-		this.notificationService.sendInfo(`Checking Ledger Status...`, { identifier: 'ledger-status', length: 0 })
+		this.svcNotifications.sendInfo(`Checking Ledger Status...`, { identifier: 'ledger-status', length: 0 })
 		try {
-			await this.walletService.selectedWallet.config({ connection: undefined })
-			this.notificationService.removeNotification('ledger-status')
+			await this.svcWallet.selectedWallet.config({ connection: undefined })
+			this.svcNotifications.removeNotification('ledger-status')
 			if (this.ledgerStatus === 'CONNECTED') {
-				this.notificationService.sendSuccess(`Successfully connected to Ledger device`)
+				this.svcNotifications.sendSuccess(`Successfully connected to Ledger device`)
 			} else if (this.ledgerStatus === 'LOCKED') {
-				this.notificationService.sendError(`Ledger device locked. Unlock and try again.`)
+				this.svcNotifications.sendError(`Ledger device locked. Unlock and try again.`)
 			}
 		} catch (err) {
 			console.log(`Got error when loading ledger! `, err)
-			this.notificationService.removeNotification('ledger-status')
+			this.svcNotifications.removeNotification('ledger-status')
 			// this.notificationService.sendError(`Unable to load Ledger Device: ${err.message}`)
 		}
 	}
 
 	async unlockWallet () {
-		const isUnlocked = await this.walletService.requestUnlock()
+		const isUnlocked = await this.svcWallet.requestUnlock()
 		if (isUnlocked === false) {
 			return
 		}
 	}
 
 	cancelPow () {
-		this.powService.cancelAllPow(true)
+		this.svcPow.cancelAllPow(true)
 	}
 }
