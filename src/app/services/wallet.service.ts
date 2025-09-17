@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core'
+import { Injectable, computed, inject } from '@angular/core'
 import {
 	AddressBookService,
 	ApiService,
@@ -94,9 +94,7 @@ export class WalletService {
 	selectedAccountAddress: string = null
 	selectedAccount: Account = null
 	selectedAccount$: BehaviorSubject<Account> = new BehaviorSubject(null)
-	get isLocked (): boolean {
-		return this.selectedWallet?.isLocked
-	}
+	isLocked = computed(() => this.selectedWallet?.isLocked)
 	isLocked$ = new BehaviorSubject(true)
 	passwordUpdated$ = new BehaviorSubject(false)
 	isUnlockRequested$ = new BehaviorSubject(false)

@@ -8,7 +8,6 @@ export class LedgerService {
 	private desktop = inject(DesktopService)
 
 	desktopMessage$ = new Subject()
-	ledgerStatus$: Subject<string> = new Subject()
 	queryingDesktopLedger = false
 
 	constructor () {

@@ -1,8 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core'
+import { Component, OnInit, computed, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
-import { AppSettingsService, LedgerService, NotificationsService, PowService, WalletService } from 'app/services'
+import { LedgerService, NotificationsService, PowService, WalletService } from 'app/services'
 
 @Component({
 	selector: 'app-wallet-widget',
@@ -11,22 +11,19 @@ import { AppSettingsService, LedgerService, NotificationsService, PowService, Wa
 	imports: [FormsModule, RouterLink, TranslocoPipe],
 })
 export class WalletWidgetComponent implements OnInit {
+	private svcLedger = inject(LedgerService)
 	private svcNotifications = inject(NotificationsService)
 	private svcPow = inject(PowService)
 	private svcTransloco = inject(TranslocoService)
+	private svcWallet = inject(WalletService)
 
-	svcLedger = inject(LedgerService)
-	svcAppSettings = inject(AppSettingsService)
-	svcWallet = inject(WalletService)
+	isConfigured = computed(() => this.svcWallet.isConfigured)
+	isLedger = computed(() => this.svcWallet.isLedger)
+	isLocked = computed(() => this.svcWallet.isLocked)
 
-	ledgerStatus = 'DISCONNECTED'
 	powAlert = false
 
 	ngOnInit () {
-		this.svcLedger.ledgerStatus$.subscribe((ledgerStatus) => {
-			this.ledgerStatus = ledgerStatus
-		})
-
 		// Detect if a PoW is taking too long and alert
 		this.svcPow.powAlert$.subscribe(async (shouldAlert) => {
 			if (shouldAlert) {
@@ -63,10 +60,12 @@ export class WalletWidgetComponent implements OnInit {
 		}
 	}
 
-	async unlockWallet () {
+	async requestUnlock () {
 		const isUnlocked = await this.svcWallet.requestUnlock()
-		if (isUnlocked === false) {
-			return
+		if (isUnlocked) {
+			this.svcNotifications.sendSuccess(this.svcTransloco.translate('accounts.wallet-unlocked'))
+		} else {
+			this.svcNotifications.sendError(this.svcTransloco.translate('accounts.wrong-password'))
 		}
 	}
 
