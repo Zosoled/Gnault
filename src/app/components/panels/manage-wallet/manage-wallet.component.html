@@ -4,7 +4,7 @@
 >
 	<div class="uk-width-1-1">
 		<h2 class="uk-heading-divider">{{ 'general.manage-wallet' | transloco }}</h2>
-		@if (!walletService.isLedger) {
+		@if (!isLedger) {
 			<div class="uk-card uk-card-default uk-margin">
 				<div class="uk-card-header">
 					<h3 class="uk-card-title">Change Wallet Password</h3>
@@ -65,12 +65,12 @@
 				</div>
 			</div>
 		}
-		@if (!walletService.isLedger) {
+		@if (!isLedger) {
 			<div class="uk-card uk-card-default uk-margin">
 				<div class="uk-card-header">
 					<h3 class="uk-card-title">Export Gnault Wallet</h3>
 				</div>
-				@if (walletService.isLocked) {
+				@if (isLocked) {
 					<div class="uk-card-body"><span uk-icon="icon: lock;"></span> Unlock wallet to access the export tool.</div>
 				} @else {
 					<ng-container>

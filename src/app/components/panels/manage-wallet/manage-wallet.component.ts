@@ -17,13 +17,12 @@ export class ManageWalletComponent implements OnInit {
 	private api = inject(ApiService)
 	private translocoService = inject(TranslocoService)
 	private util = inject(UtilService)
+	private svcWallet = inject(WalletService)
 
 	notifications = inject(NotificationsService)
 	settings = inject(AppSettingsService)
-	walletService = inject(WalletService)
 
-	wallet = this.walletService.selectedWallet
-	accounts = this.walletService.accounts
+	accounts = this.svcWallet.accounts
 	newPassword = ''
 	confirmPassword = ''
 	validateNewPassword = false
@@ -50,11 +49,17 @@ export class ManageWalletComponent implements OnInit {
 	selectedOrder = this.orderOptions[0].value
 	exportEnabled = true
 
-	async ngOnInit() {
-		this.wallet = this.walletService.selectedWallet
+	get isLedger () {
+		return this.svcWallet.isLedger()
+	}
 
+	get isLocked () {
+		return this.svcWallet.isLocked()
+	}
+
+	async ngOnInit () {
 		// Update selected account if changed in the sidebar
-		this.walletService.selectedAccount$.subscribe(async (acc) => {
+		this.svcWallet.selectedAccount$.subscribe(async (acc) => {
 			if (this.selAccountInit) {
 				this.csvAccount = acc?.id ?? this.accounts[0]?.id ?? '0'
 			}
@@ -62,12 +67,12 @@ export class ManageWalletComponent implements OnInit {
 		})
 
 		// Set the account selected in the sidebar as default
-		if (this.walletService.selectedAccount !== null) {
-			this.csvAccount = this.walletService.selectedAccount.id
+		if (this.svcWallet.selectedAccount !== null) {
+			this.csvAccount = this.svcWallet.selectedAccount.id
 		}
 	}
 
-	async changePassword() {
+	async changePassword () {
 		if (this.newPassword.length < 6) {
 			return this.notifications.sendError(
 				this.translocoService.translate(
@@ -81,13 +86,13 @@ export class ManageWalletComponent implements OnInit {
 				this.translocoService.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match')
 			)
 		}
-		if (this.walletService.isLocked) {
-			const wasUnlocked = await this.walletService.requestUnlock()
+		if (this.svcWallet.isLocked) {
+			const wasUnlocked = await this.svcWallet.requestUnlock()
 			if (wasUnlocked === false) {
 				return
 			}
 		}
-		await this.walletService.saveWalletExport()
+		await this.svcWallet.saveWalletExport()
 		this.newPassword = ''
 		this.confirmPassword = ''
 		this.notifications.sendSuccess(`Wallet password successfully updated`)
@@ -95,29 +100,29 @@ export class ManageWalletComponent implements OnInit {
 		this.showQRExport = false
 	}
 
-	async exportWallet() {
-		if (this.walletService.isLocked) {
-			const wasUnlocked = await this.walletService.requestUnlock()
+	async exportWallet () {
+		if (this.svcWallet.isLocked) {
+			const wasUnlocked = await this.svcWallet.requestUnlock()
 			if (wasUnlocked === false) {
 				return
 			}
 		}
-		const exportUrl = this.walletService.generateExportUrl()
+		const exportUrl = this.svcWallet.generateExportUrl()
 		this.QRExportUrl = exportUrl
 		this.QRExportImg = await QRCode.toDataURL(exportUrl, { errorCorrectionLevel: 'M', scale: 8 })
 		this.showQRExport = true
 	}
 
-	copied() {
+	copied () {
 		this.notifications.removeNotification('success-copied')
 		this.notifications.sendSuccess(`Wallet seed copied to clipboard!`, { identifier: 'success-copied' })
 	}
 
-	seedMnemonic() {
-		return this.wallet?.mnemonic
+	seedMnemonic () {
+		return this.svcWallet.selectedWallet()?.mnemonic
 	}
 
-	triggerFileDownload(fileName, exportData, type) {
+	triggerFileDownload (fileName, exportData, type) {
 		let blob
 		// first line, include columns for spreadsheet
 		let csvFile = 'account,type,amount,hash,height,time\n'
@@ -178,20 +183,20 @@ export class ManageWalletComponent implements OnInit {
 		}, 200)
 	}
 
-	async exportToFile() {
-		if (this.walletService.isLocked) {
-			const wasUnlocked = await this.walletService.requestUnlock()
+	async exportToFile () {
+		if (this.svcWallet.isLocked) {
+			const wasUnlocked = await this.svcWallet.requestUnlock()
 			if (wasUnlocked === false) {
 				return
 			}
 		}
 		const fileName = `Gnault-Wallet.json`
-		const exportData = this.walletService.generateExportData()
+		const exportData = this.svcWallet.generateExportData()
 		this.triggerFileDownload(fileName, exportData, 'json')
 		this.notifications.sendSuccess(`Wallet export downloaded!`)
 	}
 
-	csvCountChange(count) {
+	csvCountChange (count) {
 		if ((this.util.string.isNumeric(count) && count % 1 === 0) || count === '') {
 			// only allow beyond limit if using a custom server
 			if (
@@ -214,7 +219,7 @@ export class ManageWalletComponent implements OnInit {
 		}
 	}
 
-	csvOffsetChange(offset) {
+	csvOffsetChange (offset) {
 		if ((this.util.string.isNumeric(offset) && offset % 1 === 0) || offset === '') {
 			if (parseInt(offset, 10) < 0) {
 				this.invalidCsvOffset = true
@@ -226,11 +231,11 @@ export class ManageWalletComponent implements OnInit {
 		}
 	}
 
-	csvInit() {
+	csvInit () {
 		this.csvExportStarted = true
 	}
 
-	async exportToCsv() {
+	async exportToCsv () {
 		// disable export for a period to reduce RPC calls
 		if (!this.exportEnabled) return
 		this.exportEnabled = false

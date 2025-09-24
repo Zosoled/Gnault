@@ -63,10 +63,10 @@ export class SendComponent implements OnInit {
 	addressBookMatch = ''
 
 	amount: bigint = 0n
-	get amountFiat(): number {
+	get amountFiat (): number {
 		return this.amountNano * this.svcPrice.lastPrice
 	}
-	get amountNano(): number {
+	get amountNano (): number {
 		return parseFloat(Tools.convert(this.amount, 'raw', 'nano'))
 	}
 
@@ -83,7 +83,7 @@ export class SendComponent implements OnInit {
 	confirmingTransaction = false
 	selAccountInit = false
 
-	async ngOnInit() {
+	async ngOnInit () {
 		const params = this.route.snapshot.queryParams
 		this.updateQueries(params)
 		this.addressBookService.loadAddressBook()
@@ -122,7 +122,7 @@ export class SendComponent implements OnInit {
 		}
 	}
 
-	updateQueries(params) {
+	updateQueries (params) {
 		if (params && params.amount && !isNaN(params.amount)) {
 			this.amount = BigInt(Tools.convert(params.amount, 'nano', 'raw'))
 			this.syncFiatPrice()
@@ -135,7 +135,7 @@ export class SendComponent implements OnInit {
 		}
 	}
 
-	async findFirstAccount() {
+	async findFirstAccount () {
 		// Load balances before we try to find the right account
 		if (this.svcWallet.balance === 0n) {
 			await this.svcWallet.reloadBalances()
@@ -154,7 +154,7 @@ export class SendComponent implements OnInit {
 	}
 
 	// An update to the Nano amount, sync the fiat value
-	async syncFiatPrice() {
+	async syncFiatPrice () {
 		console.log(`syncFiatPrice()`)
 		console.log(`this.amountFiat: ${this.amount}`)
 		console.log(`this.price.price.lastPrice: ${this.svcPrice.lastPrice}`)
@@ -170,7 +170,7 @@ export class SendComponent implements OnInit {
 	}
 
 	// An update to the fiat amount, sync the nano value based on currently selected denomination
-	async syncNanoPrice() {
+	async syncNanoPrice () {
 		console.log(`syncNanoPrice()`)
 		console.log(`this.amountFiat: ${this.amountFiat}`)
 		console.log(`this.price.price.lastPrice: ${this.svcPrice.lastPrice}`)
@@ -184,7 +184,7 @@ export class SendComponent implements OnInit {
 		this.amount = BigInt(raw)
 	}
 
-	async onDestinationAddressInput() {
+	async onDestinationAddressInput () {
 		this.addressBookMatch = ''
 		this.searchAddressBook()
 		const destinationAddress = this.toAccountID || ''
@@ -205,7 +205,7 @@ export class SendComponent implements OnInit {
 		}
 	}
 
-	searchAddressBook() {
+	searchAddressBook () {
 		this.showAddressBook = true
 		const search = this.toAccountID || ''
 		const addressBook = this.addressBookService.addressBook
@@ -213,18 +213,18 @@ export class SendComponent implements OnInit {
 		this.addressBookResults$.next(matches)
 	}
 
-	selectBookEntry(account) {
+	selectBookEntry (account) {
 		this.showAddressBook = false
 		this.toAccountID = account
 		this.searchAddressBook()
 		this.validateDestination()
 	}
 
-	setSendDestinationType(newType: string) {
+	setSendDestinationType (newType: string) {
 		this.sendDestinationType = newType
 	}
 
-	async validateDestination() {
+	async validateDestination () {
 		// The timeout is used to solve a bug where the results get hidden too fast and the click is never registered
 		setTimeout(() => (this.showAddressBook = false), 400)
 
@@ -251,7 +251,7 @@ export class SendComponent implements OnInit {
 		}
 	}
 
-	getAccountLabel(accountID, defaultLabel) {
+	getAccountLabel (accountID, defaultLabel) {
 		const walletAccount = this.svcWallet.accounts.find((a) => a.id === accountID)
 		if (walletAccount == null) {
 			return defaultLabel
@@ -259,7 +259,7 @@ export class SendComponent implements OnInit {
 		return this.translocoService.translate('general.account') + ' #' + walletAccount.index
 	}
 
-	validateAmount() {
+	validateAmount () {
 		if (this.amount > 0n) {
 			this.amountStatus = 1
 			return true
@@ -269,7 +269,7 @@ export class SendComponent implements OnInit {
 		}
 	}
 
-	getDestinationID() {
+	getDestinationID () {
 		if (this.sendDestinationType === 'external-address') {
 			return this.toAccountID
 		}
@@ -286,7 +286,7 @@ export class SendComponent implements OnInit {
 		return this.toOwnAccountID
 	}
 
-	async sendTransaction() {
+	async sendTransaction () {
 		const destinationID = this.getDestinationID()
 		const isValid = this.util.account.isValidAccount(destinationID)
 		if (!isValid) {
@@ -331,8 +331,8 @@ export class SendComponent implements OnInit {
 		this.activePanel = 'confirm'
 	}
 
-	async confirmTransaction() {
-		const wallet = this.svcWallet.selectedWallet
+	async confirmTransaction () {
+		const wallet = this.svcWallet.selectedWallet()
 		const walletAccount = this.svcWallet.accounts.find((a) => a.id === this.fromAccountID)
 		if (!walletAccount) {
 			throw new Error(`Unable to find sending account in wallet`)
@@ -351,7 +351,7 @@ export class SendComponent implements OnInit {
 				walletAccount,
 				destinationID,
 				this.amount,
-				this.svcWallet.isLedger
+				this.svcWallet.isLedger()
 			)
 			if (newHash) {
 				this.notificationService.removeNotification('success-send')
@@ -366,7 +366,7 @@ export class SendComponent implements OnInit {
 				this.fromAddressBook = ''
 				this.toAddressBook = ''
 				this.addressBookMatch = ''
-			} else if (!this.svcWallet.isLedger) {
+			} else if (!this.svcWallet.isLedger()) {
 				this.notificationService.sendError(`There was an error sending your transaction, please try again.`)
 			}
 		} catch (err) {
@@ -375,7 +375,7 @@ export class SendComponent implements OnInit {
 		this.confirmingTransaction = false
 	}
 
-	async setMaxAmount() {
+	async setMaxAmount () {
 		const walletAccount = this.svcWallet.accounts.find((a) => a.id === this.fromAccountID)
 		if (!walletAccount) {
 			return
@@ -384,12 +384,12 @@ export class SendComponent implements OnInit {
 		this.syncFiatPrice()
 	}
 
-	resetAmount() {
+	resetAmount () {
 		this.amount = 0n
 	}
 
 	// open qr reader modal
-	openQR(reference, type) {
+	openQR (reference, type) {
 		if (this.preparingTransaction) {
 			return
 		}
@@ -402,7 +402,7 @@ export class SendComponent implements OnInit {
 		})
 	}
 
-	copied() {
+	copied () {
 		this.notificationService.removeNotification('success-copied')
 		this.notificationService.sendSuccess(`Successfully copied to clipboard!`, { identifier: 'success-copied' })
 	}

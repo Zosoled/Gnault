@@ -68,7 +68,7 @@ export class RepresentativesComponent implements OnInit {
 
 	representativeList = []
 
-	async ngOnInit() {
+	async ngOnInit () {
 		this.representativeService.loadRepresentativeList()
 
 		// Listen for query parameters that set defaults
@@ -103,7 +103,7 @@ export class RepresentativesComponent implements OnInit {
 		await this.loadRecommendedReps()
 	}
 
-	async populateRepresentativeList() {
+	async populateRepresentativeList () {
 		// add trusted/regular local reps to the list
 		const localReps = this.representativeService.getSortedRepresentatives()
 		this.representativeList.push(...localReps.filter((rep) => !rep.warn))
@@ -126,7 +126,7 @@ export class RepresentativesComponent implements OnInit {
 		this.representativeList.push(...localReps.filter((rep) => rep.warn))
 	}
 
-	getAccountLabel(account) {
+	getAccountLabel (account) {
 		const addressBookName = account.addressBookName
 
 		if (addressBookName != null) {
@@ -142,7 +142,7 @@ export class RepresentativesComponent implements OnInit {
 		return this.translocoService.translate('general.account') + ' #' + walletAccount.index
 	}
 
-	addSelectedAccounts(accounts) {
+	addSelectedAccounts (accounts) {
 		for (const account of accounts) {
 			this.newAccountID(account.id)
 		}
@@ -151,7 +151,7 @@ export class RepresentativesComponent implements OnInit {
 		setTimeout(() => this.repInput.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
 	}
 
-	newAccountID(accountID) {
+	newAccountID (accountID) {
 		if (accountID instanceof HTMLSelectElement) {
 			accountID = accountID.value
 		}
@@ -185,11 +185,11 @@ export class RepresentativesComponent implements OnInit {
 		setTimeout(() => (this.changeAccountID = null), 10)
 	}
 
-	removeSelectedAccount(account) {
+	removeSelectedAccount (account) {
 		this.selectedAccounts.splice(this.selectedAccounts.indexOf(account), 1) // Remove all from the list
 	}
 
-	searchRepresentatives() {
+	searchRepresentatives () {
 		this.showRepresentatives = true
 		const search = this.toRepresentativeID || ''
 
@@ -202,14 +202,14 @@ export class RepresentativesComponent implements OnInit {
 		this.representativeResults$.next(matches)
 	}
 
-	selectRepresentative(rep) {
+	selectRepresentative (rep) {
 		this.showRepresentatives = false
 		this.toRepresentativeID = rep
 		this.searchRepresentatives()
 		this.validateRepresentative()
 	}
 
-	async validateRepresentative() {
+	async validateRepresentative () {
 		setTimeout(() => (this.showRepresentatives = false), 400)
 		this.toRepresentativeID = this.toRepresentativeID.replace(/ /g, '')
 
@@ -230,7 +230,7 @@ export class RepresentativesComponent implements OnInit {
 		}
 	}
 
-	async loadRecommendedReps() {
+	async loadRecommendedReps () {
 		this.recommendedRepsLoading = true
 		try {
 			const scores = (await this.ninja.recommended()) as any[]
@@ -256,13 +256,13 @@ export class RepresentativesComponent implements OnInit {
 		}
 	}
 
-	previousReps() {
+	previousReps () {
 		if (this.currentRepPage > 0) {
 			this.currentRepPage--
 			this.calculatePage()
 		}
 	}
-	nextReps() {
+	nextReps () {
 		if (this.currentRepPage < this.recommendedReps.length / this.repsPerPage - 1) {
 			this.currentRepPage++
 		} else {
@@ -271,21 +271,21 @@ export class RepresentativesComponent implements OnInit {
 		this.calculatePage()
 	}
 
-	calculatePage() {
+	calculatePage () {
 		this.recommendedRepsPaginated = this.recommendedReps.slice(
 			this.currentRepPage * this.repsPerPage,
 			this.currentRepPage * this.repsPerPage + this.repsPerPage
 		)
 	}
 
-	selectRecommendedRep(rep) {
+	selectRecommendedRep (rep) {
 		this.selectedRecommendedRep = rep
 		this.toRepresentativeID = rep.account
 		this.showRecommendedReps = false
 		this.representativeListMatch = rep.alias // We will save if they use this, so this is a nice little helper
 	}
 
-	async changeRepresentatives() {
+	async changeRepresentatives () {
 		const accounts = this.selectedAccounts
 		const newRep = this.toRepresentativeID
 
@@ -334,7 +334,7 @@ export class RepresentativesComponent implements OnInit {
 			return this.notifications.sendInfo(`None of the accounts selected need to be updated`)
 		}
 
-		const wallet = this.walletService.selectedWallet
+		const wallet = this.walletService.selectedWallet()
 
 		// Now loop and change them
 		for (const account of accountsNeedingChange) {
@@ -344,7 +344,7 @@ export class RepresentativesComponent implements OnInit {
 			}
 
 			try {
-				const changed = await this.nanoBlock.generateChange(wallet, walletAccount, newRep, this.walletService.isLedger)
+				const changed = await this.nanoBlock.generateChange(wallet, walletAccount, newRep, this.walletService.isLedger())
 				if (!changed) {
 					this.notifications.sendError(`Error changing representative for ${account.id}, please try again`)
 				}
@@ -386,7 +386,7 @@ export class RepresentativesComponent implements OnInit {
 	}
 
 	// open qr reader modal
-	openQR(reference, type) {
+	openQR (reference, type) {
 		const qrResult = this.qrModalService.openQR(reference, type)
 		qrResult.then(
 			(data) => {
@@ -397,7 +397,7 @@ export class RepresentativesComponent implements OnInit {
 						break
 				}
 			},
-			() => {}
+			() => { }
 		)
 	}
 }

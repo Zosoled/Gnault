@@ -97,7 +97,7 @@ export class SignComponent implements OnInit {
 	signatureAccount = ''
 	signatureMessage = ''
 	signatureMessageSuccess = ''
-	wallet = this.walletService.selectedWallet
+	wallet = this.walletService.selectedWallet()
 	walletAccount = null
 	nullBlock = '0000000000000000000000000000000000000000000000000000000000000000'
 	qrString = null
@@ -155,14 +155,14 @@ export class SignComponent implements OnInit {
 
 	@ViewChild('dataAddFocus') _el: ElementRef
 
-	async ngOnInit() {
+	async ngOnInit () {
 		const UIkit = window['UIkit']
 		const qrModal = UIkit.modal('#qr-code-modal')
 		this.blockProcessed = false
 		this.qrModal = qrModal
 
 		const params = this.router.snapshot.queryParams
-		this.signTypeSelected = this.walletService.isConfigured ? this.signTypes[0] : this.signTypes[1]
+		this.signTypeSelected = this.walletService.isConfigured() ? this.signTypes[0] : this.signTypes[1]
 
 		// Multisig tab listening functions
 		hermes.on('tab-ping', (data) => {
@@ -375,14 +375,14 @@ export class SignComponent implements OnInit {
 			this.fromAccountID = null
 			try {
 				recipientInfo = await this.api.blockInfo(this.currentBlock.link)
-			} catch {}
+			} catch { }
 			if (recipientInfo && 'block_account' in recipientInfo) {
 				this.fromAccountID = recipientInfo.block_account
 			}
 		}
 	}
 
-	setFocus() {
+	setFocus () {
 		this.showAddBox = true
 		// Auto set focus to the box (but must be rendered first!)
 		setTimeout(() => {
@@ -390,7 +390,7 @@ export class SignComponent implements OnInit {
 		}, 200)
 	}
 
-	removeSelectedData(data) {
+	removeSelectedData (data) {
 		this.inputMultisigData.splice(this.inputMultisigData.indexOf(data), 1)
 		if (this.savedParticipants > 0) {
 			this.savedParticipants = this.savedParticipants - 1
@@ -399,7 +399,7 @@ export class SignComponent implements OnInit {
 	}
 
 	// abort and navigate back
-	cancel() {
+	cancel () {
 		switch (this.navigationSource) {
 			case navSource.remote:
 				this.routerService.navigate(['remote-signing'])
@@ -409,7 +409,7 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	verifyBlock(block: StateBlock) {
+	verifyBlock (block: StateBlock) {
 		if (
 			this.util.account.isValidAccount(block.account) &&
 			this.util.account.isValidAccount(block.representative) &&
@@ -424,7 +424,7 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	verifyBlockHash(currentBlock: StateBlock, previousBlock: StateBlock) {
+	verifyBlockHash (currentBlock: StateBlock, previousBlock: StateBlock) {
 		const block: StateBlock = {
 			account: previousBlock.account,
 			link: previousBlock.link,
@@ -444,7 +444,7 @@ export class SignComponent implements OnInit {
 		return currentBlock.previous && previousHash === currentBlock.previous
 	}
 
-	searchAddressBook() {
+	searchAddressBook () {
 		this.showAddressBook = true
 		const search = this.toAccountID || ''
 		const addressBook = this.addressBookService.addressBook
@@ -454,7 +454,7 @@ export class SignComponent implements OnInit {
 		this.addressBookResults$.next(matches)
 	}
 
-	async signTypeChange() {
+	async signTypeChange () {
 		this.signatureMessage = ''
 		this.signatureMessageSuccess = ''
 		let params = this.paramsString
@@ -488,13 +488,13 @@ export class SignComponent implements OnInit {
 		this.setURLParams(params)
 	}
 
-	powChange() {
+	powChange () {
 		if (this.shouldGenWork) {
 			this.prepareWork()
 		}
 	}
 
-	changeThreshold() {
+	changeThreshold () {
 		// multiplier has changed, clear the cache and recalculate
 		if (this.selectedThreshold !== this.selectedThresholdOld) {
 			const workBlock =
@@ -505,7 +505,7 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	prepareWork() {
+	prepareWork () {
 		// The block has been verified
 		if (this.toAccountID) {
 			console.log('Precomputing work...')
@@ -516,7 +516,7 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	async prepareTransaction() {
+	async prepareTransaction () {
 		// Determine fiat value of the amount (if not offline mode)
 		if (this.svcAppSettings.settings.serverAPI) {
 			this.amountFiat = parseFloat(Tools.convert(this.rawAmount, 'raw', 'mnano')) * this.svcPrice.lastPrice
@@ -544,10 +544,10 @@ export class SignComponent implements OnInit {
 	}
 
 	// Create signature for the block
-	async confirmTransaction(signature = '') {
+	async confirmTransaction (signature = '') {
 		let wallet = this.wallet
 		let walletAccount = this.walletAccount
-		let isLedger = this.walletService.isLedger
+		let isLedger = this.walletService.isLedger()
 
 		// using internal wallet
 		if (this.signTypeSelected === this.signTypes[0] && walletAccount) {
@@ -679,7 +679,7 @@ export class SignComponent implements OnInit {
 	}
 
 	// Send signed block to the network
-	async confirmBlock() {
+	async confirmBlock () {
 		this.confirmingTransaction = true
 		const workBlock =
 			this.txType === TxType.open ? Account.load(this.toAccountID).publicKey : this.currentBlock.previous
@@ -750,12 +750,12 @@ export class SignComponent implements OnInit {
 		this.confirmingTransaction = false
 	}
 
-	copied() {
+	copied () {
 		this.notificationService.removeNotification('success-copied')
 		this.notificationService.sendSuccess(`Successfully copied to clipboard!`, { identifier: 'success-copied' })
 	}
 
-	clean(obj) {
+	clean (obj) {
 		for (const propName in obj) {
 			if (obj[propName] === null || obj[propName] === undefined) {
 				delete obj[propName]
@@ -763,7 +763,7 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	async seedChange(input) {
+	async seedChange (input) {
 		const keyType = await this.checkMasterKey(input)
 		this.validSeed = keyType !== null
 		if (this.validSeed && this.validIndex) {
@@ -774,7 +774,7 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	async privkeyChange(input) {
+	async privkeyChange (input) {
 		const privKey = this.convertPrivateKey(input)
 		if (privKey !== null) {
 			// Match given block account with with private key
@@ -796,7 +796,7 @@ export class SignComponent implements OnInit {
 		this.privateKey = ''
 	}
 
-	async indexChange(index) {
+	async indexChange (index) {
 		this.validIndex = true
 		if (this.util.string.isNumeric(index) && index % 1 === 0) {
 			index = parseInt(index, 10)
@@ -819,7 +819,7 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	async verifyKey(keyType: string, input: string, index: number) {
+	async verifyKey (keyType: string, input: string, index: number) {
 		let seed = ''
 		let privKey1 = ''
 		let privKey2 = ''
@@ -882,7 +882,7 @@ export class SignComponent implements OnInit {
 	}
 
 	// Validate type of master key
-	async checkMasterKey(key) {
+	async checkMasterKey (key) {
 		// validate nano seed
 		if (key.length === 64) {
 			if (this.util.nano.isValidSeed(key)) {
@@ -904,7 +904,7 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	convertPrivateKey(key) {
+	convertPrivateKey (key) {
 		if (key.length === 128) {
 			this.privateKeyExpanded = true
 			// expanded key includes deterministic R value material which we ignore
@@ -917,7 +917,7 @@ export class SignComponent implements OnInit {
 	}
 
 	// open qr reader modal
-	openQR(reference, type) {
+	openQR (reference, type) {
 		const qrResult = this.qrModalService.openQR(reference, type)
 		qrResult.then(async (data) => {
 			switch (data.reference) {
@@ -939,13 +939,13 @@ export class SignComponent implements OnInit {
 		})
 	}
 
-	async generateOutputQR() {
+	async generateOutputQR () {
 		const qrCode = await QRCode.toDataURL(`${this.outputMultisigData}`, { errorCorrectionLevel: 'M', scale: 16 })
 		this.qrCodeImageOutput = qrCode
 	}
 
 	// Replace the address bar content
-	setURLParams(params) {
+	setURLParams (params) {
 		if (window.history.pushState) {
 			try {
 				window.history.replaceState(null, null, '/' + params)
@@ -958,7 +958,7 @@ export class SignComponent implements OnInit {
 	/**
 	 * MULTISIG
 	 */
-	privkeyChangeMulti(input) {
+	privkeyChangeMulti (input) {
 		const privKey = this.convertPrivateKey(input)
 		if (privKey !== null) {
 			if (this.util.nano.isValidHash(privKey)) {
@@ -978,7 +978,7 @@ export class SignComponent implements OnInit {
 	}
 
 	// Start signing procedure using multiple tabs
-	runMultiTabs() {
+	runMultiTabs () {
 		console.log('Starting automatic tab signing')
 		// Ping other tabs and make sure enough of them respond and with correct hash
 		this.tabCount = 1
@@ -998,7 +998,7 @@ export class SignComponent implements OnInit {
 				}
 			}
 		})
-		;((this.tabMode = true), console.log('Send ping to other tabs'))
+			; ((this.tabMode = true), console.log('Send ping to other tabs'))
 		hermes.send('tab-ping', [this.blockHash, '', this.participants])
 		// Set a timeout
 		setTimeout(() => {
@@ -1006,7 +1006,7 @@ export class SignComponent implements OnInit {
 		}, 5000)
 	}
 
-	checkTabs() {
+	checkTabs () {
 		if (this.tabCount && this.tabCount < this.participants) {
 			// unsubscribe
 			hermes.off('tab-pong')
@@ -1015,7 +1015,7 @@ export class SignComponent implements OnInit {
 	}
 
 	// Checking input tab data and act when enough data is available for the current active step
-	tabListener(activate = false) {
+	tabListener (activate = false) {
 		this.tabListenerActive = !!activate || this.tabListenerActive
 		if (this.tabListenerActive) {
 			const stepData = []
@@ -1042,7 +1042,7 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	resetMultisig() {
+	resetMultisig () {
 		this.participants = 2
 		this.validParticipants = true
 		this.savedParticipants = 0
@@ -1072,7 +1072,7 @@ export class SignComponent implements OnInit {
 		hermes.off('tab-pong') // unsubscribe
 	}
 	// activating multi-tab mode
-	tabModeCheck() {
+	tabModeCheck () {
 		hermes.send('multi-tab', this.tabChecked)
 		if (this.tabChecked) {
 			hermes.send('participants', this.participants)
@@ -1081,7 +1081,7 @@ export class SignComponent implements OnInit {
 	}
 
 	// number of participants changes
-	participantChange(index) {
+	participantChange (index) {
 		if (this.util.string.isNumeric(index) && index >= 2 && index < 1000) {
 			this.validParticipants = true
 			this.participants = parseInt(index, 10)
@@ -1102,7 +1102,7 @@ export class SignComponent implements OnInit {
 	}
 
 	// generate shared data to be sent to other participants
-	getMultisigLink() {
+	getMultisigLink () {
 		return (
 			'nanosign:{"block":' +
 			JSON.stringify(this.currentBlock) +
@@ -1115,7 +1115,7 @@ export class SignComponent implements OnInit {
 	}
 
 	// the field for input data has changed
-	inputAddChange(hashString) {
+	inputAddChange (hashString) {
 		const hashFull = hashString.substring(2)
 		let valid = true
 		if (hashFull.length === 64) {
@@ -1159,7 +1159,7 @@ export class SignComponent implements OnInit {
 	}
 
 	// append input data to complete data
-	addMultisigInputData() {
+	addMultisigInputData () {
 		if (!this.validInputAdd) {
 			this.notificationService.sendWarning('Data not in valid format')
 			return
@@ -1193,7 +1193,7 @@ export class SignComponent implements OnInit {
 	}
 
 	// copy data to be shared
-	copyUrl() {
+	copyUrl () {
 		const dummy = document.createElement('input')
 		document.body.appendChild(dummy)
 		dummy.setAttribute('value', this.multisigLink)
@@ -1208,7 +1208,7 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	startMultisig() {
+	startMultisig () {
 		if (this.validPrivkey) {
 			if (this.tabChecked) {
 				this.runMultiTabs()
@@ -1220,7 +1220,7 @@ export class SignComponent implements OnInit {
 		}
 	}
 
-	async multiSign() {
+	async multiSign () {
 		const result = await this.musigService.runMultiSign(this.privateKey, this.blockHash, this.inputMultisigData)
 		// used for validation when the final nano block is created
 		if (result && result.multisig !== '') {

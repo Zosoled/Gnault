@@ -11,11 +11,10 @@ import { NotificationsService, UtilService, WalletKeyType, WalletService } from 
 })
 export class ImportWalletComponent implements OnInit {
 	private route = inject(ActivatedRoute)
-	private notifications = inject(NotificationsService)
 	private router = inject(Router)
-	private util = inject(UtilService)
-
-	walletService = inject(WalletService)
+	private svcNotifications = inject(NotificationsService)
+	private svcUtil = inject(UtilService)
+	private svcWallet = inject(WalletService)
 
 	activePanel = 'error'
 	walletPassword = ''
@@ -23,7 +22,14 @@ export class ImportWalletComponent implements OnInit {
 	importData: any = null
 	hostname = ''
 
-	ngOnInit() {
+	get isConfigured () {
+		return this.svcWallet.isConfigured()
+	}
+	get isLedger () {
+		return this.svcWallet.isLedger()
+	}
+
+	ngOnInit () {
 		const importData = this.route.snapshot.fragment
 		const queryData = this.route.snapshot.queryParams
 		if (!importData || !importData.length) {
@@ -46,12 +52,12 @@ export class ImportWalletComponent implements OnInit {
 		}
 	}
 
-	importDataError(message) {
+	importDataError (message) {
 		this.activePanel = 'error'
-		return this.notifications.sendError(message)
+		return this.svcNotifications.sendError(message)
 	}
 
-	async decryptWallet() {
+	async decryptWallet () {
 		// Attempt to decrypt the seed value using the password
 		try {
 			await new Promise((resolve) => setTimeout(resolve, 500)) // brute force delay
@@ -94,15 +100,15 @@ export class ImportWalletComponent implements OnInit {
 			const decryptedSecret = new TextDecoder().decode(decryptedBytes)
 
 			if (decryptedSecret?.length !== 64) {
-				return this.notifications.sendError(`Invalid password, please try again`)
+				return this.svcNotifications.sendError(`Invalid password, please try again`)
 			}
-			if (!this.util.nano.isValidSeed(decryptedSecret)) {
-				return this.notifications.sendError(`Invalid seed format (non HEX characters)`)
+			if (!this.svcUtil.nano.isValidSeed(decryptedSecret)) {
+				return this.svcNotifications.sendError(`Invalid seed format (non HEX characters)`)
 			}
 
 			this.router.navigate(['accounts']) // load accounts and watch them update in real-time
-			this.notifications.sendInfo(`Loading all accounts for the wallet...`)
-			const isImported = await this.walletService.loadImportedWallet(
+			this.svcNotifications.sendInfo(`Loading all accounts for the wallet...`)
+			const isImported = await this.svcWallet.loadImportedWallet(
 				type,
 				this.walletPassword,
 				decryptedSecret,
@@ -111,12 +117,12 @@ export class ImportWalletComponent implements OnInit {
 				walletType
 			)
 			if (isImported) {
-				this.notifications.sendSuccess(`Successfully imported the wallet!`, { length: 10000 })
+				this.svcNotifications.sendSuccess(`Successfully imported the wallet!`, { length: 10000 })
 			} else {
-				return this.notifications.sendError(`Failed importing the wallet. Invalid data!`)
+				return this.svcNotifications.sendError(`Failed importing the wallet. Invalid data!`)
 			}
 		} catch (err) {
-			return this.notifications.sendError(`Invalid password, please try again`)
+			return this.svcNotifications.sendError(`Invalid password, please try again`)
 		} finally {
 			this.walletPassword = ''
 		}

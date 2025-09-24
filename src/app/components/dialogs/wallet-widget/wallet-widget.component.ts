@@ -2,7 +2,7 @@ import { Component, OnInit, computed, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
-import { LedgerService, NotificationsService, PowService, WalletService } from 'app/services'
+import { NotificationsService, PowService, WalletService } from 'app/services'
 
 @Component({
 	selector: 'app-wallet-widget',
@@ -11,16 +11,15 @@ import { LedgerService, NotificationsService, PowService, WalletService } from '
 	imports: [FormsModule, RouterLink, TranslocoPipe],
 })
 export class WalletWidgetComponent implements OnInit {
-	private svcLedger = inject(LedgerService)
 	private svcNotifications = inject(NotificationsService)
 	private svcPow = inject(PowService)
 	private svcTransloco = inject(TranslocoService)
 	private svcWallet = inject(WalletService)
 
 	isConfigured = computed(() => this.svcWallet.isConfigured)
-	isLedger = computed(() => this.svcWallet.isLedger)
-	isLocked = computed(() => this.svcWallet.isLocked)
-
+	isLedger = computed(() => this.svcWallet.isLedger())
+	isLocked = computed(() => this.svcWallet.isLocked())
+	status = computed(() => this.svcWallet.selectedWalletStatus())
 	powAlert = false
 
 	ngOnInit () {
@@ -46,12 +45,12 @@ export class WalletWidgetComponent implements OnInit {
 	async reloadLedger () {
 		this.svcNotifications.sendInfo(`Checking Ledger Status...`, { identifier: 'ledger-status', length: 0 })
 		try {
-			await this.svcWallet.selectedWallet.config({ connection: undefined })
+			await this.svcWallet.selectedWallet().config({ connection: undefined })
 			this.svcNotifications.removeNotification('ledger-status')
-			if (this.ledgerStatus === 'CONNECTED') {
-				this.svcNotifications.sendSuccess(`Successfully connected to Ledger device`)
-			} else if (this.ledgerStatus === 'LOCKED') {
+			if (this.isLocked) {
 				this.svcNotifications.sendError(`Ledger device locked. Unlock and try again.`)
+			} else {
+				this.svcNotifications.sendSuccess(`Successfully connected to Ledger device`)
 			}
 		} catch (err) {
 			console.log(`Got error when loading ledger! `, err)

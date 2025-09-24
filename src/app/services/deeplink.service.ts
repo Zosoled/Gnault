@@ -1,22 +1,21 @@
 import { Injectable, inject } from '@angular/core'
 import { Router } from '@angular/router'
-import { NotificationsService, RemoteSignService, UtilService, WalletService } from 'app/services'
+import { RemoteSignService, UtilService, WalletService } from 'app/services'
 
 @Injectable({ providedIn: 'root' })
 export class DeeplinkService {
 	private router = inject(Router)
-	private notifcationService = inject(NotificationsService)
-	private util = inject(UtilService)
-	private walletService = inject(WalletService)
-	private remoteSignService = inject(RemoteSignService)
+	private svcRemoteSign = inject(RemoteSignService)
+	private svcUtil = inject(UtilService)
+	private svcWallet = inject(WalletService)
 
-	navigate(deeplink: string): boolean {
+	navigate (deeplink: string): boolean {
 		const nano_scheme = /^(nano|nanorep|nanoseed|nanokey|nanosign|nanoprocess|https):.+$/g
 
-		if (this.util.account.isValidAccount(deeplink)) {
+		if (this.svcUtil.account.isValidAccount(deeplink)) {
 			// Got address, routing to send...
 			this.router.navigate(['send'], { queryParams: { to: deeplink } })
-		} else if (this.util.nano.isValidSeed(deeplink)) {
+		} else if (this.svcUtil.nano.isValidSeed(deeplink)) {
 			// Seed
 			this.handleSeed(deeplink)
 		} else if (nano_scheme.test(deeplink)) {
@@ -38,16 +37,16 @@ export class DeeplinkService {
 						fragment: url.hash.slice(1),
 					})
 				}
-			} else if (url.protocol === 'nano:' && this.util.account.isValidAccount(url.pathname)) {
+			} else if (url.protocol === 'nano:' && this.svcUtil.account.isValidAccount(url.pathname)) {
 				// Got address, routing to send...
 				const amount = url.searchParams.get('amount')
 				this.router.navigate(['send'], {
 					queryParams: {
 						to: url.pathname,
-						amount: this.util.nano.rawToMnano(amount) ?? null,
+						amount: this.svcUtil.nano.rawToMnano(amount) ?? null,
 					},
 				})
-			} else if (url.protocol === 'nanorep:' && this.util.account.isValidAccount(url.pathname)) {
+			} else if (url.protocol === 'nanorep:' && this.svcUtil.account.isValidAccount(url.pathname)) {
 				// Representative change
 				this.router.navigate(['representatives'], {
 					queryParams: {
@@ -56,16 +55,16 @@ export class DeeplinkService {
 						representative: url.pathname,
 					},
 				})
-			} else if (url.protocol === 'nanoseed:' && this.util.nano.isValidSeed(url.pathname)) {
+			} else if (url.protocol === 'nanoseed:' && this.svcUtil.nano.isValidSeed(url.pathname)) {
 				// Seed
 				this.handleSeed(url.pathname)
-			} else if (url.protocol === 'nanokey:' && this.util.nano.isValidHash(url.pathname)) {
+			} else if (url.protocol === 'nanokey:' && this.svcUtil.nano.isValidHash(url.pathname)) {
 				// Private key
 				this.handlePrivateKey(url.pathname)
 			} else if (url.protocol === 'nanosign:') {
-				this.remoteSignService.navigateSignBlock(url)
+				this.svcRemoteSign.navigateSignBlock(url)
 			} else if (url.protocol === 'nanoprocess:') {
-				this.remoteSignService.navigateProcessBlock(url)
+				this.svcRemoteSign.navigateProcessBlock(url)
 			}
 		} else {
 			return false
@@ -73,12 +72,12 @@ export class DeeplinkService {
 		return true
 	}
 
-	hasAccounts() {
-		return this.walletService.selectedWallet.accounts.length > 0
+	get hasAccounts () {
+		return this.svcWallet.selectedWallet().accounts.length > 0
 	}
 
-	handleSeed(seed) {
-		if (this.hasAccounts()) {
+	handleSeed (seed) {
+		if (this.hasAccounts) {
 			// Wallet already set up, sweeping...
 			this.router.navigate(['sweeper'], { state: { seed: seed } })
 		} else {
@@ -87,8 +86,8 @@ export class DeeplinkService {
 		}
 	}
 
-	handlePrivateKey(key) {
-		if (this.hasAccounts()) {
+	handlePrivateKey (key) {
+		if (this.hasAccounts) {
 			// Wallet already set up, sweeping...
 			this.router.navigate(['sweeper'], { state: { seed: key } })
 		} else {

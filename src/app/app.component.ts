@@ -76,17 +76,16 @@ export class AppComponent implements AfterViewInit {
 	private svcRepresentative = inject(RepresentativeService)
 	private svcTransloco = inject(TranslocoService)
 	private svcUtil = inject(UtilService)
+	private svcWallet = inject(WalletService)
 	private svcWebsocket = inject(WebsocketService)
 	private svcWorkPool = inject(WorkPoolService)
 
 	svcAppSettings = inject(AppSettingsService)
 	svcNode = inject(NodeService)
 	svcPrice = inject(PriceService)
-	svcWallet = inject(WalletService)
 
 	nanoPrice = this.svcPrice.lastPrice
 	node = this.svcNode.node
-	wallet = this.svcWallet.selectedWallet
 
 	fiatTimeout = 5 * 60 * 1000 // Update fiat prices every 5 minutes
 	inactiveSeconds = 0
@@ -98,16 +97,50 @@ export class AppComponent implements AfterViewInit {
 	searchData = ''
 	donationAccount = environment.donationAddress
 
+	get balance () {
+		return this.svcWallet.balance
+	}
+	get hasReceivableTransactions () {
+		return this.svcWallet.hasReceivableTransactions()
+	}
 	get innerHeight () {
 		return window.innerHeight
 	}
-
 	get innerHeightWithoutMobileBar () {
 		return this.innerHeight - (window.innerWidth < 940 ? 50 : 0)
 	}
-
+	get isBalanceInitialized () {
+		return this.svcWallet.isBalanceInitialized
+	}
+	get isBalanceUpdating () {
+		return this.svcWallet.isBalanceUpdating
+	}
 	get isConfigured () {
-		return this.svcWallet.isConfigured
+		return this.svcWallet.isConfigured()
+	}
+	get isLocked () {
+		return this.svcWallet.isLocked()
+	}
+	get isProcessingReceivable () {
+		return this.svcWallet.isProcessingReceivable
+	}
+	get receivable () {
+		return this.svcWallet.receivable
+	}
+	get selectedAccount () {
+		return this.svcWallet.selectedAccount
+	}
+	get selectedWallet () {
+		return this.svcWallet.selectedWallet()
+	}
+	get selectedWalletName () {
+		return this.svcWallet.walletNames[this.selectedWallet.id] ?? this.selectedWallet.id
+	}
+	get walletNames () {
+		return this.svcWallet.walletNames
+	}
+	get wallets$ () {
+		return this.svcWallet.wallets$
 	}
 
 	constructor () {
@@ -141,7 +174,7 @@ export class AppComponent implements AfterViewInit {
 
 		// Navigate to accounts page if there is wallet, but only if coming from home. On desktop app the path ends with index.html
 		if (
-			this.svcWallet.isConfigured &&
+			this.isConfigured &&
 			(window.location.pathname === '/' || window.location.pathname.endsWith('index.html'))
 		) {
 			if (this.svcWallet.selectedAccountAddress) {
@@ -334,8 +367,7 @@ export class AppComponent implements AfterViewInit {
 
 	selectWallet (wallet: Wallet | null) {
 		// note: wallet is null when user is switching to 'Total Balance'
-		this.svcWallet.selectedWallet = wallet
-		this.svcWallet.selectedWallet$.next(wallet)
+		this.svcWallet.selectedWallet.set(wallet)
 		this.toggleWalletsDropdown()
 		this.svcWallet.saveWalletExport()
 	}

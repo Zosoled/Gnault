@@ -1,7 +1,7 @@
 <h2 class="uk-heading-divider">Configure Wallet</h2>
 @if (
 	isConfigured &&
-	!walletService.isLedger &&
+	!isLedger &&
 	(activePanel === panels.landing || activePanel === panels.import || activePanel === panels.mnemonicTypeSelection)
 ) {
 	<div class="uk-margin-small-bottom">
@@ -588,41 +588,42 @@
 						}
 						@if (isHidSupported || isUsbSupported) {
 							<div>
-								@if (walletService.selectedWallet.type !== 'Ledger') {
-									<div>
-										<div class="uk-alert uk-alert-warning nlt-inline-alert">
-											<div class="icon-column">
-												<div uk-icon="icon: warning; ratio: 2;"></div>
-											</div>
-											<p>>Make sure you have the nano app installed and running on the device, then press connect.</p>
-										</div>
-									</div>
-								}
-								@if (walletService.selectedWallet.type === 'Ledger' && walletService.isLocked) {
+								@if (!isLedger) {
 									<div>
 										<div class="uk-alert uk-alert-warning nlt-inline-alert">
 											<div class="icon-column">
 												<div uk-icon="icon: warning; ratio: 2;"></div>
 											</div>
 											<p>
-												<b>Ledger Device Locked</b><br />Unlock your Ledger device, then press the button below to retry
+												<b>Connect Device</b><br />Make sure you have the nano app installed and running on the device,
+												then press Connect.
 											</p>
 										</div>
 									</div>
 								}
-								@if (walletService.selectedWallet.type === 'Ledger' && !walletService.isLocked) {
+								@if (isLedger && isLocked) {
+									<div>
+										<div class="uk-alert uk-alert-warning nlt-inline-alert">
+											<div class="icon-column">
+												<div uk-icon="icon: warning; ratio: 2;"></div>
+											</div>
+											<p><b>Device Locked</b><br />Unlock your Ledger device, then press the button below to retry.</p>
+										</div>
+									</div>
+								}
+								@if (isLedger && !isLocked) {
 									<div>
 										<div class="uk-alert uk-alert-success nlt-inline-alert">
 											<div class="icon-column">
 												<div uk-icon="icon: check; ratio: 2;"></div>
 											</div>
-											<p><b>Ledger Device Connected</b><br />Ledger data was imported successfully.</p>
+											<p><b>Device Connected</b><br />Ledger data was imported successfully.</p>
 										</div>
 									</div>
 								}
 							</div>
 						}
-						@if (isDesktop && !isBluetoothSupported && walletService.isLocked) {
+						@if (isDesktop && !isBluetoothSupported && isLocked) {
 							<div>
 								<div class="uk-alert uk-alert-danger nlt-inline-alert">
 									<div class="icon-column">
@@ -1003,7 +1004,7 @@
 		</div>
 	</div>
 }
-@if (activePanel === panels.final && !walletService.isLedger) {
+@if (activePanel === panels.final && !isLedger) {
 	<div
 		class="uk-alert-primary"
 		uk-alert
@@ -1014,7 +1015,7 @@
 		</p>
 	</div>
 }
-@if (activePanel === panels.final && walletService.isLedger) {
+@if (activePanel === panels.final && isLedger) {
 	<div
 		class="uk-alert-primary"
 		uk-alert

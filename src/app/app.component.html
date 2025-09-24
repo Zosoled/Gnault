@@ -35,7 +35,7 @@
 			[class]="['wallets-dropdown', isWalletsDropdownVisible ? 'visible' : 'hidden']"
 		>
 			<div class="header">Wallets</div>
-			@let wallets = svcWallet.wallets$ | async;
+			@let wallets = wallets$ | async;
 			@if (wallets.length < 1) {
 				<div class="wallet active">
 					<!-- active wallet -->
@@ -48,13 +48,12 @@
 					</div>
 				</div>
 			} @else {
-				@let selectedWallet = svcWallet.selectedWallet$ | async;
-				@if (selectedWallet != null) {
+				@if (isConfigured) {
 					<div class="wallet active">
 						<!-- active wallet -->
 						<div class="name-column">
 							<div class="name">
-								{{ svcWallet.walletNames[selectedWallet.id] ?? selectedWallet.id }}
+								{{ selectedWalletName }}
 							</div>
 						</div>
 					</div>
@@ -69,7 +68,7 @@
 							>
 								<div class="name-column">
 									<div class="name">
-										{{ svcWallet.walletNames[wallet.id] ?? wallet.id }}
+										{{ walletNames.get(wallet.id) ?? wallet.id }}
 									</div>
 								</div>
 							</div>
@@ -91,20 +90,20 @@
 				<div class="nav-header">
 					<div uk-grid>
 						<div class="uk-width-expand">
-							<div [class]="['nano-card', svcWallet.selectedAccount === null ? 'is-wallet' : 'is-card']">
+							<div [class]="['nano-card', selectedAccount === null ? 'is-wallet' : 'is-card']">
 								<div class="logo"></div>
 								<div class="card-contents">
 									<div class="account-name-container">
 										<a
-											[routerLink]="`/accounts/${svcWallet.selectedAccount?.address ?? ''}`"
+											[routerLink]="`/accounts/${selectedAccount?.address ?? ''}`"
 											[queryParams]="{ compact: '1' }"
 											class="name"
 										>
 											{{
-												svcWallet.selectedAccount == null
+												selectedAccount == null
 													? 'Total Balance'
-													: (svcWallet.selectedAccount?.addressBookName ??
-														('general.account' | transloco) + ' #' + svcWallet.selectedAccount.index)
+													: (selectedAccount?.addressBookName ??
+														('general.account' | transloco) + ' #' + selectedAccount.index)
 											}}
 										</a>
 										<div
@@ -118,26 +117,18 @@
 										</div>
 									</div>
 									<div class="account-balances">
-										@if ((node.status && svcWallet.isBalanceInitialized === true) || !isConfigured) {
+										@if ((node.status && isBalanceInitialized) || !isConfigured) {
 											<ng-container>
 												<div class="balance-container primary">
 													<div class="currency-name">Ӿ</div>
 													<div class="amount-container">
 														<div class="amount-integer">
-															{{
-																svcWallet.selectedAccount?.balance ?? svcWallet.balance ?? 0
-																	| rai: 'mnano,true'
-																	| amountsplit: 0
-															}}
+															{{ selectedAccount?.balance ?? balance ?? 0 | rai: 'mnano,true' | amountsplit: 0 }}
 														</div>
 														<div class="amount-fractional">
-															{{
-																svcWallet.selectedAccount?.balance ?? svcWallet.balance ?? 0
-																	| rai: 'nano,true'
-																	| amountsplit: 1
-															}}
+															{{ selectedAccount?.balance ?? balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }}
 														</div>
-														@if (svcWallet.isBalanceUpdating && isConfigured) {
+														@if (isBalanceUpdating && isConfigured) {
 															<div class="amount-updating">
 																<div uk-spinner="ratio: 0.5;"></div>
 															</div>
@@ -153,14 +144,14 @@
 														<div class="amount-container">
 															<div class="amount-integer">
 																{{
-																	svcWallet.selectedAccount?.balance ?? svcWallet.balance ?? 0
+																	selectedAccount?.balance ?? balance ?? 0
 																		| fiat: svcAppSettings.settings.displayCurrency
 																		| amountsplit: 0
 																}}
 															</div>
 															<div class="amount-fractional">
 																{{
-																	svcWallet.selectedAccount?.balance ?? svcWallet.balance ?? 0
+																	selectedAccount?.balance ?? balance ?? 0
 																		| fiat: svcAppSettings.settings.displayCurrency
 																		| amountsplit: 1
 																}}
@@ -175,11 +166,11 @@
 									</div>
 								</div>
 							</div>
-							@if (svcWallet.selectedAccount?.receivable > 0 || svcWallet.hasReceivableTransactions()) {
+							@if (selectedAccount?.receivable > 0 || hasReceivableTransactions) {
 								<ng-container>
-									@if (svcWallet.isProcessingReceivable) {
+									@if (isProcessingReceivable) {
 										<ng-container>
-											@if (svcWallet.isProcessingReceivable) {
+											@if (isProcessingReceivable) {
 												<div class="nav-action-receive">
 													<div
 														class="icon"
@@ -193,7 +184,7 @@
 										<ng-template #notProcessingReceivable>
 											@if (svcAppSettings.settings.receivableOption !== 'manual') {
 												<ng-container>
-													@if (svcWallet.isLocked) {
+													@if (isLocked) {
 														<div class="nav-action-receive user-action-required uk-animation-slide-left">
 															<div
 																class="icon"
@@ -230,18 +221,10 @@
 													<div class="currency-name">XNO</div>
 													<div class="amount-container">
 														<div class="amount-integer">
-															{{
-																svcWallet.selectedAccount?.receivable ?? svcWallet.receivable
-																	| rai: 'mnano,true'
-																	| amountsplit: 0
-															}}
+															{{ selectedAccount?.receivable ?? receivable | rai: 'mnano,true' | amountsplit: 0 }}
 														</div>
 														<div class="amount-fractional">
-															{{
-																svcWallet.selectedAccount?.receivable ?? svcWallet.receivable
-																	| rai: 'mnano,true'
-																	| amountsplit: 1
-															}}
+															{{ selectedAccount?.receivable ?? receivable | rai: 'mnano,true' | amountsplit: 1 }}
 														</div>
 													</div>
 												</div>
@@ -253,14 +236,14 @@
 														<div class="amount-container">
 															<div class="amount-integer">
 																{{
-																	svcWallet.selectedAccount?.receivableFiat ?? svcWallet.receivable
+																	selectedAccount?.receivableFiat ?? receivable
 																		| fiat: svcAppSettings.settings.displayCurrency
 																		| amountsplit: 0
 																}}
 															</div>
 															<div class="amount-fractional">
 																{{
-																	svcWallet.selectedAccount?.receivableFiat ?? svcWallet.receivable
+																	selectedAccount?.receivableFiat ?? receivable
 																		| fiat: svcAppSettings.settings.displayCurrency
 																		| amountsplit: 1
 																}}
@@ -340,7 +323,7 @@
 									<div class="label">{{ 'nav.receive' | transloco }}</div>
 								</div>
 								<div class="uk-width-1-4 uk-text-center label-new">
-									@if (svcWallet.hasReceivableTransactions()) {
+									@if (hasReceivableTransactions) {
 										<span class="uk-badge uk-text-top uk-align-center">
 											<div class="label">{{ 'general.new' | transloco }}</div>
 										</span>

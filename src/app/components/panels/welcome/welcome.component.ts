@@ -1,9 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core'
+import { Component, inject } from '@angular/core'
 import { RouterLink } from '@angular/router'
 import { TranslocoPipe } from '@jsverse/transloco'
 import { GnaultLogoElementComponent } from 'app/components'
-import { AppSettingsService, WalletService } from 'app/services'
-import { environment } from 'environments/environment'
+import { WalletService } from 'app/services'
 
 @Component({
 	selector: 'app-welcome',
@@ -11,13 +10,13 @@ import { environment } from 'environments/environment'
 	styleUrls: ['./welcome.component.css'],
 	imports: [GnaultLogoElementComponent, RouterLink, TranslocoPipe],
 })
-export class WelcomeComponent implements OnInit {
-	private walletService = inject(WalletService)
-	settingsService = inject(AppSettingsService)
+export class WelcomeComponent {
+	private svcWallet = inject(WalletService)
 
-	donationAccount = environment.donationAddress
-	wallet = this.walletService.selectedWallet
-	isConfigured = this.walletService.isConfigured
-
-	ngOnInit() {}
+	get isConfigured () {
+		return this.svcWallet.isConfigured()
+	}
+	get wallet () {
+		return this.svcWallet.selectedWallet()
+	}
 }

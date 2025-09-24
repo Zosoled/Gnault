@@ -1,8 +1,9 @@
-import { Injectable, computed, inject } from '@angular/core'
+import { Injectable, WritableSignal, computed, inject, signal } from '@angular/core'
 import {
 	AddressBookService,
 	ApiService,
 	AppSettingsService,
+	LedgerService,
 	NanoBlockService,
 	NotificationsService,
 	PriceService,
@@ -10,7 +11,7 @@ import {
 	WebsocketService,
 	WorkPoolService,
 } from 'app/services'
-import { Account, Tools, Wallet, WalletType } from 'libnemo'
+import { Account, Tools, Wallet } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
 
 export type WalletKeyType = 'seed' | 'ledger' | 'privateKey' | 'expandedKey'
@@ -72,6 +73,7 @@ export class WalletService {
 	private svcAddressBook = inject(AddressBookService)
 	private svcApi = inject(ApiService)
 	private svcAppSettings = inject(AppSettingsService)
+	private svcLedger = inject(LedgerService)
 	private svcNanoBlock = inject(NanoBlockService)
 	private svcNotifications = inject(NotificationsService)
 	private svcPrice = inject(PriceService)
@@ -79,8 +81,7 @@ export class WalletService {
 	private svcWebsocket = inject(WebsocketService)
 	private svcWorkPool = inject(WorkPoolService)
 
-	selectedWallet?: Wallet
-	selectedWallet$: BehaviorSubject<Wallet> = new BehaviorSubject(null)
+	selectedWallet: WritableSignal<Wallet> = signal(undefined)
 	wallets: Wallet[] = []
 	wallets$: BehaviorSubject<Wallet[]> = new BehaviorSubject([])
 	walletNames: Map<string, string> = new Map()
@@ -94,7 +95,7 @@ export class WalletService {
 	selectedAccountAddress: string = null
 	selectedAccount: Account = null
 	selectedAccount$: BehaviorSubject<Account> = new BehaviorSubject(null)
-	isLocked = computed(() => this.selectedWallet?.isLocked)
+	isLocked = signal(true)
 	isLocked$ = new BehaviorSubject(true)
 	passwordUpdated$ = new BehaviorSubject(false)
 	isUnlockRequested$ = new BehaviorSubject(false)
@@ -103,6 +104,19 @@ export class WalletService {
 	isReceivableBlocksUpdated$ = new BehaviorSubject(null)
 	newWallet$ = new BehaviorSubject(false)
 	refresh$ = new BehaviorSubject(false)
+	status = signal('DISCONNECTED')
+
+	setLocked = () => this.isLocked.set(true)
+	setUnlocked = () => this.isLocked.set(false)
+	setStatus = (event) => this.status.set(event.detail)
+	selectedWalletStatus = computed(() => {
+		this.selectedWallet().removeEventListener('locked', this.setLocked)
+		this.selectedWallet().removeEventListener('unlocked', this.setUnlocked)
+		this.selectedWallet().removeEventListener('ledgerstatuschanged', this.setStatus)
+		this.selectedWallet().addEventListener('locked', this.setLocked)
+		this.selectedWallet().addEventListener('unlocked', this.setUnlocked)
+		this.selectedWallet().addEventListener('ledgerstatuschanged', this.setStatus)
+	})
 
 	isProcessingReceivable = false
 	successfulBlocks = []
@@ -325,10 +339,10 @@ export class WalletService {
 
 		if (walletData) {
 			const walletJson = JSON.parse(walletData)
-			this.selectedWallet = await Wallet.restore(walletJson.selectedWalletId)
+			this.selectedWallet.set(await Wallet.restore(walletJson.selectedWalletId))
 
-			if (this.selectedWallet.type === 'Ledger') {
-				this.selectedWallet.unlock()
+			if (this.selectedWallet().type === 'Ledger') {
+				this.selectedWallet().unlock()
 			}
 
 			if (walletJson.accounts?.length > 0) {
@@ -339,9 +353,9 @@ export class WalletService {
 		}
 	}
 
-	// Using full list of indexes is the latest standard with back compatability with accountsIndex
+	// Using full list of indexes is the latest standard with backward compatibility with accountsIndex
 	async loadImportedWallet (
-		type: WalletType,
+		type: string,
 		password: string,
 		seed: string,
 		accountsIndex: number,
@@ -349,46 +363,45 @@ export class WalletService {
 		walletType: WalletKeyType
 	) {
 		this.resetWallet()
-		if (type === 'Ledger') {
-			return
-		}
-		const wallet = await Wallet.load(type, password, seed)
-		await wallet.unlock(password)
-		password = ''
-		this.selectedWallet = wallet
-		this.wallets.push(wallet)
-		this.wallets$.next(this.wallets)
+		if (type === 'BIP-44' || type === 'BLAKE2b') {
+			const wallet = await Wallet.load(type, password, seed)
+			await wallet.unlock(password)
+			password = ''
+			this.selectedWallet.set(wallet)
+			this.wallets.push(wallet)
+			this.wallets$.next(this.wallets)
 
-		if (walletType === 'seed') {
-			// Old method
-			if (accountsIndex > 0) {
-				for (let i = 0; i < accountsIndex; i++) {
-					await this.addWalletAccount(i)
-				}
-			} else if (indexes) {
-				// New method (the promise ensures all wallets have been added before moving on)
-				await Promise.all(
-					indexes.map(async (i) => {
+			if (walletType === 'seed') {
+				// Old method
+				if (accountsIndex > 0) {
+					for (let i = 0; i < accountsIndex; i++) {
 						await this.addWalletAccount(i)
-					})
-				)
-			} else return false
-		} else if (walletType === 'expandedKey') {
-			this.accounts.push(await Account.load({ privateKey: seed.slice(64, 128) }, 'private'))
-		} else if (walletType === 'privateKey') {
-			this.accounts.push(await Account.load({ privateKey: seed.slice(0, 64) }, 'private'))
-		} else {
-			// invalid wallet type
-			return false
+					}
+				} else if (indexes) {
+					// New method (the promise ensures all wallets have been added before moving on)
+					await Promise.all(
+						indexes.map(async (i) => {
+							await this.addWalletAccount(i)
+						})
+					)
+				} else return false
+			} else if (walletType === 'expandedKey') {
+				this.accounts.push(await Account.load({ privateKey: seed.slice(64, 128) }, 'private'))
+			} else if (walletType === 'privateKey') {
+				this.accounts.push(await Account.load({ privateKey: seed.slice(0, 64) }, 'private'))
+			} else {
+				// invalid wallet type
+				return false
+			}
+
+			await this.reloadBalances()
+
+			if (this.selectedWallet().accounts.length) {
+				this.svcWebsocket.subscribeAccounts(this.accounts.map((a) => a.address))
+			}
+
+			return true
 		}
-
-		await this.reloadBalances()
-
-		if (this.selectedWallet.accounts.length) {
-			this.svcWebsocket.subscribeAccounts(this.accounts.map((a) => a.address))
-		}
-
-		return true
 	}
 
 	async generateExportData () {
@@ -396,9 +409,9 @@ export class WalletService {
 			indexes: this.accounts.map((a) => a.index),
 		}
 		const backup = await Wallet.backup()
-		const secret = backup.find((wallet) => wallet.id === this.selectedWallet.id) as {
+		const secret = backup.find((wallet) => wallet.id === this.selectedWallet().id) as {
 			id: string
-			type: WalletType
+			type: string
 			iv: ArrayBuffer
 			salt: ArrayBuffer
 			encrypted: ArrayBuffer
@@ -420,7 +433,7 @@ export class WalletService {
 
 	async lockWallet (): Promise<void> {
 		if (this.selectedWallet) {
-			this.selectedWallet.lock()
+			this.selectedWallet().lock()
 
 			// Remove secrets from accounts
 			this.accounts.forEach((a) => {
@@ -428,7 +441,7 @@ export class WalletService {
 				a.secret = null
 			})
 
-			this.isLocked$.next(this.selectedWallet.isLocked)
+			this.isLocked$.next(this.selectedWallet().isLocked)
 
 			// Save so that a refresh gives you a locked wallet
 			await this.saveWalletExport()
@@ -437,12 +450,12 @@ export class WalletService {
 
 	async unlockWallet (password: string): Promise<boolean> {
 		try {
-			await this.selectedWallet.unlock(password)
+			await this.selectedWallet().unlock(password)
 			this.accounts.forEach(async (a) => {
-				a = await this.selectedWallet.account(a.index)
+				a = await this.selectedWallet().account(a.index)
 			})
 
-			this.isLocked$.next(this.selectedWallet.isLocked)
+			this.isLocked$.next(this.selectedWallet().isLocked)
 
 			// If there is a notification to unlock, remove it
 			this.svcNotifications.removeNotification('receivable-locked')
@@ -462,7 +475,7 @@ export class WalletService {
 
 	async setPassword (password: string) {
 		try {
-			await this.selectedWallet.update(password)
+			await this.selectedWallet().update(password)
 			this.passwordUpdated$.next(true)
 			// Save so a refresh also gives you your unlocked wallet?
 			await this.saveWalletExport()
@@ -476,8 +489,8 @@ export class WalletService {
 
 	async setWallet (password: string, wallet: Wallet) {
 		this.resetWallet()
-		this.selectedWallet = wallet
-		await this.selectedWallet.unlock(password)
+		this.selectedWallet.set(wallet)
+		await this.selectedWallet().unlock(password)
 		password = ''
 		await this.scanAccounts()
 	}
@@ -492,7 +505,7 @@ export class WalletService {
 
 		// Getting accounts...
 		for (let batchIdx = 0; batchIdx < batchesCount; batchIdx++) {
-			const batchAccounts = await this.selectedWallet.accounts(batchIdx, batchIdx + ACCOUNTS_PER_API_REQUEST)
+			const batchAccounts = await this.selectedWallet().accounts(batchIdx, batchIdx + ACCOUNTS_PER_API_REQUEST)
 			const batchAccountsArray = []
 			for (let i = batchIdx; i < batchIdx + ACCOUNTS_PER_API_REQUEST; i++) {
 				batchAccountsArray.push(batchAccounts[i].address)
@@ -525,11 +538,11 @@ export class WalletService {
 
 	async createNewWallet (password: string) {
 		this.resetWallet()
-		this.selectedWallet = await Wallet.create('BLAKE2b', password)
-		const unlockRequest = this.selectedWallet.unlock(password)
+		this.selectedWallet.set(await Wallet.create('BLAKE2b', password))
+		const unlockRequest = this.selectedWallet().unlock(password)
 		password = ''
 		await unlockRequest
-		const { mnemonic, seed } = this.selectedWallet
+		const { mnemonic, seed } = this.selectedWallet()
 		this.addWalletAccount()
 		await this.reloadBalances()
 		return { mnemonic, seed }
@@ -537,10 +550,11 @@ export class WalletService {
 
 	async createLedgerWallet (bluetooth: boolean) {
 		this.resetWallet()
-		this.selectedWallet = await Wallet.create('Ledger')
+		this.selectedWallet.set(await Wallet.create('Ledger'))
 		if (bluetooth) {
-			await this.selectedWallet.config({ connection: 'ble' })
+			await this.selectedWallet().config({ connection: 'ble' })
 		}
+		await this.selectedWallet().unlock()
 		await this.scanAccounts()
 		return this.selectedWallet
 	}
@@ -556,7 +570,7 @@ export class WalletService {
 	}
 
 	async createLedgerAccount (index) {
-		return await this.selectedWallet.account(index)
+		return await this.selectedWallet().account(index)
 	}
 
 	createKeyedAccount (index, accountBytes, accountKeyPair) {
@@ -597,13 +611,8 @@ export class WalletService {
 		this.receivableBlocks = []
 	}
 
-	get isConfigured () {
-		return this.selectedWallet != null
-	}
-
-	get isLedger () {
-		return this.selectedWallet?.type === 'Ledger'
-	}
+	isConfigured = computed(() => this.selectedWallet != null)
+	isLedger = computed(() => this.selectedWallet()?.type === 'Ledger')
 
 	hasReceivableTransactions () {
 		return this.hasReceivable
@@ -791,7 +800,7 @@ export class WalletService {
 			}
 			const newAccount: Account = this.isLedger
 				? await this.createLedgerAccount(index)
-				: await this.selectedWallet.account(index)
+				: await this.selectedWallet().account(index)
 			this.accounts.push(newAccount)
 			this.svcWebsocket.subscribeAccounts([newAccount.address])
 			await this.saveWalletExport()
@@ -944,15 +953,15 @@ export class WalletService {
 
 	removeWalletData () {
 		localStorage.removeItem(storeKey)
-		this.selectedWallet.destroy()
+		this.selectedWallet().destroy()
 	}
 
 	async generateWalletExport () {
 		const backup = await Wallet.backup()
-		const walletData = backup.find((v) => v.id === this.selectedWallet.id)
+		const walletData = backup.find((v) => v.id === this.selectedWallet().id)
 		const data: any = {
 			...walletData,
-			selectedWalletId: this.selectedWallet.id,
+			selectedWalletId: this.selectedWallet().id,
 			accounts: this.accounts.map((a) => a.toJSON()),
 			selectedAccountAddress: this.selectedAccount?.address,
 			locked: true,

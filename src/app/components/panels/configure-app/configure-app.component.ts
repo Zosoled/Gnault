@@ -28,7 +28,6 @@ import { BehaviorSubject } from 'rxjs'
 	imports: [CommonModule, FormsModule, TranslocoDirective, TranslocoPipe],
 })
 export class ConfigureAppComponent implements OnInit {
-	private walletService = inject(WalletService)
 	private notifications = inject(NotificationsService)
 	private appSettings = inject(AppSettingsService)
 	private addressBook = inject(AddressBookService)
@@ -44,8 +43,11 @@ export class ConfigureAppComponent implements OnInit {
 	private renderer = inject(Renderer2)
 	private qrModalService = inject(QrModalService)
 	private translocoService = inject(TranslocoService)
+	private svcWallet = inject(WalletService)
 
-	wallet = this.walletService.selectedWallet
+	get wallet () {
+		return this.svcWallet.selectedWallet()
+	}
 	languages = this.translocoService.getAvailableLangs() as [{ id: string; label: string }]
 	selectedLanguage = this.languages[0].id
 
@@ -169,14 +171,14 @@ export class ConfigureAppComponent implements OnInit {
 	showStatValues = () => this.selectedServer && this.selectedServer !== 'offline'
 	showServerConfigs = () => this.selectedServer && this.selectedServer === 'custom'
 
-	async ngOnInit() {
+	async ngOnInit () {
 		this.loadFromSettings()
 		this.updateNodeStats()
 
 		setTimeout(() => this.populateRepresentativeList(), 500)
 	}
 
-	async populateRepresentativeList() {
+	async populateRepresentativeList () {
 		// add trusted/regular local reps to the list
 		const localReps = this.repService.getSortedRepresentatives()
 		this.representativeList.push(...localReps.filter((rep) => !rep.warn))
@@ -199,7 +201,7 @@ export class ConfigureAppComponent implements OnInit {
 		this.representativeList.push(...localReps.filter((rep) => rep.warn))
 	}
 
-	async updateNodeStats(refresh = false) {
+	async updateNodeStats (refresh = false) {
 		if (
 			!this.serverAPIUpdated ||
 			(this.serverAPIUpdated !== this.appSettings.settings.serverAPI && this.selectedServer === 'random')
@@ -246,7 +248,7 @@ export class ConfigureAppComponent implements OnInit {
 		setTimeout(() => (this.statsRefreshEnabled = true), 5000)
 	}
 
-	loadFromSettings() {
+	loadFromSettings () {
 		const settings = this.appSettings.settings
 
 		const matchingLanguage = this.languages.find((language) => language.id === settings.language)
@@ -289,7 +291,7 @@ export class ConfigureAppComponent implements OnInit {
 		}
 	}
 
-	async loadCurrencies(): Promise<void> {
+	async loadCurrencies (): Promise<void> {
 		await this.svcPrice.fetchPrice()
 		this.svcPrice.currencies.forEach((currency) => {
 			if (this.currencies.get(currency) === undefined && currency.length === 3) {
@@ -302,7 +304,7 @@ export class ConfigureAppComponent implements OnInit {
 		this.selectedCurrency = matchingCurrency || this.currencies.get('-')
 	}
 
-	async updateDisplaySettings() {
+	async updateDisplaySettings () {
 		if (this.selectedNightModeOption === 'disabled') {
 			this.renderer.addClass(document.body, 'light-mode')
 			this.renderer.removeClass(document.body, 'dark-mode')
@@ -344,7 +346,7 @@ export class ConfigureAppComponent implements OnInit {
 		// }
 	}
 
-	async updateWalletSettings() {
+	async updateWalletSettings () {
 		const newStorage = this.selectedStorage
 		const resaveWallet = this.appSettings.settings.walletStorage !== newStorage
 
@@ -358,7 +360,7 @@ export class ConfigureAppComponent implements OnInit {
 					<span style="font-size: 18px;">
 					${this.translocoService.translate('configure-app.you-are-about-to-disable-storage-of-all-wallet-data-which')}
 					</span><br>
-					${this.walletService.isConfigured ? saveSeedWarning : ''}`
+					${this.svcWallet.isConfigured() ? saveSeedWarning : ''}`
 				)
 			} catch (err) {
 				// pressing cancel, reset storage setting and interrupt
@@ -426,14 +428,14 @@ export class ConfigureAppComponent implements OnInit {
 		)
 
 		if (resaveWallet) {
-			this.walletService.saveWalletExport() // If swapping the storage engine, resave the wallet
+			this.svcWallet.saveWalletExport() // If swapping the storage engine, resave the wallet
 		}
 		if (reloadReceivable) {
-			this.walletService.reloadBalances()
+			this.svcWallet.reloadBalances()
 		}
 	}
 
-	async updateServerSettings() {
+	async updateServerSettings () {
 		const newSettings = {
 			serverName: this.selectedServer,
 			serverAPI: null,
@@ -476,7 +478,7 @@ export class ConfigureAppComponent implements OnInit {
 		this.node.node.status = false // Directly set node to offline since API url changed.  Status will get set by reloadBalances
 
 		// Reload balances which triggers an api check + reconnect to websocket server
-		await this.walletService.reloadBalances()
+		await this.svcWallet.reloadBalances()
 		this.websocket.forceReconnect()
 		// this is updated after setting server to random and doing recheck of wallet balance
 		this.serverAPIUpdated = this.appSettings.settings.serverAPI
@@ -485,7 +487,7 @@ export class ConfigureAppComponent implements OnInit {
 		this.updateNodeStats()
 	}
 
-	searchRepresentatives() {
+	searchRepresentatives () {
 		if (this.defaultRepresentative && !this.util.account.isValidAccount(this.defaultRepresentative)) this.repStatus = 0
 		else this.repStatus = null
 
@@ -501,14 +503,14 @@ export class ConfigureAppComponent implements OnInit {
 		this.representativeResults$.next(matches)
 	}
 
-	selectRepresentative(rep) {
+	selectRepresentative (rep) {
 		this.showRepresentatives = false
 		this.defaultRepresentative = rep
 		this.searchRepresentatives()
 		this.validateRepresentative()
 	}
 
-	async validateRepresentative() {
+	async validateRepresentative () {
 		setTimeout(() => (this.showRepresentatives = false), 400)
 		if (this.defaultRepresentative) this.defaultRepresentative = this.defaultRepresentative.replace(/ /g, '')
 
@@ -530,7 +532,7 @@ export class ConfigureAppComponent implements OnInit {
 	}
 
 	// When changing the Server Config option, prefill values
-	serverConfigChange(newServer) {
+	serverConfigChange (newServer) {
 		const custom = this.serverOptions.find((c) => c.value === newServer)
 		if (custom) {
 			this.serverAPI = custom.api
@@ -554,7 +556,7 @@ export class ConfigureAppComponent implements OnInit {
 		this.statsRefreshEnabled = newServer !== 'random'
 	}
 
-	getRemotePoWOptionName() {
+	getRemotePoWOptionName () {
 		const optionName = this.translocoService.translate('configure-app.pow-options.external-selected-server')
 		if (this.selectedServer === 'random' || this.selectedServer === 'offline') {
 			return optionName
@@ -566,15 +568,15 @@ export class ConfigureAppComponent implements OnInit {
 		return optionName + ' (' + selectedServerOption.name + ')'
 	}
 
-	async clearWorkCache() {
+	async clearWorkCache () {
 		const UIkit = window['UIkit']
 		try {
 			await UIkit.modal.confirm(
 				'<p style="text-align: center;">' +
-					this.translocoService.translate('configure-app.you-are-about-to-delete-all-locally-cached-proof-of-work') +
-					'<br><br><b>' +
-					this.translocoService.translate('configure-app.are-you-sure') +
-					'</b></p>'
+				this.translocoService.translate('configure-app.you-are-about-to-delete-all-locally-cached-proof-of-work') +
+				'<br><br><b>' +
+				this.translocoService.translate('configure-app.are-you-sure') +
+				'</b></p>'
 			)
 			this.workPool.clearCache()
 			this.notifications.sendSuccess(
@@ -586,40 +588,40 @@ export class ConfigureAppComponent implements OnInit {
 		}
 	}
 
-	async clearWalletData() {
+	async clearWalletData () {
 		const UIkit = window['UIkit']
 		try {
 			await UIkit.modal.confirm(
 				'<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">' +
-					this.translocoService.translate('configure-app.you-are-about-to-delete-all-locally-stored-data-about-your') +
-					'</span><br><br><b style="font-size: 18px;">' +
-					this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
-					'</b><br><br><span style="font-size: 18px;"><b>' +
-					this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
-					'</b></span></p><br>'
+				this.translocoService.translate('configure-app.you-are-about-to-delete-all-locally-stored-data-about-your') +
+				'</span><br><br><b style="font-size: 18px;">' +
+				this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
+				'</b><br><br><span style="font-size: 18px;"><b>' +
+				this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
+				'</b></span></p><br>'
 			)
-			this.walletService.resetWallet()
-			this.walletService.removeWalletData()
+			this.svcWallet.resetWallet()
+			this.svcWallet.removeWalletData()
 			this.notifications.sendSuccess(
 				this.translocoService.translate('configure-app.successfully-deleted-all-wallet-data')
 			)
-		} catch (err) {}
+		} catch (err) { }
 	}
 
-	async clearAllData() {
+	async clearAllData () {
 		const UIkit = window['UIkit']
 		try {
 			await UIkit.modal.confirm(
 				'<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">' +
-					this.translocoService.translate('configure-app.clear-all-data.1') +
-					'</span><br><br><b style="font-size: 18px;">' +
-					this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
-					'</b><br><br><span style="font-size: 18px;"><b>' +
-					this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
-					'</b></span></p><br>'
+				this.translocoService.translate('configure-app.clear-all-data.1') +
+				'</span><br><br><b style="font-size: 18px;">' +
+				this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
+				'</b><br><br><span style="font-size: 18px;"><b>' +
+				this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
+				'</b></span></p><br>'
 			)
-			this.walletService.resetWallet()
-			this.walletService.removeWalletData()
+			this.svcWallet.resetWallet()
+			this.svcWallet.removeWalletData()
 			this.workPool.deleteCache()
 			this.addressBook.clearAddressBook()
 			this.appSettings.clearAppSettings()
@@ -633,11 +635,11 @@ export class ConfigureAppComponent implements OnInit {
 			)
 			// Get a new random API server or Gnault will get stuck in offline mode
 			this.updateServerSettings()
-		} catch (err) {}
+		} catch (err) { }
 	}
 
 	// open qr reader modal
-	openQR(reference, type) {
+	openQR (reference, type) {
 		const qrResult = this.qrModalService.openQR(reference, type)
 		qrResult.then(
 			(data) => {
@@ -648,7 +650,7 @@ export class ConfigureAppComponent implements OnInit {
 						break
 				}
 			},
-			() => {}
+			() => { }
 		)
 	}
 }

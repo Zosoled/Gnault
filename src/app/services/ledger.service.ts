@@ -1,6 +1,7 @@
-import { Injectable, inject } from '@angular/core'
+import { Injectable, computed, inject } from '@angular/core'
 import { DesktopService } from 'app/services'
 import { environment } from 'environments/environment'
+import { Ledger } from 'libnemo'
 import { Subject } from 'rxjs'
 
 @Injectable({ providedIn: 'root' })
@@ -8,7 +9,7 @@ export class LedgerService {
 	private desktop = inject(DesktopService)
 
 	desktopMessage$ = new Subject()
-	queryingDesktopLedger = false
+	status = computed(() => Ledger.status)
 
 	constructor () {
 		if (environment.desktop) {

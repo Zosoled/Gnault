@@ -139,9 +139,15 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	representativesOverview = []
 	// End remote signing
 
-	constructor() {
-		const route = this.router
+	get isBalanceUpdating () {
+		return this.svcWallet.isBalanceUpdating
+	}
+	get isConfigured () {
+		return this.svcWallet.isConfigured()
+	}
 
+	constructor () {
+		const route = this.router
 		// to detect when the account changes if the view is already active
 		route.events.subscribe((val) => {
 			if (val instanceof NavigationEnd) {
@@ -150,7 +156,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		})
 	}
 
-	async ngOnInit() {
+	async ngOnInit () {
 		const params = this.activatedRoute.snapshot.queryParams
 		if ('sign' in params) {
 			this.remoteVisible = params.sign === '1'
@@ -201,7 +207,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		})
 	}
 
-	async populateRepresentativeList() {
+	async populateRepresentativeList () {
 		// add trusted/regular local reps to the list
 		const localReps = this.svcRepresentative.getSortedRepresentatives()
 		this.representativeList.push(...localReps.filter((rep) => !rep.warn))
@@ -224,7 +230,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.representativeList.push(...localReps.filter((rep) => rep.warn))
 	}
 
-	clearAccountVars() {
+	clearAccountVars () {
 		this.accountHistory = []
 		this.receivableBlocks = []
 		this.address = ''
@@ -236,7 +242,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.qrCodeImage = null
 	}
 
-	clearRemoteVars() {
+	clearRemoteVars () {
 		this.amount = null
 		this.amountRaw = 0n
 		this.amountFiat = null
@@ -257,7 +263,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.representativeListMatch = ''
 	}
 
-	updateRepresentativeInfo() {
+	updateRepresentativeInfo () {
 		if (!this.account) {
 			return
 		}
@@ -280,12 +286,12 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.repLabel = null
 	}
 
-	onRefreshButtonClick() {
+	onRefreshButtonClick () {
 		if (!this.manualRefreshAllowed) return
 		this.loadAccountDetails()
 	}
 
-	isReceivableBlockUpdateRelevant(receivableBlockUpdate) {
+	isReceivableBlockUpdateRelevant (receivableBlockUpdate) {
 		if (receivableBlockUpdate.account !== this.address) {
 			return false
 		}
@@ -313,7 +319,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		return true
 	}
 
-	onReceivableBlockUpdate(receivableBlockUpdate) {
+	onReceivableBlockUpdate (receivableBlockUpdate) {
 		if (receivableBlockUpdate === null) {
 			return
 		}
@@ -327,7 +333,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.loadAccountDetailsThrottled({ receivableBlockUpdate })
 	}
 
-	loadAccountDetailsThrottled(params) {
+	loadAccountDetailsThrottled (params) {
 		this.autoRefreshReasonBlockUpdate = params.receivableBlockUpdate != null ? params.receivableBlockUpdate : null
 
 		if (!this.initialLoadDone) {
@@ -348,7 +354,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	enableManualRefreshDelayed(delayMS) {
+	enableManualRefreshDelayed (delayMS) {
 		if (this.timeoutIdAllowingManualRefresh != null) {
 			clearTimeout(this.timeoutIdAllowingManualRefresh)
 		}
@@ -358,7 +364,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}, delayMS)
 	}
 
-	enableInstantAutoRefreshDelayed(delayMS) {
+	enableInstantAutoRefreshDelayed (delayMS) {
 		if (this.timeoutIdAllowingInstantAutoRefresh != null) {
 			clearTimeout(this.timeoutIdAllowingInstantAutoRefresh)
 		}
@@ -368,7 +374,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}, delayMS)
 	}
 
-	loadAccountDetailsDelayed(delayMS) {
+	loadAccountDetailsDelayed (delayMS) {
 		if (this.timeoutIdQueuedAutoRefresh != null) {
 			clearTimeout(this.timeoutIdQueuedAutoRefresh)
 		}
@@ -387,7 +393,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}, delayMS)
 	}
 
-	onAccountDetailsLoadStart() {
+	onAccountDetailsLoadStart () {
 		this.instantAutoRefreshAllowed = false
 		this.manualRefreshAllowed = false
 
@@ -404,12 +410,12 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	enableRefreshesEventually() {
+	enableRefreshesEventually () {
 		this.enableInstantAutoRefreshDelayed(3000)
 		this.enableManualRefreshDelayed(5000)
 	}
 
-	onAccountDetailsLoadDone() {
+	onAccountDetailsLoadDone () {
 		if (this.shouldQueueAutoRefresh === true) {
 			this.shouldQueueAutoRefresh = false
 			this.loadAccountDetailsDelayed(3000)
@@ -419,7 +425,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.enableRefreshesEventually()
 	}
 
-	async loadAccountDetails() {
+	async loadAccountDetails () {
 		this.onAccountDetailsLoadStart()
 
 		this.receivableBlocks = []
@@ -529,7 +535,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.onAccountDetailsLoadDone()
 	}
 
-	getAccountLabel(accountID, defaultLabel) {
+	getAccountLabel (accountID, defaultLabel) {
 		const walletAccount = this.svcWallet.accounts.find((a) => a.id === accountID)
 
 		if (walletAccount == null) {
@@ -539,7 +545,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		return translate('general.account') + ' #' + walletAccount.index
 	}
 
-	ngOnDestroy() {
+	ngOnDestroy () {
 		this.mobileAccountMenuModal.hide()
 		this.mobileTransactionMenuModal.hide()
 		if (this.routerSub) {
@@ -550,19 +556,19 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	async generateReceiveQR(accountID) {
+	async generateReceiveQR (accountID) {
 		const qrCode = await QRCode.toDataURL(`${accountID}`, { errorCorrectionLevel: 'M', scale: 16 })
 		this.qrCodeImage = qrCode
 	}
 
-	updateTodayYesterdayDateStrings() {
+	updateTodayYesterdayDateStrings () {
 		const unixTimeNow = Date.now()
 
 		this.dateStringToday = formatDate(unixTimeNow, 'MMM d, y', 'en-US')
 		this.dateStringYesterday = formatDate(unixTimeNow - 86400000, 'MMM d, y', 'en-US')
 	}
 
-	async getAccountHistory(accountID, resetPage = true) {
+	async getAccountHistory (accountID, resetPage = true) {
 		if (resetPage) {
 			this.accountHistory = []
 			this.pageSize = 25
@@ -649,14 +655,14 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.loadingTxList = false
 	}
 
-	async loadMore() {
+	async loadMore () {
 		if (this.pageSize <= this.maxPageSize) {
 			this.pageSize += 25
 			await this.getAccountHistory(this.address, false)
 		}
 	}
 
-	async saveAddressBook() {
+	async saveAddressBook () {
 		// Trim and remove duplicate spaces
 		this.addressBookModel = this.addressBookModel.trim().replace(/ +/g, ' ')
 
@@ -708,7 +714,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.showEditAddressBook = false
 	}
 
-	searchRepresentatives() {
+	searchRepresentatives () {
 		if (this.representativeModel !== '' && !this.svcUtil.account.isValidAccount(this.representativeModel))
 			this.repStatus = 0
 		else this.repStatus = null
@@ -725,14 +731,14 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.representativeResults$.next(matches)
 	}
 
-	selectRepresentative(rep) {
+	selectRepresentative (rep) {
 		this.showRepresentatives = false
 		this.representativeModel = rep
 		this.searchRepresentatives()
 		this.validateRepresentative()
 	}
 
-	async validateRepresentative() {
+	async validateRepresentative () {
 		setTimeout(() => (this.showRepresentatives = false), 400)
 		this.representativeModel = this.representativeModel.replace(/ /g, '')
 
@@ -753,7 +759,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	copied() {
+	copied () {
 		this.svcNotifications.removeNotification('success-copied')
 		this.svcNotifications.sendSuccess(translate('general.successfully-copied-to-clipboard'), {
 			identifier: 'success-copied',
@@ -762,7 +768,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 
 	// Remote signing methods
 	// An update to the Nano amount, sync the fiat value
-	syncFiatPrice() {
+	syncFiatPrice () {
 		if (!this.validateAmount()) return
 		const rawAmount = BigInt(this.amount ?? 0) + this.amountRaw
 		if (rawAmount <= 0n) {
@@ -777,7 +783,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	}
 
 	// An update to the fiat amount, sync the nano value based on currently selected denomination
-	async syncNanoPrice() {
+	async syncNanoPrice () {
 		if (!this.amountFiat) {
 			this.amount = ''
 			return
@@ -788,7 +794,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.amount = Number(nanoPrice).toPrecision(3)
 	}
 
-	searchAddressBook() {
+	searchAddressBook () {
 		this.showAddressBook = true
 		const search = this.toAccountID || ''
 		const addressBook = this.svcAddressBook.addressBook
@@ -798,14 +804,14 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.addressBookResults$.next(matches)
 	}
 
-	selectBookEntry(account) {
+	selectBookEntry (account) {
 		this.showAddressBook = false
 		this.toAccountID = account
 		this.searchAddressBook()
 		this.validateDestination()
 	}
 
-	async validateDestination() {
+	async validateDestination () {
 		// The timeout is used to solve a bug where the results get hidden too fast and the click is never registered
 		setTimeout(() => (this.showAddressBook = false), 400)
 
@@ -832,7 +838,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	validateAmount() {
+	validateAmount () {
 		if (this.svcUtil.account.isValidNanoAmount(this.amount)) {
 			this.amountStatus = 1
 			return true
@@ -842,20 +848,20 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	async setMaxAmount() {
+	async setMaxAmount () {
 		this.amountRaw = BigInt(this.account?.balance || 0n)
 		this.amount = parseFloat(Tools.convert(this.account?.balance, 'raw', 'nano')).toFixed(6)
 		this.syncFiatPrice()
 	}
 
-	showMobileMenuForTransaction(transaction) {
+	showMobileMenuForTransaction (transaction) {
 		this.svcNotifications.removeNotification('success-copied')
 
 		this.mobileTransactionData = transaction
 		this.mobileTransactionMenuModal.show()
 	}
 
-	onReceiveFundsPress(receivableTransaction) {
+	onReceiveFundsPress (receivableTransaction) {
 		if (receivableTransaction.loading || receivableTransaction.received) {
 			return
 		}
@@ -863,7 +869,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.receiveReceivableBlock(receivableTransaction)
 	}
 
-	async receiveReceivableBlock(receivableBlock) {
+	async receiveReceivableBlock (receivableBlock) {
 		const sourceBlock = receivableBlock.hash
 
 		if (this.svcWallet.isLocked) {
@@ -912,7 +918,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.loadAccountDetailsThrottled({})
 	}
 
-	async generateSend() {
+	async generateSend () {
 		if (!this.address || !this.toAccountID) {
 			return this.svcNotifications.sendWarning(`From and to account are required`)
 		}
@@ -973,7 +979,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.qrCodeImageBlock = qrCode
 	}
 
-	async generateReceive(receivableHash) {
+	async generateReceive (receivableHash) {
 		this.qrCodeImageBlockReceive = null
 		this.qrString = null
 		this.blockHashReceive = null
@@ -1040,7 +1046,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.qrCodeImageBlockReceive = qrCode
 	}
 
-	async generateChange() {
+	async generateChange () {
 		if (!this.svcUtil.account.isValidAccount(this.representativeModel)) {
 			return this.svcNotifications.sendError(`Not a valid representative account`)
 		}
@@ -1081,11 +1087,11 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.qrCodeImageBlock = qrCode
 	}
 
-	showRemote(state: boolean) {
+	showRemote (state: boolean) {
 		this.remoteVisible = !state
 	}
 
-	showRemoteModal() {
+	showRemoteModal () {
 		const UIkit = window['UIkit']
 		const modal = UIkit.modal('#block-modal')
 		modal.show()
@@ -1093,7 +1099,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	}
 
 	// open qr reader modal
-	openQR(reference, type) {
+	openQR (reference, type) {
 		const qrResult = this.svcQrModal.openQR(reference, type)
 		qrResult.then(
 			(data) => {
@@ -1108,11 +1114,11 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 						break
 				}
 			},
-			() => {}
+			() => { }
 		)
 	}
 
-	resetRaw() {
+	resetRaw () {
 		this.amountRaw = 0n
 	}
 

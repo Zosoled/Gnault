@@ -113,7 +113,7 @@ export class AccountsComponent implements OnInit {
 		// if (this.walletService.accounts.length <= 1) {
 		// return this.notificationService.sendWarning(`You need at least 2 accounts to sort them`)
 		// }
-		if (this.svcWallet.isLocked || !this.svcWallet.isConfigured || this.svcWallet.accounts.length <= 1) {
+		if (this.svcWallet.isLocked() || !this.svcWallet.isConfigured() || this.svcWallet.accounts.length <= 1) {
 			return
 		}
 		this.svcWallet.accounts = this.svcWallet.accounts.sort((a, b) => a.index - b.index)
@@ -177,7 +177,7 @@ export class AccountsComponent implements OnInit {
 			{ identifier: 'ledger-account', length: 0 }
 		)
 		try {
-			await this.svcWallet.selectedWallet.account(account.index)
+			await this.svcWallet.selectedWallet().account(account.index)
 			this.svcNotifications.sendSuccess(this.svcTransloco.translate('accounts.account-address-confirmed-on-ledger'))
 		} catch (err) {
 			this.svcNotifications.sendError(
