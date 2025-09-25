@@ -3,9 +3,6 @@ import { Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ChildActivationEnd, Router, RouterLink } from '@angular/router'
 import { TranslocoDirective, TranslocoPipe, TranslocoService } from '@jsverse/transloco'
-import { Account, Tools } from 'libnemo'
-import { ClipboardModule } from 'ngx-clipboard'
-import * as QRCode from 'qrcode'
 import {
 	NanoAccountIdComponent,
 	NanoIdenticonComponent,
@@ -28,6 +25,9 @@ import {
 	WalletService,
 	WebsocketService
 } from 'app/services'
+import { Account, Tools } from 'libnemo'
+import { ClipboardModule } from 'ngx-clipboard'
+import * as QRCode from 'qrcode'
 
 @Component({
 	selector: 'app-receive',
@@ -52,20 +52,20 @@ import {
 })
 
 export class ReceiveComponent implements OnInit, OnDestroy {
-	private addressBook = inject(AddressBookService)
-	private nanoBlock = inject(NanoBlockService)
-	private notificationService = inject(NotificationsService)
-	private route = inject(Router)
-	private translocoService = inject(TranslocoService)
-	private walletService = inject(WalletService)
-	private websocket = inject(WebsocketService)
+	private router = inject(Router)
+	private svcAddressBook = inject(AddressBookService)
+	private svcNanoBlock = inject(NanoBlockService)
+	private svcNotifications = inject(NotificationsService)
+	private svcTransloco = inject(TranslocoService)
+	private svcWallet = inject(WalletService)
+	private svcWebsocket = inject(WebsocketService)
 
 	svcPrice = inject(PriceService)
 	svcAppSettings = inject(AppSettingsService)
 	svcUtil = inject(UtilService)
 
 	nano = 1000000000000000000000000
-	accounts = this.walletService.accounts
+	accounts = this.svcWallet.accounts
 	timeoutIdClearingRecentlyCopiedState: any = null
 	mobileTransactionMenuModal: any = null
 	merchantModeModal: any = null
@@ -112,7 +112,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		const merchantModeModal = UIkit.modal('#merchant-mode-modal')
 		this.merchantModeModal = merchantModeModal
 
-		this.routerSub = this.route.events.subscribe(event => {
+		this.routerSub = this.router.events.subscribe(event => {
 			if (event instanceof ChildActivationEnd) {
 				this.mobileTransactionMenuModal.hide()
 				this.merchantModeModal.hide()
@@ -120,7 +120,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		})
 
 		// Update selected account if changed in the sidebar
-		this.walletService.selectedAccount$.subscribe(async acc => {
+		this.svcWallet.selectedAccount$.subscribe(async acc => {
 			if (this.selAccountInit) {
 				this.receivableAccountModel = acc?.id ?? '0'
 				this.onSelectedAccountChange(this.receivableAccountModel)
@@ -128,7 +128,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			this.selAccountInit = true
 		})
 
-		this.walletService.isReceivableBlocksUpdated$.subscribe(async receivableBlockUpdate => {
+		this.svcWallet.isReceivableBlocksUpdated$.subscribe(async receivableBlockUpdate => {
 			if (receivableBlockUpdate === null) {
 				return
 			}
@@ -137,9 +137,9 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 
 		await this.updateReceivableBlocks()
 
-		if (this.walletService.selectedAccount !== null) {
+		if (this.svcWallet.selectedAccount !== null) {
 			// Set the account selected in the sidebar as default
-			this.receivableAccountModel = this.walletService.selectedAccount.id
+			this.receivableAccountModel = this.svcWallet.selectedAccount.id
 			this.onSelectedAccountChange(this.receivableAccountModel)
 		} else if (this.accounts.length === 1) {
 			// Auto-select account if it is the only account in the wallet
@@ -148,8 +148,8 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		}
 
 		// Listen as new transactions come in. Ignore the latest transaction that is already present on page load.
-		const latest = this.websocket.newTransactions$.getValue()
-		this.websocket.newTransactions$.subscribe(async (transaction) => {
+		const latest = this.svcWebsocket.newTransactions$.getValue()
+		this.svcWebsocket.newTransactions$.subscribe(async (transaction) => {
 			if (transaction && latest !== transaction) {
 				const rawAmount = BigInt(transaction.amount)
 				if (transaction.block.link_as_account === this.qrAccount && rawAmount > (this.qrAmount || 0n)) {
@@ -173,7 +173,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 
 	async updateReceivableBlocks () {
 		this.receivableBlocks =
-			this.walletService.receivableBlocks
+			this.svcWallet.receivableBlocks
 				.map(
 					(receivableBlock) =>
 						Object.assign(
@@ -184,12 +184,12 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 								destination: receivableBlock.account,
 								source: null,
 								addressBookName: (
-									this.addressBook.getAccountName(receivableBlock.source)
+									this.svcAddressBook.getAccountName(receivableBlock.source)
 									|| this.getAccountLabel(receivableBlock.source, null)
 								),
 								destinationAddressBookName: (
-									this.addressBook.getAccountName(receivableBlock.account)
-									|| this.getAccountLabel(receivableBlock.account, this.translocoService.translate('general.account'))
+									this.svcAddressBook.getAccountName(receivableBlock.account)
+									|| this.getAccountLabel(receivableBlock.account, this.svcTransloco.translate('general.account'))
 								),
 								isReceivable: true,
 								local_time_string: '',
@@ -221,18 +221,18 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	}
 
 	showMobileMenuForTransaction (transaction) {
-		this.notificationService.removeNotification('success-copied')
+		this.svcNotifications.removeNotification('success-copied')
 
 		this.mobileTransactionData = transaction
 		this.mobileTransactionMenuModal.show()
 	}
 
 	getAccountLabel (accountID, defaultLabel) {
-		const walletAccount = this.walletService.accounts.find(a => a.id === accountID)
+		const walletAccount = this.svcWallet.accounts.find(a => a.id === accountID)
 		if (walletAccount == null) {
 			return defaultLabel
 		}
-		return (this.translocoService.translate('general.account') + ' #' + walletAccount.index)
+		return (this.svcTransloco.translate('general.account') + ' #' + walletAccount.index)
 	}
 
 	async getReceivable () {
@@ -240,7 +240,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		this.receivableBlocks = []
 		this.receivableBlocksForSelectedAccount = []
 		this.loadingIncomingTxList = true
-		await this.walletService.reloadBalances()
+		await this.svcWallet.reloadBalances()
 		this.loadingIncomingTxList = false
 	}
 
@@ -295,8 +295,8 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 
 	onSelectedAccountChange (accountID) {
 		this.selectedAccountAddressBookName = (
-			this.addressBook.getAccountName(accountID)
-			|| this.getAccountLabel(accountID, this.translocoService.translate('general.account'))
+			this.svcAddressBook.getAccountName(accountID)
+			|| this.getAccountLabel(accountID, this.svcTransloco.translate('general.account'))
 		)
 
 		this.changeQRAccount(accountID)
@@ -304,7 +304,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	}
 
 	async changeQRAccount (account) {
-		this.walletAccount = this.walletService.accounts.find(a => a.address === account) || null
+		this.walletAccount = this.svcWallet.accounts.find(a => a.address === account) || null
 		this.qrAccount = ''
 		let qrCode = null
 		if (account.length > 1) {
@@ -359,13 +359,13 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	async receiveReceivableBlock (receivableBlock) {
 		const sourceBlock = receivableBlock.hash
 
-		const walletAccount = this.walletService.accounts.find(a => a.id === receivableBlock.destination)
+		const walletAccount = this.svcWallet.accounts.find(a => a.id === receivableBlock.destination)
 		if (!walletAccount) {
-			throw new Error(this.translocoService.translate('receive.unable-to-find-receiving-account'))
+			throw new Error(this.svcTransloco.translate('receive.unable-to-find-receiving-account'))
 		}
 
-		if (this.walletService.isLocked) {
-			const wasUnlocked = await this.walletService.requestUnlock()
+		if (this.svcWallet.isLocked) {
+			const wasUnlocked = await this.svcWallet.requestUnlock()
 
 			if (wasUnlocked === false) {
 				return
@@ -377,23 +377,23 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		let hasShownErrorNotification = false
 
 		try {
-			createdReceiveBlockHash = await this.nanoBlock.generateReceive(walletAccount, sourceBlock, this.walletService.isLedger)
+			createdReceiveBlockHash = await this.svcNanoBlock.generateReceive(walletAccount, sourceBlock, this.svcWallet.isLedger)
 		} catch (err) {
-			this.notificationService.sendError('Error receiving transaction: ' + err.message)
+			this.svcNotifications.sendError('Error receiving transaction: ' + err.message)
 			hasShownErrorNotification = true
 		}
 
 		if (createdReceiveBlockHash != null) {
 			receivableBlock.received = true
 			this.mobileTransactionMenuModal.hide()
-			this.notificationService.removeNotification('success-receive')
-			this.notificationService.sendSuccess(this.translocoService.translate('receive.successfully-received-nano'), { identifier: 'success-receive' })
+			this.svcNotifications.removeNotification('success-receive')
+			this.svcNotifications.sendSuccess(this.svcTransloco.translate('receive.successfully-received-nano'), { identifier: 'success-receive' })
 			// receivable has been processed, can be removed from the list
 			// list also updated with reloadBalances but not if called too fast
-			this.walletService.removeReceivableBlock(receivableBlock.hash)
+			this.svcWallet.removeReceivableBlock(receivableBlock.hash)
 		} else {
-			if (hasShownErrorNotification === false && !this.walletService.isLedger) {
-				this.notificationService.sendError(this.translocoService.translate('receive.there-was-a-problem-receiving-the-transaction-try-manually'), { length: 10000 })
+			if (hasShownErrorNotification === false && !this.svcWallet.isLedger) {
+				this.svcNotifications.sendError(this.svcTransloco.translate('receive.there-was-a-problem-receiving-the-transaction-try-manually'), { length: 10000 })
 			}
 		}
 
@@ -402,8 +402,8 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	}
 
 	copied () {
-		this.notificationService.removeNotification('success-copied')
-		this.notificationService.sendSuccess(this.translocoService.translate('general.successfully-copied-to-clipboard'), { identifier: 'success-copied' })
+		this.svcNotifications.removeNotification('success-copied')
+		this.svcNotifications.sendSuccess(this.svcTransloco.translate('general.successfully-copied-to-clipboard'), { identifier: 'success-copied' })
 	}
 
 	copiedAccountAddress () {
