@@ -54,6 +54,7 @@ import * as QRCode from 'qrcode'
 export class ReceiveComponent implements OnInit, OnDestroy {
 	private router = inject(Router)
 	private svcAddressBook = inject(AddressBookService)
+	private svcAppSettings = inject(AppSettingsService)
 	private svcNanoBlock = inject(NanoBlockService)
 	private svcNotifications = inject(NotificationsService)
 	private svcTransloco = inject(TranslocoService)
@@ -61,7 +62,6 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	private svcWebsocket = inject(WebsocketService)
 
 	svcPrice = inject(PriceService)
-	svcAppSettings = inject(AppSettingsService)
 	svcUtil = inject(UtilService)
 
 	nano = 1000000000000000000000000
@@ -102,6 +102,16 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	merchantModeTransactionHashes = []
 
 	routerSub = null
+
+	get displayCurrency () {
+		return this.svcAppSettings.settings.displayCurrency.toUpperCase()
+	}
+	get identiconsStyle () {
+		return this.svcAppSettings.settings.identiconsStyle
+	}
+	get minimumReceive () {
+		return this.svcAppSettings.settings.minimumReceive
+	}
 
 	async ngOnInit () {
 		const UIkit = window['UIkit']

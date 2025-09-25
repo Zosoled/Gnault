@@ -11,7 +11,7 @@ export class PriceService {
 	static storeKey: 'Gnault-Price' = 'Gnault-Price'
 
 	#lastPrice$: BehaviorSubject<number> = new BehaviorSubject(1)
-	get lastPrice$(): BehaviorSubject<number> {
+	get lastPrice$ (): BehaviorSubject<number> {
 		return this.#lastPrice$
 	}
 
@@ -20,7 +20,7 @@ export class PriceService {
 	oneNano = 10n ** 30n
 	prices: Map<string, number>
 
-	constructor() {
+	constructor () {
 		this.loadPrice()
 	}
 
@@ -31,7 +31,8 @@ export class PriceService {
 	 * @param {string} [currency] Code for requested exchange rate currency
 	 * @returns Market price for requested currency
 	 */
-	async fetchPrice(currency?: string): Promise<number> {
+	async fetchPrice (currency?: string): Promise<number> {
+		currency = currency.toLowerCase()
 		if (PriceService.lastUpdate < Date.now() - 60000) {
 			const request = this.http.get(`${PriceService.apiUrl}`)
 			const response: any = await firstValueFrom(request)
@@ -48,14 +49,14 @@ export class PriceService {
 		return this.lastPrice
 	}
 
-	async loadPrice(): Promise<void> {
+	async loadPrice (): Promise<void> {
 		const priceData = localStorage.getItem(PriceService.storeKey)
 		if (priceData) {
 			Object.assign(this, JSON.parse(priceData))
 		}
 	}
 
-	savePrice(): void {
+	savePrice (): void {
 		PriceService.lastUpdate = Date.now()
 		localStorage.setItem(PriceService.storeKey, JSON.stringify({ prices: this.prices }))
 	}

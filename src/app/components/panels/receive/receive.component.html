@@ -123,14 +123,14 @@
 										maxlength="40"
 									/>
 								</div>
-								@if (svcAppSettings.settings.displayCurrency) {
+								@if (displayCurrency) {
 									<div style="margin-top: 10px">
 										<div class="uk-width-1-1 uk-inline">
 											<a
 												class="uk-form-icon uk-link-reset uk-link-muted fiat-currency-ticker"
 												uk-tooltip
 												title="Last Price: {{ svcPrice.lastPrice }} / XNO"
-												>{{ svcAppSettings.settings.displayCurrency | currencySymbol }}</a
+												>{{ displayCurrency | currencySymbol }}</a
 											>
 											<input
 												[(ngModel)]="amountFiat"
@@ -143,7 +143,7 @@
 												id="form-horizontal-text-fiat"
 												type="number"
 												step="any"
-												[placeholder]="t('receive.amount-of-x', { currency: svcAppSettings.settings.displayCurrency })"
+												[placeholder]="t('receive.amount-of-x', { currency: displayCurrency })"
 											/>
 										</div>
 									</div>
@@ -264,7 +264,7 @@
 						}
 						<app-nano-transaction-mobile
 							[transaction]="transaction"
-							[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
+							[settingIdenticonsStyle]="identiconsStyle"
 							(click)="showMobileMenuForTransaction(transaction)"
 						></app-nano-transaction-mobile>
 					}
@@ -346,11 +346,11 @@
 												uk-tooltip
 											>
 												<div class="identicon-name-row uk-text-truncate">
-													@if (svcAppSettings.settings.identiconsStyle !== 'none') {
+													@if (identiconsStyle !== 'none') {
 														<app-nano-identicon
 															scale="6"
 															[address]="receivable.account"
-															[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
+															[settingIdenticonsStyle]="identiconsStyle"
 															class="nano-identicon"
 														></app-nano-identicon>
 													}
@@ -410,11 +410,11 @@
 													uk-tooltip
 												>
 													<div class="identicon-name-row uk-text-truncate">
-														@if (svcAppSettings.settings.identiconsStyle !== 'none') {
+														@if (identiconsStyle !== 'none') {
 															<app-nano-identicon
 																scale="6"
 																[address]="receivable.destination"
-																[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
+																[settingIdenticonsStyle]="identiconsStyle"
 																class="nano-identicon"
 															></app-nano-identicon>
 														}
@@ -526,7 +526,7 @@
 						}
 					</tbody>
 				</table>
-				@if (svcAppSettings.settings.minimumReceive) {
+				@if (minimumReceive) {
 					<table class="uk-table uk-table-striped uk-table-small">
 						<thead>
 							<tr class="uk-alert uk-alert-primary missing-accounts-hint">
@@ -536,21 +536,14 @@
 								>
 									<span uk-icon="icon: info"></span>
 									{{ 'receive.minimum-receive-is-set-to.1' | transloco }}
-									@if (svcUtil.nano.mnanoToRaw(this.svcAppSettings.settings.minimumReceive).length > 24) {
+									@if (svcUtil.nano.mnanoToRaw(this.minimumReceive).length > 24) {
 										<a
 											class="hint-action"
 											routerLink="/configure-app"
 											routerLinkActive="active"
 										>
-											{{
-												svcUtil.nano.mnanoToRaw(this.svcAppSettings.settings.minimumReceive)
-													| rai: 'mnano,true'
-													| amountsplit: 0
-											}}{{
-												svcUtil.nano.mnanoToRaw(this.svcAppSettings.settings.minimumReceive)
-													| rai: 'mnano,false'
-													| amountsplit: 1
-											}}
+											{{ svcUtil.nano.mnanoToRaw(this.minimumReceive) | rai: 'mnano,true' | amountsplit: 0
+											}}{{ svcUtil.nano.mnanoToRaw(this.minimumReceive) | rai: 'mnano,false' | amountsplit: 1 }}
 										</a>
 									} @else {
 										<a
@@ -558,7 +551,7 @@
 											routerLink="/configure-app"
 											routerLinkActive="active"
 										>
-											{{ this.svcAppSettings.settings.minimumReceive | rai: 'raw,false' }}
+											{{ this.minimumReceive | rai: 'raw,false' }}
 										</a>
 									}
 									{{ 'receive.minimum-receive-is-set-to.2' | transloco }}
@@ -583,7 +576,7 @@
 					<app-nano-transaction-mobile
 						[isInteractable]="false"
 						[transaction]="mobileTransactionData"
-						[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
+						[settingIdenticonsStyle]="identiconsStyle"
 					></app-nano-transaction-mobile>
 				}
 			</div>
@@ -686,11 +679,11 @@
 			}
 			@if (inMerchantModePaymentComplete === false && inMerchantModeQR === false && receivableAccountModel !== '0') {
 				<div class="identicon-name-row uk-text-truncate">
-					@if (svcAppSettings.settings.identiconsStyle !== 'none') {
+					@if (identiconsStyle !== 'none') {
 						<app-nano-identicon
 							scale="6"
 							[address]="receivableAccountModel"
-							[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
+							[settingIdenticonsStyle]="identiconsStyle"
 							class="nano-identicon"
 						></app-nano-identicon>
 					}
@@ -739,7 +732,7 @@
 									maxlength="40"
 								/>
 							</div>
-							@if (svcAppSettings.settings.displayCurrency) {
+							@if (displayCurrency) {
 								<div style="margin-top: 10px">
 									<p
 										class="text-half-muted"
@@ -751,8 +744,8 @@
 										<a
 											class="uk-form-icon uk-link-reset uk-link-muted fiat-currency-ticker"
 											uk-tooltip
-											title="Last Price: {{ svcPrice.lastPrice | fiat: svcAppSettings.settings.displayCurrency }} / XNO"
-											>{{ svcAppSettings.settings.displayCurrency | currencySymbol }}</a
+											title="Last Price: {{ svcPrice.lastPrice | fiat: displayCurrency }} / XNO"
+											>{{ displayCurrency | currencySymbol }}</a
 										>
 										<input
 											[(ngModel)]="amountFiat"
@@ -765,7 +758,7 @@
 											id="form-horizontal-text-fiat"
 											type="number"
 											step="any"
-											placeholder="Amount of {{ svcAppSettings.settings.displayCurrency }}"
+											placeholder="Amount of {{ displayCurrency }}"
 										/>
 									</div>
 								</div>
