@@ -144,14 +144,14 @@ export class ConfigureWalletComponent {
 	}
 
 	async importLedgerWallet (bluetooth: boolean) {
-		this.svcNotifications.sendInfo(`Checking for Ledger device...`, { identifier: 'ledger-status', length: 0 })
+		this.svcNotifications.sendInfo('Checking for Ledger device...', { identifier: 'ledger-status', length: 0 })
 		try {
 			// Create new ledger wallet
 			await this.svcWallet.createLedgerWallet(bluetooth)
 			// We skip the password panel
 			this.router.navigate(['accounts']) // load accounts and watch them update in real-time
 			this.svcWallet.publishNewWallet()
-			this.svcNotifications.sendSuccess(`Successfully connected to Ledger device`)
+			this.svcNotifications.sendSuccess('Successfully connected to Ledger device')
 		} catch (err) {
 			return this.svcNotifications.sendWarning(
 				`Failed to connect the Ledger device. Make sure the nano app is running on the Ledger. If the error persists: Check the <a href="https://docs.nault.cc/2020/08/04/ledger-guide.html#troubleshooting" target="_blank" rel="noopener noreferrer">troubleshooting guide</a>`,
