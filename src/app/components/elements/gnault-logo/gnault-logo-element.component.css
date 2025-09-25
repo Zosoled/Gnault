@@ -11,9 +11,9 @@ svg {
 text {
 	fill: white;
 	font-family: 'OpenDyslexic';
-	letter-spacing: -10%;
+	letter-spacing: -0.1em;
 	mix-blend-mode: difference;
-	text-shadow: 0 0 0.8em red;
+	text-shadow: 0 0 0.5em red;
 }
 
 .logo-first {
