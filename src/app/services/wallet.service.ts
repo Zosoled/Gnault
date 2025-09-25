@@ -1,4 +1,4 @@
-import { Injectable, WritableSignal, computed, inject, signal } from '@angular/core'
+import { Injectable, WritableSignal, computed, effect, inject, signal } from '@angular/core'
 import {
 	AddressBookService,
 	ApiService,
@@ -106,23 +106,29 @@ export class WalletService {
 	refresh$ = new BehaviorSubject(false)
 	status = signal('DISCONNECTED')
 
-	setLocked = () => this.isLocked.set(true)
-	setUnlocked = () => this.isLocked.set(false)
-	setStatus = (event) => this.status.set(event.detail)
-	selectedWalletStatus = computed(() => {
-		this.selectedWallet().removeEventListener('locked', this.setLocked)
-		this.selectedWallet().removeEventListener('unlocked', this.setUnlocked)
-		this.selectedWallet().removeEventListener('ledgerstatuschanged', this.setStatus)
-		this.selectedWallet().addEventListener('locked', this.setLocked)
-		this.selectedWallet().addEventListener('unlocked', this.setUnlocked)
-		this.selectedWallet().addEventListener('ledgerstatuschanged', this.setStatus)
-	})
-
 	isProcessingReceivable = false
 	successfulBlocks = []
 	trackedHashes = []
 
 	constructor () {
+		effect((onCleanup) => {
+			const selectedWallet = this.selectedWallet()
+			if (!selectedWallet) {
+				return
+			}
+			const setLocked = () => this.isLocked.set(true)
+			const setUnlocked = () => this.isLocked.set(false)
+			const setStatus = (event) => this.status.set(event.detail)
+			selectedWallet.addEventListener('locked', setLocked)
+			selectedWallet.addEventListener('unlocked', setUnlocked)
+			selectedWallet.addEventListener('ledgerstatuschanged', setStatus)
+			onCleanup(() => {
+				selectedWallet.removeEventListener('locked', setLocked)
+				selectedWallet.removeEventListener('unlocked', setUnlocked)
+				selectedWallet.removeEventListener('ledgerstatuschanged', setStatus)
+			})
+		})
+
 		this.svcWebsocket.newTransactions$.subscribe(async (transaction) => {
 			// Not really a new transaction
 			if (!transaction) {
@@ -611,7 +617,7 @@ export class WalletService {
 		this.receivableBlocks = []
 	}
 
-	isConfigured = computed(() => this.selectedWallet != null)
+	isConfigured = computed(() => this.selectedWallet() != null)
 	isLedger = computed(() => this.selectedWallet()?.type === 'Ledger')
 
 	hasReceivableTransactions () {

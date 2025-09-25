@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject } from '@angular/core'
+import { Component, OnInit, inject, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
@@ -16,19 +16,28 @@ export class WalletWidgetComponent implements OnInit {
 	private svcTransloco = inject(TranslocoService)
 	private svcWallet = inject(WalletService)
 
-	isConfigured = computed(() => this.svcWallet.isConfigured)
-	isLedger = computed(() => this.svcWallet.isLedger())
-	isLocked = computed(() => this.svcWallet.isLocked())
-	status = computed(() => this.svcWallet.selectedWalletStatus())
-	powAlert = false
+	powAlert = signal(false)
+
+	get isConfigured () {
+		return this.svcWallet.isConfigured()
+	}
+	get isLedger () {
+		return this.svcWallet.isLedger()
+	}
+	get isLocked () {
+		return this.svcWallet.isLocked()
+	}
+	get status () {
+		return this.svcWallet.status()
+	}
 
 	ngOnInit () {
 		// Detect if a PoW is taking too long and alert
 		this.svcPow.powAlert$.subscribe(async (shouldAlert) => {
 			if (shouldAlert) {
-				this.powAlert = true
+				this.powAlert.set(true)
 			} else {
-				this.powAlert = false
+				this.powAlert.set(false)
 			}
 		})
 	}
