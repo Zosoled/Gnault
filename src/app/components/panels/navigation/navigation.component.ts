@@ -1,9 +1,9 @@
 import { AsyncPipe } from '@angular/common'
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Output, Renderer2, ViewChild, inject } from '@angular/core'
+import { Component, ElementRef, EventEmitter, HostListener, Output, Renderer2, ViewChild, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
 import { SwUpdate } from '@angular/service-worker'
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { TranslocoPipe } from '@jsverse/transloco'
 import {
 	ChangeRepWidgetComponent,
 	GnaultLogoElementComponent,
@@ -12,18 +12,12 @@ import {
 } from 'app/components'
 import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
-	AddressBookService,
 	AppSettingsService,
-	DeeplinkService,
-	DesktopService,
 	NodeService,
 	NotificationsService,
 	PriceService,
-	RepresentativeService,
 	UtilService,
-	WalletService,
-	WebsocketService,
-	WorkPoolService,
+	WalletService
 } from 'app/services'
 import { environment } from 'environments/environment'
 import { Wallet } from 'libnemo'
@@ -46,7 +40,19 @@ import { Wallet } from 'libnemo'
 		WalletWidgetComponent,
 	],
 })
-export class NavigationComponent implements AfterViewInit {
+export class NavigationComponent {
+	private renderer = inject(Renderer2)
+	private router = inject(Router)
+	private updates = inject(SwUpdate)
+
+	private svcAppSettings = inject(AppSettingsService)
+	private svcNotification = inject(NotificationsService)
+	private svcUtil = inject(UtilService)
+	private svcWallet = inject(WalletService)
+
+	svcNode = inject(NodeService)
+	svcPrice = inject(PriceService)
+
 	@HostListener('document:mousedown', ['$event']) onGlobalClick (event): void {
 		if (
 			this.selectButton.nativeElement.contains(event.target) === false &&
@@ -64,40 +70,19 @@ export class NavigationComponent implements AfterViewInit {
 	@ViewChild('selectButton') selectButton: ElementRef
 	@ViewChild('walletsDropdown') walletsDropdown: ElementRef
 
-	private renderer = inject(Renderer2)
-	private router = inject(Router)
-	private updates = inject(SwUpdate)
 
-	private svcAddressBook = inject(AddressBookService)
-	private svcDeeplink = inject(DeeplinkService)
-	private svcDesktop = inject(DesktopService)
-	private svcNotification = inject(NotificationsService)
-	private svcRepresentative = inject(RepresentativeService)
-	private svcTransloco = inject(TranslocoService)
-	private svcUtil = inject(UtilService)
-	private svcWallet = inject(WalletService)
-	private svcWebsocket = inject(WebsocketService)
-	private svcWorkPool = inject(WorkPoolService)
-
-	stage = environment.production ? '' : 'BETA'
-
-	svcAppSettings = inject(AppSettingsService)
-	svcNode = inject(NodeService)
-	svcPrice = inject(PriceService)
-
-	nanoPrice = this.svcPrice.lastPrice
-	node = this.svcNode.node
-
-	fiatTimeout = 5 * 60 * 1000 // Update fiat prices every 5 minutes
-	inactiveSeconds = 0
-	isWalletRefreshed = false
-	isWalletsDropdownVisible = false
 	canToggleLightMode = true
-	searchData = ''
 	donationAccount = environment.donationAddress
+	isWalletsDropdownVisible = false
+	node = this.svcNode.node
+	searchData = ''
+	stage = environment.production ? '' : 'BETA'
 
 	get balance () {
 		return this.svcWallet.balance
+	}
+	get displayCurrency () {
+		return this.svcAppSettings.settings.displayCurrency
 	}
 	get hasReceivableTransactions () {
 		return this.svcWallet.hasReceivableTransactions()
@@ -123,11 +108,17 @@ export class NavigationComponent implements AfterViewInit {
 	get isProcessingReceivable () {
 		return this.svcWallet.isProcessingReceivable
 	}
+	get lightModeEnabled () {
+		return this.svcAppSettings.settings.lightModeEnabled
+	}
 	get mobileBarHeight () {
 		return window.innerWidth < 940 ? 50 : 0
 	}
 	get receivable () {
 		return this.svcWallet.receivable
+	}
+	get receivableOption () {
+		return this.svcAppSettings.settings.receivableOption
 	}
 	get selectedAccount () {
 		return this.svcWallet.selectedAccount
@@ -137,6 +128,9 @@ export class NavigationComponent implements AfterViewInit {
 	}
 	get selectedWalletName () {
 		return this.svcWallet.walletNames.get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
+	}
+	get serverAPI () {
+		return this.svcAppSettings.settings.serverAPI
 	}
 	get walletNames () {
 		return this.svcWallet.walletNames
@@ -149,164 +143,6 @@ export class NavigationComponent implements AfterViewInit {
 		this.router.events.subscribe(() => {
 			this.closeNav()
 		})
-		this.svcWallet.refresh$.subscribe((isRefreshed) => {
-			if (isRefreshed) {
-				this.isWalletRefreshed = true
-			}
-		})
-	}
-
-	async ngAfterViewInit () {
-		this.svcAppSettings.loadAppSettings()
-		this.svcTransloco.setActiveLang(this.svcAppSettings.settings.language)
-
-		this.updateAppTheme()
-
-		this.svcAddressBook.loadAddressBook()
-		this.svcWorkPool.loadWorkCache()
-
-		await this.svcWallet.loadWallet()
-
-		// Subscribe to any transaction tracking
-		for (const entry of this.svcAddressBook.addressBook) {
-			if (entry.trackTransactions) {
-				this.svcWallet.trackAddress(entry.account)
-			}
-		}
-
-		// Navigate to accounts page if there is wallet, but only if coming from home. On desktop app the path ends with index.html
-		if (
-			this.isConfigured &&
-			(window.location.pathname === '/' || window.location.pathname.endsWith('index.html'))
-		) {
-			if (this.svcWallet.selectedAccountAddress) {
-				this.router.navigate([`accounts/${this.svcWallet.selectedAccountAddress}`], {
-					queryParams: { compact: 1 },
-					replaceUrl: true,
-				})
-			} else {
-				this.router.navigate(['accounts'], { replaceUrl: true })
-			}
-		}
-
-		// update selected account object with the latest balance, receivable, etc
-		if (this.svcWallet.selectedAccountAddress) {
-			const currentUpdatedAccount = this.svcWallet.accounts.find((a) => a.id === this.svcWallet.selectedAccountAddress)
-			this.svcWallet.selectedAccount = currentUpdatedAccount
-		}
-
-		await this.svcWallet.reloadBalances()
-
-		// Workaround fix for github pages when Gnault is refreshed (or externally linked) and there is a subpath for example to the send screen.
-		// This data is saved from the 404.html page
-		const path = localStorage.getItem('path')
-
-		if (path) {
-			const search = localStorage.getItem('query') // ?param=value
-			const fragment = localStorage.getItem('fragment') // #value
-			localStorage.removeItem('path')
-			localStorage.removeItem('query')
-			localStorage.removeItem('fragment')
-
-			if (search && search.length) {
-				const queryParams = {}
-				const urlSearch = new URLSearchParams(search)
-				urlSearch.forEach(function (value, key) {
-					queryParams[key] = value
-				})
-				this.router.navigate([path], { queryParams: queryParams, replaceUrl: true })
-			} else if (fragment && fragment.length) {
-				this.router.navigate([path], { fragment: fragment, replaceUrl: true })
-			} else {
-				this.router.navigate([path], { replaceUrl: true })
-			}
-		}
-
-		this.svcWebsocket.connect()
-
-		this.svcRepresentative.loadRepresentativeList()
-
-		// If the wallet is locked and there is a receivable balance, show a warning to unlock the wallet
-		// (if not receive priority is set to manual)
-		if (
-			this.svcWallet.isLocked &&
-			this.svcWallet.hasReceivableTransactions() &&
-			this.svcAppSettings.settings.receivableOption !== 'manual'
-		) {
-			this.svcNotification.sendWarning(`New incoming transaction(s) - Unlock the wallet to receive`, {
-				length: 10000,
-				identifier: 'receivable-locked',
-			})
-		} else if (
-			this.svcWallet.hasReceivableTransactions() &&
-			this.svcAppSettings.settings.receivableOption === 'manual'
-		) {
-			this.svcNotification.sendWarning(`Incoming transaction(s) found - Set to be received manually`, {
-				length: 10000,
-				identifier: 'receivable-locked',
-			})
-		}
-
-		// When the page closes, determine if we should lock the wallet
-		window.addEventListener('beforeunload', (e) => {
-			if (this.svcWallet.isLocked) return // Already locked, nothing to worry about
-			this.svcWallet.lockWallet()
-		})
-		window.addEventListener('unload', (e) => {
-			if (this.svcWallet.isLocked) return // Already locked, nothing to worry about
-			this.svcWallet.lockWallet()
-		})
-
-		// handle deeplinks
-		this.svcDesktop.on('deeplink', (deeplink) => {
-			if (!this.svcDeeplink.navigate(deeplink))
-				this.svcNotification.sendWarning('This URI has an invalid address.', { length: 5000 })
-		})
-		this.svcDesktop.send('deeplink-ready')
-
-		// Notify user if service worker update is available
-		this.updates.versionUpdates.subscribe((event) => {
-			if (event.type === 'VERSION_READY') {
-				console.log(`SW update available. Current: ${event.currentVersion.hash}. New: ${event.latestVersion.hash}`)
-				this.svcNotification.sendInfo(
-					'An update was installed in the background and will be applied on next launch. <a href="#" (click)="applySwUpdate()">Apply immediately</a>',
-					{ length: 10000 }
-				)
-			}
-		})
-
-		/* DEPRECATED
-		// Notify user after service worker was updated
-		this.updates.activated.subscribe((event) => {
-			console.log(`SW update successful. Current: ${event.current.hash}`)
-			this.notifications.sendSuccess('Gnault was updated successfully.')
-		})
-		*/
-
-		// Check how long the wallet has been inactive, and lock it if it's been too long
-		setInterval(() => {
-			this.inactiveSeconds += 1
-			if (!this.svcAppSettings.settings.lockInactivityMinutes) return // Do not lock on inactivity
-			if (this.svcWallet.isLocked) return
-
-			// Determine if we have been inactive for longer than our lock setting
-			if (this.inactiveSeconds >= this.svcAppSettings.settings.lockInactivityMinutes * 60) {
-				this.svcWallet.lockWallet()
-				this.svcNotification.sendSuccess(
-					`Wallet locked after ${this.svcAppSettings.settings.lockInactivityMinutes} minutes of inactivity`
-				)
-			}
-		}, 1000)
-
-		try {
-			if (!this.svcAppSettings.settings.serverAPI) return
-			await this.updateFiatPrices()
-		} catch (err) {
-			this.svcNotification.sendWarning(
-				`There was an issue retrieving latest nano price.  Ensure your AdBlocker is disabled on this page then reload to see accurate FIAT values.`,
-				{ length: 0, identifier: `price-adblock` }
-			)
-		}
 	}
 
 	applySwUpdate () {
@@ -401,10 +237,6 @@ export class NavigationComponent implements AfterViewInit {
 		this.svcNotification.sendWarning(`Invalid nano address or block hash! Please double check your input`)
 	}
 
-	updateIdleTime () {
-		this.inactiveSeconds = 0 // Action has happened, reset the inactivity timer
-	}
-
 	retryConnection () {
 		if (!this.svcAppSettings.settings.serverAPI) {
 			this.svcNotification.sendInfo(`Wallet server settings is set to offline mode. Please change server first!`)
@@ -412,11 +244,5 @@ export class NavigationComponent implements AfterViewInit {
 		}
 		this.svcWallet.reloadBalances()
 		this.svcNotification.sendInfo(`Attempting to reconnect to nano node`)
-	}
-
-	async updateFiatPrices () {
-		const displayCurrency = this.svcAppSettings.getAppSetting('displayCurrency') ?? 'usd'
-		await this.svcPrice.fetchPrice(displayCurrency)
-		setTimeout(() => this.updateFiatPrices(), this.fiatTimeout)
 	}
 }
