@@ -132,7 +132,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		// Update selected account if changed in the sidebar
 		this.svcWallet.selectedAccount$.subscribe(async acc => {
 			if (this.selAccountInit) {
-				this.receivableAccountModel = acc?.id ?? '0'
+				this.receivableAccountModel = acc?.address ?? '0'
 				this.onSelectedAccountChange(this.receivableAccountModel)
 			}
 			this.selAccountInit = true
@@ -153,7 +153,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			this.onSelectedAccountChange(this.receivableAccountModel)
 		} else if (this.accounts.length === 1) {
 			// Auto-select account if it is the only account in the wallet
-			this.receivableAccountModel = this.accounts[0].id
+			this.receivableAccountModel = this.accounts[0].address
 			this.onSelectedAccountChange(this.receivableAccountModel)
 		}
 
