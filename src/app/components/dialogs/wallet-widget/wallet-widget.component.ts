@@ -27,8 +27,8 @@ export class WalletWidgetComponent implements OnInit {
 	get isLocked () {
 		return this.svcWallet.isLocked()
 	}
-	get status () {
-		return this.svcWallet.status()
+	get ledgerStatus () {
+		return this.svcWallet.ledgerStatus
 	}
 
 	ngOnInit () {
@@ -54,7 +54,8 @@ export class WalletWidgetComponent implements OnInit {
 	async reloadLedger () {
 		this.svcNotifications.sendInfo(`Checking Ledger Status...`, { identifier: 'ledger-status', length: 0 })
 		try {
-			await this.svcWallet.selectedWallet().config({ connection: undefined })
+			await this.svcWallet.selectedWallet().config({ connection: 'hid' })
+			await this.svcWallet.selectedWallet().unlock()
 			this.svcNotifications.removeNotification('ledger-status')
 			if (this.isLocked) {
 				this.svcNotifications.sendError(`Ledger device locked. Unlock and try again.`)

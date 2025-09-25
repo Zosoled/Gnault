@@ -1,4 +1,4 @@
-import { Injectable, computed, inject } from '@angular/core'
+import { Injectable, inject, signal } from '@angular/core'
 import { DesktopService } from 'app/services'
 import { environment } from 'environments/environment'
 import { Ledger } from 'libnemo'
@@ -9,12 +9,15 @@ export class LedgerService {
 	private desktop = inject(DesktopService)
 
 	desktopMessage$ = new Subject()
-	status = computed(() => Ledger.status)
+	status = signal(Ledger.status)
 
 	constructor () {
 		if (environment.desktop) {
 			this.configureDesktop()
 		}
+		Ledger.addEventListener('ledgerstatuschanged', (event) => {
+			this.status.set(event.detail)
+		})
 	}
 
 	/**

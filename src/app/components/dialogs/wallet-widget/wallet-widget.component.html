@@ -1,6 +1,6 @@
 @if (isLedger) {
 	<div>
-		@if (status === 'DISCONNECTED') {
+		@if (ledgerStatus === 'DISCONNECTED') {
 			<div class="nav-status-row">
 				<div class="status-icon">
 					<span
@@ -22,7 +22,21 @@
 				</div>
 			</div>
 		}
-		@if (status === 'LOCKED') {
+		@if (ledgerStatus === 'BUSY') {
+			<div class="nav-status-row">
+				<div class="status-icon">
+					<span
+						class="uk-text-warning"
+						uk-icon="icon: warning; ratio: 1.2;"
+					></span>
+				</div>
+				<div class="status-labels">
+					<div class="label primary uk-text-warning">Ledger busy</div>
+					<div class="label secondary">Open the Nano app on the device</div>
+				</div>
+			</div>
+		}
+		@if (ledgerStatus === 'LOCKED') {
 			<div class="nav-status-row">
 				<div class="status-icon">
 					<span
@@ -38,7 +52,7 @@
 				</div>
 			</div>
 		}
-		@if (status === 'CONNECTED') {
+		@if (ledgerStatus === 'CONNECTED') {
 			<div
 				class="nav-status-row interactable"
 				(click)="reloadLedger()"
@@ -56,7 +70,7 @@
 		}
 	</div>
 }
-@if (powAlert) {
+@if (powAlert()) {
 	<div class="nav-status-row">
 		<div class="status-icon">
 			<span

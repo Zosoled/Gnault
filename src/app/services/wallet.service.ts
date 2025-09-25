@@ -104,11 +104,14 @@ export class WalletService {
 	isReceivableBlocksUpdated$ = new BehaviorSubject(null)
 	newWallet$ = new BehaviorSubject(false)
 	refresh$ = new BehaviorSubject(false)
-	status = signal('DISCONNECTED')
 
 	isProcessingReceivable = false
 	successfulBlocks = []
 	trackedHashes = []
+
+	get ledgerStatus () {
+		return this.svcLedger.status()
+	}
 
 	constructor () {
 		effect((onCleanup) => {
@@ -118,14 +121,11 @@ export class WalletService {
 			}
 			const setLocked = () => this.isLocked.set(true)
 			const setUnlocked = () => this.isLocked.set(false)
-			const setStatus = (event) => this.status.set(event.detail)
 			selectedWallet.addEventListener('locked', setLocked)
 			selectedWallet.addEventListener('unlocked', setUnlocked)
-			selectedWallet.addEventListener('ledgerstatuschanged', setStatus)
 			onCleanup(() => {
 				selectedWallet.removeEventListener('locked', setLocked)
 				selectedWallet.removeEventListener('unlocked', setUnlocked)
-				selectedWallet.removeEventListener('ledgerstatuschanged', setStatus)
 			})
 		})
 
@@ -346,10 +346,6 @@ export class WalletService {
 		if (walletData) {
 			const walletJson = JSON.parse(walletData)
 			this.selectedWallet.set(await Wallet.restore(walletJson.selectedWalletId))
-
-			if (this.selectedWallet().type === 'Ledger') {
-				this.selectedWallet().unlock()
-			}
 
 			if (walletJson.accounts?.length > 0) {
 				walletJson.accounts.forEach((a) => this.loadWalletAccount(a))
