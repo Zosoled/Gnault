@@ -1,14 +1,16 @@
-import { AfterViewInit, Component, ElementRef, Renderer2, ViewChild, inject } from '@angular/core'
+import { AsyncPipe } from '@angular/common'
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Output, Renderer2, ViewChild, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { Router, RouterOutlet } from '@angular/router'
+import { Router, RouterLink } from '@angular/router'
 import { SwUpdate } from '@angular/service-worker'
-import { TranslocoService } from '@jsverse/transloco'
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import {
-	NavigationComponent,
-	NotificationsComponent,
-	SetPasswordDialogComponent,
-	UnlockWalletDialogComponent
+	ChangeRepWidgetComponent,
+	GnaultLogoElementComponent,
+	InstallWidgetComponent,
+	WalletWidgetComponent
 } from 'app/components'
+import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AddressBookService,
 	AppSettingsService,
@@ -27,19 +29,38 @@ import { environment } from 'environments/environment'
 import { Wallet } from 'libnemo'
 
 @Component({
-	selector: 'app',
-	templateUrl: './app.component.html',
-	styleUrls: ['./app.component.less'],
+	selector: 'app-navigation',
+	templateUrl: './navigation.component.html',
+	styleUrls: ['./navigation.component.css'],
 	imports: [
+		AsyncPipe,
+		AmountSplitPipe,
+		ChangeRepWidgetComponent,
+		FiatPipe,
+		GnaultLogoElementComponent,
+		InstallWidgetComponent,
 		FormsModule,
-		NavigationComponent,
-		NotificationsComponent,
-		RouterOutlet,
-		SetPasswordDialogComponent,
-		UnlockWalletDialogComponent,
+		RaiPipe,
+		RouterLink,
+		TranslocoPipe,
+		WalletWidgetComponent,
 	],
 })
-export class AppComponent implements AfterViewInit {
+export class NavigationComponent implements AfterViewInit {
+	@HostListener('document:mousedown', ['$event']) onGlobalClick (event): void {
+		if (
+			this.selectButton.nativeElement.contains(event.target) === false &&
+			this.walletsDropdown.nativeElement.contains(event.target) === false
+		) {
+			this.isWalletsDropdownVisible = false
+		}
+	}
+
+	@Output() animatingChanged = new EventEmitter<boolean>()
+	isAnimating = false
+	@Output() expandedChanged = new EventEmitter<boolean>()
+	isExpanded = false
+
 	@ViewChild('selectButton') selectButton: ElementRef
 	@ViewChild('walletsDropdown') walletsDropdown: ElementRef
 
@@ -70,8 +91,6 @@ export class AppComponent implements AfterViewInit {
 	fiatTimeout = 5 * 60 * 1000 // Update fiat prices every 5 minutes
 	inactiveSeconds = 0
 	isWalletRefreshed = false
-	navExpanded = false
-	navAnimating = false
 	isWalletsDropdownVisible = false
 	canToggleLightMode = true
 	searchData = ''
@@ -87,7 +106,7 @@ export class AppComponent implements AfterViewInit {
 		return window.innerHeight
 	}
 	get innerHeightWithoutMobileBar () {
-		return this.innerHeight - (window.innerWidth < 940 ? 50 : 0)
+		return this.innerHeight - this.mobileBarHeight
 	}
 	get isBalanceInitialized () {
 		return this.svcWallet.isBalanceInitialized
@@ -103,6 +122,9 @@ export class AppComponent implements AfterViewInit {
 	}
 	get isProcessingReceivable () {
 		return this.svcWallet.isProcessingReceivable
+	}
+	get mobileBarHeight () {
+		return window.innerWidth < 940 ? 50 : 0
 	}
 	get receivable () {
 		return this.svcWallet.receivable
@@ -292,23 +314,24 @@ export class AppComponent implements AfterViewInit {
 	}
 
 	toggleNav () {
-		this.navExpanded = !this.navExpanded
+		this.isExpanded = !this.isExpanded
 		this.onNavExpandedChange()
 	}
 
 	closeNav () {
-		if (this.navExpanded === false) {
-			return
+		if (this.isExpanded) {
+			this.isExpanded = false
+			this.onNavExpandedChange()
 		}
-
-		this.navExpanded = false
-		this.onNavExpandedChange()
 	}
 
 	onNavExpandedChange () {
-		this.navAnimating = true
+		this.isAnimating = true
+		this.animatingChanged.emit(true)
+		this.expandedChanged.emit(true)
 		setTimeout(() => {
-			this.navAnimating = false
+			this.isAnimating = false
+			this.animatingChanged.emit(false)
 		}, 350)
 	}
 

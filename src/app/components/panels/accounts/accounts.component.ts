@@ -7,7 +7,6 @@ import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/e
 import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AppSettingsService,
-	LedgerService,
 	NotificationsService,
 	RepresentativeService,
 	WalletService
@@ -37,21 +36,23 @@ import { debounce } from 'rxjs/operators'
 })
 export class AccountsComponent implements OnInit {
 	private router = inject(Router)
-	private svcLedger = inject(LedgerService)
+	private svcAppSettings = inject(AppSettingsService)
 	private svcNotifications = inject(NotificationsService)
 	private svcRepresentative = inject(RepresentativeService)
 	private svcTransloco = inject(TranslocoService)
-
-	svcAppSettings = inject(AppSettingsService)
-	svcWallet = inject(WalletService)
+	private svcWallet = inject(WalletService)
 
 	accounts = this.svcWallet.accounts
-	isLedgerWallet = this.svcWallet.isLedger
 	viewAdvanced = false
 	newAccountIndex = null
 	// When we change the accounts, redetect changable reps (Debounce by 5 seconds)
 	accountsChanged$ = new Subject()
 	reloadRepWarning$ = this.accountsChanged$.pipe(debounce(() => timer(5000)))
+
+	get displayCurrency () { return this.svcAppSettings.settings.displayCurrency }
+	get identiconsStyle () { return this.svcAppSettings.settings.identiconsStyle }
+	get isBalanceUpdating () { return this.svcWallet.isBalanceUpdating }
+	get isLedgerWallet () { return this.svcWallet.isLedger() }
 
 	async ngOnInit () {
 		this.reloadRepWarning$.subscribe((a) => {
@@ -67,7 +68,7 @@ export class AccountsComponent implements OnInit {
 				return
 			}
 		}
-		if (this.isLedgerWallet() && this.svcWallet.isLocked()) {
+		if (this.isLedgerWallet && this.svcWallet.isLocked()) {
 			return this.svcNotifications.sendWarning(this.svcTransloco.translate('accounts.ledger-device-must-be-ready'))
 		}
 		if (this.svcWallet.accounts.length >= 20) {
