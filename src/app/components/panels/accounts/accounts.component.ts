@@ -61,13 +61,13 @@ export class AccountsComponent implements OnInit {
 	}
 
 	async createAccount () {
-		if (this.svcWallet.isLocked) {
+		if (this.svcWallet.isLocked()) {
 			await this.svcWallet.requestUnlock()
-			if (this.svcWallet.isLocked) {
+			if (this.svcWallet.isLocked()) {
 				return
 			}
 		}
-		if (this.isLedgerWallet && this.svcWallet.isLocked) {
+		if (this.isLedgerWallet() && this.svcWallet.isLocked()) {
 			return this.svcNotifications.sendWarning(this.svcTransloco.translate('accounts.ledger-device-must-be-ready'))
 		}
 		if (this.svcWallet.accounts.length >= 20) {

@@ -1008,7 +1008,11 @@ export class WalletService {
 		this.refresh$.next(false)
 	}
 
-	requestUnlock (): Promise<boolean> {
+	async requestUnlock (): Promise<boolean> {
+		if (this.isLedger()) {
+			await this.selectedWallet().unlock()
+			return this.isLocked()
+		}
 		this.isUnlockRequested$.next(true)
 		return new Promise((resolve): void => {
 			let subscriptionForUnlock
