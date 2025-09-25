@@ -503,9 +503,7 @@ export class WalletService {
 	}
 
 	async scanAccounts (count: number = 20) {
-		debugger
 		const accounts = await this.selectedWallet().accounts(0, count)
-		debugger
 		const addresses: string[] = []
 		for (const [_, account] of accounts) {
 			addresses.push(account.address)
@@ -556,8 +554,8 @@ export class WalletService {
 			await this.selectedWallet().config({ connection: 'ble' })
 		}
 		await this.selectedWallet().unlock()
-		this.svcNotifications.removeNotification('ledger-status')
-		await this.scanAccounts(1)
+		this.scanAccounts(1)
+		this.scanAccounts()
 	}
 
 	async createWalletFromSingleKey (key: string, expanded: boolean) {
@@ -802,7 +800,11 @@ export class WalletService {
 			const newAccount: Account = this.isLedger
 				? await this.createLedgerAccount(index)
 				: await this.selectedWallet().account(index)
-			this.accounts.push(newAccount)
+			if (this.accounts.some(a => a.index === index)) {
+				await this.selectedWallet().refresh(this.svcAppSettings.settings.serverAPI, index)
+			} else {
+				this.accounts.push(newAccount)
+			}
 			this.svcWebsocket.subscribeAccounts([newAccount.address])
 			await this.saveWalletExport()
 			return newAccount
