@@ -872,7 +872,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	async receiveReceivableBlock (receivableBlock) {
 		const sourceBlock = receivableBlock.hash
 
-		if (this.svcWallet.isLocked) {
+		if (this.svcWallet.isLocked()) {
 			const wasUnlocked = await this.svcWallet.requestUnlock()
 
 			if (wasUnlocked === false) {

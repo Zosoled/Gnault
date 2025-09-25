@@ -11,7 +11,6 @@ import {
 import {
 	AmountSplitPipe,
 	CurrencySymbolPipe,
-	FiatPipe,
 	RaiPipe,
 	SqueezePipe
 } from 'app/pipes'
@@ -38,7 +37,6 @@ import * as QRCode from 'qrcode'
 		ClipboardModule,
 		CommonModule,
 		CurrencySymbolPipe,
-		FiatPipe,
 		FormsModule,
 		NanoAccountIdComponent,
 		NanoIdenticonComponent,
