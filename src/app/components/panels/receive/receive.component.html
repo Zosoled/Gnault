@@ -83,9 +83,9 @@
 								>
 									<option [value]="0">{{ 'receive.all-accounts' | transloco }}</option>
 									@for (account of accounts; track account) {
-										<option [value]="account.id">
+										<option [value]="account.address">
 											{{ account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
-											{{ account.id | squeeze }} ({{ account.balance | rai: 'mnano,true' | amountsplit: 0
+											{{ account.address | squeeze }} ({{ account.balance | rai: 'mnano,true' | amountsplit: 0
 											}}{{ account.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO)
 										</option>
 									}
@@ -129,9 +129,7 @@
 											<a
 												class="uk-form-icon uk-link-reset uk-link-muted fiat-currency-ticker"
 												uk-tooltip
-												title="Last Price: {{
-													svcPrice.lastPrice | fiat: svcAppSettings.settings.displayCurrency
-												}} / XNO"
+												title="Last Price: {{ svcPrice.lastPrice }} / XNO"
 												>{{ svcAppSettings.settings.displayCurrency | currencySymbol }}</a
 											>
 											<input
