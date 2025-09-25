@@ -346,6 +346,11 @@ export class WalletService {
 		if (walletData) {
 			const walletJson = JSON.parse(walletData)
 			this.selectedWallet.set(await Wallet.restore(walletJson.selectedWalletId))
+			if (this.selectedWallet().type === 'Ledger') {
+				try {
+					await this.selectedWallet().unlock()
+				} catch { }
+			}
 
 			if (walletJson.accounts?.length > 0) {
 				walletJson.accounts.forEach((a) => this.loadWalletAccount(a))
