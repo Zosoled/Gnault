@@ -502,15 +502,13 @@ export class WalletService {
 		await this.scanAccounts()
 	}
 
-	async scanAccounts (count: number = 20) {
-		const accounts = await this.selectedWallet().accounts(0, count)
+	async scanAccounts () {
+		const accounts = await this.selectedWallet().accounts(0, 20)
 		const addresses: string[] = []
 		for (const [_, account] of accounts) {
 			addresses.push(account.address)
 		}
-
 		const usedIndexes = []
-
 		if (addresses.length > 0) {
 			const { frontiers } = await this.svcApi.accountsFrontiers(addresses)
 			if (frontiers) {
@@ -523,7 +521,6 @@ export class WalletService {
 				}
 			}
 		}
-
 		if (usedIndexes.length > 0) {
 			for (const index of usedIndexes) {
 				await this.addWalletAccount(index)
@@ -531,7 +528,6 @@ export class WalletService {
 		} else {
 			await this.addWalletAccount(0)
 		}
-
 		await this.saveWalletExport()
 		await this.reloadBalances()
 	}
@@ -554,8 +550,9 @@ export class WalletService {
 			await this.selectedWallet().config({ connection: 'ble' })
 		}
 		await this.selectedWallet().unlock()
-		this.scanAccounts(1)
-		this.scanAccounts()
+		await this.addWalletAccount(0)
+		await this.saveWalletExport()
+		await this.reloadBalances()
 	}
 
 	async createWalletFromSingleKey (key: string, expanded: boolean) {
