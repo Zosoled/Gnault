@@ -49,10 +49,10 @@
 									</div>
 									<div class="amount-container">
 										<div class="amount-integer">
-											{{ account.balanceFiat | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 0 }}
+											{{ account.balance ?? 0 | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 0 }}
 										</div>
 										<div class="amount-fractional">
-											{{ account.balanceFiat | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 1 }}
+											{{ account.balance ?? 0 | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 1 }}
 										</div>
 									</div>
 								</div>
