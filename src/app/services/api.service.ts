@@ -82,7 +82,7 @@ export class ApiService {
 	async accountsBalances (accounts: string[]): Promise<{ balances: any }> {
 		return await this.request('accounts_balances', { accounts }, false)
 	}
-	async accountsFrontiers (accounts: string[]): Promise<{ frontiers: any }> {
+	async accountsFrontiers (accounts: string[]): Promise<{ frontiers: { [address: string]: string } }> {
 		return await this.request('accounts_frontiers', { accounts }, false)
 	}
 	async accountsReceivable (accounts: string[], count: number = 50): Promise<{ blocks: any }> {
