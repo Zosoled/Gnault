@@ -137,7 +137,7 @@ export class AccountsComponent implements OnInit {
 			this.svcWallet.selectedAccount$.next(account)
 			this.svcWallet.saveWalletExport()
 		}
-		this.router.navigate([`accounts/${account.id}`], { queryParams: { compact: 1 } })
+		this.router.navigate([`accounts/${account.address}`], { queryParams: { compact: 1 } })
 	}
 
 	copied () {
