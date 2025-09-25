@@ -502,45 +502,40 @@ export class WalletService {
 		await this.scanAccounts()
 	}
 
-	async scanAccounts () {
-		const usedIndices = []
+	async scanAccounts (count: number = 20) {
+		debugger
+		const accounts = await this.selectedWallet().accounts(0, count)
+		debugger
+		const addresses: string[] = []
+		for (const [_, account] of accounts) {
+			addresses.push(account.address)
+		}
 
-		const NAULT_ACCOUNTS_LIMIT = 20
-		const ACCOUNTS_PER_API_REQUEST = 10
+		const usedIndexes = []
 
-		const batchesCount = NAULT_ACCOUNTS_LIMIT / ACCOUNTS_PER_API_REQUEST
-
-		// Getting accounts...
-		for (let batchIdx = 0; batchIdx < batchesCount; batchIdx++) {
-			const batchAccounts = await this.selectedWallet().accounts(batchIdx, batchIdx + ACCOUNTS_PER_API_REQUEST)
-			const batchAccountsArray = []
-			for (let i = batchIdx; i < batchIdx + ACCOUNTS_PER_API_REQUEST; i++) {
-				batchAccountsArray.push(batchAccounts[i].address)
-			}
-
-			// Checking frontiers...
-			const batchResponse = await this.svcApi.accountsFrontiers(batchAccountsArray)
-			if (batchResponse) {
-				for (const address of Object.keys(batchResponse.frontiers)) {
-					const hash = batchResponse.frontiers[address]
-					if (this.svcUtil.nano.isValidHash(hash) && hash !== batchAccounts[address].publicKey) {
-						usedIndices.push(batchAccounts[address].index)
+		if (addresses.length > 0) {
+			const { frontiers } = await this.svcApi.accountsFrontiers(addresses)
+			if (frontiers) {
+				for (const address of Object.keys(frontiers)) {
+					const hash = frontiers[address]
+					const index = [...accounts.values()].find(a => a.address === address)
+					if (this.svcUtil.nano.isValidHash(hash)) {
+						usedIndexes.push(index)
 					}
 				}
 			}
 		}
 
-		// Add accounts
-		if (usedIndices.length > 0) {
-			for (const index of usedIndices) {
+		if (usedIndexes.length > 0) {
+			for (const index of usedIndexes) {
 				await this.addWalletAccount(index)
 			}
 		} else {
 			await this.addWalletAccount(0)
 		}
 
-		// Reload balances for all accounts
-		this.reloadBalances()
+		await this.saveWalletExport()
+		await this.reloadBalances()
 	}
 
 	async createNewWallet (password: string) {
@@ -556,14 +551,13 @@ export class WalletService {
 	}
 
 	async createLedgerWallet (bluetooth: boolean) {
-		this.resetWallet()
 		this.selectedWallet.set(await Wallet.create('Ledger'))
 		if (bluetooth) {
 			await this.selectedWallet().config({ connection: 'ble' })
 		}
 		await this.selectedWallet().unlock()
-		await this.scanAccounts()
-		return this.selectedWallet
+		this.svcNotifications.removeNotification('ledger-status')
+		await this.scanAccounts(1)
 	}
 
 	async createWalletFromSingleKey (key: string, expanded: boolean) {
