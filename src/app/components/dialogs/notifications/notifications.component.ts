@@ -15,45 +15,40 @@ export class NotificationsComponent implements OnInit {
 
 	ngOnInit () {
 		this.notificationService.notifications$.subscribe(notification => {
-			if (!notification) {
-				// Default value
-				return
-			}
+			if (notification) {
+				// Check the options
+				const length = notification.options?.length ?? this.notificationLength
+				const identifier = notification.options?.identifier || null
 
-			// Check the options
-			const length = notification.options?.length ?? this.notificationLength
-			const identifier = notification.options?.identifier || null
-
-			// Stop duplicates
-			if (identifier) {
-				const existingNotification = this.notifications.find(n => n.identifier === identifier)
-				if (existingNotification) {
-					return
+				// Stop duplicates
+				if (identifier) {
+					const existingNotification = this.notifications.find(n => n.identifier === identifier)
+					if (existingNotification) {
+						return
+					}
 				}
-			}
 
-			const newNotification = {
-				type: notification.type,
-				message: notification.message,
-				cssClass: this.getCssClass(notification.type),
-				identifier,
-				length,
-			}
+				const newNotification = {
+					type: notification.type,
+					message: notification.message,
+					cssClass: this.getCssClass(notification.type),
+					identifier,
+					length,
+				}
 
-			this.notifications.push(newNotification)
-			if (length) {
-				setTimeout(() => this.removeNotification(newNotification), length)
+				this.notifications.push(newNotification)
+				if (length) {
+					setTimeout(() => this.removeNotification(newNotification), length)
+				}
 			}
 		})
 
 		this.notificationService.removeNotification$.subscribe(identifier => {
-			if (!identifier) {
-				return
-			}
-
-			const existingNotification = this.notifications.find(n => n.identifier === identifier)
-			if (existingNotification) {
-				this.removeNotification(existingNotification)
+			if (identifier) {
+				const existingNotification = this.notifications.find(n => n.identifier === identifier)
+				if (existingNotification) {
+					this.removeNotification(existingNotification)
+				}
 			}
 		})
 	}
