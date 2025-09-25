@@ -1,6 +1,6 @@
 .uk-button-large {
 	border-radius: 50px;
-	background-color: #e24a90;
+	background-color: #c00;
 	line-height: 1;
 	letter-spacing: 0.5px;
 	padding-top: 20px;
@@ -9,5 +9,5 @@
 }
 
 .uk-button-large:hover {
-	background-color: #ca3379 !important;
+	background-color: #f33 !important;
 }
