@@ -115,7 +115,7 @@ export class SendComponent implements OnInit {
 
 		// Set the account selected in the sidebar as default
 		if (this.svcWallet.selectedAccount !== null) {
-			this.fromAccountID = this.svcWallet.selectedAccount.id
+			this.fromAccountID = this.svcWallet.selectedAccount.address
 		} else {
 			// If "total balance" is selected in the sidebar, use the first account in the wallet that has a balance
 			this.findFirstAccount()
@@ -252,7 +252,7 @@ export class SendComponent implements OnInit {
 	}
 
 	getAccountLabel (accountID, defaultLabel) {
-		const walletAccount = this.svcWallet.accounts.find((a) => a.id === accountID)
+		const walletAccount = this.svcWallet.accounts.find((a) => a.address === accountID)
 		if (walletAccount == null) {
 			return defaultLabel
 		}
@@ -274,7 +274,7 @@ export class SendComponent implements OnInit {
 			return this.toAccountID
 		}
 		// 'own-address'
-		const walletAccount = this.svcWallet.accounts.find((a) => a.id === this.toOwnAccountID)
+		const walletAccount = this.svcWallet.accounts.find((a) => a.address === this.toOwnAccountID)
 		if (!walletAccount) {
 			// Unable to find receiving account in wallet
 			return ''
@@ -333,7 +333,7 @@ export class SendComponent implements OnInit {
 
 	async confirmTransaction () {
 		const wallet = this.svcWallet.selectedWallet()
-		const walletAccount = this.svcWallet.accounts.find((a) => a.id === this.fromAccountID)
+		const walletAccount = this.svcWallet.accounts.find((a) => a.address === this.fromAccountID)
 		if (!walletAccount) {
 			throw new Error(`Unable to find sending account in wallet`)
 		}
@@ -376,7 +376,7 @@ export class SendComponent implements OnInit {
 	}
 
 	async setMaxAmount () {
-		const walletAccount = this.svcWallet.accounts.find((a) => a.id === this.fromAccountID)
+		const walletAccount = this.svcWallet.accounts.find((a) => a.address === this.fromAccountID)
 		if (!walletAccount) {
 			return
 		}

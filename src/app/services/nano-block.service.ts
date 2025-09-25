@@ -43,7 +43,7 @@ export class NanoBlockService {
 	newOpenBlock$: BehaviorSubject<boolean | false> = new BehaviorSubject(false)
 
 	async generateChange (wallet: Wallet, walletAccount, representativeAccount, ledger = false) {
-		const account = Account.load(walletAccount.id)
+		const account = Account.load(walletAccount.address)
 		const toAcct = await this.svcApi.accountInfo(account.address)
 		if (!toAcct) throw new Error(`Account must have an open block first`)
 
@@ -54,7 +54,7 @@ export class NanoBlockService {
 		const link = this.zeroHash
 		const blockData = {
 			type: 'state',
-			account: walletAccount.id,
+			account: walletAccount.address,
 			previous: toAcct.frontier,
 			representative: representativeAccount,
 			balance: balanceDecimal,
@@ -111,8 +111,8 @@ export class NanoBlockService {
 	//     observable.next({ step: 0, startTime: startTime })
 	//
 	//
-	//     const fromAccount = await this.api.accountInfo(walletAccount.id)
-	//     if (!fromAccount) throw new Error(`Unable to get account information for ${walletAccount.id}`)
+	//     const fromAccount = await this.api.accountInfo(walletAccount.address)
+	//     if (!fromAccount) throw new Error(`Unable to get account information for ${walletAccount.address}`)
 	//
 	//     const remaining = new BigNumber(fromAccount.balance).minus(rawAmount)
 	//     const remainingDecimal = remaining.toString(10)
@@ -156,7 +156,7 @@ export class NanoBlockService {
 	//
 	//     blockData = {
 	//       type: 'state',
-	//       account: walletAccount.id,
+	//       account: walletAccount.address,
 	//       previous: fromAccount.frontier,
 	//       representative: representative,
 	//       balance: remainingDecimal,
@@ -190,7 +190,7 @@ export class NanoBlockService {
 	// }
 
 	async generateSend (wallet: Wallet, walletAccount, toAccountID, rawAmount, ledger = false) {
-		const account = Account.load(walletAccount.id)
+		const account = Account.load(walletAccount.address)
 		const fromAccount = await this.svcApi.accountInfo(account.address)
 		if (!fromAccount) throw new Error(`Unable to get account information for ${account.address}`)
 
@@ -200,7 +200,7 @@ export class NanoBlockService {
 		const representative = fromAccount.representative || (this.svcAppSettings.settings.defaultRepresentative || this.getRandomRepresentative())
 		const blockData = {
 			type: 'state',
-			account: walletAccount.id,
+			account: walletAccount.address,
 			previous: fromAccount.frontier,
 			representative: representative,
 			balance: remainingDecimal,
@@ -269,7 +269,7 @@ export class NanoBlockService {
 		while (newBalancePadded.length < 32) newBalancePadded = '0' + newBalancePadded // Left pad with 0's
 		const blockData = {
 			type: 'state',
-			account: walletAccount.id,
+			account: walletAccount.address,
 			previous: previousBlock,
 			representative: representative,
 			balance: newBalanceDecimal,
@@ -304,7 +304,7 @@ export class NanoBlockService {
 		}
 
 		workBlock = openEquiv
-			? Account.load(walletAccount.id).publicKey
+			? Account.load(walletAccount.address).publicKey
 			: previousBlock
 		if (!this.svcWorkPool.workExists(workBlock)) {
 			this.svcNotifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
@@ -385,7 +385,7 @@ export class NanoBlockService {
 		if (genWork) {
 			// For open blocks which don't have a frontier, use the public key of the account
 			const workBlock = openEquiv
-				? Account.load(walletAccount.id).publicKey
+				? Account.load(walletAccount.address).publicKey
 				: block.previous
 			if (!this.svcWorkPool.workExists(workBlock)) {
 				this.svcNotifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })

@@ -133,7 +133,7 @@ export class RepresentativesComponent implements OnInit {
 			return addressBookName
 		}
 
-		const walletAccount = this.walletService.accounts.find((a) => a.id === account.id)
+		const walletAccount = this.walletService.accounts.find((a) => a.address === account.address)
 
 		if (walletAccount == null) {
 			return this.translocoService.translate('general.account')
@@ -144,7 +144,7 @@ export class RepresentativesComponent implements OnInit {
 
 	addSelectedAccounts (accounts) {
 		for (const account of accounts) {
-			this.newAccountID(account.id)
+			this.newAccountID(account.address)
 		}
 
 		// Scroll to the representative input
@@ -160,12 +160,12 @@ export class RepresentativesComponent implements OnInit {
 			return // Didn't select anything
 		}
 
-		const existingAccount = this.selectedAccounts.find((a) => a.id === newAccount)
+		const existingAccount = this.selectedAccounts.find((a) => a.address === newAccount)
 		if (existingAccount) {
 			return // Already selected
 		}
 
-		const allExists = this.selectedAccounts.find((a) => a.id === 'All Current Accounts')
+		const allExists = this.selectedAccounts.find((a) => a.address === 'All Current Accounts')
 		if (newAccount === 'all' && !allExists) {
 			this.selectedAccounts = [] // Reset the list before adding all
 		}
@@ -311,13 +311,13 @@ export class RepresentativesComponent implements OnInit {
 			return this.notifications.sendWarning(`Representative is not a valid account`)
 		}
 
-		const accountsToChange = accounts.find((a) => a.id === 'All Current Accounts')
+		const accountsToChange = accounts.find((a) => a.address === 'All Current Accounts')
 			? this.walletService.accounts
 			: accounts
 
 		// Remove any that don't need their represetatives to be changed
 		const accountsNeedingChange = accountsToChange.filter((account) => {
-			const accountInfo = this.fullAccounts.find((a) => a.id === account.id)
+			const accountInfo = this.fullAccounts.find((a) => a.address === account.iaddressd)
 			if (!accountInfo || accountInfo.error) {
 				return false // Cant find info, update the account
 			}
@@ -338,7 +338,7 @@ export class RepresentativesComponent implements OnInit {
 
 		// Now loop and change them
 		for (const account of accountsNeedingChange) {
-			const walletAccount = this.walletService.getWalletAccount(account.id)
+			const walletAccount = this.walletService.getWalletAccount(account.address)
 			if (!walletAccount) {
 				continue // Unable to find account in the wallet? wat?
 			}
@@ -346,7 +346,7 @@ export class RepresentativesComponent implements OnInit {
 			try {
 				const changed = await this.nanoBlock.generateChange(wallet, walletAccount, newRep, this.walletService.isLedger())
 				if (!changed) {
-					this.notifications.sendError(`Error changing representative for ${account.id}, please try again`)
+					this.notifications.sendError(`Error changing representative for ${account.address}, please try again`)
 				}
 			} catch (err) {
 				this.notifications.sendError('Error changing representative: ' + err.message)

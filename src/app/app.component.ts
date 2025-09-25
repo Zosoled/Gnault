@@ -169,7 +169,7 @@ export class AppComponent implements AfterViewInit {
 
 		// update selected account object with the latest balance, receivable, etc
 		if (this.svcWallet.selectedAccountAddress) {
-			const currentUpdatedAccount = this.svcWallet.accounts.find((a) => a.id === this.svcWallet.selectedAccountAddress)
+			const currentUpdatedAccount = this.svcWallet.accounts.find((a) => a.address === this.svcWallet.selectedAccountAddress)
 			this.svcWallet.selectedAccount = currentUpdatedAccount
 		}
 

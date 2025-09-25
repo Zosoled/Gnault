@@ -83,7 +83,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	loadingBalances = false
 	numberOfTrackedBalance = 0
 
-	async ngOnInit() {
+	async ngOnInit () {
 		this.addressBookService.loadAddressBook()
 		// Keep price up to date with the service
 		this.priceSub = this.svcPrice.lastPrice$.subscribe((event) => {
@@ -100,7 +100,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 						continue
 					}
 					// If the account exist in the wallet, take the info from there to save on RPC calls
-					const walletAccount = this.walletService.accounts.find((a) => a.id === entry.account)
+					const walletAccount = this.walletService.accounts.find((a) => a.address === entry.account)
 					if (walletAccount) {
 						// Subtract first so we can add back any updated amounts
 						this.totalTrackedBalance -= this.accounts[entry.account].balance
@@ -123,7 +123,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.updateTrackedBalances()
 	}
 
-	ngOnDestroy() {
+	ngOnDestroy () {
 		if (this.priceSub) {
 			this.priceSub.unsubscribe()
 		}
@@ -132,7 +132,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		}
 	}
 
-	ngAfterViewInit() {
+	ngAfterViewInit () {
 		// Listen for reordering events
 		document.getElementById('address-book-sortable').addEventListener('moved', (e) => {
 			const element = e.target as HTMLDivElement
@@ -146,11 +146,11 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		})
 	}
 
-	sleep(ms) {
+	sleep (ms) {
 		return new Promise((resolve) => setTimeout(resolve, ms))
 	}
 
-	async updateTrackedBalances(refresh = false) {
+	async updateTrackedBalances (refresh = false) {
 		if (refresh && !this.statsRefreshEnabled) return
 		this.statsRefreshEnabled = false
 		if (this.timeoutIdAllowingRefresh != null) {
@@ -175,7 +175,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.totalTrackedReceivable = 0n
 
 		// Get account balances for all account in address book not in wallet (which has tracking active)
-		const accountIDsWallet = this.walletService.accounts.map((a) => a.id)
+		const accountIDsWallet = this.walletService.accounts.map((a) => a.address)
 		const accountIDs = this.addressBookService.addressBook
 			.filter((a) => !accountIDsWallet.includes(a.account) && a.trackBalance)
 			.map((a) => a.account)
@@ -200,7 +200,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 				receivable: 0n,
 			}
 			// If the account exist in the wallet, take the info from there to save on RPC calls
-			const walletAccount = this.walletService.accounts.find((a) => a.id === entry.account)
+			const walletAccount = this.walletService.accounts.find((a) => a.address === entry.account)
 			if (walletAccount) {
 				balanceAccount.balance = walletAccount.balance
 				balanceAccount.balanceFiat = walletAccount.balanceFiat
@@ -253,7 +253,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.loadingBalances = false
 	}
 
-	addEntry() {
+	addEntry () {
 		this.previousAddressName = ''
 		this.newTrackBalance = false
 		this.newTrackTransactions = false
@@ -261,7 +261,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.activePanel = 1
 	}
 
-	editEntry(addressBook) {
+	editEntry (addressBook) {
 		this.newAddressAccount = addressBook.account
 		this.previousAddressName = addressBook.name
 		this.newAddressName = addressBook.name
@@ -274,7 +274,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		}, 150)
 	}
 
-	async saveNewAddress() {
+	async saveNewAddress () {
 		if (!this.newAddressAccount || !this.newAddressName) {
 			return this.notificationService.sendError(
 				this.translocoService.translate('address-book.account-and-name-are-required')
@@ -329,7 +329,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 				this.translocoService.translate('address-book.address-book-entry-saved-successfully')
 			)
 			// If this is one of our accounts, set its name and let it propagate through the app
-			const walletAccount = this.walletService.accounts.find((a) => a.id === this.newAddressAccount)
+			const walletAccount = this.walletService.accounts.find((a) => a.address === this.newAddressAccount)
 			if (walletAccount) {
 				walletAccount.addressBookName = this.newAddressName
 			}
@@ -350,13 +350,13 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		}
 	}
 
-	cancelNewAddress() {
+	cancelNewAddress () {
 		this.newAddressName = ''
 		this.newAddressAccount = ''
 		this.activePanel = 0
 	}
 
-	copied() {
+	copied () {
 		this.notificationService.removeNotification('success-copied')
 		this.notificationService.sendSuccess(
 			this.translocoService.translate('address-book.account-address-copied-to-clipboard'),
@@ -364,7 +364,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		)
 	}
 
-	async deleteAddress(account) {
+	async deleteAddress (account) {
 		try {
 			this.addressBookService.deleteAddress(account)
 			this.notificationService.sendSuccess(
@@ -380,7 +380,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	// open qr reader modal
-	openQR(reference, type) {
+	openQR (reference, type) {
 		const qrResult = this.qrModalService.openQR(reference, type)
 		qrResult.then(
 			(data) => {
@@ -390,13 +390,13 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 						break
 				}
 			},
-			() => {}
+			() => { }
 		)
 	}
 
 	// converts a Unicode string to a string in which
 	// each 16-bit unit occupies only one byte
-	toBinary(string) {
+	toBinary (string) {
 		const codeUnits = new Uint16Array(string.length)
 		for (let i = 0; i < codeUnits.length; i++) {
 			codeUnits[i] = string.charCodeAt(i)
@@ -404,7 +404,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		return String.fromCharCode(...new Uint8Array(codeUnits.buffer))
 	}
 
-	async exportAddressBook() {
+	async exportAddressBook () {
 		const exportData = this.addressBookService.addressBook
 		const base64Data = btoa(this.toBinary(JSON.stringify(exportData)))
 		const exportUrl = `https://gnault.cc/import-address-book#${base64Data}`
@@ -417,7 +417,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		}
 	}
 
-	exportAddressBookToFile() {
+	exportAddressBookToFile () {
 		const fileName = `Gnault-AddressBook.json`
 
 		const exportData = this.addressBookService.addressBook
@@ -426,7 +426,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.notificationService.sendSuccess(this.translocoService.translate('address-book.address-book-export-downloaded'))
 	}
 
-	importFromFile(files) {
+	importFromFile (files) {
 		if (!files.length) {
 			return
 		}
@@ -454,7 +454,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		reader.readAsText(file)
 	}
 
-	triggerFileDownload(fileName, exportData) {
+	triggerFileDownload (fileName, exportData) {
 		const blob = new Blob([JSON.stringify(exportData)], { type: 'application/json' })
 
 		// Check for iOS, which is weird with saving files

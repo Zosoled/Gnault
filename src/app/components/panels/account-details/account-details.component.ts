@@ -536,7 +536,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	}
 
 	getAccountLabel (accountID, defaultLabel) {
-		const walletAccount = this.svcWallet.accounts.find((a) => a.id === accountID)
+		const walletAccount = this.svcWallet.accounts.find((a) => a.address === accountID)
 
 		if (walletAccount == null) {
 			return defaultLabel

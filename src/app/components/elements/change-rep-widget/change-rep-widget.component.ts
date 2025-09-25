@@ -25,7 +25,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 	selectedAccountHasRepresentative = false
 	initialLoadComplete = false
 
-	async ngOnInit() {
+	async ngOnInit () {
 		this.svcRepresentative.walletReps$.subscribe(async (reps) => {
 			if (reps[0] === null) {
 				// initial state from new BehaviorSubject([null])
@@ -74,7 +74,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 		await this.svcRepresentative.getRepresentativesOverview()
 	}
 
-	async resetRepresentatives() {
+	async resetRepresentatives () {
 		console.log('Reloading representatives..')
 		this.initialLoadComplete = false
 		this.selectedAccount = null
@@ -87,16 +87,16 @@ export class ChangeRepWidgetComponent implements OnInit {
 		console.log('Representatives reloaded')
 	}
 
-	async updateChangeableRepresentatives() {
+	async updateChangeableRepresentatives () {
 		await this.svcRepresentative.detectChangeableReps(this.representatives)
 	}
 
-	updateDisplayedRepresentatives() {
+	updateDisplayedRepresentatives () {
 		this.updateSelectedAccountHasRep()
 		this.displayedRepresentatives = this.getDisplayedRepresentatives(this.representatives)
 	}
 
-	includeRepRequiringChange(displayedReps: any[]) {
+	includeRepRequiringChange (displayedReps: any[]) {
 		const repRequiringChange = this.changeableRepresentatives
 			.sort((a, b) => b.delegatedWeight.minus(a.delegatedWeight))
 			.filter((changeableRep) => {
@@ -110,7 +110,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 		return displayedReps
 	}
 
-	updateSelectedAccountHasRep() {
+	updateSelectedAccountHasRep () {
 		if (this.selectedAccount == null) {
 			const accounts = this.svcWallet.accounts
 			this.selectedAccountHasRepresentative = accounts.some((a) => a.frontier)
@@ -119,7 +119,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 		}
 	}
 
-	getDisplayedRepresentatives(representatives: any[]) {
+	getDisplayedRepresentatives (representatives: any[]) {
 		if (this.representatives?.length === 0) {
 			return []
 		}
@@ -143,33 +143,33 @@ export class ChangeRepWidgetComponent implements OnInit {
 		return this.includeRepRequiringChange(displayedReps)
 	}
 
-	sleep(ms) {
+	sleep (ms) {
 		return new Promise((resolve) => setTimeout(resolve, ms))
 	}
 
-	showRepSelectionForSpecificRep(clickedRep) {
+	showRepSelectionForSpecificRep (clickedRep) {
 		this.showRepHelp = false
 		const selectedAccountMatchesClickedRep =
-			this.selectedAccount !== null && clickedRep.accounts.some((a) => a.id === this.selectedAccount.id)
+			this.selectedAccount !== null && clickedRep.accounts.some((a) => a.address === this.selectedAccount.address)
 		const accountsToChangeRepFor = selectedAccountMatchesClickedRep
-			? this.selectedAccount.id
+			? this.selectedAccount.address
 			: // all accounts that delegate to this rep
-				this.representatives
-					.filter((rep) => rep.id === clickedRep.id)
-					.map((rep) => {
-						rep.accounts.map((a) => a.id).join(',')
-					})
-					.join(',')
+			this.representatives
+				.filter((rep) => rep.id === clickedRep.id)
+				.map((rep) => {
+					rep.accounts.map((a) => a.address).join(',')
+				})
+				.join(',')
 
 		this.router.navigate(['/representatives'], {
 			queryParams: { hideOverview: true, accounts: accountsToChangeRepFor, showRecommended: true },
 		})
 	}
 
-	showRepSelectionForAllChangeableReps() {
+	showRepSelectionForAllChangeableReps () {
 		const allAccounts = this.changeableRepresentatives
 			.map((rep) => {
-				rep.accounts.map((a) => a.id).join(',')
+				rep.accounts.map((a) => a.address).join(',')
 			})
 			.join(',')
 		this.router.navigate(['/representatives'], {

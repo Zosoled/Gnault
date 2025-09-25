@@ -17,7 +17,7 @@ import { BehaviorSubject } from 'rxjs'
 export type WalletKeyType = 'seed' | 'ledger' | 'privateKey' | 'expandedKey'
 
 export interface WalletAccount {
-	id: string
+	address: string
 	frontier: string | null
 	secret: any
 	keyPair: any
@@ -574,7 +574,7 @@ export class WalletService {
 		const addressBookName = this.svcAddressBook.getAccountName(accountAddress)
 
 		const newAccount: WalletAccount = {
-			id: accountAddress,
+			address: accountAddress,
 			frontier: null,
 			secret: accountBytes,
 			keyPair: accountKeyPair,

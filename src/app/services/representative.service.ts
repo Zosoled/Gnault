@@ -77,7 +77,7 @@ export class RepresentativeService {
 	 * Determine if any accounts in the wallet need a rep change
 	 * @returns {Promise<FullRepresentativeOverview[]>}
 	 */
-	async detectChangeableReps(cachedReps?: FullRepresentativeOverview[]): Promise<FullRepresentativeOverview[]> {
+	async detectChangeableReps (cachedReps?: FullRepresentativeOverview[]): Promise<FullRepresentativeOverview[]> {
 		const representatives = cachedReps ?? (await this.getRepresentativesOverview())
 
 		// Now based on some of their properties, we filter them out
@@ -109,7 +109,7 @@ export class RepresentativeService {
 	 * Get a detailed overview of representatives for all acounts in the wallet
 	 * @returns {Promise<FullRepresentativeOverview[]>}
 	 */
-	async getRepresentativesOverview(): Promise<FullRepresentativeOverview[]> {
+	async getRepresentativesOverview (): Promise<FullRepresentativeOverview[]> {
 		// First get the details of all representatives for accounts in our wallet
 		const accounts = await this.svcWallet.getAccountsDetails()
 		const uniqueReps = this.getUniqueRepresentatives(accounts)
@@ -270,7 +270,7 @@ export class RepresentativeService {
 	 * @param accounts
 	 * @returns {RepresentativeOverview[]}
 	 */
-	getUniqueRepresentatives(accounts: WalletApiAccount[]): RepresentativeOverview[] {
+	getUniqueRepresentatives (accounts: WalletApiAccount[]): RepresentativeOverview[] {
 		const representatives = []
 		for (const account of accounts) {
 			if (!account || !account.representative) continue // Account doesn't exist yet
@@ -296,7 +296,7 @@ export class RepresentativeService {
 	 * Get a list of all online representatives
 	 * @returns {Promise<string[]>}
 	 */
-	async getOnlineRepresentatives(): Promise<string[]> {
+	async getOnlineRepresentatives (): Promise<string[]> {
 		const representatives = []
 		const reps = await this.svcApi.representativesOnline()
 		if (!reps) return representatives
@@ -316,7 +316,7 @@ export class RepresentativeService {
 	 * @param {RepresentativeOverview[]} representatives
 	 * @returns {Promise<RepresentativeApiOverview[]>}
 	 */
-	async getRepresentativesDetails(representatives: RepresentativeOverview[]): Promise<RepresentativeApiOverview[]> {
+	async getRepresentativesDetails (representatives: RepresentativeOverview[]): Promise<RepresentativeApiOverview[]> {
 		const repInfos = await Promise.all(
 			representatives.map((rep) =>
 				this.svcApi.accountInfo(rep.address).then((res: RepresentativeApiOverview) => {
@@ -334,7 +334,7 @@ export class RepresentativeService {
 	 * Load the stored/known representative list from local storage
 	 * @returns {StoredRepresentative[]}
 	 */
-	loadRepresentativeList(): StoredRepresentative[] {
+	loadRepresentativeList (): StoredRepresentative[] {
 		if (this.loaded) {
 			return this.representatives
 		}
@@ -351,7 +351,7 @@ export class RepresentativeService {
 		return list
 	}
 
-	patchXrbPrefixData() {
+	patchXrbPrefixData () {
 		const representativeStore = localStorage.getItem(this.storeKey)
 		if (!representativeStore) {
 			return
@@ -367,18 +367,18 @@ export class RepresentativeService {
 		return true
 	}
 
-	getRepresentative(id): StoredRepresentative | undefined {
+	getRepresentative (id): StoredRepresentative | undefined {
 		return this.representatives.find((rep) => rep.id === id)
 	}
 
 	// Reset representatives list to the default one
-	resetRepresentativeList() {
+	resetRepresentativeList () {
 		localStorage.removeItem(this.storeKey)
 		this.representatives = this.defaultRepresentatives
 		this.loaded = false
 	}
 
-	saveRepresentative(accountID, name, trusted = false, warn = false): void {
+	saveRepresentative (accountID, name, trusted = false, warn = false): void {
 		const newRepresentative: any = {
 			id: accountID,
 			name: name,
@@ -399,8 +399,8 @@ export class RepresentativeService {
 		this.representatives$.next(this.representatives)
 	}
 
-	deleteRepresentative(accountID): void {
-		const existingIndex = this.representatives.findIndex((a) => a.id.toLowerCase() === accountID.toLowerCase())
+	deleteRepresentative (accountID): void {
+		const existingIndex = this.representatives.findIndex((a) => a.address.toLowerCase() === accountID.toLowerCase())
 		if (existingIndex === -1) {
 			return
 		}
@@ -409,11 +409,11 @@ export class RepresentativeService {
 		this.representatives$.next(this.representatives)
 	}
 
-	saveRepresentatives(): void {
+	saveRepresentatives (): void {
 		localStorage.setItem(this.storeKey, JSON.stringify(this.representatives))
 	}
 
-	getSortedRepresentatives() {
+	getSortedRepresentatives () {
 		const weightedReps = this.representatives.map((r) => {
 			if (r.trusted) {
 				r.weight = 2
@@ -427,7 +427,7 @@ export class RepresentativeService {
 		return weightedReps.sort((a, b) => b.weight - a.weight)
 	}
 
-	nameExists(name: string): boolean {
+	nameExists (name: string): boolean {
 		return this.representatives.findIndex((a) => a.name.toLowerCase() === name.toLowerCase()) !== -1
 	}
 

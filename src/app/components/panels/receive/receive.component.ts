@@ -149,7 +149,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 
 		if (this.svcWallet.selectedAccount !== null) {
 			// Set the account selected in the sidebar as default
-			this.receivableAccountModel = this.svcWallet.selectedAccount.id
+			this.receivableAccountModel = this.svcWallet.selectedAccount.address
 			this.onSelectedAccountChange(this.receivableAccountModel)
 		} else if (this.accounts.length === 1) {
 			// Auto-select account if it is the only account in the wallet
@@ -238,7 +238,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	}
 
 	getAccountLabel (accountID, defaultLabel) {
-		const walletAccount = this.svcWallet.accounts.find(a => a.id === accountID)
+		const walletAccount = this.svcWallet.accounts.find(a => a.address === accountID)
 		if (walletAccount == null) {
 			return defaultLabel
 		}
@@ -369,7 +369,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	async receiveReceivableBlock (receivableBlock) {
 		const sourceBlock = receivableBlock.hash
 
-		const walletAccount = this.svcWallet.accounts.find(a => a.id === receivableBlock.destination)
+		const walletAccount = this.svcWallet.accounts.find(a => a.address === receivableBlock.destination)
 		if (!walletAccount) {
 			throw new Error(this.svcTransloco.translate('receive.unable-to-find-receiving-account'))
 		}

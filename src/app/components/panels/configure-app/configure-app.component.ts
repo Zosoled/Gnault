@@ -335,7 +335,7 @@ export class ConfigureAppComponent implements OnInit {
 		// 	this.appSettings.setAppSetting('displayPrefix', this.selectedPrefix)
 		// 	// Go through accounts?
 		// 	this.wallet.accounts.forEach(account => {
-		// 		account.id = this.util.account.setPrefix(account.id, this.selectedPrefix)
+		// 		account.address = this.util.account.setPrefix(account.address, this.selectedPrefix)
 		// 	})
 		// 	this.walletService.saveWalletExport()
 		//

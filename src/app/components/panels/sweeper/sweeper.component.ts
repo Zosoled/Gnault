@@ -74,14 +74,14 @@ export class SweeperComponent implements OnInit {
 
 	@ViewChild('outputarea') logArea: ElementRef
 
-	constructor() {
+	constructor () {
 		if (this.route.getCurrentNavigation().extras.state && this.route.getCurrentNavigation().extras.state.seed) {
 			this.sourceWallet = this.route.getCurrentNavigation().extras.state.seed
 			this.validSeed = true
 		}
 	}
 
-	async ngOnInit() {
+	async ngOnInit () {
 		// Update selected account if changed in the sidebar
 		this.walletService.selectedAccount$.subscribe(async (acc) => {
 			if (this.selAccountInit) {
@@ -92,15 +92,15 @@ export class SweeperComponent implements OnInit {
 
 		// Set the account selected in the sidebar as default
 		if (this.walletService.selectedAccount !== null) {
-			this.myAccountModel = this.walletService.selectedAccount.id
+			this.myAccountModel = this.walletService.selectedAccount.address
 		}
 	}
 
-	sleep(ms) {
+	sleep (ms) {
 		return new Promise((resolve) => setTimeout(resolve, ms))
 	}
 
-	setDestination(account) {
+	setDestination (account) {
 		if (account !== '0') {
 			this.destinationAccount = account
 			this.customAccountSelected = false
@@ -112,7 +112,7 @@ export class SweeperComponent implements OnInit {
 	}
 
 	// set min value for start index
-	setMin() {
+	setMin () {
 		this.startIndex = '0'
 		// check end index
 		if (this.validEndIndex) {
@@ -123,7 +123,7 @@ export class SweeperComponent implements OnInit {
 	}
 
 	// set max value for end index
-	setMax() {
+	setMax () {
 		this.endIndex = INDEX_MAX.toString()
 		// check start index
 		if (this.validStartIndex) {
@@ -134,11 +134,11 @@ export class SweeperComponent implements OnInit {
 	}
 
 	// set max value for receivable limit
-	setMaxIncoming() {
+	setMaxIncoming () {
 		this.maxIncoming = SWEEP_MAX_RECEIVABLE.toString()
 	}
 
-	seedChange(seed) {
+	seedChange (seed) {
 		if (this.checkMasterKey(seed)) {
 			this.validSeed = true
 		} else {
@@ -146,7 +146,7 @@ export class SweeperComponent implements OnInit {
 		}
 	}
 
-	destinationChange(address) {
+	destinationChange (address) {
 		try {
 			Account.load(address)
 			this.validDestination = true
@@ -155,7 +155,7 @@ export class SweeperComponent implements OnInit {
 		}
 	}
 
-	startIndexChange(index) {
+	startIndexChange (index) {
 		index = parseInt(index, 10)
 		if (index < 0 || index > INDEX_MAX) {
 			this.validStartIndex = false
@@ -170,7 +170,7 @@ export class SweeperComponent implements OnInit {
 		}
 	}
 
-	endIndexChange(index) {
+	endIndexChange (index) {
 		index = parseInt(index, 10)
 		if (Number.isNaN(index) || index < 0 || index > INDEX_MAX) {
 			this.validEndIndex = false
@@ -185,7 +185,7 @@ export class SweeperComponent implements OnInit {
 		}
 	}
 
-	maxIncomingChange(value) {
+	maxIncomingChange (value) {
 		if (!this.util.string.isNumeric(value) || value % 1 !== 0) {
 			this.validMaxIncoming = false
 			return
@@ -201,7 +201,7 @@ export class SweeperComponent implements OnInit {
 	}
 
 	// Validate type of master key. Seed and private key can't be differentiated
-	async checkMasterKey(key) {
+	async checkMasterKey (key) {
 		// validate nano seed or private key
 		if (/^[A-F0-9]{64}$/i.test(key)) {
 			return 'nano_seed'
@@ -220,7 +220,7 @@ export class SweeperComponent implements OnInit {
 	}
 
 	// Append row to log output
-	appendLog(row) {
+	appendLog (row) {
 		let linebreak = '\n'
 		if (this.output === '') {
 			linebreak = ''
@@ -231,7 +231,7 @@ export class SweeperComponent implements OnInit {
 	}
 
 	// Process final send block
-	async processSend(privKey, previous, sendCallback) {
+	async processSend (privKey, previous, sendCallback) {
 		const account = await Account.load(privKey, 'private')
 		const destinationAccount = Account.load(this.destinationAccount)
 
@@ -270,7 +270,7 @@ export class SweeperComponent implements OnInit {
 	}
 
 	// For each receivable block
-	async processReceivable(blocks, keys, keyCount) {
+	async processReceivable (blocks, keys, keyCount) {
 		const key = keys[keyCount]
 		this.blocks = blocks
 		this.keys = keys
@@ -331,7 +331,7 @@ export class SweeperComponent implements OnInit {
 	}
 
 	// Create receivable blocks based on current balance and previous block (or start with an open block)
-	async createReceivableBlocks(privKey, address, balance, previous, subType, callback, accountCallback) {
+	async createReceivableBlocks (privKey, address, balance, previous, subType, callback, accountCallback) {
 		this.privKey = privKey
 		this.previous = previous
 		this.subType = subType
@@ -388,7 +388,7 @@ export class SweeperComponent implements OnInit {
 	}
 
 	// Process an account
-	async processAccount(privKey, accountCallback) {
+	async processAccount (privKey, accountCallback) {
 		if (privKey.length !== 64) {
 			accountCallback()
 			return
@@ -449,7 +449,7 @@ export class SweeperComponent implements OnInit {
 	}
 
 	// Recursively process private keys from index range
-	async processIndexRecursive(privKeys, keyCount) {
+	async processIndexRecursive (privKeys, keyCount) {
 		// delay each process to not hit backend rate limiters
 		await this.sleep(300)
 		const privKey = privKeys[keyCount][0]
@@ -474,7 +474,7 @@ export class SweeperComponent implements OnInit {
 		)
 	}
 
-	async sweepContinue() {
+	async sweepContinue () {
 		this.sweeping = true
 		this.totalSwept = '0'
 
@@ -555,7 +555,7 @@ export class SweeperComponent implements OnInit {
 	}
 
 	/* Start the sweeping */
-	async sweep() {
+	async sweep () {
 		if (!this.validSeed) {
 			this.notificationService.sendError(`No valid source wallet provided!`)
 			return

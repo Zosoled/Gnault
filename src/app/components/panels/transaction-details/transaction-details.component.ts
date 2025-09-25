@@ -54,7 +54,7 @@ export class TransactionDetailsComponent implements OnInit {
 	amount = 0n
 	successorHash = ''
 
-	async ngOnInit() {
+	async ngOnInit () {
 		this.routerSub = this.router.events.subscribe((event) => {
 			if (event instanceof ChildActivationEnd) {
 				// Reload the state when navigating to itself from the transactions page
@@ -64,7 +64,7 @@ export class TransactionDetailsComponent implements OnInit {
 		await this.loadTransaction()
 	}
 
-	async loadTransaction() {
+	async loadTransaction () {
 		const hash = this.route.snapshot.params.transaction
 		let legacyFromAccount = ''
 
@@ -169,23 +169,23 @@ export class TransactionDetailsComponent implements OnInit {
 		this.loadingBlock = false
 	}
 
-	getAccountLabel(accountID, defaultLabel) {
-		const walletAccount = this.walletService.accounts.find((a) => a.id === accountID)
+	getAccountLabel (accountID, defaultLabel) {
+		const walletAccount = this.walletService.accounts.find((a) => a.address === accountID)
 		if (walletAccount == null) {
 			return defaultLabel
 		}
 		return this.translocoService.translate('general.account') + ' #' + walletAccount.index
 	}
 
-	getBalanceFromHex(balance) {
+	getBalanceFromHex (balance) {
 		return BigInt(`0x${balance}`)
 	}
 
-	getBalanceFromDec(balance) {
+	getBalanceFromDec (balance) {
 		return BigInt(balance)
 	}
 
-	copied() {
+	copied () {
 		this.notifications.removeNotification('success-copied')
 		this.notifications.sendSuccess(`Successfully copied to clipboard!`, { identifier: 'success-copied' })
 	}

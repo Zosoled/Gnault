@@ -68,7 +68,7 @@ export class ManageWalletComponent implements OnInit {
 
 		// Set the account selected in the sidebar as default
 		if (this.svcWallet.selectedAccount !== null) {
-			this.csvAccount = this.svcWallet.selectedAccount.id
+			this.csvAccount = this.svcWallet.selectedAccount.address
 		}
 	}
 

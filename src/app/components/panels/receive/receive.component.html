@@ -668,9 +668,9 @@
 						>
 							<option [value]="0">–</option>
 							@for (account of accounts; track account) {
-								<option [value]="account.id">
+								<option [value]="account.address">
 									{{ account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
-									{{ account.id | squeeze }}
+									{{ account.address | squeeze }}
 								</option>
 							}
 						</select>

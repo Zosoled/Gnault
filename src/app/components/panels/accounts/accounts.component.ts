@@ -97,10 +97,10 @@ export class AccountsComponent implements OnInit {
 			const newAccount = await this.svcWallet.addWalletAccount(accountIndex)
 			await this.svcWallet.reloadBalances()
 			this.svcNotifications.sendSuccess(
-				this.svcTransloco.translate('accounts.successfully-created-new-account', { account: newAccount.id })
+				this.svcTransloco.translate('accounts.successfully-created-new-account', { account: newAccount.address })
 			)
 			this.newAccountIndex = null
-			this.accountsChanged$.next(newAccount.id)
+			this.accountsChanged$.next(newAccount.address)
 		} catch (err) {
 			this.svcNotifications.sendError(
 				this.svcTransloco.translate('accounts.unable-to-add-new-account', { error: err.message })
@@ -157,11 +157,11 @@ export class AccountsComponent implements OnInit {
 		}
 
 		try {
-			await this.svcWallet.removeWalletAccount(account.id)
+			await this.svcWallet.removeWalletAccount(account.address)
 			this.svcNotifications.sendSuccess(
-				this.svcTransloco.translate('accounts.successfully-removed-account', { account: account.id })
+				this.svcTransloco.translate('accounts.successfully-removed-account', { account: account.address })
 			)
-			this.accountsChanged$.next(account.id)
+			this.accountsChanged$.next(account.address)
 		} catch (err) {
 			this.svcNotifications.sendError(
 				this.svcTransloco.translate('accounts.unable-to-delete-account', { error: err.message })

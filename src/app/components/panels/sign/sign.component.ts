@@ -462,7 +462,7 @@ export class SignComponent implements OnInit {
 		switch (this.signTypeSelected) {
 			// wallet
 			case this.signTypes[0]:
-				this.walletAccount = this.accounts.find((a) => a.id.replace('xrb_', 'nano_') === this.signatureAccount)
+				this.walletAccount = this.accounts.find((a) => a.address.replace('xrb_', 'nano_') === this.signatureAccount)
 				if (!this.walletAccount) {
 					this.signatureMessage =
 						"Could not find a matching wallet account to sign with. Make sure it's added under your accounts"
