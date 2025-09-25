@@ -80,6 +80,8 @@ export class AppComponent implements AfterViewInit {
 	private svcWebsocket = inject(WebsocketService)
 	private svcWorkPool = inject(WorkPoolService)
 
+	stage = environment.production ? '' : 'BETA'
+
 	svcAppSettings = inject(AppSettingsService)
 	svcNode = inject(NodeService)
 	svcPrice = inject(PriceService)
