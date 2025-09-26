@@ -18,7 +18,7 @@ import {
 	UtilService,
 	WalletService,
 } from 'app/services'
-import { Account, Block, Tools } from 'libnemo'
+import { Account, Block, Rpc, Tools } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 import * as QRCode from 'qrcode'
 import { BehaviorSubject } from 'rxjs'
@@ -934,23 +934,20 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		walletAccount.representative ??= this.svcAppSettings.settings.defaultRepresentative || this.svcNanoBlock.getRandomRepresentative()
 		const receiveBlock = new Block(walletAccount).receive(sourceBlock, receivableBlock.amount)
 		try {
-			createdReceiveBlockHash = await this.svcNanoBlock.generateReceive(
-				this.svcWallet.selectedWallet(),
-				this.walletAccount(),
-				sourceBlock,
-				this.svcWallet.isLedger()
-			)
+			await receiveBlock.pow()
+			await receiveBlock.sign(this.svcWallet.selectedWallet(), walletAccount.index)
+			await receiveBlock.process(new Rpc(this.svcAppSettings.settings.serverAPI))
 		} catch (err) {
 			this.svcNotifications.sendError('Error receiving transaction: ' + err.message)
 			hasShownErrorNotification = true
 		}
 
-		if (createdReceiveBlockHash != null) {
+		if (receiveBlock.hash != null && !hasShownErrorNotification) {
 			receivableBlock.received = true
 			this.mobileTransactionMenuModal.hide()
 			this.svcNotifications.removeNotification('success-receive')
 			this.svcNotifications.sendSuccess(`Successfully received nano!`, { identifier: 'success-receive' })
-			// clear the list of receivable blocks. Updated again with reloadBalances()
+			// clear receivables list before subsequent balance reload
 			this.svcWallet.clearReceivableBlocks()
 		} else {
 			if (hasShownErrorNotification === false) {
@@ -961,9 +958,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 
 		receivableBlock.loading = false
-
 		await this.svcWallet.reloadBalances()
-
 		this.loadAccountDetailsThrottled({})
 	}
 
