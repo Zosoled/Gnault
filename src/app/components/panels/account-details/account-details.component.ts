@@ -463,7 +463,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			return
 		}
 
-		this.account.set(Account.load(accountInfo))
+		this.account.set(Account.load(address))
 
 		this.updateRepresentativeInfo()
 
