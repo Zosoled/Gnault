@@ -73,7 +73,7 @@ export class AppSettingsService {
 			api: 'https://nanoslo.0x.no/proxy',
 			ws: 'wss://nanoslo.0x.no/websocket',
 			auth: null,
-			shouldRandom: true,
+			shouldRandom: false, // BLOCKED 2025-09-25 as not currently working
 		},
 		{
 			name: 'SomeNano',
