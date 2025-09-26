@@ -69,7 +69,7 @@
 								</div>
 							}
 							<div class="account-amounts-converted uk-width-1-1 text-half-muted">
-								{{ totalTrackedBalanceFiat | fiat: appSettings.settings.displayCurrency }}
+								{{ totalTrackedBalance | fiat: appSettings.settings.displayCurrency }}
 							</div>
 						</div>
 					}
@@ -221,8 +221,7 @@
 															</div>
 															<div class="account-amounts-converted uk-width-1-1 text-half-muted">
 																{{
-																	accounts[addressBook.account]?.balanceFiat
-																		| fiat: appSettings.settings.displayCurrency
+																	accounts[addressBook.account]?.balance | fiat: appSettings.settings.displayCurrency
 																}}
 															</div>
 														} @else {

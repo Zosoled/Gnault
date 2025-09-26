@@ -1,1 +1,20 @@
+.nano-address-start {
+	color: #f30;
+}
 
+.nano-address-prefix {
+	color: #a20;
+}
+
+.nano-address-middle {
+	min-width: 1.4em;
+
+	&.is-off {
+		letter-spacing: -4px;
+		margin-right: 4px;
+	}
+}
+
+.nano-address-end {
+	color: #d5af4e;
+}
