@@ -131,7 +131,7 @@
 										style="max-width: calc(100% - 35px)"
 									>
 										<a
-											[routerLink]="'/account/' + fromAccountID"
+											[routerLink]="'/accounts/' + fromAccountID"
 											class="uk-link-reset account-container uk-text-truncate"
 											uk-tooltip
 											title="View Account Details"
@@ -188,7 +188,7 @@
 										style="max-width: calc(100% - 35px)"
 									>
 										<a
-											[routerLink]="'/account/' + toAccountID"
+											[routerLink]="'/accounts/' + toAccountID"
 											class="uk-link-reset account-container uk-text-truncate"
 											uk-tooltip
 											title="View Account Details"
@@ -333,7 +333,7 @@
 							<label class="uk-form-label">Representative:</label>
 							<div class="uk-form-controls uk-text-truncate">
 								<a
-									[routerLink]="'/account/' + transaction?.contents?.representative"
+									[routerLink]="'/accounts/' + transaction?.contents?.representative"
 									class="account-container uk-link-text uk-text-truncate"
 									uk-tooltip
 									title="View Account Details"
@@ -464,7 +464,7 @@
 							<label class="uk-form-label">Link (Destination):</label>
 							<div class="uk-form-controls uk-text-truncate">
 								<a
-									[routerLink]="'/account/' + transaction?.contents?.link_as_account"
+									[routerLink]="'/accounts/' + transaction?.contents?.link_as_account"
 									class="account-container uk-link-text uk-text-truncate"
 									uk-tooltip
 									title="View Account Details"

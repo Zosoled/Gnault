@@ -549,7 +549,7 @@
 										style="max-width: calc(100% - 35px)"
 									>
 										<a
-											[routerLink]="'/account/' + receivable.account"
+											[routerLink]="'/accounts/' + receivable.account"
 											class="account-container uk-text-truncate"
 											[title]="'general.view-details' | transloco"
 											uk-tooltip
@@ -715,7 +715,7 @@
 										style="max-width: calc(100% - 35px)"
 									>
 										<a
-											[routerLink]="'/account/' + (history.link_as_account || history.account)"
+											[routerLink]="'/accounts/' + (history.link_as_account || history.account)"
 											class="account-container uk-text-truncate"
 											[title]="'general.view-details' | transloco"
 											uk-tooltip
@@ -1471,7 +1471,7 @@
 				<hr />
 				<div
 					class="menu-option"
-					[routerLink]="`/account/${address}`"
+					[routerLink]="`/accounts/${address}`"
 					(click)="mobileAccountMenuModal.hide()"
 				>
 					<span

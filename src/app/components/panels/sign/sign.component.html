@@ -99,7 +99,7 @@
 										style="max-width: calc(100% - 35px)"
 									>
 										<a
-											[routerLink]="'/account/' + fromAccountID"
+											[routerLink]="'/accounts/' + fromAccountID"
 											class="uk-link-reset account-container uk-text-truncate"
 											uk-tooltip
 											title="View Account Details"
@@ -196,7 +196,7 @@
 											style="max-width: calc(100% - 35px)"
 										>
 											<a
-												[routerLink]="'/account/' + toAccountID"
+												[routerLink]="'/accounts/' + toAccountID"
 												class="uk-link-reset account-container uk-text-truncate"
 												uk-tooltip
 												title="View Account Details"
@@ -240,7 +240,7 @@
 											style="max-width: calc(100% - 35px)"
 										>
 											<a
-												[routerLink]="'/account/' + currentBlock.representative"
+												[routerLink]="'/accounts/' + currentBlock.representative"
 												class="uk-link-reset account-container uk-text-truncate"
 												uk-tooltip
 												title="View Account Details"
@@ -880,7 +880,7 @@
 							<br />
 							@if (processedHash) {
 								<a
-									[routerLink]="'/account/' + signatureAccount"
+									[routerLink]="'/accounts/' + signatureAccount"
 									[queryParams]="{ sign: 1 }"
 									class="uk-button uk-button-primary uk-width-auto"
 									title="Account detail view"
