@@ -147,7 +147,8 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	}
 
 	accountColor: Signal<number> = computed((): number => {
-		const pk = BigInt(`0x${this.account()?.publicKey ?? 0}`)
+		const account = this.account()
+		const pk = BigInt(`0x${account?.publicKey ?? 0}`)
 		const mod = pk % 360n
 		return Number(mod)
 	})
@@ -270,26 +271,25 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	}
 
 	updateRepresentativeInfo () {
-		if (!this.account()) {
-			return
+		if (this.account()) {
+			const representativeFromOverview = this.representativesOverview.find(
+				(rep) => rep.account === this.account().representative
+			)
+			if (representativeFromOverview != null) {
+				this.repLabel = representativeFromOverview.label
+				this.repVotingWeight = representativeFromOverview.percent
+				this.repDonationAddress = representativeFromOverview.donationAddress
+				return
+			}
+			this.repVotingWeight = 0n
+			this.repDonationAddress = null
+			const knownRepresentative = this.svcRepresentative.getRepresentative(this.account().representative)
+			if (knownRepresentative != null) {
+				this.repLabel = knownRepresentative.name
+				return
+			}
+			this.repLabel = null
 		}
-		const representativeFromOverview = this.representativesOverview.find(
-			(rep) => rep.account === this.account().representative
-		)
-		if (representativeFromOverview != null) {
-			this.repLabel = representativeFromOverview.label
-			this.repVotingWeight = representativeFromOverview.percent
-			this.repDonationAddress = representativeFromOverview.donationAddress
-			return
-		}
-		this.repVotingWeight = 0n
-		this.repDonationAddress = null
-		const knownRepresentative = this.svcRepresentative.getRepresentative(this.account().representative)
-		if (knownRepresentative != null) {
-			this.repLabel = knownRepresentative.name
-			return
-		}
-		this.repLabel = null
 	}
 
 	onRefreshButtonClick () {
@@ -447,24 +447,28 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.addressBookModel = this.addressBookEntry || ''
 		this.walletAccount = this.svcWallet.getWalletAccount(address)
 
-		this.account.set(await this.svcApi.accountInfo(address))
+		const accountInfo = await this.svcApi.accountInfo(address)
+		debugger
 
+		// Navigated to a different account while account info was loading
 		if (address !== this.address) {
-			// Navigated to a different account while account info was loading
 			this.onAccountDetailsLoadDone()
 			return
 		}
 
-		if (!this.account()) {
+		// No results from RPC
+		if (!accountInfo) {
 			this.loadingAccountDetails = false
 			this.onAccountDetailsLoadDone()
 			return
 		}
 
+		this.account.set(Account.load(accountInfo))
+
 		this.updateRepresentativeInfo()
 
 		// If there is a receivable balance, or the account is not opened yet, load receivable transactions
-		if ((!this.account().error && this.account().receivable > 0) || this.account().error) {
+		if (accountInfo.receivable > 0 || accountInfo.error) {
 			// Take minimum receive into account
 			let receivableBalance = '0'
 			let receivable
@@ -521,7 +525,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 
 		// If the account doesnt exist, set the receivable balance manually
-		if (this.account().error) {
+		if (accountInfo.error) {
 			const receivableRaw = this.receivableBlocks.reduce(
 				(prev: bigint, current: any) => prev + BigInt(current.amount),
 				0n

@@ -959,7 +959,7 @@ export class WalletService {
 			...walletData,
 			selectedWalletId: this.selectedWallet().id,
 			accounts: this.accounts.map((a) => a.toJSON()),
-			selectedAccountAddress: this.selectedAccount().address,
+			selectedAccountAddress: this.selectedAccount()?.address,
 			locked: true,
 		}
 		return data

@@ -1,3 +1,7 @@
+:host {
+	--accountColor: 0deg;
+}
+
 .account-type-label.editing-name {
 	margin-bottom: 6px;
 }

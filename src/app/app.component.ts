@@ -24,7 +24,8 @@ import {
 	WorkPoolService,
 } from 'app/services'
 import { environment } from 'environments/environment'
-import { Wallet } from 'libnemo'
+import { Account, Wallet } from 'libnemo'
+import { BehaviorSubject } from 'rxjs'
 
 @Component({
 	selector: 'app',
@@ -77,49 +78,49 @@ export class AppComponent implements AfterViewInit {
 	searchData = ''
 	donationAccount = environment.donationAddress
 
-	get balance () {
+	get balance (): bigint {
 		return this.svcWallet.balance
 	}
-	get hasReceivableTransactions () {
+	get hasReceivableTransactions (): boolean {
 		return this.svcWallet.hasReceivableTransactions()
 	}
-	get innerHeight () {
+	get innerHeight (): number {
 		return window.innerHeight
 	}
-	get innerHeightWithoutMobileBar () {
+	get innerHeightWithoutMobileBar (): number {
 		return this.innerHeight - (window.innerWidth < 940 ? 50 : 0)
 	}
-	get isBalanceInitialized () {
+	get isBalanceInitialized (): boolean {
 		return this.svcWallet.isBalanceInitialized
 	}
-	get isBalanceUpdating () {
+	get isBalanceUpdating (): boolean {
 		return this.svcWallet.isBalanceUpdating
 	}
-	get isConfigured () {
+	get isConfigured (): boolean {
 		return this.svcWallet.isConfigured()
 	}
-	get isLocked () {
+	get isLocked (): boolean {
 		return this.svcWallet.isLocked()
 	}
-	get isProcessingReceivable () {
+	get isProcessingReceivable (): boolean {
 		return this.svcWallet.isProcessingReceivable
 	}
-	get receivable () {
+	get receivable (): bigint {
 		return this.svcWallet.receivable
 	}
-	get selectedAccount () {
+	get selectedAccount (): Account {
 		return this.svcWallet.selectedAccount()
 	}
-	get selectedWallet () {
+	get selectedWallet (): Wallet {
 		return this.svcWallet.selectedWallet()
 	}
-	get selectedWalletName () {
+	get selectedWalletName (): string {
 		return this.svcWallet.walletNames.get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
 	}
-	get walletNames () {
+	get walletNames (): Map<string, string> {
 		return this.svcWallet.walletNames
 	}
-	get wallets$ () {
+	get wallets$ (): BehaviorSubject<Wallet[]> {
 		return this.svcWallet.wallets$
 	}
 
