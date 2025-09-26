@@ -1,83 +1,72 @@
 import { Injectable, inject } from '@angular/core'
-import { BehaviorSubject } from 'rxjs'
 import { AppSettingsService } from 'app/services'
+import { BehaviorSubject } from 'rxjs'
 
 @Injectable({ providedIn: 'root' })
 export class WebsocketService {
-	private appSettings = inject(AppSettingsService)
+	private svcAppSettings = inject(AppSettingsService)
 
-	queuedCommands = []
-	keepaliveTimeout = 60 * 1000
-	reconnectTimeout = 5 * 1000
+	isConnected = false
 	keepaliveSet = false
-	socket = {
-		connected: false,
-		ws: null,
-	}
+	keepaliveTimeout = 60 * 1000
+	queuedCommands = []
+	reconnectTimeout = 5 * 1000
 	subscribedAccounts = []
 	newTransactions$ = new BehaviorSubject(null)
+	websocket: WebSocket = null
 
 	forceReconnect () {
 		console.log('Reconnecting Websocket...')
-		if (this.socket.connected && this.socket.ws) {
+		if (this.isConnected && this.websocket) {
 			// Override the onclose event so it doesnt try to reconnect the old instance
-			this.socket.ws.onclose = event => {
-			}
-			this.socket.ws.close()
-			delete this.socket.ws
-			this.socket.connected = false
+			this.websocket.onclose = () => { }
+			this.websocket.close()
+			delete this.websocket
+			this.isConnected = false
 		}
 		setTimeout(() => this.connect(), 250)
 	}
 
 	connect () {
-		if (this.socket.connected && this.socket.ws) {
-			// Already connected
-			return
-		}
-		if (!this.appSettings.settings.serverWS) {
-			console.log('No Websocket server available.')
-			return
-		}
-		delete this.socket.ws // Maybe this will erase old connections
+		if (this.svcAppSettings.settings.serverWS && (!this.isConnected || !this.websocket)) {
+			// Try to erase old connections
+			delete this.websocket
+			this.websocket = new WebSocket(this.svcAppSettings.settings.serverWS)
 
-		const wsUrl = this.appSettings.settings.serverWS
-		const ws = new WebSocket(wsUrl)
-		this.socket.ws = ws
-
-		ws.onopen = event => {
-			this.socket.connected = true
-			this.queuedCommands.forEach(queueevent => ws.send(JSON.stringify(queueevent)))
-			// Resubscribe to accounts?
-			if (this.subscribedAccounts.length) {
-				this.subscribeAccounts(this.subscribedAccounts)
-			}
-			if (!this.keepaliveSet) {
-				this.keepalive() // Start keepalives!
-			}
-		}
-
-		ws.onerror = event => {
-			// this.socket.connected = false
-			console.log(`Socket error`, event)
-		}
-
-		ws.onclose = event => {
-			this.socket.connected = false
-			console.log(`Socket close`, event)
-			// Start attempting to recconect
-			setTimeout(() => this.attemptReconnect(), this.reconnectTimeout)
-		}
-
-		ws.onmessage = event => {
-			try {
-				const newEvent = JSON.parse(event.data)
-				console.log('WS', newEvent)
-				if (newEvent.topic === 'confirmation') {
-					this.newTransactions$.next(newEvent.message)
+			this.websocket.onopen = (event: Event) => {
+				console.log('Websocket opened', event)
+				this.isConnected = true
+				this.queuedCommands.forEach(queueevent => this.websocket.send(JSON.stringify(queueevent)))
+				// Resubscribe to accounts?
+				if (this.subscribedAccounts.length) {
+					this.subscribeAccounts(this.subscribedAccounts)
 				}
-			} catch (err) {
-				console.log(`Error parsing message`, err)
+				if (!this.keepaliveSet) {
+					// Start keepalives!
+					this.keepalive()
+				}
+			}
+			this.websocket.onerror = (event: Event) => {
+				console.log('Websocket error', event)
+				// this.socket.connected = false
+			}
+			this.websocket.onclose = (event: CloseEvent) => {
+				console.log('Websocket closed', event)
+				this.isConnected = false
+				// Start attempting to recconect
+				setTimeout(() => this.attemptReconnect(), this.reconnectTimeout)
+			}
+			this.websocket.onmessage = (event: MessageEvent<any>) => {
+				try {
+					const data = JSON.parse(event.data)
+					console.log('Websocket message', data)
+					const { topic, message } = data
+					if (topic === 'confirmation') {
+						this.newTransactions$.next(message)
+					}
+				} catch (err) {
+					console.warn('Error parsing Websocket message', err)
+				}
 			}
 		}
 	}
@@ -92,60 +81,51 @@ export class WebsocketService {
 
 	keepalive () {
 		this.keepaliveSet = true
-		if (this.socket.connected) {
-			this.socket.ws.send(JSON.stringify({ action: 'ping' }))
+		if (this.isConnected) {
+			this.websocket.send(JSON.stringify({ action: 'ping' }))
 		}
-
-		setTimeout(() => {
-			this.keepalive()
-		}, this.keepaliveTimeout)
+		setTimeout(() => this.keepalive(), this.keepaliveTimeout)
 	}
 
-	subscribeAccounts (accountIDs: string[]) {
+	subscribeAccounts (accounts: string[]) {
 		const event = {
 			action: 'subscribe',
 			topic: 'confirmation',
-			options: {
-				accounts: accountIDs
-			}
+			options: { accounts }
 		}
-
-		accountIDs.forEach(account => {
+		for (const account of accounts) {
 			if (this.subscribedAccounts.indexOf(account) === -1) {
 				// Keep a unique list of subscriptions for reconnecting
 				this.subscribedAccounts.push(account)
 			}
-		})
-		if (!this.socket.connected) {
+		}
+		if (this.isConnected) {
+			this.websocket.send(JSON.stringify(event))
+		} else {
 			this.queuedCommands.push(event)
 			if (this.queuedCommands.length >= 3) {
 				// Prune queued commands
 				this.queuedCommands.shift()
 			}
-			return
 		}
-		this.socket.ws.send(JSON.stringify(event))
 	}
 
-	unsubscribeAccounts (accountIDs: string[]) {
+	unsubscribeAccounts (accounts: string[]) {
 		const event = {
 			action: 'unsubscribe',
 			topic: 'confirmation',
-			options: {
-				accounts: accountIDs
-			}
+			options: { accounts }
 		}
-		accountIDs.forEach(account => {
+		for (const account of accounts) {
 			const existingIndex = this.subscribedAccounts.indexOf(account)
 			if (existingIndex !== -1) {
 				// Remove from our internal subscription list
 				this.subscribedAccounts.splice(existingIndex, 1)
 			}
-		})
-		// If we aren't connected, we don't need to do anything.  On reconnect, it won't subscribe.
-		if (this.socket.connected) {
-			this.socket.ws.send(JSON.stringify(event))
+		}
+		// If we aren't connected, we don't need to do anything. On reconnect, it won't subscribe.
+		if (this.isConnected) {
+			this.websocket.send(JSON.stringify(event))
 		}
 	}
-
 }
