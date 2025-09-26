@@ -236,7 +236,7 @@ export class NavigationComponent {
 			this.svcUtil.account.isValidAccount(searchData)
 
 		if (isValidNanoAccount === true) {
-			this.router.navigate(['account', searchData])
+			this.router.navigate(['accounts', searchData])
 			this.searchData = ''
 			return
 		}
