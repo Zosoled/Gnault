@@ -81,7 +81,7 @@ export class WalletService {
 	private svcWebsocket = inject(WebsocketService)
 	private svcWorkPool = inject(WorkPoolService)
 
-	selectedWallet: WritableSignal<Wallet> = signal(undefined)
+	selectedWallet: WritableSignal<Wallet> = signal(null)
 	wallets: Wallet[] = []
 	wallets$: BehaviorSubject<Wallet[]> = new BehaviorSubject([])
 	walletNames: Map<string, string> = new Map()
@@ -92,8 +92,7 @@ export class WalletService {
 	isBalanceInitialized = false
 
 	accounts: Account[] = []
-	selectedAccountAddress: string = null
-	selectedAccount: Account = null
+	selectedAccount: WritableSignal<Account> = signal(null)
 	selectedAccount$: BehaviorSubject<Account> = new BehaviorSubject(null)
 	isLocked = signal(true)
 	isLocked$ = new BehaviorSubject(true)
@@ -355,8 +354,6 @@ export class WalletService {
 			if (walletJson.accounts?.length > 0) {
 				walletJson.accounts.forEach((a) => this.loadWalletAccount(a))
 			}
-
-			this.selectedAccountAddress = walletJson.selectedAccountAddress
 		}
 	}
 
@@ -601,8 +598,7 @@ export class WalletService {
 		this.balance = 0n
 		this.receivable = 0n
 		this.hasReceivable = false
-		this.selectedAccountAddress = null
-		this.selectedAccount = null
+		this.selectedAccount.set(null)
 		this.selectedAccount$.next(null)
 		this.receivableBlocks = []
 	}
@@ -963,7 +959,7 @@ export class WalletService {
 			...walletData,
 			selectedWalletId: this.selectedWallet().id,
 			accounts: this.accounts.map((a) => a.toJSON()),
-			selectedAccountAddress: this.selectedAccount?.address,
+			selectedAccountAddress: this.selectedAccount().address,
 			locked: true,
 		}
 		return data

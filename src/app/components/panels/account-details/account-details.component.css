@@ -108,6 +108,10 @@
 	display: none;
 }
 
+.logo {
+	filter: hue-rotate(var(--accountColor, 0deg)) saturate(1) brightness(1);
+}
+
 .details-header {
 	text-transform: uppercase;
 	font-size: 13px;

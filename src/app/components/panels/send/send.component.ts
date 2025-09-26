@@ -114,8 +114,8 @@ export class SendComponent implements OnInit {
 		})
 
 		// Set the account selected in the sidebar as default
-		if (this.svcWallet.selectedAccount !== null) {
-			this.fromAccountID = this.svcWallet.selectedAccount.address
+		if (this.svcWallet.selectedAccount() !== null) {
+			this.fromAccountID = this.svcWallet.selectedAccount().address
 		} else {
 			// If "total balance" is selected in the sidebar, use the first account in the wallet that has a balance
 			this.findFirstAccount()

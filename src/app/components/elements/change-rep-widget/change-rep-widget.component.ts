@@ -68,7 +68,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 			this.updateDisplayedRepresentatives()
 		})
 
-		this.selectedAccount = this.svcWallet.selectedAccount
+		this.selectedAccount = this.svcWallet.selectedAccount()
 		this.updateSelectedAccountHasRep()
 		// calls walletReps$.next
 		await this.svcRepresentative.getRepresentativesOverview()

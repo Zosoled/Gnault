@@ -1,5 +1,5 @@
 import { CommonModule, DecimalPipe, formatDate } from '@angular/common'
-import { Component, inject, OnDestroy, OnInit } from '@angular/core'
+import { Component, computed, inject, OnDestroy, OnInit, signal, Signal, WritableSignal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, ChildActivationEnd, NavigationEnd, Router, RouterLink } from '@angular/router'
 import { translate, TranslocoPipe } from '@jsverse/transloco'
@@ -71,7 +71,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	repDonationAddress: any = ''
 
 	addressBookEntry: any = null
-	account: Account
+	account: WritableSignal<Account> = signal(null)
 	address: string
 
 	walletAccount = null
@@ -145,6 +145,12 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	get isConfigured () {
 		return this.svcWallet.isConfigured()
 	}
+
+	accountColor: Signal<number> = computed((): number => {
+		const pk = BigInt(`0x${this.account()?.publicKey ?? 0}`)
+		const mod = pk % 360n
+		return Number(mod)
+	})
 
 	constructor () {
 		const route = this.router
@@ -238,7 +244,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.addressBookModel = ''
 		this.showEditAddressBook = false
 		this.walletAccount = null
-		this.account = undefined
+		this.account.set(null)
 		this.qrCodeImage = null
 	}
 
@@ -264,11 +270,11 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	}
 
 	updateRepresentativeInfo () {
-		if (!this.account) {
+		if (!this.account()) {
 			return
 		}
 		const representativeFromOverview = this.representativesOverview.find(
-			(rep) => rep.account === this.account.representative
+			(rep) => rep.account === this.account().representative
 		)
 		if (representativeFromOverview != null) {
 			this.repLabel = representativeFromOverview.label
@@ -278,7 +284,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 		this.repVotingWeight = 0n
 		this.repDonationAddress = null
-		const knownRepresentative = this.svcRepresentative.getRepresentative(this.account.representative)
+		const knownRepresentative = this.svcRepresentative.getRepresentative(this.account().representative)
 		if (knownRepresentative != null) {
 			this.repLabel = knownRepresentative.name
 			return
@@ -433,23 +439,23 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.clearAccountVars()
 		this.loadingAccountDetails = true
 
-		const accountID = this.activatedRoute.snapshot.params.account
-		this.address = accountID
-		this.generateReceiveQR(accountID)
+		const address = this.activatedRoute.snapshot.params.account
+		this.address = address
+		this.generateReceiveQR(address)
 
-		this.addressBookEntry = this.svcAddressBook.getAccountName(accountID)
+		this.addressBookEntry = this.svcAddressBook.getAccountName(address)
 		this.addressBookModel = this.addressBookEntry || ''
-		this.walletAccount = this.svcWallet.getWalletAccount(accountID)
+		this.walletAccount = this.svcWallet.getWalletAccount(address)
 
-		this.account = await this.svcApi.accountInfo(accountID)
+		this.account.set(await this.svcApi.accountInfo(address))
 
-		if (accountID !== this.address) {
+		if (address !== this.address) {
 			// Navigated to a different account while account info was loading
 			this.onAccountDetailsLoadDone()
 			return
 		}
 
-		if (!this.account) {
+		if (!this.account()) {
 			this.loadingAccountDetails = false
 			this.onAccountDetailsLoadDone()
 			return
@@ -458,7 +464,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.updateRepresentativeInfo()
 
 		// If there is a receivable balance, or the account is not opened yet, load receivable transactions
-		if ((!this.account.error && this.account.receivable > 0) || this.account.error) {
+		if ((!this.account().error && this.account().receivable > 0) || this.account().error) {
 			// Take minimum receive into account
 			let receivableBalance = '0'
 			let receivable
@@ -467,13 +473,13 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			this.loadingIncomingTxList = true
 
 			if (this.svcAppSettings.settings.minimumReceive) {
-				const minAmount = await Tools.convert(this.svcAppSettings.settings.minimumReceive, 'mnano', 'raw')
-				receivable = await this.svcApi.receivableLimitSorted(accountID, 50, minAmount)
+				const minAmount = await Tools.convert(this.svcAppSettings.settings.minimumReceive, 'nano', 'raw')
+				receivable = await this.svcApi.receivableLimitSorted(address, 50, minAmount)
 			} else {
-				receivable = await this.svcApi.receivableSorted(accountID, 50)
+				receivable = await this.svcApi.receivableSorted(address, 50)
 			}
 
-			if (accountID !== this.address) {
+			if (address !== this.address) {
 				// Navigated to a different account while incoming tx were loading
 				this.onAccountDetailsLoadDone()
 				return
@@ -508,24 +514,24 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 				}
 			}
 
-			this.account.receivable = receivableBalance
+			this.account().receivable = receivableBalance
 		} else {
 			// Unset variable that may still be set to true from old request
 			this.loadingIncomingTxList = false
 		}
 
 		// If the account doesnt exist, set the receivable balance manually
-		if (this.account.error) {
+		if (this.account().error) {
 			const receivableRaw = this.receivableBlocks.reduce(
 				(prev: bigint, current: any) => prev + BigInt(current.amount),
 				0n
 			)
-			this.account.receivable = receivableRaw
+			this.account().receivable = receivableRaw
 		}
 
-		await this.getAccountHistory(accountID)
+		await this.getAccountHistory(address)
 
-		if (accountID !== this.address) {
+		if (address !== this.address) {
 			// Navigated to a different account while account history was loading
 			this.onAccountDetailsLoadDone()
 			return
@@ -585,7 +591,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 
 		const additionalBlocksInfo = []
-		const accountConfirmationHeight = parseInt(this.account?.confirmation_height, 10) || null
+		const accountConfirmationHeight = parseInt(this.account()?.confirmation_height, 10) || null
 
 		if (Array.isArray(history?.history)) {
 			this.accountHistory = history.history.map((h) => {
@@ -849,8 +855,8 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	}
 
 	async setMaxAmount () {
-		this.amountRaw = BigInt(this.account?.balance || 0n)
-		this.amount = parseFloat(Tools.convert(this.account?.balance, 'raw', 'nano')).toFixed(6)
+		this.amountRaw = BigInt(this.account()?.balance || 0n)
+		this.amount = parseFloat(Tools.convert(this.account()?.balance, 'raw', 'nano')).toFixed(6)
 		this.syncFiatPrice()
 	}
 
@@ -873,10 +879,11 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		const sourceBlock = receivableBlock.hash
 
 		if (this.svcWallet.isLocked()) {
-			const wasUnlocked = await this.svcWallet.requestUnlock()
-
-			if (wasUnlocked === false) {
-				return
+			try {
+				await this.svcWallet.requestUnlock()
+			} catch (err) {
+				console.error(err)
+				this.svcNotifications.sendError('Failed to unlock and receive', { identifier: 'receive-unlock-fail' })
 			}
 		}
 

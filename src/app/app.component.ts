@@ -108,7 +108,7 @@ export class AppComponent implements AfterViewInit {
 		return this.svcWallet.receivable
 	}
 	get selectedAccount () {
-		return this.svcWallet.selectedAccount
+		return this.svcWallet.selectedAccount()
 	}
 	get selectedWallet () {
 		return this.svcWallet.selectedWallet()
@@ -157,8 +157,8 @@ export class AppComponent implements AfterViewInit {
 			this.isConfigured &&
 			(window.location.pathname === '/' || window.location.pathname.endsWith('index.html'))
 		) {
-			if (this.svcWallet.selectedAccountAddress) {
-				this.router.navigate([`accounts/${this.svcWallet.selectedAccountAddress}`], {
+			if (this.svcWallet.selectedAccount()?.address) {
+				this.router.navigate([`accounts/${this.svcWallet.selectedAccount().address}`], {
 					queryParams: { compact: 1 },
 					replaceUrl: true,
 				})
@@ -168,9 +168,9 @@ export class AppComponent implements AfterViewInit {
 		}
 
 		// update selected account object with the latest balance, receivable, etc
-		if (this.svcWallet.selectedAccountAddress) {
-			const currentUpdatedAccount = this.svcWallet.accounts.find((a) => a.address === this.svcWallet.selectedAccountAddress)
-			this.svcWallet.selectedAccount = currentUpdatedAccount
+		if (this.svcWallet.selectedAccount()?.address) {
+			const currentUpdatedAccount = this.svcWallet.accounts.find((a) => a.address === this.svcWallet.selectedAccount().address)
+			this.svcWallet.selectedAccount.set(currentUpdatedAccount)
 		}
 
 		await this.svcWallet.reloadBalances()

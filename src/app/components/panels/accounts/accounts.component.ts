@@ -132,8 +132,7 @@ export class AccountsComponent implements OnInit {
 
 		// why only small screen sizes?
 		if (window.innerWidth < 940) {
-			this.svcWallet.selectedAccountAddress = account.address
-			this.svcWallet.selectedAccount = account
+			this.svcWallet.selectedAccount.set(account)
 			this.svcWallet.selectedAccount$.next(account)
 			this.svcWallet.saveWalletExport()
 		}

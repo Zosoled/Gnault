@@ -8,7 +8,10 @@
 	>
 		@if (walletAccount && showFullDetailsOnSmallViewports === false) {
 			<div class="nano-card is-card">
-				<div class="logo"></div>
+				<div
+					class="logo"
+					[style.--accountColor.deg]="accountColor()"
+				></div>
 				<div class="card-contents">
 					<div class="account-name-container">
 						<div class="name">
@@ -30,10 +33,10 @@
 								<div class="currency-name">XNO</div>
 								<div class="amount-container">
 									<div class="amount-integer">
-										{{ !account ? 0 : (account.balance || 0 | rai: 'mnano,true' | amountsplit: 0) }}
+										{{ !account() ? 0 : (account().balance || 0 | rai: 'mnano,true' | amountsplit: 0) }}
 									</div>
 									<div class="amount-fractional">
-										{{ !account ? 0 : (account.balance || 0 | rai: 'mnano,true' | amountsplit: 1) }}
+										{{ !account() ? 0 : (account().balance || 0 | rai: 'mnano,true' | amountsplit: 1) }}
 									</div>
 									@if (isBalanceUpdating && isConfigured) {
 										<div class="amount-updating">
@@ -49,10 +52,10 @@
 									</div>
 									<div class="amount-container">
 										<div class="amount-integer">
-											{{ account.balance ?? 0 | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 0 }}
+											{{ account().balance ?? 0 | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 0 }}
 										</div>
 										<div class="amount-fractional">
-											{{ account.balance ?? 0 | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 1 }}
+											{{ account().balance ?? 0 | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 1 }}
 										</div>
 									</div>
 								</div>
@@ -219,11 +222,11 @@
 							<div class="details-header">{{ 'general.representative' | transloco }}</div>
 							@if (!loadingAccountDetails) {
 								<div>
-									@if (account && account.representative) {
+									@if (account()?.representative) {
 										<div class="uk-width-auto uk-text-truncate">
 											<div class="representative-label-container">
 												<div class="account-label rep">{{ repLabel ? repLabel : ('general.unknown' | transloco) }}</div>
-												@if (account && account.representative) {
+												@if (account()?.representative) {
 													<div
 														class="uk-width-auto uk-flex-inline uk-flex-middle"
 														style="padding-left: 10px"
@@ -266,10 +269,10 @@
 											</div>
 											<div
 												class="nano-address-monospace"
-												[title]="account.representative"
+												[title]="account().representative"
 											>
 												<app-nano-account-id
-													[address]="account.representative.address"
+													[address]="account().representative.address"
 													middle="off"
 												></app-nano-account-id>
 											</div>
@@ -299,38 +302,30 @@
 									<div class="account-amounts-primary">
 										<div
 											class="account-amounts-primary-confirmed"
-											[title]="
-												account && account.balanceRaw && account.balanceRaw > 0
-													? '+' + account.balanceRaw.toString(10) + ' raw'
-													: ''
-											"
+											[title]="account()?.balanceRaw > 0 ? '+' + account().balanceRaw.toString(10) + ' raw' : ''"
 										>
 											<span class="amount-currency-symbol xno-symbol"></span>
 											<span class="amount-integer">{{
-												account?.balance ?? 0 | rai: 'nano,true' | amountsplit: 0
+												account()?.balance ?? 0 | rai: 'nano,true' | amountsplit: 0
 											}}</span>
 											<span class="amount-fractional">{{
-												account?.balance ?? 0 | rai: 'nano,true' | amountsplit: 1
+												account()?.balance ?? 0 | rai: 'nano,true' | amountsplit: 1
 											}}</span>
 										</div>
-										@if (account && account.receivable && account.receivable > 0) {
+										@if (account()?.receivable > 0) {
 											<div
 												class="incoming-label"
-												[title]="
-													account && account.receivableRaw && account.receivableRaw > 0
-														? '+' + account.receivableRaw.toString(10) + ' raw'
-														: ''
-												"
+												[title]="account().receivableRaw > 0 ? '+' + account().receivableRaw.toString(10) + ' raw' : ''"
 											>
 												<div class="text-snippet">{{ 'general.new' | transloco }}</div>
 												<div class="text-full">
 													<div class="amount-sign">+</div>
 													<div class="amount-currency-symbol xno-symbol"></div>
 													<div class="amount-integer">
-														{{ account.receivable | rai: 'mnano,true' | amountsplit: 0 }}
+														{{ account().receivable | rai: 'mnano,true' | amountsplit: 0 }}
 													</div>
 													<div class="amount-fractional">
-														{{ account.receivable | rai: 'mnano,true' | amountsplit: 1 }}
+														{{ account().receivable | rai: 'mnano,true' | amountsplit: 1 }}
 													</div>
 												</div>
 											</div>
@@ -339,7 +334,7 @@
 								</div>
 								<div class="account-amounts-converted text-half-muted">
 									@if (account) {
-										{{ account.balance ?? 0 | fiat: svcAppSettings.settings.displayCurrency }}
+										{{ account().balance ?? 0 | fiat: svcAppSettings.settings.displayCurrency }}
 									}
 								</div>
 							} @else {
@@ -365,13 +360,15 @@
 					</div>
 					@if (showAdvancedOptions) {
 						<div class="advanced-options">
-							@if (account.confirmation_height != null && account.block_count != null && account.block_count > 0) {
+							@if (
+								account().confirmation_height != null && account().block_count != null && account().block_count > 0
+							) {
 								<div class="advanced-option">
 									<div>
 										<div>{{ 'account-details.confirmed-blocks' | transloco }}:</div>
-										<div>{{ account.confirmation_height | number }} / {{ account.block_count | number }}</div>
+										<div>{{ account().confirmation_height | number }} / {{ account().block_count | number }}</div>
 										<div class="uk-text-small text-half-muted">
-											{{ (account.confirmation_height / account.block_count) * 100 | number: '1.0-2' }}%
+											{{ (account().confirmation_height / account().block_count) * 100 | number: '1.0-2' }}%
 										</div>
 									</div>
 								</div>

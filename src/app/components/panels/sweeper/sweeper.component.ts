@@ -91,8 +91,8 @@ export class SweeperComponent implements OnInit {
 		})
 
 		// Set the account selected in the sidebar as default
-		if (this.walletService.selectedAccount !== null) {
-			this.myAccountModel = this.walletService.selectedAccount.address
+		if (this.walletService.selectedAccount() !== null) {
+			this.myAccountModel = this.walletService.selectedAccount().address
 		}
 	}
 

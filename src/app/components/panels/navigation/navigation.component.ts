@@ -1,5 +1,16 @@
 import { AsyncPipe } from '@angular/common'
-import { Component, ElementRef, EventEmitter, HostListener, Output, Renderer2, ViewChild, inject } from '@angular/core'
+import {
+	Component,
+	ElementRef,
+	EventEmitter,
+	HostListener,
+	Output,
+	Renderer2,
+	Signal,
+	ViewChild,
+	computed,
+	inject
+} from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
 import { SwUpdate } from '@angular/service-worker'
@@ -70,7 +81,6 @@ export class NavigationComponent {
 	@ViewChild('selectButton') selectButton: ElementRef
 	@ViewChild('walletsDropdown') walletsDropdown: ElementRef
 
-
 	canToggleLightMode = true
 	donationAccount = environment.donationAddress
 	isWalletsDropdownVisible = false
@@ -121,7 +131,7 @@ export class NavigationComponent {
 		return this.svcAppSettings.settings.receivableOption
 	}
 	get selectedAccount () {
-		return this.svcWallet.selectedAccount
+		return this.svcWallet.selectedAccount()
 	}
 	get selectedWallet () {
 		return this.svcWallet.selectedWallet()
@@ -138,6 +148,12 @@ export class NavigationComponent {
 	get wallets$ () {
 		return this.svcWallet.wallets$
 	}
+
+	selectedAccountColor: Signal<number> = computed((): number => {
+		const pk = BigInt(`0x${this.selectedAccount?.publicKey ?? 0}`)
+		const mod = pk % 360n
+		return Number(mod)
+	})
 
 	constructor () {
 		this.router.events.subscribe(() => {

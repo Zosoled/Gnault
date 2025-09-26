@@ -147,7 +147,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 
 		if (this.svcWallet.selectedAccount !== null) {
 			// Set the account selected in the sidebar as default
-			this.receivableAccountModel = this.svcWallet.selectedAccount.address
+			this.receivableAccountModel = this.svcWallet.selectedAccount().address
 			this.onSelectedAccountChange(this.receivableAccountModel)
 		} else if (this.accounts.length === 1) {
 			// Auto-select account if it is the only account in the wallet

@@ -1,4 +1,5 @@
 :host {
+	--pk: 0;
 	padding-left: 0;
 }
 
@@ -15,4 +16,8 @@
 
 .footer-link:hover {
 	opacity: 1;
+}
+
+.logo {
+	filter: hue-rotate(var(--selectedAccountColor, 0deg)) saturate(1) brightness(1);
 }
