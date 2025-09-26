@@ -577,7 +577,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.dateStringYesterday = formatDate(unixTimeNow - 86400000, 'MMM d, y', 'en-US')
 	}
 
-	async getAccountHistory (accountID, resetPage = true) {
+	async getAccountHistory (address: string, resetPage: boolean = true): Promise<void> {
 		if (resetPage) {
 			this.accountHistory = []
 			this.pageSize = 25
@@ -586,81 +586,83 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.loadingTxList = true
 		this.updateTodayYesterdayDateStrings()
 
-		const history = await this.svcApi.accountHistory(accountID, this.pageSize, true)
+		const accountHistory = await this.svcApi.accountHistory(address, this.pageSize, true)
 
-		if (accountID !== this.address) {
-			// Navigated to a different account while account history was loading
+		// Navigated to a different account while account history was loading
+		if (address !== this.address) {
 			return
 		}
+
+		// No response from RPC
+		if (!accountHistory?.history) {
+			this.accountHistory = []
+			return
+		}
+		const { history } = accountHistory
 
 		const additionalBlocksInfo = []
 		const accountConfirmationHeight = parseInt(this.account()?.confirmation_height, 10) || null
 
-		if (Array.isArray(history?.history)) {
-			this.accountHistory = history.history.map((h) => {
-				h.local_date_string = h.local_timestamp ? formatDate(h.local_timestamp * 1000, 'MMM d, y', 'en-US') : 'N/A'
-				h.local_time_string = h.local_timestamp ? formatDate(h.local_timestamp * 1000, 'HH:mm:ss', 'en-US') : ''
+		for (const h of history) {
+			h.local_date_string = h.local_timestamp ? formatDate(h.local_timestamp * 1000, 'MMM d, y', 'en-US') : 'N/A'
+			h.local_time_string = h.local_timestamp ? formatDate(h.local_timestamp * 1000, 'HH:mm:ss', 'en-US') : ''
 
-				if (h.type === 'state') {
-					if (h.subtype === 'open' || h.subtype === 'receive') {
-						// Look up block info to get sender account
-						additionalBlocksInfo.push({ hash: h.hash, link: h.link })
+			if (h.type === 'state') {
+				if (h.subtype === 'open' || h.subtype === 'receive') {
+					// Look up block info to get sender account
+					additionalBlocksInfo.push({ hash: h.hash, link: h.link })
 
-						// Remove a receivable block if this is a receive for it
-						const sourceHashToFind = h.link
+					// Remove a receivable block if this is a receive for it
+					const sourceHashToFind = h.link
 
-						this.receivableBlocks = this.receivableBlocks.filter((knownReceivableBlock) => {
-							knownReceivableBlock.hash !== sourceHashToFind
-						})
-					} else if (h.subtype === 'change') {
-						h.link_as_account = h.representative
-						h.addressBookName =
-							this.svcAddressBook.getAccountName(h.link_as_account) || this.getAccountLabel(h.link_as_account, null)
-					} else {
-						h.link_as_account = Account.load(h.link).address
-						h.addressBookName =
-							this.svcAddressBook.getAccountName(h.link_as_account) || this.getAccountLabel(h.link_as_account, null)
-					}
+					this.receivableBlocks = this.receivableBlocks.filter((knownReceivableBlock) => {
+						knownReceivableBlock.hash !== sourceHashToFind
+					})
+				} else if (h.subtype === 'change') {
+					h.link_as_account = h.representative
+					h.addressBookName =
+						this.svcAddressBook.getAccountName(h.link_as_account) || this.getAccountLabel(h.link_as_account, null)
 				} else {
-					h.addressBookName = this.svcAddressBook.getAccountName(h.account) || this.getAccountLabel(h.account, null)
+					h.link_as_account = Account.load(h.link).address
+					h.addressBookName =
+						this.svcAddressBook.getAccountName(h.link_as_account) || this.getAccountLabel(h.link_as_account, null)
 				}
-				h.confirmed = parseInt(h.height, 10) <= accountConfirmationHeight
-				return h
-			})
-
-			// Currently not supporting non-state rep change or state epoch blocks
-			this.accountHistory = this.accountHistory.filter((h) => {
-				return h.type !== 'change' && h.subtype !== 'epoch'
-			})
-
-			if (additionalBlocksInfo.length) {
-				const blocksInfo = await this.svcApi.blocksInfo(additionalBlocksInfo.map((b) => b.link))
-
-				if (accountID !== this.address) {
-					// Navigated to a different account while block info was loading
-					return
-				}
-
-				for (const block in blocksInfo.blocks) {
-					if (!blocksInfo.blocks.hasOwnProperty(block)) continue
-
-					const matchingBlock = additionalBlocksInfo.find((a) => a.link === block)
-					if (!matchingBlock) continue
-					const accountHistoryBlock = this.accountHistory.find((h) => h.hash === matchingBlock.hash)
-					if (!accountHistoryBlock) continue
-
-					const blockData = blocksInfo.blocks[block]
-
-					accountHistoryBlock.link_as_account = blockData.block_account
-					accountHistoryBlock.addressBookName =
-						this.svcAddressBook.getAccountName(blockData.block_account) ||
-						this.getAccountLabel(blockData.block_account, null)
-				}
+			} else {
+				h.addressBookName = this.svcAddressBook.getAccountName(h.account) || this.getAccountLabel(h.account, null)
 			}
-		} else {
-			this.accountHistory = []
+			h.confirmed = parseInt(h.height, 10) <= accountConfirmationHeight
+			this.accountHistory.push(h)
 		}
 
+		// Currently not supporting non-state rep change or state epoch blocks
+		this.accountHistory = this.accountHistory.filter((h) => {
+			return h.type !== 'change' && h.subtype !== 'epoch'
+		})
+
+		if (additionalBlocksInfo.length) {
+			const blocksInfo = await this.svcApi.blocksInfo(additionalBlocksInfo.map((b) => b.link))
+
+			if (address !== this.address) {
+				// Navigated to a different account while block info was loading
+				return
+			}
+
+			for (const block in blocksInfo.blocks) {
+				if (!blocksInfo.blocks.hasOwnProperty(block)) continue
+
+				const matchingBlock = additionalBlocksInfo.find((a) => a.link === block)
+				if (!matchingBlock) continue
+				const accountHistoryBlock = this.accountHistory.find((h) => h.hash === matchingBlock.hash)
+				if (!accountHistoryBlock) continue
+
+				const blockData = blocksInfo.blocks[block]
+
+				accountHistoryBlock.link_as_account = blockData.block_account
+				accountHistoryBlock.addressBookName =
+					this.svcAddressBook.getAccountName(blockData.block_account) ||
+					this.getAccountLabel(blockData.block_account, null)
+			}
+		}
 		this.loadingTxList = false
 	}
 
