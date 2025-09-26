@@ -448,7 +448,6 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.walletAccount = this.svcWallet.getWalletAccount(address)
 
 		const accountInfo = await this.svcApi.accountInfo(address)
-		debugger
 
 		// Navigated to a different account while account info was loading
 		if (address !== this.address) {
