@@ -385,7 +385,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		let hasShownErrorNotification = false
 
 		try {
-			createdReceiveBlockHash = await this.svcNanoBlock.generateReceive(walletAccount, sourceBlock, this.svcWallet.isLedger)
+			createdReceiveBlockHash = await this.svcNanoBlock.generateReceive(this.svcWallet.selectedWallet(), walletAccount, sourceBlock, this.svcWallet.isLedger())
 		} catch (err) {
 			this.svcNotifications.sendError('Error receiving transaction: ' + err.message)
 			hasShownErrorNotification = true

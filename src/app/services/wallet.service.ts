@@ -896,7 +896,7 @@ export class WalletService {
 			return // Dispose of the block, no matching account
 		}
 
-		const newHash = await this.svcNanoBlock.generateReceive(walletAccount, nextBlock.hash, this.isLedger)
+		const newHash = await this.svcNanoBlock.generateReceive(this.selectedWallet(), walletAccount, nextBlock.hash, this.isLedger())
 		if (newHash) {
 			if (this.successfulBlocks.length >= 15) this.successfulBlocks.shift()
 			this.successfulBlocks.push(nextBlock.hash)

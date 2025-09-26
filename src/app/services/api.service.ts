@@ -1,35 +1,39 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http'
-import { Injectable, inject } from '@angular/core'
+import { Injectable, WritableSignal, inject, signal } from '@angular/core'
 import { AppSettingsService, NodeService, TxType } from 'app/services'
+import { Rpc } from 'libnemo'
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
 	private http = inject(HttpClient)
-	private appSettings = inject(AppSettingsService)
-	private node = inject(NodeService)
+	private svcAppSettings = inject(AppSettingsService)
+	private svcNode = inject(NodeService)
 
+	rpc: WritableSignal<Rpc> = signal(null)
 	storeKey: 'Gnault-ActiveDifficulty' = 'Gnault-ActiveDifficulty'
+
 	private async request (action, data, skipError, url = '', validateResponse?, attempts = 0): Promise<any> {
 		if (attempts > 9) {
 			throw new Error('No response from repeated requests to server')
 		}
 		data.action = action
-		const apiUrl = url || this.appSettings.settings.serverAPI
+		const apiUrl = url || this.svcAppSettings.settings.serverAPI
 		if (!apiUrl) {
-			this.node.setOffline(null) // offline mode
+			this.svcNode.setOffline(null) // offline mode
 			return
 		}
-		if (this.node.node.status === false) {
+
+		if (this.svcNode.node.status === false) {
 			if (!skipError) {
-				this.node.setLoading()
+				this.svcNode.setLoading()
 			}
 		}
 		let options: any = {
 			responseType: 'json',
 		}
-		if (this.appSettings.settings.serverAuth != null && this.appSettings.settings.serverAuth !== '') {
+		if (this.svcAppSettings.settings.serverAuth != null && this.svcAppSettings.settings.serverAuth !== '') {
 			options = Object.assign({}, options, {
-				headers: new HttpHeaders().set('Authorization', this.appSettings.settings.serverAuth),
+				headers: new HttpHeaders().set('Authorization', this.svcAppSettings.settings.serverAuth),
 			})
 		}
 
@@ -50,7 +54,7 @@ export class ApiService {
 						}
 					}
 				}
-				this.node.setOnline()
+				this.svcNode.setOnline()
 				return res
 			})
 			.catch(async (err) => {
@@ -62,17 +66,17 @@ export class ApiService {
 					console.log('Node responded with error', err.status)
 				}
 
-				if (this.appSettings.settings.serverName === 'random') {
+				if (this.svcAppSettings.settings.serverName === 'random') {
 					// choose a new backend and do the request again
-					this.appSettings.loadServerSettings()
+					this.svcAppSettings.loadServerSettings()
 					await this.sleep(1000) // delay if all servers are down
 					return this.request(action, data, skipError, '', validateResponse, attempts + 1)
 				} else {
 					// hard exit
 					if (err.status === 429) {
-						this.node.setOffline('Too Many Requests to the node. Try again later or choose a different node.')
+						this.svcNode.setOffline('Too Many Requests to the node. Try again later or choose a different node.')
 					} else {
-						this.node.setOffline()
+						this.svcNode.setOffline()
 					}
 					throw err
 				}
@@ -82,9 +86,11 @@ export class ApiService {
 	async accountsBalances (accounts: string[]): Promise<{ balances: any }> {
 		return await this.request('accounts_balances', { accounts }, false)
 	}
+
 	async accountsFrontiers (accounts: string[]): Promise<{ frontiers: { [address: string]: string } }> {
 		return await this.request('accounts_frontiers', { accounts }, false)
 	}
+
 	async accountsReceivable (accounts: string[], count: number = 50): Promise<{ blocks: any }> {
 		const data = { accounts, count, source: true, include_only_confirmed: true }
 		let response
@@ -95,6 +101,7 @@ export class ApiService {
 		}
 		return response
 	}
+
 	async accountsReceivableLimit (accounts: string[], threshold: string, count: number = 50): Promise<{ blocks: any }> {
 		const data = { accounts, count, threshold, source: true, include_only_confirmed: true }
 		try {
@@ -103,6 +110,7 @@ export class ApiService {
 			return await this.request('accounts_receivable', data, false)
 		}
 	}
+
 	async accountsReceivableSorted (accounts: string[], count: number = 50): Promise<{ blocks: any }> {
 		const data = { accounts, count, source: true, include_only_confirmed: true, sorting: true }
 		let response
@@ -113,6 +121,7 @@ export class ApiService {
 		}
 		return response
 	}
+
 	async accountsReceivableLimitSorted (
 		accounts: string[],
 		threshold: string,
@@ -127,22 +136,100 @@ export class ApiService {
 		}
 		return response
 	}
+
 	async delegatorsCount (account: string): Promise<{ count: string }> {
 		return await this.request('delegators_count', { account }, false)
 	}
+
 	async representativesOnline (): Promise<{ representatives: any }> {
 		return await this.request('representatives_online', {}, false)
 	}
 
-	async blocksInfo (blocks): Promise<{ blocks: any; error?: string }> {
-		return await this.request('blocks_info', { hashes: blocks, receivable: true, source: true }, false)
+	/**
+	 * Reports the number of blocks in the ledger.
+	 * @see https://docs.nano.org/commands/rpc-protocol/#block_count
+	 */
+	async blockCount (): Promise<{
+		count: number
+		unchecked: number
+		cemented: number
+	}> {
+		return await this.request('block_count', { include_cemented: true }, false)
 	}
-	async blockInfo (hash): Promise<any> {
-		return await this.request('block_info', { hash: hash }, false)
+
+	/**
+	 * Retrieves a JSON representation of the block.
+	 * @see https://docs.nano.org/commands/rpc-protocol/#block_info
+	 */
+	async blockInfo (hash: string): Promise<{
+		error?: string
+		block_account: string
+		amount: string
+		balance: string
+		height: number
+		local_timestamp: string
+		successor: string
+		confirmed: boolean
+		subtype: string
+		linked_account: string
+		contents: {
+			type: string
+			account: string
+			previous: string
+			representative: string
+			balance: string
+			link: string
+			link_as_account: string
+			signature: string
+			work: string
+		}
+	}> {
+		return await this.request(
+			'block_info',
+			{ hash, json_block: true, include_linked_account: true },
+			false
+		)
 	}
-	async blockCount (): Promise<{ count: number; unchecked: number; cemented: number }> {
-		return await this.request('block_count', { include_cemented: 'true' }, false)
+
+	/**
+	 * Retrieves a JSON representation of blocks.
+	 * @see https://docs.nano.org/commands/rpc-protocol/#blocks_info
+	 */
+	async blocksInfo (hashes: string[]): Promise<{
+		blocks_not_found?: string[]
+		blocks: {
+			[hash: string]: {
+				block_account: string
+				amount: string
+				balance: string
+				height: number
+				local_timestamp: string
+				successor: string
+				confirmed: boolean
+				subtype: string
+				linked_account: string
+				receive_hash: string
+				contents: {
+					type: string
+					account: string
+					previous: string
+					representative: string
+					balance: string
+					link: string
+					link_as_account: string
+					signature: string
+					work: string
+				}
+			}
+		}
+	}> {
+		return await this.request(
+			'blocks_info',
+			{ hashes, receivable: true, source: true, include_not_found: true, json_block: true, receive_hash: true, include_linked_account: true },
+			false
+		)
 	}
+
 	async workGenerate (hash, difficulty, workServer = ''): Promise<{ work: string }> {
 		const validateResponse = (res) => {
 			if (res.work == null) {
@@ -187,9 +274,20 @@ export class ApiService {
 			return await this.request('account_history', { account, count, raw, offset, reverse }, false)
 		}
 	}
-	async accountInfo (account): Promise<any> {
-		return await this.request('account_info', { account, receivable: true, representative: true, weight: true }, false)
+
+	/**
+	 * Returns info for account.
+	 * @param account
+	 * @see https://docs.nano.org/commands/rpc-protocol/#account_info
+	 */
+	async accountInfo (account: string): Promise<any> {
+		return await this.request(
+			'account_info',
+			{ account, receivable: true, representative: true, weight: true },
+			false
+		)
 	}
+
 	async receivable (account, count): Promise<any> {
 		return await this.request('receivable', { account, count, source: true, include_only_confirmed: true }, false)
 	}

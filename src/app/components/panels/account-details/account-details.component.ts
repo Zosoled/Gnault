@@ -62,7 +62,18 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	zeroHash = '0000000000000000000000000000000000000000000000000000000000000000'
 
 	accountHistory: any[] = []
-	receivableBlocks = []
+	receivableBlocks: {
+		account: any
+		amount: any
+		local_timestamp: any
+		local_date_string: any
+		local_time_string: any
+		addressBookName: string
+		hash: any
+		loading: boolean
+		received: boolean
+		isReceivable: boolean
+	}[] = []
 	pageSize = 25
 	maxPageSize = 200
 
@@ -74,7 +85,8 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	account: WritableSignal<Account> = signal(null)
 	address: string
 
-	walletAccount = null
+	walletAccount: WritableSignal<Account> = signal(null)
+	get walletAccountIndex () { return this.walletAccount()?.index ?? '' }
 
 	timeoutIdAllowingManualRefresh: any = null
 	timeoutIdAllowingInstantAutoRefresh: any = null
@@ -244,7 +256,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.addressBookEntry = null
 		this.addressBookModel = ''
 		this.showEditAddressBook = false
-		this.walletAccount = null
+		this.walletAccount.set(null)
 		this.account.set(null)
 		this.qrCodeImage = null
 	}
@@ -445,7 +457,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 
 		this.addressBookEntry = this.svcAddressBook.getAccountName(address)
 		this.addressBookModel = this.addressBookEntry || ''
-		this.walletAccount = this.svcWallet.getWalletAccount(address)
+		this.walletAccount.set(this.svcWallet.getWalletAccount(address))
 
 		const accountInfo = await this.svcApi.accountInfo(address)
 
@@ -880,7 +892,19 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.receiveReceivableBlock(receivableTransaction)
 	}
 
-	async receiveReceivableBlock (receivableBlock) {
+	async receiveReceivableBlock (receivableBlock: {
+		account: any
+		amount: any
+		local_timestamp: any
+		local_date_string: any
+		local_time_string: any
+		addressBookName: string
+		hash: any
+		loading: boolean
+		received: boolean
+		isReceivable: boolean
+	}) {
+		debugger
 		const sourceBlock = receivableBlock.hash
 
 		if (this.svcWallet.isLocked()) {
@@ -897,11 +921,24 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		let createdReceiveBlockHash = null
 		let hasShownErrorNotification = false
 
+		const walletAccount = this.walletAccount()
+		try {
+			await walletAccount.refresh(this.svcAppSettings.settings.serverAPI)
+		} catch (err) {
+			if (err.message !== 'Account not found') {
+				throw new Error('Error refreshing account', { cause: err })
+			}
+		}
+		walletAccount.balance ??= 0
+		walletAccount.frontier ??= ''.padStart(64, '0')
+		walletAccount.representative ??= this.svcAppSettings.settings.defaultRepresentative || this.svcNanoBlock.getRandomRepresentative()
+		const receiveBlock = new Block(walletAccount).receive(sourceBlock, receivableBlock.amount)
 		try {
 			createdReceiveBlockHash = await this.svcNanoBlock.generateReceive(
-				this.walletAccount,
+				this.svcWallet.selectedWallet(),
+				this.walletAccount(),
 				sourceBlock,
-				this.svcWallet.isLedger
+				this.svcWallet.isLedger()
 			)
 		} catch (err) {
 			this.svcNotifications.sendError('Error receiving transaction: ' + err.message)
@@ -973,16 +1010,16 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		console.log('Block hash: ' + this.blockHash)
 
 		// Previous block info
-		const previousBlockInfo = await this.svcApi.blockInfo(block.previous)
+		const previousBlockInfo = await this.svcApi.blockInfo(from.frontier)
 		if (!('contents' in previousBlockInfo)) return this.svcNotifications.sendError(`Previous block not found`)
-		const jsonBlock = JSON.parse(previousBlockInfo.contents)
+		const { contents } = previousBlockInfo
 		const blockDataPrevious = {
-			account: jsonBlock.account.replace('xrb_', 'nano_').toLowerCase(),
-			previous: jsonBlock.previous,
-			representative: jsonBlock.representative,
-			balance: jsonBlock.balance,
-			link: jsonBlock.link,
-			signature: jsonBlock.signature,
+			account: contents.account.replace('xrb_', 'nano_').toLowerCase(),
+			previous: contents.previous,
+			representative: contents.representative,
+			balance: contents.balance,
+			link: contents.link,
+			signature: contents.signature,
 		}
 
 		// Nano signing standard
@@ -1026,16 +1063,16 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		// Previous block info
 		let blockDataPrevious = null
 		if (!openEquiv) {
-			const previousBlockInfo = await this.svcApi.blockInfo(block.previous)
+			const previousBlockInfo = await this.svcApi.blockInfo(previousBlock)
 			if (!('contents' in previousBlockInfo)) return this.svcNotifications.sendError(`Previous block not found`)
-			const jsonBlock = JSON.parse(previousBlockInfo.contents)
+			const { contents } = previousBlockInfo
 			blockDataPrevious = {
-				account: jsonBlock.account.replace('xrb_', 'nano_').toLowerCase(),
-				previous: jsonBlock.previous,
-				representative: jsonBlock.representative,
-				balance: jsonBlock.balance,
-				link: jsonBlock.link,
-				signature: jsonBlock.signature,
+				account: contents.account.replace('xrb_', 'nano_').toLowerCase(),
+				previous: contents.previous,
+				representative: contents.representative,
+				balance: contents.balance,
+				link: contents.link,
+				signature: contents.signature,
 			}
 		}
 
@@ -1080,16 +1117,16 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		console.log('Block hash: ' + this.blockHash)
 
 		// Previous block info
-		const previousBlockInfo = await this.svcApi.blockInfo(block.previous)
+		const previousBlockInfo = await this.svcApi.blockInfo(account.frontier)
 		if (!('contents' in previousBlockInfo)) return this.svcNotifications.sendError(`Previous block not found`)
-		const jsonBlock = JSON.parse(previousBlockInfo.contents)
+		const { contents } = previousBlockInfo
 		const blockDataPrevious = {
-			account: jsonBlock.account.replace('xrb_', 'nano_').toLowerCase(),
-			previous: jsonBlock.previous,
-			representative: jsonBlock.representative,
-			balance: jsonBlock.balance,
-			link: jsonBlock.link,
-			signature: jsonBlock.signature,
+			account: contents.account.replace('xrb_', 'nano_').toLowerCase(),
+			previous: contents.previous,
+			representative: contents.representative,
+			balance: contents.balance,
+			link: contents.link,
+			signature: contents.signature,
 		}
 
 		// Nano signing standard

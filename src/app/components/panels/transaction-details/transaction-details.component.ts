@@ -83,42 +83,41 @@ export class TransactionDetailsComponent implements OnInit {
 		this.hashID = hash
 
 		this.loadingBlock = true
-		const blockData = await this.api.blocksInfo([hash])
+		const blockData = await this.api.blockInfo(hash)
 
-		if (!blockData || blockData.error || !blockData.blocks[hash]) {
+		if (blockData == null || blockData.error != null) {
 			this.loadingBlock = false
 			this.transaction = null
 			return
 		}
 
-		const hashData = blockData.blocks[hash]
-		const hashContents = JSON.parse(hashData.contents)
-		hashData.contents = hashContents
+		const { amount, confirmed, contents, height, successor } = blockData
+		const { previous } = contents
 
-		this.transactionJSON = JSON.stringify(hashData.contents, null, 4)
+		this.transactionJSON = JSON.stringify(contents, null, 4)
 
-		this.isUnconfirmedBlock = hashData.confirmed === 'false'
-		this.blockHeight = hashData.height
+		this.isUnconfirmedBlock = !confirmed
+		this.blockHeight = height
 
 		const HASH_ONLY_ZEROES = '0000000000000000000000000000000000000000000000000000000000000000'
 
-		const blockType = hashData.contents.type
+		const blockType = contents.type
 		if (blockType === 'state') {
-			const isOpen = hashData.contents.previous === HASH_ONLY_ZEROES
+			const isOpen = contents.previous === HASH_ONLY_ZEROES
 
 			if (isOpen) {
 				this.blockType = 'open'
 			} else {
-				const prevRes = await this.api.blocksInfo([hashData.contents.previous])
-				const prevData = prevRes.blocks[hashData.contents.previous]
-				prevData.contents = JSON.parse(prevData.contents)
+				const prevRes = await this.api.blocksInfo([contents.previous])
+				const prevData = prevRes.blocks[previous]
 				if (!prevData.contents.balance) {
 					// Previous block is not a state block.
 					this.blockType = prevData.contents.type
+					//@ts-expect-error
 					legacyFromAccount = prevData.source_account
 				} else {
 					const prevBalance = BigInt(prevData.contents.balance)
-					const curBalance = BigInt(hashData.contents.balance)
+					const curBalance = BigInt(contents.balance)
 					const balDifference = curBalance - prevBalance
 					if (balDifference < 0n) {
 						this.blockType = 'send'
@@ -133,14 +132,14 @@ export class TransactionDetailsComponent implements OnInit {
 			this.blockType = blockType
 			this.isStateBlock = false
 		}
-		if (hashData.amount) {
-			this.amount = BigInt(hashData.amount)
+		if (amount) {
+			this.amount = BigInt(amount)
 		}
-		if (hashData.successor != null && hashData.successor !== HASH_ONLY_ZEROES) {
-			this.successorHash = hashData.successor
+		if (successor != null && successor !== HASH_ONLY_ZEROES) {
+			this.successorHash = successor
 		}
 
-		this.transaction = hashData
+		this.transaction = blockData
 		let fromAccount = ''
 		let toAccount = ''
 		switch (this.blockType) {

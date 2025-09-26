@@ -248,9 +248,8 @@ export class NanoBlockService {
 		return processResponse.hash
 	}
 
-	async generateReceive (wallet, walletAccount, sourceBlock, ledger = false) {
-		const account = Account.load(walletAccount)
-		const toAcct = await this.svcApi.accountInfo(account.address)
+	async generateReceive (wallet: Wallet, walletAccount: Account, sourceBlock, ledger = false) {
+		const toAcct = await this.svcApi.accountInfo(walletAccount.address)
 
 		let workBlock = null
 
@@ -290,9 +289,9 @@ export class NanoBlockService {
 			}
 			try {
 				this.sendLedgerNotification()
-				const signature = await wallet.sign(walletAccount.index, ledgerBlock, toAcct.frontier)
+				await wallet.sign(walletAccount.index, ledgerBlock, toAcct.frontier)
 				this.svcNotifications.removeNotification('ledger-sign')
-				blockData.signature = signature.toUpperCase()
+				blockData.signature = ledgerBlock.signature.toUpperCase()
 			} catch (err) {
 				this.svcNotifications.removeNotification('ledger-sign')
 				this.svcNotifications.sendWarning(err.message || `Transaction denied on Ledger device`)
@@ -300,7 +299,7 @@ export class NanoBlockService {
 			}
 		} else {
 			this.validateAccount(toAcct, toAcct.publicKey)
-			await wallet.sign(account.index, blockData as unknown as Block)
+			await wallet.sign(walletAccount.index, blockData as unknown as Block)
 		}
 
 		workBlock = openEquiv
@@ -416,27 +415,29 @@ export class NanoBlockService {
 		const blockResponse = await this.svcApi.blocksInfo([accountInfo.frontier])
 		const blockData = blockResponse.blocks[accountInfo.frontier]
 		if (!blockData) throw new Error(`Unable to load frontier block data`)
-		blockData.contents = JSON.parse(blockData.contents)
+		const { contents, subtype } = blockData
+		const { account, balance, previous, representative, type } = contents
 
-		if (accountInfo.balance !== blockData.contents.balance || accountInfo.representative !== blockData.contents.representative) {
+		if (accountInfo.balance !== balance || accountInfo.representative !== representative) {
 			throw new Error(`Frontier block data doesn't match account info`)
 		}
 
-		if (blockData.contents.type !== 'state') {
+		if (type !== 'state') {
 			throw new Error(`Frontier block wasn't a state block, which shouldn't be possible`)
 		}
-		if (this.svcUtil.hex.fromUint8(this.svcUtil.nano.hashStateBlock(blockData.contents)) !== accountInfo.frontier) {
+		if (this.svcUtil.hex.fromUint8(this.svcUtil.nano.hashStateBlock(contents)) !== accountInfo.frontier) {
 			throw new Error(`Frontier hash didn't match block data`)
 		}
 
-		if (blockData.subtype === 'epoch') {
+		const block = new Block(account, balance, previous, representative)
+		if (subtype === 'epoch') {
 			const epochV2SignerAccount = Account.load(this.epochV2SignerAccount)
-			const isEpochV2BlockSignatureValid = await (blockData.contents as Block).verify(epochV2SignerAccount.publicKey)
+			const isEpochV2BlockSignatureValid = await block.verify(epochV2SignerAccount.publicKey)
 			if (isEpochV2BlockSignatureValid !== true) {
 				throw new Error(`Node provided an untrusted frontier block that is an unsupported epoch`)
 			}
 		} else {
-			const isFrontierBlockSignatureValid = await (blockData.contents as Block).verify(accountPublicKey)
+			const isFrontierBlockSignatureValid = await block.verify(accountPublicKey)
 			if (isFrontierBlockSignatureValid !== true) {
 				throw new Error(`Node provided an untrusted frontier block that was signed by someone else`)
 			}

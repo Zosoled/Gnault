@@ -4,9 +4,9 @@
 >
 	<div
 		class="uk-width-1-1"
-		[class.add-whitespace-underneath]="walletAccount && showFullDetailsOnSmallViewports === false"
+		[class.add-whitespace-underneath]="walletAccount() && showFullDetailsOnSmallViewports === false"
 	>
-		@if (walletAccount && showFullDetailsOnSmallViewports === false) {
+		@if (walletAccount() && showFullDetailsOnSmallViewports === false) {
 			<div class="nano-card is-card">
 				<div
 					class="logo"
@@ -15,7 +15,7 @@
 				<div class="card-contents">
 					<div class="account-name-container">
 						<div class="name">
-							{{ addressBookEntry ? addressBookEntry : ('general.account' | transloco) + ' #' + walletAccount.index }}
+							{{ addressBookEntry ? addressBookEntry : ('general.account' | transloco) + ' #' + walletAccountIndex }}
 						</div>
 						<div
 							#selectButton
@@ -71,17 +71,17 @@
 		}
 		<h2
 			class="uk-heading-divider"
-			[class.hide-on-small-viewports]="walletAccount && showFullDetailsOnSmallViewports === false"
+			[class.hide-on-small-viewports]="walletAccount() && showFullDetailsOnSmallViewports === false"
 		>
 			{{
-				walletAccount
+				walletAccount()
 					? ('account-details.account-details' | transloco)
 					: ('account-details.network-explorer' | transloco)
 			}}
 		</h2>
 		<div
 			class="uk-card uk-card-default uk-margin"
-			[class.hide-on-small-viewports]="walletAccount && showFullDetailsOnSmallViewports === false"
+			[class.hide-on-small-viewports]="walletAccount() && showFullDetailsOnSmallViewports === false"
 		>
 			<div class="account-details-header uk-card-header uk-visible-toggle">
 				<div uk-grid>
@@ -94,12 +94,12 @@
 						></app-nano-identicon>
 					}
 					<div class="uk-width-1-1 uk-width-expand@s">
-						@if (walletAccount && (addressBookEntry || showEditAddressBook)) {
+						@if (walletAccount() && (addressBookEntry || showEditAddressBook)) {
 							<div
 								class="account-type-label"
 								[class.editing-name]="showEditAddressBook"
 							>
-								{{ ('general.account' | transloco) + ' #' + walletAccount.index }}
+								{{ ('general.account' | transloco) + ' #' + walletAccountIndex }}
 							</div>
 						}
 						@if (!walletAccount) {
@@ -155,7 +155,7 @@
 													addressBookEntry
 														? addressBookEntry
 														: walletAccount
-															? ('general.account' | transloco) + ' #' + walletAccount.index
+															? ('general.account' | transloco) + ' #' + walletAccountIndex
 															: ('account-details.no-label-set' | transloco)
 												}}
 											</h3>
@@ -601,7 +601,7 @@
 								>
 							</td>
 							<ng-template #transactionActionsOrDate>
-								@if (walletAccount || remoteVisible) {
+								@if (walletAccount() || remoteVisible) {
 									@if (walletAccount) {
 										<div class="button-container">
 											@if (!receivable.loading) {
@@ -651,10 +651,7 @@
 							<td
 								class="amount-column uk-text-middle uk-text-muted"
 								[title]="
-									'Incoming Transaction' +
-									(receivable.amountRaw && receivable.amountRaw > 0
-										? ', +' + receivable.amountRaw.toString(10) + ' raw'
-										: '')
+									`Incoming Transaction${receivable?.amount > 0 ? `, +${receivable.amount.toString()} raw` : ''}`
 								"
 							>
 								<span class="uk-text-small">{{ 'general.blockactions.ready-to-receive' | transloco }}</span
@@ -1379,7 +1376,7 @@
 		</div>
 	</div>
 </div>
-@if (walletAccount && showFullDetailsOnSmallViewports === false) {
+@if (walletAccount() && showFullDetailsOnSmallViewports === false) {
 	<div class="mobile-actions-fixed">
 		<div class="actions-area">
 			<button routerLink="/receive">{{ 'nav.receive' | transloco }}</button>
@@ -1416,7 +1413,7 @@
 						addressBookEntry
 							? addressBookEntry
 							: walletAccount
-								? ('general.account' | transloco) + ' #' + walletAccount.index
+								? ('general.account' | transloco) + ' #' + walletAccountIndex
 								: ('account-details.external-address' | transloco)
 					}}
 				</div>
@@ -1467,7 +1464,7 @@
 						addressBookEntry
 							? addressBookEntry
 							: walletAccount
-								? ('general.account' | transloco) + ' #' + walletAccount.index
+								? ('general.account' | transloco) + ' #' + walletAccountIndex
 								: ('account-details.external-address' | transloco)
 					}}
 				</h3>
@@ -1565,7 +1562,7 @@
 					}
 					@if (mobileTransactionData.isReceivable !== true) {
 						@if (
-							walletAccount &&
+							walletAccount() &&
 							!isNaN(mobileTransactionData.amount) &&
 							(mobileTransactionData.type === 'receive' ||
 								mobileTransactionData.subtype === 'receive' ||
