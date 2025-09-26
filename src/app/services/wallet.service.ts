@@ -626,7 +626,7 @@ export class WalletService {
 		if (this.isBalanceUpdating) return
 
 		this.isBalanceUpdating = true
-		const fiatPrice = this.svcPrice.lastPrice
+		const fiatPrice = this.svcPrice.lastPrice()
 
 		const addresses = await this.accounts.map((a) => a.address)
 		const accounts = await this.svcApi.accountsBalances(addresses)

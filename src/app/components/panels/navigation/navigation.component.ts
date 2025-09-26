@@ -21,7 +21,7 @@ import {
 	InstallWidgetComponent,
 	WalletWidgetComponent
 } from 'app/components'
-import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
+import { AmountSplitPipe, CurrencySymbolPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AppSettingsService,
 	NodeService,
@@ -41,6 +41,7 @@ import { Wallet } from 'libnemo'
 		AsyncPipe,
 		AmountSplitPipe,
 		ChangeRepWidgetComponent,
+		CurrencySymbolPipe,
 		FiatPipe,
 		GnaultLogoElementComponent,
 		InstallWidgetComponent,

@@ -519,7 +519,7 @@ export class SignComponent implements OnInit {
 	async prepareTransaction () {
 		// Determine fiat value of the amount (if not offline mode)
 		if (this.svcAppSettings.settings.serverAPI) {
-			this.amountFiat = parseFloat(Tools.convert(this.rawAmount, 'raw', 'mnano')) * this.svcPrice.lastPrice
+			this.amountFiat = parseFloat(Tools.convert(this.rawAmount, 'raw', 'nano')) * this.svcPrice.lastPrice()
 		}
 
 		this.fromAddressBook = this.addressBookService.getAccountName(this.fromAccountID)

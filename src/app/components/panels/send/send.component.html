@@ -49,7 +49,7 @@
 								<div class="uk-margin">
 									<label
 										class="uk-form-label"
-										for="form-horizontal-select"
+										for="form-horizontal-select-from-account"
 										>From Account</label
 									>
 									<div class="uk-form-controls">
@@ -57,7 +57,7 @@
 											class="form-select-source uk-select"
 											[(ngModel)]="fromAccountID"
 											(change)="resetAmount()"
-											id="form-horizontal-select"
+											id="form-horizontal-select-from-account"
 										>
 											@for (account of accounts; track account) {
 												<option [value]="account.address">
@@ -144,7 +144,7 @@
 												required
 												class="form-select-destination uk-select"
 												[(ngModel)]="toOwnAccountID"
-												id="form-horizontal-select"
+												id="form-horizontal-select-to-own-account"
 											>
 												<option
 													value=""
@@ -232,9 +232,7 @@
 															<a
 																class="uk-form-icon uk-link-reset uk-link-muted fiat-currency-ticker"
 																uk-tooltip
-																title="Last Price: {{
-																	svcPrice.lastPrice | fiat: svcAppSettings.settings.displayCurrency
-																}} / XNO"
+																title="Last Price: {{ svcPrice.lastPrice | fiat }} / XNO"
 																>{{ svcAppSettings.settings.displayCurrency | currencySymbol }}</a
 															>
 															<input
@@ -330,7 +328,7 @@
 									style="margin: 8px 0 -1px 0"
 									class="text-half-muted"
 								>
-									{{ amountFiat | fiat: svcAppSettings.settings.displayCurrency }}
+									{{ amountFiat | fiat }}
 								</div>
 							}
 							@if (svcAppSettings.settings.displayCurrency) {
@@ -338,7 +336,7 @@
 									style="margin: 1px 0 -1px 0"
 									class="uk-text-muted"
 								>
-									{{ svcPrice.lastPrice | fiat: svcAppSettings.settings.displayCurrency }} / XNO
+									{{ svcPrice.lastPrice | fiat }} / XNO
 								</div>
 							}
 						</div>

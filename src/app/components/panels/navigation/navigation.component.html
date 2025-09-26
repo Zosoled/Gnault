@@ -126,14 +126,14 @@
 										<div class="balance-container converted">
 											<div class="currency-name">
 												<span class="estimate-symbol">~</span>
-												{{ displayCurrency }}
+												{{ displayCurrency | currencySymbol }}
 											</div>
 											<div class="amount-container">
 												<div class="amount-integer">
-													{{ selectedAccount?.balance ?? balance ?? 0 | fiat: displayCurrency | amountsplit: 0 }}
+													{{ selectedAccount?.balance ?? balance ?? 0 | fiat | amountsplit: 0 }}
 												</div>
 												<div class="amount-fractional">
-													{{ selectedAccount?.balance ?? balance ?? 0 | fiat: displayCurrency | amountsplit: 1 }}
+													{{ selectedAccount?.balance ?? balance ?? 0 | fiat | amountsplit: 1 }}
 												</div>
 											</div>
 										</div>
@@ -209,13 +209,15 @@
 									</div>
 									@if (displayCurrency) {
 										<div class="balance-container converted">
-											<div class="currency-name"><span class="estimate-symbol">~</span>{{ displayCurrency }}</div>
+											<div class="currency-name">
+												<span class="estimate-symbol">~</span>{{ displayCurrency | currencySymbol }}
+											</div>
 											<div class="amount-container">
 												<div class="amount-integer">
-													{{ selectedAccount?.receivableFiat ?? receivable | fiat: displayCurrency | amountsplit: 0 }}
+													{{ selectedAccount?.receivableFiat ?? receivable | fiat | amountsplit: 0 }}
 												</div>
 												<div class="amount-fractional">
-													{{ selectedAccount?.receivableFiat ?? receivable | fiat: displayCurrency | amountsplit: 1 }}
+													{{ selectedAccount?.receivableFiat ?? receivable | fiat | amountsplit: 1 }}
 												</div>
 											</div>
 										</div>

@@ -260,7 +260,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		}
 		const precision = this.svcAppSettings.settings.displayCurrency === 'BTC' ? 6 : 2
 		const rawAmount = Tools.convert(this.amountNano || 0, 'mnano', 'raw')
-		const fiatAmount = parseFloat(Tools.convert(rawAmount, 'raw', 'mnano')) * this.svcPrice.lastPrice
+		const fiatAmount = parseFloat(Tools.convert(rawAmount, 'raw', 'mnano')) * this.svcPrice.lastPrice()
 
 		this.amountFiat = fiatAmount.toFixed(precision)
 		this.changeQRAmount(rawAmount)
@@ -273,7 +273,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			this.changeQRAmount()
 			return
 		}
-		const amount = parseFloat(this.amountFiat) / this.svcPrice.lastPrice
+		const amount = parseFloat(this.amountFiat) / this.svcPrice.lastPrice()
 		const raw = Tools.convert(amount, 'mnano', 'raw')
 		const nanoRounded = parseFloat(this.svcUtil.nano.rawToMnano(raw)).toFixed(6)
 		const rawRounded = this.svcUtil.nano.nanoToRaw(nanoRounded)

@@ -70,13 +70,13 @@
 					<div class="uk-flex-1">
 						<div class="uk-margin">
 							<label
-								for="form-horizontal-select"
+								for="form-horizontal-select-account"
 								class="uk-form-label label-block"
 								>{{ 'general.account' | transloco }}</label
 							>
 							<div class="form-account">
 								<select
-									id="form-horizontal-select"
+									id="form-horizontal-select-account"
 									class="uk-select"
 									[(ngModel)]="receivableAccountModel"
 									(change)="onSelectedAccountChange(receivableAccountModel)"
@@ -661,7 +661,7 @@
 					<div class="uk-card-body">
 						<p class="uk-text-large">Select the <span class="uk-text-primary">destination account</span></p>
 						<select
-							id="form-horizontal-select"
+							id="form-horizontal-select-destination-account"
 							class="uk-select"
 							[(ngModel)]="receivableAccountModel"
 							(change)="onSelectedAccountChange(receivableAccountModel)"

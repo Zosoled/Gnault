@@ -113,7 +113,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 
 	routerSub = null
 	priceSub = null
-	lastPrice = null
+	get lastPrice () { return this.svcPrice.lastPrice() }
 
 	initialLoadDone = false
 	manualRefreshAllowed = true
@@ -190,9 +190,6 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 				this.showFullDetailsOnSmallViewports = this.activatedRoute.snapshot.queryParams.compact !== '1'
 				this.mobileTransactionMenuModal.hide()
 			}
-		})
-		this.priceSub = this.svcPrice.lastPrice$.subscribe((event) => {
-			this.lastPrice = this.svcPrice.lastPrice
 		})
 
 		this.svcWallet.isReceivableBlocksUpdated$.subscribe(async (receivableBlockUpdate) => {
@@ -572,9 +569,6 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		if (this.routerSub) {
 			this.routerSub.unsubscribe()
 		}
-		if (this.priceSub) {
-			this.priceSub.unsubscribe()
-		}
 	}
 
 	async generateReceiveQR (accountID) {
@@ -799,7 +793,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			return
 		}
 		const precision = this.svcAppSettings.settings.displayCurrency === 'BTC' ? 6 : 2
-		const fiatAmount = (parseFloat(Tools.convert(rawAmount, 'raw', 'nano')) * this.svcPrice.lastPrice).toFixed(
+		const fiatAmount = (parseFloat(Tools.convert(rawAmount, 'raw', 'nano')) * this.lastPrice).toFixed(
 			precision
 		)
 		this.amountFiat = parseFloat(fiatAmount)
@@ -812,7 +806,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			return
 		}
 		if (!this.svcUtil.string.isNumeric(this.amountFiat)) return
-		const fx = (this.amountFiat / this.svcPrice.lastPrice).toString()
+		const fx = (this.amountFiat / this.lastPrice).toString()
 		const nanoPrice: string = await Tools.convert(fx, 'mnano', 'nano')
 		this.amount = Number(nanoPrice).toPrecision(3)
 	}
@@ -991,7 +985,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.amountRaw = this.rawAmount
 
 		// Determine fiat value of the amount
-		this.amountFiat = parseFloat(Tools.convert(rawAmount, 'raw', 'nano')) * this.svcPrice.lastPrice
+		this.amountFiat = parseFloat(Tools.convert(rawAmount, 'raw', 'nano')) * this.lastPrice
 
 		const defaultRepresentative =
 			this.svcAppSettings.settings.defaultRepresentative || this.svcNanoBlock.getRandomRepresentative()

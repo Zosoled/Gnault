@@ -74,7 +74,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	totalTrackedBalanceRaw = 0n
 	totalTrackedBalanceFiat = 0
 	totalTrackedReceivable = 0n
-	fiatPrice = 0
+	get fiatPrice () { return this.svcPrice.lastPrice() }
 	priceSub = null
 	refreshSub = null
 	showAdvancedOptions = false
@@ -85,11 +85,6 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	async ngOnInit () {
 		this.addressBookService.loadAddressBook()
-		// Keep price up to date with the service
-		this.priceSub = this.svcPrice.lastPrice$.subscribe((event) => {
-			this.fiatPrice = this.svcPrice.lastPrice
-		})
-
 		// Detect if local wallet balance is refreshed
 		this.refreshSub = this.walletService.refresh$.subscribe((shouldRefresh) => {
 			if (shouldRefresh) {

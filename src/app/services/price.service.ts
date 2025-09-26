@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http'
-import { Injectable, inject } from '@angular/core'
-import { BehaviorSubject, firstValueFrom } from 'rxjs'
+import { Injectable, inject, signal } from '@angular/core'
+import { firstValueFrom } from 'rxjs'
 
 @Injectable({ providedIn: 'root' })
 export class PriceService {
@@ -10,13 +10,8 @@ export class PriceService {
 	static lastUpdate: number = 0
 	static storeKey: 'Gnault-Price' = 'Gnault-Price'
 
-	#lastPrice$: BehaviorSubject<number> = new BehaviorSubject(1)
-	get lastPrice$ (): BehaviorSubject<number> {
-		return this.#lastPrice$
-	}
-
 	currencies: string[] = []
-	lastPrice: number = 0
+	lastPrice = signal(0)
 	oneNano = 10n ** 30n
 	prices: Map<string, number>
 
@@ -31,8 +26,8 @@ export class PriceService {
 	 * @param {string} [currency] Code for requested exchange rate currency
 	 * @returns Market price for requested currency
 	 */
-	async fetchPrice (currency?: string): Promise<number> {
-		currency = currency.toLowerCase()
+	async fetchPrice (currency?: string): Promise<void> {
+		currency = currency?.toLowerCase()
 		if (PriceService.lastUpdate < Date.now() - 60000) {
 			const request = this.http.get(`${PriceService.apiUrl}`)
 			const response: any = await firstValueFrom(request)
@@ -44,9 +39,7 @@ export class PriceService {
 				this.savePrice()
 			}
 		}
-		this.lastPrice = this.prices[currency]
-		this.lastPrice$.next(this.lastPrice)
-		return this.lastPrice
+		this.lastPrice.set(this.prices[currency])
 	}
 
 	async loadPrice (): Promise<void> {

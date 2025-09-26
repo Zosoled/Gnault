@@ -471,7 +471,7 @@
 							<div class="uk-margin">
 								<label
 									class="uk-form-label"
-									for="form-horizontal-select"
+									for="form-textarea-bip39-mnemonic"
 									>BIP39 Mnemonic</label
 								>
 								<div class="uk-form-controls">
@@ -489,6 +489,7 @@
 											[(ngModel)]="importSeedBip39MnemonicModel"
 											placeholder="12-, 15-, 18-, 21-, or 24-word secret recovery BIP39 mnemonic"
 											autocomplete="off"
+											id="form-textarea-bip39-mnemonic"
 										></textarea>
 									</div>
 								</div>
@@ -498,7 +499,7 @@
 							<div class="uk-margin">
 								<label
 									class="uk-form-label"
-									for="form-horizontal-select"
+									for="form-text-account-index"
 									>Account Index
 									<span
 										uk-icon="icon: info;"
@@ -516,6 +517,7 @@
 										maxLength="10"
 										placeholder="0 to {{ indexMax }}"
 										autocomplete="off"
+										id="form-text-account-index"
 									/>
 								</div>
 							</div>
@@ -524,7 +526,7 @@
 							<div class="uk-margin">
 								<label
 									class="uk-form-label"
-									for="form-horizontal-select"
+									for="form-password-bip39-passphrase"
 									>BIP39 Passphrase
 									<span
 										uk-icon="icon: info;"
@@ -540,6 +542,7 @@
 										[(ngModel)]="importSeedBip39MnemonicPasswordModel"
 										placeholder="Optional"
 										autocomplete="off"
+										id="form-password-bip39-passphrase"
 									/>
 								</div>
 							</div>

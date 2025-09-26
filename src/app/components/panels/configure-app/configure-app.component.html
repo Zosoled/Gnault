@@ -45,7 +45,7 @@
 							<div class="uk-margin">
 								<label
 									class="uk-form-label"
-									for="form-horizontal-select"
+									for="form-horizontal-select-fiat-currency"
 								>
 									{{ 'configure-app.fiat-currency' | transloco }}
 									<span
@@ -56,13 +56,13 @@
 								</label>
 								<div class="uk-form-controls">
 									<select
+										id="form-horizontal-select-fiat-currency"
 										class="uk-select"
-										[(ngModel)]="selectedCurrency"
-										id="form-horizontal-select"
+										[formControl]="selectedCurrency"
 									>
-										@for (currency of currencies | keyvalue; track currency) {
-											<option [value]="currency.key">
-												{{ currency.value }}
+										@for (currency of currencies; track currency.value) {
+											<option [value]="currency.value">
+												{{ currency.name }}
 											</option>
 										}
 									</select>
@@ -75,7 +75,7 @@
 							<div class="uk-margin">
 								<label
 									class="uk-form-label"
-									for="form-horizontal-select"
+									for="form-horizontal-select-night-mode"
 								>
 									{{ 'configure-app.night-mode' | transloco }}
 								</label>
@@ -83,7 +83,7 @@
 									<select
 										class="uk-select"
 										[(ngModel)]="selectedNightModeOption"
-										id="form-horizontal-select"
+										id="form-horizontal-select-night-mode"
 									>
 										@for (nightModeOption of nightModeOptions; track nightModeOption) {
 											<option [value]="nightModeOption.value">
@@ -100,7 +100,7 @@
 							<div class="uk-margin">
 								<label
 									class="uk-form-label"
-									for="form-horizontal-select"
+									for="form-horizontal-select-identicon-option"
 								>
 									{{ 'configure-app.identicons' | transloco }}
 								</label>
@@ -108,7 +108,7 @@
 									<select
 										class="uk-select"
 										[(ngModel)]="selectedIdenticonOption"
-										id="form-horizontal-select"
+										id="form-horizontal-select-identicon-option"
 									>
 										@for (identiconOption of identiconOptions; track identiconOption) {
 											<option [value]="identiconOption.value">
@@ -421,7 +421,7 @@
 							<div class="uk-margin">
 								<label
 									class="uk-form-label"
-									for="form-horizontal-select"
+									for="form-horizontal-select-server"
 								>
 									{{ 'configure-app.server-configuration' | transloco }}
 									<span
@@ -435,7 +435,7 @@
 										class="uk-select"
 										[(ngModel)]="selectedServer"
 										(change)="serverConfigChange(selectedServer)"
-										id="form-horizontal-select"
+										id="form-horizontal-select-server"
 									>
 										@for (server of serverOptions; track server) {
 											<option [value]="server.value">

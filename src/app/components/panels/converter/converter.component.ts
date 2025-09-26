@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common'
-import { Component, OnInit, OnDestroy, inject } from '@angular/core'
+import { Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { Tools } from 'libnemo'
-import { ClipboardModule } from 'ngx-clipboard'
 import {
 	AppSettingsService,
 	NotificationsService,
 	PriceService,
 	UtilService
 } from 'app/services'
+import { Tools } from 'libnemo'
+import { ClipboardModule } from 'ngx-clipboard'
 
 @Component({
 	selector: 'app-converter',
@@ -20,7 +20,6 @@ import {
 		FormsModule
 	]
 })
-
 export class ConverterComponent implements OnInit, OnDestroy {
 	private svcPrice = inject(PriceService)
 	private svcUtil = inject(UtilService)
@@ -37,10 +36,7 @@ export class ConverterComponent implements OnInit, OnDestroy {
 	priceSub = null
 
 	ngOnInit (): void {
-		this.priceSub = this.svcPrice.lastPrice$.subscribe(event => {
-			this.fiatPrice = this.svcPrice.lastPrice.toFixed(30)
-		})
-		this.unitChange('mnano')
+		this.unitChange('nano')
 	}
 
 	ngOnDestroy () {
@@ -51,10 +47,10 @@ export class ConverterComponent implements OnInit, OnDestroy {
 
 	async unitChange (unit) {
 		switch (unit) {
-			case 'mnano':
+			case 'nano':
 				if (this.svcUtil.account.isValidNanoAmount(this.Mnano)) {
 					this.raw = await Tools.convert(this.Mnano, 'nano', 'raw')
-					this.fiatPrice = (parseFloat(this.Mnano) * this.svcPrice.lastPrice).toString()
+					this.fiatPrice = (parseFloat(this.Mnano) * this.svcPrice.lastPrice()).toString()
 					this.invalidMnano = false
 					this.invalidRaw = false
 					this.invalidFiat = false
@@ -67,7 +63,7 @@ export class ConverterComponent implements OnInit, OnDestroy {
 			case 'raw':
 				if (this.svcUtil.account.isValidAmount(this.raw)) {
 					this.Mnano = await Tools.convert(this.raw, 'raw', 'nano')
-					this.fiatPrice = (parseFloat(this.Mnano) * this.svcPrice.lastPrice).toString()
+					this.fiatPrice = (parseFloat(this.Mnano) * this.svcPrice.lastPrice()).toString()
 					this.invalidRaw = false
 					this.invalidMnano = false
 					this.invalidFiat = false
@@ -79,7 +75,7 @@ export class ConverterComponent implements OnInit, OnDestroy {
 				break
 			case 'fiat':
 				if (this.svcUtil.string.isNumeric(this.fiatPrice)) {
-					this.Mnano = (parseFloat(this.fiatPrice) / this.svcPrice.lastPrice).toString()
+					this.Mnano = (parseFloat(this.fiatPrice) / this.svcPrice.lastPrice()).toString()
 					this.raw = await Tools.convert(this.Mnano, 'nano', 'raw')
 					this.invalidRaw = false
 					this.invalidMnano = false

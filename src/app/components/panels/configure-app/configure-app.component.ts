@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common'
 import { Component, inject, OnInit, Renderer2 } from '@angular/core'
-import { FormsModule } from '@angular/forms'
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { TranslocoDirective, TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import {
 	AddressBookService,
@@ -25,7 +25,7 @@ import { BehaviorSubject } from 'rxjs'
 	selector: 'app-configure-app',
 	templateUrl: './configure-app.component.html',
 	styleUrls: ['./configure-app.component.css'],
-	imports: [CommonModule, FormsModule, TranslocoDirective, TranslocoPipe],
+	imports: [CommonModule, FormsModule, ReactiveFormsModule, TranslocoDirective, TranslocoPipe],
 })
 export class ConfigureAppComponent implements OnInit {
 	private notifications = inject(NotificationsService)
@@ -67,26 +67,26 @@ export class ConfigureAppComponent implements OnInit {
 	]
 	selectedStorage = this.storageOptions[0].value
 
-	currencies: Map<string, string> = new Map<string, string>([
-		['-', this.translocoService.translate('configure-app.currencies.none')],
-		['bch', 'BCH - Bitcoin Cash'],
-		['bits', 'BITS - Bitcoin (bits)'],
-		['bnb', 'BNB - Binance Coin'],
-		['btc', 'BTC - Bitcoin'],
-		['dot', 'DOT - Polkadot'],
-		['eos', 'EOS - EOS'],
-		['eth', 'ETH - Ethereum'],
-		['link', 'LINK - Chainlink'],
-		['ltc', 'LTC - Litecoin'],
-		['sats', 'SATS - Bitcoin (satoshis)'],
-		['sol', 'SOL - Solana'],
-		['xag', 'XAG - Silver (Troy Ounce)'],
-		['xau', 'XAU - Gold (Troy Ounce)'],
-		['xlm', 'XLM - Stellar'],
-		['xrp', 'XRP - XRP'],
-		['yfi', 'YFI - yearn.finance'],
-	])
-	selectedCurrency = this.currencies.get('-')
+	currencies = [
+		{ value: 'bch', name: 'BCH - Bitcoin Cash' },
+		{ value: 'bits', name: 'BITS - Bitcoin (bits)' },
+		{ value: 'bnb', name: 'BNB - Binance Coin' },
+		{ value: 'btc', name: 'BTC - Bitcoin' },
+		{ value: 'dot', name: 'DOT - Polkadot' },
+		{ value: 'eos', name: 'EOS - EOS' },
+		{ value: 'eth', name: 'ETH - Ethereum' },
+		{ value: 'link', name: 'LINK - Chainlink' },
+		{ value: 'ltc', name: 'LTC - Litecoin' },
+		{ value: 'sats', name: 'SATS - Bitcoin (satoshis)' },
+		{ value: 'sol', name: 'SOL - Solana' },
+		{ value: 'vef', name: 'VEF - Venezuelan Bolívar (historical)' },
+		{ value: 'xag', name: 'XAG - Silver (Troy Ounce)' },
+		{ value: 'xau', name: 'XAU - Gold (Troy Ounce)' },
+		{ value: 'xlm', name: 'XLM - Stellar' },
+		{ value: 'xrp', name: 'XRP - XRP' },
+		{ value: 'yfi', name: 'YFI - yearn.finance' },
+	]
+	selectedCurrency: FormControl<string> = new FormControl<string>('usd', { nonNullable: true })
 
 	nightModeOptions = [
 		{ name: this.translocoService.translate('configure-app.night-mode-options.enabled'), value: 'enabled' },
@@ -172,9 +172,8 @@ export class ConfigureAppComponent implements OnInit {
 	showServerConfigs = () => this.selectedServer && this.selectedServer === 'custom'
 
 	async ngOnInit () {
-		this.loadFromSettings()
+		await this.loadFromSettings()
 		this.updateNodeStats()
-
 		setTimeout(() => this.populateRepresentativeList(), 500)
 	}
 
@@ -248,13 +247,13 @@ export class ConfigureAppComponent implements OnInit {
 		setTimeout(() => (this.statsRefreshEnabled = true), 5000)
 	}
 
-	loadFromSettings () {
+	async loadFromSettings () {
 		const settings = this.appSettings.settings
 
 		const matchingLanguage = this.languages.find((language) => language.id === settings.language)
 		this.selectedLanguage = matchingLanguage?.id || this.languages[0].id
 
-		this.loadCurrencies()
+		await this.loadCurrencies()
 
 		const nightModeOptionString = settings.lightModeEnabled ? 'disabled' : 'enabled'
 		const matchingNightModeOption = this.nightModeOptions.find((d) => d.value === nightModeOptionString)
@@ -291,17 +290,23 @@ export class ConfigureAppComponent implements OnInit {
 		}
 	}
 
+	/**
+	 * Populates currency settings with up-to-date list of abbreviations and
+	 * names based on user locale.
+	 */
 	async loadCurrencies (): Promise<void> {
 		await this.svcPrice.fetchPrice()
-		this.svcPrice.currencies.forEach((currency) => {
-			if (this.currencies.get(currency) === undefined && currency.length === 3) {
+		for (const currency of this.svcPrice.currencies) {
+			if (this.currencies.every(c => c.value !== currency)) {
 				const lang = this.appSettings.settings.language ?? 'en'
-				const currencyName = new Intl.DisplayNames([lang], { type: 'currency' }).of(currency)
-				this.currencies.set(currency, `${currency.toUpperCase()} - ${currencyName}`)
+				const currencyName = currency.length === 3
+					? new Intl.DisplayNames([lang], { type: 'currency' }).of(currency)
+					: currency
+				this.currencies.push({ value: currency, name: `${currency.toUpperCase()} - ${currencyName}` })
 			}
-		})
-		const matchingCurrency = this.currencies.get(this.appSettings.settings.displayCurrency)
-		this.selectedCurrency = matchingCurrency || this.currencies.get('-')
+		}
+		this.currencies = this.currencies.sort((a, b) => a.name.localeCompare(b.name))
+		this.selectedCurrency.setValue(this.appSettings.settings.displayCurrency ?? 'usd')
 	}
 
 	async updateDisplaySettings () {
@@ -317,7 +322,7 @@ export class ConfigureAppComponent implements OnInit {
 
 		this.appSettings.setAppSetting('identiconsStyle', this.selectedIdenticonOption)
 
-		const newCurrency = this.selectedCurrency
+		const newCurrency = this.selectedCurrency.value
 		const reloadFiat = this.appSettings.settings.displayCurrency !== newCurrency
 		this.notifications.sendSuccess(
 			this.translocoService.translate('configure-app.app-display-settings-successfully-updated')

@@ -110,7 +110,7 @@
 										</span>
 									</div>
 									<div class="account-amounts-converted uk-width-1-1 text-half-muted">
-										{{ account?.balance ?? 0 | fiat: displayCurrency }}
+										{{ account?.balance ?? 0 | fiat }}
 									</div>
 								} @else {
 									<div class="account-amounts-primary uk-width-1-1">

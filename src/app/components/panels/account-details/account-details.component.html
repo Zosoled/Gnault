@@ -52,10 +52,10 @@
 									</div>
 									<div class="amount-container">
 										<div class="amount-integer">
-											{{ account().balance ?? 0 | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 0 }}
+											{{ account().balance ?? 0 | fiat | amountsplit: 0 }}
 										</div>
 										<div class="amount-fractional">
-											{{ account().balance ?? 0 | fiat: svcAppSettings.settings.displayCurrency | amountsplit: 1 }}
+											{{ account().balance ?? 0 | fiat | amountsplit: 1 }}
 										</div>
 									</div>
 								</div>
@@ -334,7 +334,7 @@
 								</div>
 								<div class="account-amounts-converted text-half-muted">
 									@if (account) {
-										{{ account().balance ?? 0 | fiat: svcAppSettings.settings.displayCurrency }}
+										{{ account().balance ?? 0 | fiat }}
 									}
 								</div>
 							} @else {
@@ -1192,9 +1192,7 @@
 														class="uk-form-icon uk-link-reset uk-link-muted"
 														style="padding-left: 7px"
 														uk-tooltip
-														title="Last Price: {{
-															svcPrice.oneNano | fiat: svcAppSettings.settings.displayCurrency
-														}} / XNO"
+														title="Last Price: {{ svcPrice.oneNano | fiat }} / XNO"
 														>{{ svcAppSettings.settings.displayCurrency | currencySymbol }}</a
 													>
 													<input

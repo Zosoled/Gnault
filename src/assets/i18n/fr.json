@@ -164,7 +164,7 @@
 		"delete-all-data": "Supprimer TOUTES les données",
 		"delete-wallet-data": "Supprimer les données du portefeuille",
 		"display-settings": "Paramètres d'affichage",
-		"fiat-currency": "Devise FIAT",
+		"fiat-currency": "Monnaie fiduciaire",
 		"for-example-using-basic-auth": "Par exemple, en utilisant l'authentification de base : Basic xyz",
 		"identicon-options": {
 			"1-hour": "1 Heure",

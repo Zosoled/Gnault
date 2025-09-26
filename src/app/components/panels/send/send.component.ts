@@ -64,7 +64,7 @@ export class SendComponent implements OnInit {
 
 	amount: bigint = 0n
 	get amountFiat (): number {
-		return this.amountNano * this.svcPrice.lastPrice
+		return this.amountNano * this.svcPrice.lastPrice()
 	}
 	get amountNano (): number {
 		return parseFloat(Tools.convert(this.amount, 'raw', 'nano'))
@@ -179,7 +179,7 @@ export class SendComponent implements OnInit {
 			return
 		}
 		if (!this.util.string.isNumeric(this.amountFiat)) return
-		const fx = this.amountFiat / this.svcPrice.lastPrice
+		const fx = this.amountFiat / this.svcPrice.lastPrice()
 		const raw = await Tools.convert(fx, 'nano', 'raw')
 		this.amount = BigInt(raw)
 	}
