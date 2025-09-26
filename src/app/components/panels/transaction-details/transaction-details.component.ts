@@ -149,7 +149,7 @@ export class TransactionDetailsComponent implements OnInit {
 				break
 			case 'open':
 			case 'receive':
-				fromAccount = this.transaction.source_account
+				fromAccount = this.transaction.linked_account
 				toAccount = this.transaction.block_account
 				break
 			case 'change':
