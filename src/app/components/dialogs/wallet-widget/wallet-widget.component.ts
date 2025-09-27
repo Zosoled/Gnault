@@ -70,12 +70,7 @@ export class WalletWidgetComponent implements OnInit {
 	}
 
 	async requestUnlock () {
-		const isUnlocked = await this.svcWallet.requestUnlock()
-		if (isUnlocked) {
-			this.svcNotifications.sendSuccess(this.svcTransloco.translate('accounts.wallet-unlocked'))
-		} else {
-			this.svcNotifications.sendError(this.svcTransloco.translate('accounts.wrong-password'))
-		}
+		await this.svcWallet.requestUnlock()
 	}
 
 	cancelPow () {

@@ -94,7 +94,6 @@ export class WalletService {
 	selectedAccount: WritableSignal<Account> = signal(null)
 	selectedAccount$: BehaviorSubject<Account> = new BehaviorSubject(null)
 	isLocked = signal(true)
-	isLocked$ = new BehaviorSubject(true)
 	passwordUpdated$ = new BehaviorSubject(false)
 	isUnlockRequested$ = new BehaviorSubject(false)
 	isChangePasswordRequested$ = new BehaviorSubject(false)
@@ -444,8 +443,6 @@ export class WalletService {
 				a.secret = null
 			})
 
-			this.isLocked$.next(this.selectedWallet().isLocked)
-
 			// Save so that a refresh gives you a locked wallet
 			await this.saveWalletExport()
 		}
@@ -457,8 +454,6 @@ export class WalletService {
 			this.accounts.forEach(async (a) => {
 				a = await this.selectedWallet().account(a.index)
 			})
-
-			this.isLocked$.next(this.selectedWallet().isLocked)
 
 			// If there is a notification to unlock, remove it
 			this.svcNotifications.removeNotification('receivable-locked')
@@ -592,7 +587,6 @@ export class WalletService {
 			// Unsubscribe from old accounts
 			this.svcWebsocket.unsubscribeAccounts(this.accounts.map((a) => a.address))
 		}
-		this.isLocked$.next(true)
 		this.accounts = []
 		this.balance = 0n
 		this.receivable = 0n
@@ -1003,25 +997,15 @@ export class WalletService {
 		}
 		this.isUnlockRequested$.next(true)
 		return new Promise((resolve): void => {
-			let subscriptionForUnlock
 			let subscriptionForCancel
-			const removeSubscriptions = () => {
-				if (subscriptionForUnlock != null) {
-					subscriptionForUnlock.unsubscribe()
-				}
+			const removeSubscription = () => {
 				if (subscriptionForCancel != null) {
 					subscriptionForCancel.unsubscribe()
 				}
 			}
-			subscriptionForUnlock = this.isLocked$.subscribe((isLocked) => {
-				if (isLocked === false) {
-					removeSubscriptions()
-					resolve(false)
-				}
-			})
 			subscriptionForCancel = this.isUnlockRequested$.subscribe((wasRequested) => {
 				if (wasRequested === false) {
-					removeSubscriptions()
+					removeSubscription()
 					resolve(false)
 				}
 			})
