@@ -95,7 +95,7 @@ export class WalletService {
 	selectedAccount$: BehaviorSubject<Account> = new BehaviorSubject(null)
 	isLocked = signal(true)
 	passwordUpdated$ = new BehaviorSubject(false)
-	isUnlockRequested$ = new BehaviorSubject(false)
+	isUnlockRequested$ = new BehaviorSubject(true)
 	isChangePasswordRequested$ = new BehaviorSubject(false)
 	receivableBlocks = []
 	isReceivableBlocksUpdated$ = new BehaviorSubject(null)
@@ -997,46 +997,27 @@ export class WalletService {
 		}
 		this.isUnlockRequested$.next(true)
 		return new Promise((resolve): void => {
-			let subscriptionForCancel
-			const removeSubscription = () => {
-				if (subscriptionForCancel != null) {
-					subscriptionForCancel.unsubscribe()
-				}
-			}
-			subscriptionForCancel = this.isUnlockRequested$.subscribe((wasRequested) => {
-				if (wasRequested === false) {
-					removeSubscription()
-					resolve(false)
-				}
+			let subUnlock
+			subUnlock = this.isUnlockRequested$.subscribe(() => {
+				subUnlock?.unsubscribe()
+				resolve(this.isLocked())
 			})
 		})
 	}
 
 	requestChangePassword () {
 		this.isChangePasswordRequested$.next(true)
-		return new Promise((resolve, reject) => {
-			let subscriptionForUpdate
-			let subscriptionForCancel
-
-			const removeSubscriptions = () => {
-				if (subscriptionForUpdate != null) {
-					subscriptionForUpdate.unsubscribe()
-				}
-				if (subscriptionForCancel != null) {
-					subscriptionForCancel.unsubscribe()
-				}
-			}
-
-			subscriptionForUpdate = this.passwordUpdated$.subscribe(async (isUpdated) => {
+		return new Promise((resolve) => {
+			let subUpdate, subCancel
+			subUpdate = this.passwordUpdated$.subscribe(async (isUpdated) => {
 				if (isUpdated) {
-					removeSubscriptions()
+					subUpdate?.unsubscribe()
 					resolve(true)
 				}
 			})
-
-			subscriptionForCancel = this.isChangePasswordRequested$.subscribe(async (wasRequested) => {
-				if (wasRequested === false) {
-					removeSubscriptions()
+			subCancel = this.isChangePasswordRequested$.subscribe(async (isVisible) => {
+				if (!isVisible) {
+					subCancel?.unsubscribe()
 					resolve(false)
 				}
 			})
