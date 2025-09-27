@@ -1007,7 +1007,7 @@ export class WalletService {
 		})
 	}
 
-	requestChangePassword () {
+	requestChangePassword (): Promise<boolean> {
 		this.isChangePasswordRequested$.next(true)
 		return new Promise((resolve) => {
 			let subUpdate, subCancel
