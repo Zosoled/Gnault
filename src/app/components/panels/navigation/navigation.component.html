@@ -74,77 +74,7 @@
 	<div class="nav-header">
 		<div uk-grid>
 			<div class="uk-width-expand">
-				<div [class]="['nano-card', selectedAccount === null ? 'is-wallet' : 'is-card']">
-					<div
-						class="logo"
-						[style.--selectedAccountColor.deg]="selectedAccountColor()"
-					></div>
-					<div class="card-contents">
-						<div class="account-name-container">
-							<a
-								[routerLink]="`/accounts/${selectedAccount?.address ?? ''}`"
-								[queryParams]="{ compact: '1' }"
-								class="name"
-							>
-								{{
-									selectedAccount == null
-										? 'Total Balance'
-										: (selectedAccount.addressBookName ??
-											('general.account' | transloco) + ' #' + selectedAccount.index)
-								}}
-							</a>
-							<div
-								#selectButton
-								[class]="['select-button', isWalletsDropdownVisible ? 'open' : 'closed']"
-								(click)="toggleWalletsDropdown()"
-							>
-								<div class="circle"></div>
-								<div class="circle"></div>
-								<div class="circle"></div>
-							</div>
-						</div>
-						<div class="account-balances">
-							@if ((node.status && isBalanceInitialized) || !isConfigured) {
-								<ng-container>
-									<div class="balance-container primary">
-										<div class="currency-name">Ӿ</div>
-										<div class="amount-container">
-											<div class="amount-integer">
-												{{ selectedAccount?.balance ?? balance ?? 0 | rai: 'mnano,true' | amountsplit: 0 }}
-											</div>
-											<div class="amount-fractional">
-												{{ selectedAccount?.balance ?? balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }}
-											</div>
-											@if (isBalanceUpdating && isConfigured) {
-												<div class="amount-updating">
-													<div uk-spinner="ratio: 0.5;"></div>
-												</div>
-											}
-										</div>
-									</div>
-									@if (displayCurrency) {
-										<div class="balance-container converted">
-											<div class="currency-name">
-												<span class="estimate-symbol">~</span>
-												{{ displayCurrency | currencySymbol }}
-											</div>
-											<div class="amount-container">
-												<div class="amount-integer">
-													{{ selectedAccount?.balance ?? balance ?? 0 | fiat | amountsplit: 0 }}
-												</div>
-												<div class="amount-fractional">
-													{{ selectedAccount?.balance ?? balance ?? 0 | fiat | amountsplit: 1 }}
-												</div>
-											</div>
-										</div>
-									}
-								</ng-container>
-							} @else if (node.status !== false) {
-								<ng-template [ngTemplateOutlet]="balanceLoading"></ng-template>
-							}
-						</div>
-					</div>
-				</div>
+				<app-nano-card></app-nano-card>
 				@if (selectedAccount?.receivable > 0 || hasReceivableTransactions) {
 					<ng-container>
 						@if (isProcessingReceivable) {

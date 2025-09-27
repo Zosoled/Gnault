@@ -1,4 +1,3 @@
-import { AsyncPipe } from '@angular/common'
 import {
 	Component,
 	ElementRef,
@@ -15,13 +14,6 @@ import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
 import { SwUpdate } from '@angular/service-worker'
 import { TranslocoPipe } from '@jsverse/transloco'
-import {
-	ChangeRepWidgetComponent,
-	GnaultLogoElementComponent,
-	InstallWidgetComponent,
-	WalletWidgetComponent
-} from 'app/components'
-import { NanoCardComponent } from 'app/components/elements/nano-card/nano-card.component'
 import { AmountSplitPipe, CurrencySymbolPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AppSettingsService,
@@ -35,26 +27,20 @@ import { environment } from 'environments/environment'
 import { Wallet } from 'libnemo'
 
 @Component({
-	selector: 'app-navigation',
-	templateUrl: './navigation.component.html',
-	styleUrls: ['./navigation.component.css'],
+	selector: 'app-nano-card',
+	templateUrl: './nano-card.component.html',
+	styleUrls: ['./nano-card.component.css'],
 	imports: [
-		AsyncPipe,
 		AmountSplitPipe,
-		ChangeRepWidgetComponent,
 		CurrencySymbolPipe,
 		FiatPipe,
-		GnaultLogoElementComponent,
-		InstallWidgetComponent,
 		FormsModule,
-		NanoCardComponent,
 		RaiPipe,
 		RouterLink,
 		TranslocoPipe,
-		WalletWidgetComponent,
 	],
 })
-export class NavigationComponent {
+export class NanoCardComponent {
 	private renderer = inject(Renderer2)
 	private router = inject(Router)
 	private updates = inject(SwUpdate)
