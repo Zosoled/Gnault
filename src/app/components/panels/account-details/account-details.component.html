@@ -531,7 +531,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					@for (receivable of receivableBlocks; track $index) {
+					@for (receivable of receivableBlocks; track receivable.hash) {
 						<tr [class]="{ 'uk-text-muted': true, 'uk-hidden': receivable.received }">
 							<td class="type-column">
 								<span
