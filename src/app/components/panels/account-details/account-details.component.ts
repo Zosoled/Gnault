@@ -602,13 +602,13 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		// No response from RPC
 		if (!accountHistory?.history) {
 			this.accountHistory = []
+			this.loadingTxList = false
 			return
 		}
 		const { history } = accountHistory
 
 		const additionalBlocksInfo = []
 		const accountConfirmationHeight = parseInt(this.account()?.confirmation_height, 10) || null
-
 		for (const h of history) {
 			h.local_date_string = h.local_timestamp ? formatDate(h.local_timestamp * 1000, 'MMM d, y', 'en-US') : 'N/A'
 			h.local_time_string = h.local_timestamp ? formatDate(h.local_timestamp * 1000, 'HH:mm:ss', 'en-US') : ''
