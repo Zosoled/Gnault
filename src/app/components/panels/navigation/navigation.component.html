@@ -214,10 +214,10 @@
 											</div>
 											<div class="amount-container">
 												<div class="amount-integer">
-													{{ selectedAccount?.receivableFiat ?? receivable | fiat | amountsplit: 0 }}
+													{{ selectedAccount?.receivable ?? receivable | fiat | amountsplit: 0 }}
 												</div>
 												<div class="amount-fractional">
-													{{ selectedAccount?.receivableFiat ?? receivable | fiat | amountsplit: 1 }}
+													{{ selectedAccount?.receivable ?? receivable | fiat | amountsplit: 1 }}
 												</div>
 											</div>
 										</div>
