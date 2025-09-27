@@ -82,8 +82,7 @@ export class WalletService {
 	private svcWorkPool = inject(WorkPoolService)
 
 	selectedWallet: WritableSignal<Wallet> = signal(null)
-	wallets: Wallet[] = []
-	wallets$: BehaviorSubject<Wallet[]> = new BehaviorSubject([])
+	wallets: WritableSignal<Wallet[]> = signal<Wallet[]>([])
 	walletNames: Map<string, string> = new Map()
 	balance = 0n
 	receivable = 0n
@@ -335,8 +334,7 @@ export class WalletService {
 	async loadWallet (): Promise<void> {
 		this.resetWallet()
 
-		this.wallets = await Wallet.restore()
-		this.wallets$.next(this.wallets)
+		this.wallets.set(await Wallet.restore())
 
 		const { walletStorage } = this.svcAppSettings.settings
 		const storage = globalThis[walletStorage]
@@ -372,8 +370,9 @@ export class WalletService {
 			await wallet.unlock(password)
 			password = ''
 			this.selectedWallet.set(wallet)
-			this.wallets.push(wallet)
-			this.wallets$.next(this.wallets)
+			this.wallets.update(v => {
+				return [...v, wallet]
+			})
 
 			if (walletType === 'seed') {
 				// Old method

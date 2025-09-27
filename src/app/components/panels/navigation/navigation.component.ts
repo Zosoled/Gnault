@@ -131,8 +131,8 @@ export class NavigationComponent {
 	get walletNames () {
 		return this.svcWallet.walletNames
 	}
-	get wallets$ () {
-		return this.svcWallet.wallets$
+	get wallets () {
+		return this.svcWallet.wallets()
 	}
 
 	selectedAccountColor: Signal<number> = computed((): number => {

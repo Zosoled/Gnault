@@ -4,7 +4,6 @@
 	[class]="['wallets-dropdown', isWalletsDropdownVisible ? 'visible' : 'hidden']"
 >
 	<div class="header">Wallets</div>
-	@let wallets = wallets$ | async;
 	@if (wallets.length < 1) {
 		<div class="wallet active">
 			<!-- active wallet -->

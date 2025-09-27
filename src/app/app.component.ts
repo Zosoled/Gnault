@@ -25,7 +25,6 @@ import {
 } from 'app/services'
 import { environment } from 'environments/environment'
 import { Account, Wallet } from 'libnemo'
-import { BehaviorSubject } from 'rxjs'
 
 @Component({
 	selector: 'app',
@@ -120,8 +119,8 @@ export class AppComponent implements AfterViewInit {
 	get walletNames (): Map<string, string> {
 		return this.svcWallet.walletNames
 	}
-	get wallets$ (): BehaviorSubject<Wallet[]> {
-		return this.svcWallet.wallets$
+	get wallets (): Wallet[] {
+		return this.svcWallet.wallets()
 	}
 
 	constructor () {
