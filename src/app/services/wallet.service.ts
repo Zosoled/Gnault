@@ -95,7 +95,7 @@ export class WalletService {
 	selectedAccount$: BehaviorSubject<Account> = new BehaviorSubject(null)
 	isLocked = signal(true)
 	passwordUpdated$ = new BehaviorSubject(false)
-	isUnlockRequested$ = new BehaviorSubject(true)
+	isUnlockRequested$ = new BehaviorSubject(false)
 	isChangePasswordRequested$ = new BehaviorSubject(false)
 	receivableBlocks = []
 	isReceivableBlocksUpdated$ = new BehaviorSubject(null)
@@ -998,9 +998,11 @@ export class WalletService {
 		this.isUnlockRequested$.next(true)
 		return new Promise((resolve): void => {
 			let subUnlock
-			subUnlock = this.isUnlockRequested$.subscribe(() => {
-				subUnlock?.unsubscribe()
-				resolve(this.isLocked())
+			subUnlock = this.isUnlockRequested$.subscribe((isVisible) => {
+				if (!isVisible) {
+					subUnlock?.unsubscribe()
+					resolve(this.isLocked())
+				}
 			})
 		})
 	}
