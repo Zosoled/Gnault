@@ -19,54 +19,6 @@
 	></div>
 </div>
 
-<!-- Wallets dropdown -->
-<div
-	#walletsDropdown
-	[class]="['wallets-dropdown', isWalletsDropdownVisible ? 'visible' : 'hidden']"
->
-	<div class="header">Wallets</div>
-	@let wallets = wallets$ | async;
-	@if (wallets.length < 1) {
-		<div class="wallet active">
-			<!-- active wallet -->
-			<div class="name-column">
-				<div class="name">
-					<a [routerLink]="'/configure-wallet/'">
-						{{ 'configure-wallet.new-wallet.configure-new-wallet' | transloco }}
-					</a>
-				</div>
-			</div>
-		</div>
-	} @else {
-		@if (isConfigured) {
-			<div class="wallet active">
-				<!-- active wallet -->
-				<div class="name-column">
-					<div class="name">
-						{{ selectedWalletName }}
-					</div>
-				</div>
-			</div>
-		}
-		@for (wallet of wallets; track wallet.id) {
-			<ng-container>
-				<!-- inactive wallets -->
-				@if (selectedWallet == null || selectedWallet.id !== wallet.id) {
-					<div
-						class="wallet inactive"
-						(click)="selectWallet(wallet)"
-					>
-						<div class="name-column">
-							<div class="name">
-								{{ walletNames.get(wallet.id) ?? wallet.id }}
-							</div>
-						</div>
-					</div>
-				}
-			</ng-container>
-		}
-	}
-</div>
 <div
 	class="uk-width-1-4 nav-container"
 	[style.top]="`${mobileBarHeight}px`"

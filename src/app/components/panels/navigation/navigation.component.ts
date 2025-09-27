@@ -1,13 +1,9 @@
-import { AsyncPipe } from '@angular/common'
 import {
 	Component,
-	ElementRef,
 	EventEmitter,
-	HostListener,
 	Output,
 	Renderer2,
 	Signal,
-	ViewChild,
 	computed,
 	inject
 } from '@angular/core'
@@ -39,7 +35,6 @@ import { Wallet } from 'libnemo'
 	templateUrl: './navigation.component.html',
 	styleUrls: ['./navigation.component.css'],
 	imports: [
-		AsyncPipe,
 		AmountSplitPipe,
 		ChangeRepWidgetComponent,
 		CurrencySymbolPipe,
@@ -67,22 +62,10 @@ export class NavigationComponent {
 	svcNode = inject(NodeService)
 	svcPrice = inject(PriceService)
 
-	@HostListener('document:mousedown', ['$event']) onGlobalClick (event): void {
-		if (
-			this.selectButton.nativeElement.contains(event.target) === false &&
-			this.walletsDropdown.nativeElement.contains(event.target) === false
-		) {
-			this.isWalletsDropdownVisible = false
-		}
-	}
-
 	@Output() animatingChanged = new EventEmitter<boolean>()
 	isAnimating = false
 	@Output() expandedChanged = new EventEmitter<boolean>()
 	isExpanded = false
-
-	@ViewChild('selectButton') selectButton: ElementRef
-	@ViewChild('walletsDropdown') walletsDropdown: ElementRef
 
 	canToggleLightMode = true
 	donationAccount = environment.donationAddress
@@ -214,19 +197,9 @@ export class NavigationComponent {
 		}
 	}
 
-	toggleWalletsDropdown () {
-		if (this.isWalletsDropdownVisible) {
-			this.isWalletsDropdownVisible = false
-		} else {
-			this.isWalletsDropdownVisible = true
-			this.walletsDropdown.nativeElement.scrollTop = 0
-		}
-	}
-
 	selectWallet (wallet: Wallet | null) {
 		// note: wallet is null when user is switching to 'Total Balance'
 		this.svcWallet.selectedWallet.set(wallet)
-		this.toggleWalletsDropdown()
 		this.svcWallet.saveWalletExport()
 	}
 

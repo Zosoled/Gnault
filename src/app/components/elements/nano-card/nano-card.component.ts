@@ -1,3 +1,4 @@
+import { AsyncPipe } from '@angular/common'
 import {
 	Component,
 	ElementRef,
@@ -32,6 +33,7 @@ import { Wallet } from 'libnemo'
 	styleUrls: ['./nano-card.component.css'],
 	imports: [
 		AmountSplitPipe,
+		AsyncPipe,
 		CurrencySymbolPipe,
 		FiatPipe,
 		FormsModule,
