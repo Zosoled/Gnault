@@ -15,7 +15,6 @@ import { AmountSplitPipe, CurrencySymbolPipe, FiatPipe, RaiPipe } from 'app/pipe
 import {
 	AppSettingsService,
 	NodeService,
-	PriceService,
 	WalletService
 } from 'app/services'
 import { Wallet } from 'libnemo'
@@ -37,10 +36,8 @@ import { Wallet } from 'libnemo'
 })
 export class NanoCardComponent {
 	private svcAppSettings = inject(AppSettingsService)
+	private svcNode = inject(NodeService)
 	private svcWallet = inject(WalletService)
-
-	svcNode = inject(NodeService)
-	svcPrice = inject(PriceService)
 
 	@ViewChild('selectButton') selectButton: ElementRef
 	@ViewChild('walletsDropdown') walletsDropdown: ElementRef
