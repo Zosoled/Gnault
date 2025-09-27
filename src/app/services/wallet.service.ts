@@ -161,7 +161,7 @@ export class WalletService {
 
 			if (isConfirmedIncomingTransactionForOwnWalletAccount === true) {
 				if (shouldNotify === true) {
-					if (this.isLocked && this.svcAppSettings.settings.receivableOption !== 'manual') {
+					if (this.isLocked() && this.svcAppSettings.settings.receivableOption !== 'manual') {
 						this.svcNotifications.sendWarning(`New incoming transaction - Unlock the wallet to receive`, {
 							length: 10000,
 							identifier: 'receivable-locked',
@@ -866,7 +866,7 @@ export class WalletService {
 	async processReceivableBlocks () {
 		if (
 			this.isProcessingReceivable ||
-			this.isLocked ||
+			this.isLocked() ||
 			!this.receivableBlocks.length ||
 			this.svcAppSettings.settings.receivableOption === 'manual'
 		)

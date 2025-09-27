@@ -372,7 +372,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			throw new Error(this.svcTransloco.translate('receive.unable-to-find-receiving-account'))
 		}
 
-		if (this.svcWallet.isLocked) {
+		if (this.svcWallet.isLocked()) {
 			const wasUnlocked = await this.svcWallet.requestUnlock()
 
 			if (wasUnlocked === false) {

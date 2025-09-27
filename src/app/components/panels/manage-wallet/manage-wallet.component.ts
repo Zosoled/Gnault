@@ -86,7 +86,7 @@ export class ManageWalletComponent implements OnInit {
 				this.translocoService.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match')
 			)
 		}
-		if (this.svcWallet.isLocked) {
+		if (this.svcWallet.isLocked()) {
 			const wasUnlocked = await this.svcWallet.requestUnlock()
 			if (wasUnlocked === false) {
 				return
@@ -101,7 +101,7 @@ export class ManageWalletComponent implements OnInit {
 	}
 
 	async exportWallet () {
-		if (this.svcWallet.isLocked) {
+		if (this.svcWallet.isLocked()) {
 			const wasUnlocked = await this.svcWallet.requestUnlock()
 			if (wasUnlocked === false) {
 				return
@@ -184,7 +184,7 @@ export class ManageWalletComponent implements OnInit {
 	}
 
 	async exportToFile () {
-		if (this.svcWallet.isLocked) {
+		if (this.svcWallet.isLocked()) {
 			const wasUnlocked = await this.svcWallet.requestUnlock()
 			if (wasUnlocked === false) {
 				return

@@ -337,7 +337,7 @@ export class SendComponent implements OnInit {
 		if (!walletAccount) {
 			throw new Error(`Unable to find sending account in wallet`)
 		}
-		if (this.svcWallet.isLocked) {
+		if (this.svcWallet.isLocked()) {
 			const wasUnlocked = await this.svcWallet.requestUnlock()
 			if (wasUnlocked === false) {
 				return

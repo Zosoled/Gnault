@@ -147,7 +147,7 @@ export class AccountsComponent implements OnInit {
 	}
 
 	async deleteAccount (account) {
-		if (this.svcWallet.isLocked) {
+		if (this.svcWallet.isLocked()) {
 			const wasUnlocked = await this.svcWallet.requestUnlock()
 
 			if (wasUnlocked === false) {
@@ -169,7 +169,7 @@ export class AccountsComponent implements OnInit {
 	}
 
 	async showLedgerAddress (account) {
-		if (this.svcWallet.isLocked) {
+		if (this.svcWallet.isLocked()) {
 			return this.svcNotifications.sendWarning(this.svcTransloco.translate('accounts.ledger-device-must-be-ready'))
 		}
 		this.svcNotifications.sendInfo(

@@ -207,7 +207,7 @@ export class AppComponent implements AfterViewInit {
 		// If the wallet is locked and there is a receivable balance, show a warning to unlock the wallet
 		// (if not receive priority is set to manual)
 		if (
-			this.svcWallet.isLocked &&
+			this.svcWallet.isLocked() &&
 			this.svcWallet.hasReceivableTransactions() &&
 			this.svcAppSettings.settings.receivableOption !== 'manual'
 		) {
@@ -227,11 +227,11 @@ export class AppComponent implements AfterViewInit {
 
 		// When the page closes, determine if we should lock the wallet
 		window.addEventListener('beforeunload', (e) => {
-			if (this.svcWallet.isLocked) return // Already locked, nothing to worry about
+			if (this.svcWallet.isLocked()) return // Already locked, nothing to worry about
 			this.svcWallet.lockWallet()
 		})
 		window.addEventListener('unload', (e) => {
-			if (this.svcWallet.isLocked) return // Already locked, nothing to worry about
+			if (this.svcWallet.isLocked()) return // Already locked, nothing to worry about
 			this.svcWallet.lockWallet()
 		})
 
@@ -265,7 +265,7 @@ export class AppComponent implements AfterViewInit {
 		setInterval(() => {
 			this.inactiveSeconds += 1
 			if (!this.svcAppSettings.settings.lockInactivityMinutes) return // Do not lock on inactivity
-			if (this.svcWallet.isLocked) return
+			if (this.svcWallet.isLocked()) return
 
 			// Determine if we have been inactive for longer than our lock setting
 			if (this.inactiveSeconds >= this.svcAppSettings.settings.lockInactivityMinutes * 60) {

@@ -292,7 +292,7 @@ export class RepresentativesComponent implements OnInit {
 		if (this.changingRepresentatives) {
 			return // Already running
 		}
-		if (this.walletService.isLocked) {
+		if (this.walletService.isLocked()) {
 			const wasUnlocked = await this.walletService.requestUnlock()
 
 			if (wasUnlocked === false) {
