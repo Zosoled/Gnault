@@ -807,8 +807,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 		if (!this.svcUtil.string.isNumeric(this.amountFiat)) return
 		const fx = (this.amountFiat / this.lastPrice).toString()
-		const nanoPrice: string = await Tools.convert(fx, 'mnano', 'nano')
-		this.amount = Number(nanoPrice).toPrecision(3)
+		this.amount = Number(fx).toPrecision(3)
 	}
 
 	searchAddressBook () {
