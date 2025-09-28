@@ -136,7 +136,7 @@ pre.mnemonic span.mnemonic-word::before {
 }
 
 .landing-container > div > .wallet-option > .icon > .seed {
-	font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+	font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 	margin: 0;
 	line-height: 1.2;
 	font-size: 24px;
@@ -144,7 +144,7 @@ pre.mnemonic span.mnemonic-word::before {
 }
 
 .landing-container > div > .wallet-option > .icon > .more-options {
-	font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+	font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 	margin: 0;
 	line-height: 1.2;
 	font-size: 36px;
@@ -162,7 +162,7 @@ pre.mnemonic span.mnemonic-word::before {
 .landing-container > div > .wallet-option > .icon > .mnemonic > .mnemonic-row > .number {
 	width: 10px;
 	text-align: right;
-	font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+	font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 	margin: 0;
 	margin-bottom: 2px;
 	margin-right: 5px;
@@ -171,7 +171,7 @@ pre.mnemonic span.mnemonic-word::before {
 	font-weight: 300;
 }
 .landing-container > div > .wallet-option > .icon > .mnemonic > .mnemonic-row > .word {
-	font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+	font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 	margin: 0;
 	line-height: 1.2;
 	font-size: 16px;
@@ -196,7 +196,7 @@ pre.mnemonic span.mnemonic-word::before {
 }
 
 .landing-container > div > .wallet-option > p {
-	font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+	font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 	margin: 0;
 	line-height: 1.2;
 	font-size: 17px;

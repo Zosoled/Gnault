@@ -92,7 +92,7 @@
 	justify-content: center;
 	align-items: center;
 	text-align: center;
-	background: #FFF;
+	background: #fff;
 	padding: 20px;
 }
 
@@ -105,11 +105,11 @@
 	width: 150%;
 	height: 150%;
 	margin: -25%;
-	background: #16A670;
+	background: #16a670;
 	transition: all 0.3s cubic-bezier(0.6, 0, 1, 1);
 	transform: scale(0);
 	border-radius: 50%;
-	color: #FFF;
+	color: #fff;
 	padding: 30%;
 	box-sizing: border-box;
 }
@@ -176,7 +176,7 @@
 }
 
 .merchant-mode-overlay {
-	background-color: #FFF;
+	background-color: #fff;
 	z-index: 1050;
 	/* above notifications */
 	padding: 15px !important;
@@ -233,7 +233,7 @@
 	transition: border-color 100ms ease-in-out;
 }
 .merchant-mode-exit:hover {
-	border-color: #676686AA;
+	border-color: #676686aa;
 }
 
 .merchant-centered-container {
@@ -263,14 +263,14 @@
 	width: 290px;
 	height: 290px;
 	border-radius: 20px;
-	border: 2px solid #19191B;
-	background-color: #FFF;
+	border: 2px solid #19191b;
+	background-color: #fff;
 }
 
 .merchant-mode-amount-integer,
 .merchant-mode-amount-fractional,
 .merchant-mode-currency-name {
-	font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+	font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 	font-size: 34px;
 }
 

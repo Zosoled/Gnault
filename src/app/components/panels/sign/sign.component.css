@@ -67,7 +67,7 @@
 	justify-content: center;
 	width: 350px;
 	height: 350px;
-	background: #FFF;
+	background: #fff;
 	margin-bottom: 0;
 }
 .uk-modal-body .qr-code {
@@ -105,7 +105,7 @@
 }
 
 .block-amount-primary {
-	font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+	font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 	line-height: 1;
 	margin-top: 4px;
 }
@@ -128,7 +128,7 @@
 .block-balance .balance-amount-primary .amount-integer,
 .block-balance .balance-amount-primary .amount-fractional,
 .block-balance .balance-amount-primary .currency-name {
-	font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+	font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 	font-size: 16px;
 }
 

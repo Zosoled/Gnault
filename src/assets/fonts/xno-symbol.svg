@@ -1,0 +1,12 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg">
+<metadata>Copyright (C) 2025 by original authors @ fontello.com</metadata>
+<defs>
+<font id="xno-symbol" horiz-adv-x="1000" >
+<font-face font-family="xno-symbol" font-weight="400" font-stretch="normal" units-per-em="1000" ascent="850" descent="-150" />
+<missing-glyph horiz-adv-x="1000" />
+<glyph glyph-name="xno-symbol" unicode="&#xe001;" d="M644-9h-56l-212 330-215-330h-55l241 374-220 344h57l193-302 197 302h54l-222-343 238-375z m-485 396h434v-41h-434v41z m0-122h434v-41h-434l0 41z" horiz-adv-x="750" />
+</font>
+</defs>
+</svg>

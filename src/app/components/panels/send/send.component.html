@@ -62,7 +62,8 @@
 											@for (account of accounts; track account.address) {
 												<option [value]="account.address">
 													{{ account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
-													{{ account.address | squeeze }} ({{ account?.balance ?? 0 | rai: 'nano,true' | amountsplit: 0
+													{{ account.address | squeeze }} (&#xe001;{{
+														account?.balance ?? 0 | rai: 'nano,true' | amountsplit: 0
 													}}{{ account?.balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }} XNO)
 												</option>
 											}
@@ -180,9 +181,10 @@
 											>
 											<div class="uk-inline uk-width-1-1">
 												<label
-													class="uk-form-icon uk-link-reset uk-link-muted xno-symbol"
+													class="uk-form-icon uk-link-reset uk-link-muted"
 													for="send-form-input-number-amount-nano"
-												></label>
+													>&#xe001;</label
+												>
 												<input
 													[formControl]="amounts.nano"
 													(input)="syncTo('nano')"
@@ -237,9 +239,10 @@
 													>Max</a
 												>
 												<label
-													class="uk-form-icon uk-link-reset uk-link-muted xno-symbol"
+													class="uk-form-icon uk-link-reset uk-link-muted"
 													for="send-form-input-number-amount-raw"
-												></label>
+													>&#xe001;</label
+												>
 												<input
 													[formControl]="amounts.raw"
 													(input)="syncTo('raw')"

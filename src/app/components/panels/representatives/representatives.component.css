@@ -40,31 +40,31 @@
 }
 
 .representative-health-status.health-green {
-	color: #32D296;
+	color: #32d296;
 }
 .representative-health-status.health-green > .health-icon {
-	background-color: #32D296;
+	background-color: #32d296;
 }
 
 .representative-health-status.health-yellow {
-	color: #FAA05A;
+	color: #faa05a;
 }
 .representative-health-status.health-yellow > .health-icon {
-	background-color: #FAA05A;
+	background-color: #faa05a;
 }
 
 .representative-health-status.health-red {
-	color: #F0506E;
+	color: #f0506e;
 }
 .representative-health-status.health-red > .health-icon {
-	background-color: #F0506E;
+	background-color: #f0506e;
 }
 
 .representative-health-status.health-unknown {
-	color: #868AB0;
+	color: #868ab0;
 }
 .representative-health-status.health-unknown > .health-icon {
-	background-color: #868AB0;
+	background-color: #868ab0;
 }
 
 .representative-name-column {
@@ -134,7 +134,7 @@
 .voting-weight-column .amount-integer,
 .voting-weight-column .amount-fractional,
 .voting-weight-column .currency-name {
-	font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+	font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 }
 
 .representative-row .voting-weight-column .amount-integer,

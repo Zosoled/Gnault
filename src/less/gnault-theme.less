@@ -6,6 +6,17 @@ html {
 	--special: rebeccapurple;
 }
 
+.xno {
+	// Use &#xe001; in text
+	font-style: normal;
+	font-weight: normal;
+	// Reset parent styles that can break glyph codes
+	font-variant: normal;
+	text-transform: none;
+	// Fix button height for Twitter bootstrap
+	line-height: 1em;
+}
+
 @nlt-intro-margin: 40px;
 
 @rep-label-color: #9A71D5;
@@ -173,23 +184,8 @@ h5,
 	color: #A478E3;
 }
 
-.xno-symbol {
-	display: inline-block;
-	width: 0.756em;
-	height: 1em;
-	background-color: currentcolor;
-	-webkit-mask-image: url('../assets/img/xno-symbol.svg');
-	mask-image: url('../assets/img/xno-symbol.svg');
-	-webkit-mask-size: cover;
-	mask-size: cover;
-
-	&.uk-form-icon {
-		margin: 12px 21px;
-	}
-}
-
 a.fiat-currency-ticker {
-	font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+	font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 	color: #9F8181 !important;
 	font-weight: 500;
 	padding-left: 7px;
@@ -578,7 +574,7 @@ input[type=number] {
 		padding: 10px 8px;
 		margin: 10px -8px 0 -8px;
 		font-size: 17px;
-		font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+		font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 		cursor: pointer;
 		border-radius: 2px;
 		user-select: none;
@@ -656,7 +652,7 @@ input[type=number] {
 			background: #E04E4E;
 			border-radius: 30px;
 			color: #FFF;
-			font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+			font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 			font-size: 17px;
 			font-weight: 400;
 			text-transform: uppercase;
@@ -813,7 +809,7 @@ input[type=number] {
 			.amount-integer,
 			.amount-fractional,
 			.currency-name {
-				font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+				font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 				font-size: 16px;
 			}
 
@@ -1160,7 +1156,7 @@ input[type=number] {
 		.amount-integer,
 		.amount-fractional,
 		.currency-name {
-			font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+			font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 			font-size: 16px;
 		}
 
@@ -1496,7 +1492,7 @@ input[type=number] {
 		}
 
 		>p {
-			font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+			font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
 			margin: 0;
 			line-height: 1.6;
 			font-size: 16px;
