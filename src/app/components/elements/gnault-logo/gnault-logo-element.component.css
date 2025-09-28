@@ -13,7 +13,7 @@ text {
 	font-family: 'OpenDyslexic-Regular';
 	letter-spacing: -0.1em;
 	mix-blend-mode: difference;
-	text-shadow: 0 0 0.5em red;
+	text-shadow: 0 0 0.5em var(--primary);
 }
 
 .logo-first {
