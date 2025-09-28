@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common'
 import { AfterViewInit, Component, effect, inject } from '@angular/core'
-import { FormControl, FormControlOptions, FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
 import { ActivatedRoute, RouterLink } from '@angular/router'
 import { TranslocoService } from '@jsverse/transloco'
 import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/elements'
@@ -58,21 +58,10 @@ export class SendComponent implements AfterViewInit {
 	activePanel = 'send'
 	addressBookMatch = ''
 	addressBookResults$ = new BehaviorSubject([])
-	amountsInputOptions: FormControlOptions = {
-		nonNullable: false,
-		validators: (input) => {
-			const { value } = input
-			if (typeof value !== 'bigint' && typeof value !== 'number') {
-				return { TypeError: typeof value }
-			} else if (value < 0) {
-				return { RangeError: value }
-			}
-		}
-	}
 	amounts = {
-		fiat: new FormControl<number>(null, this.amountsInputOptions),
-		nano: new FormControl<number>(null, this.amountsInputOptions),
-		raw: new FormControl<bigint>(null, this.amountsInputOptions),
+		fiat: new FormControl<number>(null, { nonNullable: false, validators: Validators.pattern('\d*\.?\d*') }),
+		nano: new FormControl<number>(null, { nonNullable: false, validators: Validators.pattern('\d*\.?\d*') }),
+		raw: new FormControl<bigint>(null, { nonNullable: false, validators: Validators.pattern('\d*') }),
 	}
 	sendDestinationType = 'external-address'
 	showAddressBook = false
@@ -176,27 +165,33 @@ export class SendComponent implements AfterViewInit {
 	 */
 	async syncTo (unit: 'fiat' | 'nano' | 'raw'): Promise<void> {
 		console.log('syncPrices()')
-		console.log(`lastPrice: ${this.svcPrice.lastPrice}`)
-		console.log(`this.amounts.fiat: ${this.amounts.fiat}`)
-		console.log(`this.amounts.nano: ${this.amounts.nano}`)
-		console.log(`this.amounts.raw: ${this.amounts.raw}`)
-		const lastPrice = this.svcPrice.lastPrice()
-		switch (unit) {
-			case 'fiat': {
-				this.amounts.nano.setValue(this.amounts.fiat.value / lastPrice)
-				this.amounts.raw.setValue(Tools.convert(this.amounts.nano.value, 'nano', 'raw', 'bigint'))
-				return
+		console.log(`lastPrice: ${this.lastPrice}`)
+		console.log(`fiat: ${this.amounts.fiat.value}`)
+		console.log(`nano: ${this.amounts.nano.value}`)
+		console.log(`raw: ${this.amounts.raw.value}`)
+		try {
+			switch (unit) {
+				case 'fiat': {
+					const fiat = this.amounts.fiat.value
+					this.amounts.nano.setValue(fiat ? fiat / this.lastPrice : null)
+					this.amounts.raw.setValue(fiat ? Tools.convert(fiat / this.lastPrice, 'nano', 'raw', 'bigint') : null)
+					return
+				}
+				case 'nano': {
+					const nano = this.amounts.nano.value
+					this.amounts.fiat.setValue(nano ? nano * this.lastPrice : null)
+					this.amounts.raw.setValue(nano ? Tools.convert(nano, 'nano', 'raw', 'bigint') : null)
+					return
+				}
+				case 'raw': {
+					const raw = this.amounts.raw.value
+					this.amounts.nano.setValue(raw ? Tools.convert(raw, 'raw', 'nano', 'number') : null)
+					this.amounts.fiat.setValue(raw ? Tools.convert(raw, 'raw', 'nano', 'number') * this.lastPrice : null)
+					return
+				}
 			}
-			case 'nano': {
-				this.amounts.fiat.setValue(this.amounts.nano.value * lastPrice)
-				this.amounts.raw.setValue(Tools.convert(this.amounts.nano.value, 'nano', 'raw', 'bigint'))
-				return
-			}
-			case 'raw': {
-				this.amounts.nano.setValue(Tools.convert(this.amounts.raw.value, 'raw', 'nano', 'number'))
-				this.amounts.fiat.setValue(this.amounts.nano.value * lastPrice)
-				return
-			}
+		} catch (err) {
+			this.svcNotifications.sendError(err?.message ?? err)
 		}
 	}
 

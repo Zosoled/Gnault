@@ -62,8 +62,8 @@
 											@for (account of accounts; track account.address) {
 												<option [value]="account.address">
 													{{ account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
-													{{ account.address | squeeze }} ({{ account.balance | rai: 'mnano,true' | amountsplit: 0
-													}}{{ account.balance | rai: 'mnano,true' | amountsplit: 1 }} XNO)
+													{{ account.address | squeeze }} ({{ account?.balance ?? 0 | rai: 'nano,true' | amountsplit: 0
+													}}{{ account?.balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }} XNO)
 												</option>
 											}
 										</select>
@@ -171,6 +171,56 @@
 								}
 								<div class="form-amount uk-form-controls">
 									<div uk-grid>
+										<!-- Nano amount -->
+										<div class="uk-width-1-1">
+											<label
+												class="uk-form-label"
+												for="send-form-input-number-amount-nano"
+												>XNO (nano)</label
+											>
+											<div class="uk-inline uk-width-1-1">
+												<label
+													class="uk-form-icon uk-link-reset uk-link-muted xno-symbol"
+													for="send-form-input-number-amount-nano"
+												></label>
+												<input
+													[formControl]="amounts.nano"
+													(input)="syncTo('nano')"
+													[ngClass]="{ 'uk-form-danger': amount < 0 }"
+													style="padding-left: 52px !important"
+													class="uk-input"
+													id="send-form-input-number-amount-nano"
+													type="text"
+													placeholder="XNO (nano)"
+													maxlength="40"
+												/>
+											</div>
+										</div>
+										<!-- Fiat Amount -->
+										<div class="uk-width-1-1">
+											<label
+												class="uk-form-label"
+												for="send-form-input-number-amount-fiat"
+												>{{ displayCurrency.toUpperCase() }}</label
+											>
+											<div class="uk-width-1-1 uk-inline">
+												<label
+													class="uk-form-icon uk-link-reset uk-link-muted fiat-currency-ticker"
+													for="send-form-input-number-amount-fiat"
+													>{{ displayCurrency | currencySymbol }}</label
+												>
+												<input
+													[formControl]="amounts.fiat"
+													(input)="syncTo('fiat')"
+													[ngClass]="{ 'uk-form-danger': amount < 0 }"
+													style="padding-left: 52px !important"
+													class="uk-input"
+													id="send-form-input-number-amount-fiat"
+													type="text"
+													placeholder="{{ displayCurrency }}"
+												/>
+											</div>
+										</div>
 										<!-- Raw amount -->
 										<div class="uk-width-1-1">
 											<label
@@ -193,66 +243,13 @@
 												<input
 													[formControl]="amounts.raw"
 													(input)="syncTo('raw')"
-													[ngClass]="{ 'uk-form-danger': amounts.raw.value < 0 }"
+													[ngClass]="{ 'uk-form-danger': amount < 0 }"
 													style="padding-left: 52px !important"
 													class="uk-input"
 													id="send-form-input-number-amount-raw"
-													type="number"
-													step="any"
+													type="text"
 													placeholder="XNO (raw)"
 													maxlength="40"
-												/>
-											</div>
-										</div>
-										<!-- Nano amount -->
-										<div class="uk-width-1-1">
-											<label
-												class="uk-form-label"
-												for="send-form-input-number-amount-nano"
-												>XNO (nano)</label
-											>
-											<div class="uk-inline uk-width-1-1">
-												<label
-													class="uk-form-icon uk-link-reset uk-link-muted xno-symbol"
-													for="send-form-input-number-amount-nano"
-												></label>
-												<input
-													[formControl]="amounts.nano"
-													(input)="syncTo('nano')"
-													[ngClass]="{ 'uk-form-danger': amounts.raw.value < 0 }"
-													style="padding-left: 52px !important"
-													class="uk-input"
-													id="send-form-input-number-amount-nano"
-													type="number"
-													step="any"
-													placeholder="XNO (nano)"
-													maxlength="40"
-												/>
-											</div>
-										</div>
-										<!-- Fiat Amount -->
-										<div class="uk-width-1-1">
-											<label
-												class="uk-form-label"
-												for="send-form-input-number-amount-fiat"
-												>{{ displayCurrency.toUpperCase() }}</label
-											>
-											<div class="uk-width-1-1 uk-inline">
-												<label
-													class="uk-form-icon uk-link-reset uk-link-muted fiat-currency-ticker"
-													for="send-form-input-number-amount-fiat"
-													>{{ displayCurrency | currencySymbol }}</label
-												>
-												<input
-													[formControl]="amounts.fiat"
-													(input)="syncTo('fiat')"
-													[ngClass]="{ 'uk-form-danger': amounts.raw.value < 0 }"
-													style="padding-left: 52px !important"
-													class="uk-input"
-													id="send-form-input-number-amount-fiat"
-													type="number"
-													step="any"
-													placeholder="{{ displayCurrency }}"
 												/>
 											</div>
 										</div>
