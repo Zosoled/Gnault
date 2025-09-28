@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common'
-import { Component, OnInit, inject } from '@angular/core'
-import { FormsModule } from '@angular/forms'
+import { AfterViewInit, Component, effect, inject } from '@angular/core'
+import { FormControl, FormControlOptions, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { ActivatedRoute, RouterLink } from '@angular/router'
 import { TranslocoService } from '@jsverse/transloco'
 import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/elements'
@@ -15,7 +15,7 @@ import {
 	QrModalService,
 	UtilService,
 	WalletService,
-	WorkPoolService,
+	WorkPoolService
 } from 'app/services'
 import { environment } from 'environments/environment'
 import { Tools } from 'libnemo'
@@ -36,77 +36,94 @@ import { BehaviorSubject } from 'rxjs'
 		NanoAccountIdComponent,
 		NanoIdenticonComponent,
 		RaiPipe,
+		ReactiveFormsModule,
 		RouterLink,
 		SqueezePipe,
 	],
 })
-export class SendComponent implements OnInit {
+export class SendComponent implements AfterViewInit {
 	private route = inject(ActivatedRoute)
+	private svcAddressBook = inject(AddressBookService)
+	private svcApi = inject(ApiService)
+	private svcAppSettings = inject(AppSettingsService)
+	private svcNanoBlock = inject(NanoBlockService)
+	private svcNotifications = inject(NotificationsService)
+	private svcPrice = inject(PriceService)
+	private svcQrModal = inject(QrModalService)
+	private svcTransloco = inject(TranslocoService)
+	private svcUtil = inject(UtilService)
 	private svcWallet = inject(WalletService)
-	private addressBookService = inject(AddressBookService)
-	private notificationService = inject(NotificationsService)
-	private nodeApi = inject(ApiService)
-	private nanoBlock = inject(NanoBlockService)
-	private workPool = inject(WorkPoolService)
-	private util = inject(UtilService)
-	private qrModalService = inject(QrModalService)
-	private translocoService = inject(TranslocoService)
-
-	svcPrice = inject(PriceService)
-	svcAppSettings = inject(AppSettingsService)
+	private svcWorkPool = inject(WorkPoolService)
 
 	activePanel = 'send'
-	sendDestinationType = 'external-address'
-	accounts = this.svcWallet.accounts
-	addressBookResults$ = new BehaviorSubject([])
-	showAddressBook = false
 	addressBookMatch = ''
-
-	amount: bigint = 0n
-	get amountFiat (): number {
-		return this.amountNano * this.svcPrice.lastPrice()
+	addressBookResults$ = new BehaviorSubject([])
+	amountsInputOptions: FormControlOptions = {
+		nonNullable: false,
+		validators: (input) => {
+			const { value } = input
+			if (typeof value !== 'bigint' && typeof value !== 'number') {
+				return { TypeError: typeof value }
+			} else if (value < 0) {
+				return { RangeError: value }
+			}
+		}
 	}
-	get amountNano (): number {
-		return parseFloat(Tools.convert(this.amount, 'raw', 'nano'))
+	amounts = {
+		fiat: new FormControl<number>(null, this.amountsInputOptions),
+		nano: new FormControl<number>(null, this.amountsInputOptions),
+		raw: new FormControl<bigint>(null, this.amountsInputOptions),
+	}
+	sendDestinationType = 'external-address'
+	showAddressBook = false
+
+	get accounts () {
+		return this.svcWallet.accounts
+	}
+	get amount () {
+		return this.amounts.raw.value
+	}
+	get displayCurrency () {
+		return this.svcAppSettings.settings.displayCurrency.toUpperCase()
+	}
+	get identiconsStyle () {
+		return this.svcAppSettings.settings.identiconsStyle
+	}
+	get lastPrice () {
+		return this.svcPrice.lastPrice()
 	}
 
 	fromAccount: any = {}
-	fromAccountID: any = ''
+	fromAddress: any = ''
 	fromAddressBook = ''
 	toAccount: any = false
-	toAccountID = ''
-	toOwnAccountID: any = ''
+	toAddress = ''
+	toOwnAddress: any = ''
 	toAddressBook = ''
 	toAccountStatus = null
-	amountStatus = null
 	preparingTransaction = false
 	confirmingTransaction = false
-	selAccountInit = false
 
-	async ngOnInit () {
+	// Update selected account if changed in the sidebar
+	selectAccount = effect(() => {
+		if (this.activePanel === 'send') {
+			const selectedAccount = this.svcWallet.selectedAccount()
+			if (selectedAccount) {
+				this.fromAddress = selectedAccount.address
+			} else {
+				this.findFirstAccount()
+			}
+		}
+	})
+
+	async ngAfterViewInit () {
 		const params = this.route.snapshot.queryParams
 		this.updateQueries(params)
-		this.addressBookService.loadAddressBook()
+		this.svcAddressBook.loadAddressBook()
 
 		// Set default From account
-		this.fromAccountID = this.accounts[0]?.id ?? ''
+		this.fromAddress = this.accounts[0]?.address ?? ''
 
-		// Update selected account if changed in the sidebar
-		this.svcWallet.selectedAccount$.subscribe(async (acc) => {
-			if (this.activePanel !== 'send') {
-				// Transaction details already finalized
-				return
-			}
-
-			if (this.selAccountInit) {
-				if (acc) {
-					this.fromAccountID = acc.id
-				} else {
-					this.findFirstAccount()
-				}
-			}
-			this.selAccountInit = true
-		})
 
 		// Update the account if query params changes. For example donation button while active on this page
 		this.route.queryParams.subscribe((queries) => {
@@ -115,7 +132,7 @@ export class SendComponent implements OnInit {
 
 		// Set the account selected in the sidebar as default
 		if (this.svcWallet.selectedAccount() !== null) {
-			this.fromAccountID = this.svcWallet.selectedAccount().address
+			this.fromAddress = this.svcWallet.selectedAccount().address
 		} else {
 			// If "total balance" is selected in the sidebar, use the first account in the wallet that has a balance
 			this.findFirstAccount()
@@ -124,12 +141,12 @@ export class SendComponent implements OnInit {
 
 	updateQueries (params) {
 		if (params && params.amount && !isNaN(params.amount)) {
-			this.amount = BigInt(Tools.convert(params.amount, 'nano', 'raw'))
-			this.syncFiatPrice()
+			this.amounts.raw.setValue(Tools.convert(params.amount, 'raw', 'raw', 'bigint'))
+			this.syncTo('raw')
 		}
 
 		if (params && params.to) {
-			this.toAccountID = params.to
+			this.toAddress = params.to
 			this.validateDestination()
 			this.sendDestinationType = 'external-address'
 		}
@@ -142,57 +159,56 @@ export class SendComponent implements OnInit {
 		}
 
 		// Look for the first account that has a balance
-		const accountIDWithBalance = this.accounts.reduce((previous, current) => {
+		const addressWithBalance = this.accounts.reduce((previous, current) => {
 			if (previous) return previous
 			if (current.balance > 0n) return current.id
 			return null
 		}, null)
 
-		if (accountIDWithBalance) {
-			this.fromAccountID = accountIDWithBalance
+		if (addressWithBalance) {
+			this.fromAddress = addressWithBalance
 		}
 	}
 
-	// An update to the Nano amount, sync the fiat value
-	async syncFiatPrice () {
-		console.log(`syncFiatPrice()`)
-		console.log(`this.amountFiat: ${this.amount}`)
-		console.log(`this.price.price.lastPrice: ${this.svcPrice.lastPrice}`)
-		if (!this.validateAmount() || Number(this.amount) === 0) {
-			return
+	/**
+	 * When value of one unit is changed, sync the other two units of measure.
+	 * @param {('fiat' | 'nano' | 'raw')} unit
+	 */
+	async syncTo (unit: 'fiat' | 'nano' | 'raw'): Promise<void> {
+		console.log('syncPrices()')
+		console.log(`lastPrice: ${this.svcPrice.lastPrice}`)
+		console.log(`this.amounts.fiat: ${this.amounts.fiat}`)
+		console.log(`this.amounts.nano: ${this.amounts.nano}`)
+		console.log(`this.amounts.raw: ${this.amounts.raw}`)
+		const lastPrice = this.svcPrice.lastPrice()
+		switch (unit) {
+			case 'fiat': {
+				this.amounts.nano.setValue(this.amounts.fiat.value / lastPrice)
+				this.amounts.raw.setValue(Tools.convert(this.amounts.nano.value, 'nano', 'raw', 'bigint'))
+				return
+			}
+			case 'nano': {
+				this.amounts.fiat.setValue(this.amounts.nano.value * lastPrice)
+				this.amounts.raw.setValue(Tools.convert(this.amounts.nano.value, 'nano', 'raw', 'bigint'))
+				return
+			}
+			case 'raw': {
+				this.amounts.nano.setValue(Tools.convert(this.amounts.raw.value, 'raw', 'nano', 'number'))
+				this.amounts.fiat.setValue(this.amounts.nano.value * lastPrice)
+				return
+			}
 		}
-		console.log(`sendTransaction() this.amount: ${this.amount}`)
-		console.log(typeof this.amount)
-		const rawAmount = BigInt(await Tools.convert(this.amount, 'nano', 'raw')) + this.amount
-		if (rawAmount < 0n) {
-			return
-		}
-	}
-
-	// An update to the fiat amount, sync the nano value based on currently selected denomination
-	async syncNanoPrice () {
-		console.log(`syncNanoPrice()`)
-		console.log(`this.amountFiat: ${this.amountFiat}`)
-		console.log(`this.price.price.lastPrice: ${this.svcPrice.lastPrice}`)
-		if (!this.amountFiat) {
-			this.amount = 0n
-			return
-		}
-		if (!this.util.string.isNumeric(this.amountFiat)) return
-		const fx = this.amountFiat / this.svcPrice.lastPrice()
-		const raw = await Tools.convert(fx, 'nano', 'raw')
-		this.amount = BigInt(raw)
 	}
 
 	async onDestinationAddressInput () {
 		this.addressBookMatch = ''
 		this.searchAddressBook()
-		const destinationAddress = this.toAccountID || ''
+		const destinationAddress = this.toAddress || ''
 		const nanoURIScheme = /^nano:.+$/g
 		const isNanoURI = nanoURIScheme.test(destinationAddress)
 		if (isNanoURI === true) {
 			const url = new URL(destinationAddress)
-			if (this.util.account.isValidAccount(url.pathname)) {
+			if (this.svcUtil.account.isValidAccount(url.pathname)) {
 				const amountAsRaw = url.searchParams.get('amount')
 				const amountAsXNO = amountAsRaw ? await Tools.convert(amountAsRaw, 'raw', 'nano').toString() : null
 				setTimeout(() => {
@@ -207,15 +223,15 @@ export class SendComponent implements OnInit {
 
 	searchAddressBook () {
 		this.showAddressBook = true
-		const search = this.toAccountID || ''
-		const addressBook = this.addressBookService.addressBook
+		const search = this.toAddress || ''
+		const addressBook = this.svcAddressBook.addressBook
 		const matches = addressBook.filter((a) => a.name.toLowerCase().indexOf(search.toLowerCase()) !== -1).slice(0, 5)
 		this.addressBookResults$.next(matches)
 	}
 
 	selectBookEntry (account) {
 		this.showAddressBook = false
-		this.toAccountID = account
+		this.toAddress = account
 		this.searchAddressBook()
 		this.validateDestination()
 	}
@@ -229,17 +245,17 @@ export class SendComponent implements OnInit {
 		setTimeout(() => (this.showAddressBook = false), 400)
 
 		// Remove spaces from the account id
-		this.toAccountID = this.toAccountID.replace(/ /g, '')
+		this.toAddress = this.toAddress.replace(/ /g, '')
 		this.addressBookMatch =
-			this.addressBookService.getAccountName(this.toAccountID) || this.getAccountLabel(this.toAccountID, null)
-		if (!this.addressBookMatch && this.toAccountID === environment.donationAddress) {
+			this.svcAddressBook.getAccountName(this.toAddress) || this.getAccountLabel(this.toAddress, null)
+		if (!this.addressBookMatch && this.toAddress === environment.donationAddress) {
 			this.addressBookMatch = 'Gnault Donations'
 		}
 
-		// const accountInfo = await this.walletService.walletApi.accountInfo(this.toAccountID)
+		// const accountInfo = await this.walletService.walletApi.accountInfo(this.toAddress)
 		this.toAccountStatus = null
-		if (this.util.account.isValidAccount(this.toAccountID)) {
-			const accountInfo = await this.nodeApi.accountInfo(this.toAccountID)
+		if (this.svcUtil.account.isValidAccount(this.toAddress)) {
+			const accountInfo = await this.svcApi.accountInfo(this.toAddress)
 			if (accountInfo?.error === 'Account not found') {
 				this.toAccountStatus = 1
 			}
@@ -251,89 +267,84 @@ export class SendComponent implements OnInit {
 		}
 	}
 
-	getAccountLabel (accountID, defaultLabel) {
-		const walletAccount = this.svcWallet.accounts.find((a) => a.address === accountID)
+	getAccountLabel (address, defaultLabel) {
+		const walletAccount = this.svcWallet.accounts.find((a) => a.address === address)
 		if (walletAccount == null) {
 			return defaultLabel
 		}
-		return this.translocoService.translate('general.account') + ' #' + walletAccount.index
+		return this.svcTransloco.translate('general.account') + ' #' + walletAccount.index
 	}
 
-	validateAmount () {
-		if (this.amount > 0n) {
-			this.amountStatus = 1
-			return true
-		} else {
-			this.amountStatus = 0
-			return false
-		}
-	}
-
-	getDestinationID () {
+	getDestinationAddress () {
 		if (this.sendDestinationType === 'external-address') {
-			return this.toAccountID
+			return this.toAddress
 		}
 		// 'own-address'
-		const walletAccount = this.svcWallet.accounts.find((a) => a.address === this.toOwnAccountID)
+		const walletAccount = this.svcWallet.accounts.find((a) => a.address === this.toOwnAddress)
 		if (!walletAccount) {
 			// Unable to find receiving account in wallet
 			return ''
 		}
-		if (this.toOwnAccountID === this.fromAccountID) {
+		if (this.toOwnAddress === this.fromAddress) {
 			// Sending to the same address is only allowed via 'external-address'
 			return ''
 		}
-		return this.toOwnAccountID
+		return this.toOwnAddress
 	}
 
 	async sendTransaction () {
-		const destinationID = this.getDestinationID()
-		const isValid = this.util.account.isValidAccount(destinationID)
-		if (!isValid) {
-			return this.notificationService.sendWarning(`To account address is not valid`)
+		try {
+			const destinationAddress = this.getDestinationAddress()
+			const isValid = this.svcUtil.account.isValidAccount(destinationAddress)
+			if (!isValid) {
+				return this.svcNotifications.sendWarning(`To account address is not valid`)
+			}
+			if (!this.fromAddress || !destinationAddress) {
+				return this.svcNotifications.sendWarning(`From and to account are required`)
+			}
+			if (!['bigint', 'number', 'string'].includes(typeof this.amounts.raw.value)) {
+				return this.svcNotifications.sendWarning(`Invalid amount ${typeof this.amounts.raw.value}`)
+			}
+			const amount = BigInt(this.amounts.raw.value)
+			if (amount <= 0n) {
+				return this.svcNotifications.sendWarning('Amount must be greater than zero')
+			}
+			this.preparingTransaction = true
+
+			const from = await this.svcApi.accountInfo(this.fromAddress)
+			const to = await this.svcApi.accountInfo(destinationAddress)
+
+			this.preparingTransaction = false
+
+			if (!from) {
+				return this.svcNotifications.sendError(`From account not found`)
+			}
+
+			const bigBalanceFrom = BigInt(from.balance ?? 0n)
+			const bigBalanceTo = BigInt(to.balance ?? 0n)
+
+			this.fromAccount = from
+			this.toAccount = to
+
+			if (bigBalanceFrom - amount < 0n) {
+				return this.svcNotifications.sendError(`From account does not have enough XNO`)
+			}
+			this.fromAddressBook =
+				this.svcAddressBook.getAccountName(this.fromAddress) || this.getAccountLabel(this.fromAddress, 'Account')
+			this.toAddressBook =
+				this.svcAddressBook.getAccountName(destinationAddress) || this.getAccountLabel(destinationAddress, null)
+
+			// Start precomputing the work...
+			this.svcWorkPool.addWorkToCache(this.fromAccount.frontier, 1)
+			this.activePanel = 'confirm'
+		} catch (err) {
+			this.svcNotifications.sendError(err?.message ?? err)
 		}
-		if (!this.fromAccountID || !destinationID) {
-			return this.notificationService.sendWarning(`From and to account are required`)
-		}
-		if (!this.validateAmount()) {
-			return this.notificationService.sendWarning(`Invalid XNO amount`)
-		}
-		this.preparingTransaction = true
-
-		const from = await this.nodeApi.accountInfo(this.fromAccountID)
-		const to = await this.nodeApi.accountInfo(destinationID)
-
-		this.preparingTransaction = false
-
-		if (!from) {
-			return this.notificationService.sendError(`From account not found`)
-		}
-
-		const bigBalanceFrom = BigInt(from.balance ?? 0n)
-		const bigBalanceTo = BigInt(to.balance ?? 0n)
-
-		this.fromAccount = from
-		this.toAccount = to
-
-		if (this.amount < 0) {
-			return this.notificationService.sendWarning(`Amount is invalid`)
-		}
-		if (bigBalanceFrom - this.amount < 0n) {
-			return this.notificationService.sendError(`From account does not have enough XNO`)
-		}
-		this.fromAddressBook =
-			this.addressBookService.getAccountName(this.fromAccountID) || this.getAccountLabel(this.fromAccountID, 'Account')
-		this.toAddressBook =
-			this.addressBookService.getAccountName(destinationID) || this.getAccountLabel(destinationID, null)
-
-		// Start precomputing the work...
-		this.workPool.addWorkToCache(this.fromAccount.frontier, 1)
-		this.activePanel = 'confirm'
 	}
 
 	async confirmTransaction () {
 		const wallet = this.svcWallet.selectedWallet()
-		const walletAccount = this.svcWallet.accounts.find((a) => a.address === this.fromAccountID)
+		const walletAccount = this.svcWallet.accounts.find((a) => a.address === this.fromAddress)
 		if (!walletAccount) {
 			throw new Error(`Unable to find sending account in wallet`)
 		}
@@ -345,65 +356,65 @@ export class SendComponent implements OnInit {
 		}
 		this.confirmingTransaction = true
 		try {
-			const destinationID = this.getDestinationID()
-			const newHash = await this.nanoBlock.generateSend(
+			const destinationAddress = this.getDestinationAddress()
+			const newHash = await this.svcNanoBlock.generateSend(
 				wallet,
 				walletAccount,
-				destinationID,
-				this.amount,
+				destinationAddress,
+				this.amounts.raw.value,
 				this.svcWallet.isLedger()
 			)
 			if (newHash) {
-				this.notificationService.removeNotification('success-send')
-				this.notificationService.sendSuccess(`Successfully sent ${this.amountNano} XNO!`, {
+				this.svcNotifications.removeNotification('success-send')
+				this.svcNotifications.sendSuccess(`Successfully sent XNO ${this.amounts.nano}!`, {
 					identifier: 'success-send',
 				})
 				this.activePanel = 'send'
-				this.amount = 0n
-				this.toAccountID = ''
-				this.toOwnAccountID = ''
+				this.amounts.raw.setValue(0n)
+				this.toAddress = ''
+				this.toOwnAddress = ''
 				this.toAccountStatus = null
 				this.fromAddressBook = ''
 				this.toAddressBook = ''
 				this.addressBookMatch = ''
 			} else if (!this.svcWallet.isLedger()) {
-				this.notificationService.sendError(`There was an error sending your transaction, please try again.`)
+				this.svcNotifications.sendError(`There was an error sending your transaction. Please try again.`)
 			}
 		} catch (err) {
-			this.notificationService.sendError(`There was an error sending your transaction: ${err.message}`)
+			this.svcNotifications.sendError(err?.message ?? err)
 		}
 		this.confirmingTransaction = false
 	}
 
 	async setMaxAmount () {
-		const walletAccount = this.svcWallet.accounts.find((a) => a.address === this.fromAccountID)
-		if (!walletAccount) {
-			return
+		const walletAccount = this.svcWallet.accounts.find((a) => a.address === this.fromAddress)
+		if (walletAccount) {
+			this.amounts.raw.setValue(walletAccount.balance)
+			this.syncTo('raw')
 		}
-		this.amount = walletAccount.balance
-		this.syncFiatPrice()
 	}
 
 	resetAmount () {
-		this.amount = 0n
+		this.amounts.fiat.setValue(0)
+		this.amounts.nano.setValue(0)
+		this.amounts.raw.setValue(0n)
 	}
 
 	// open qr reader modal
 	openQR (reference, type) {
-		if (this.preparingTransaction) {
-			return
+		if (!this.preparingTransaction) {
+			const qrResult = this.svcQrModal.openQR(reference, type)
+			qrResult.then((data) => {
+				if (data.reference === 'account1') {
+					this.toAddress = data.content
+					this.validateDestination()
+				}
+			})
 		}
-		const qrResult = this.qrModalService.openQR(reference, type)
-		qrResult.then((data) => {
-			if (data.reference === 'account1') {
-				this.toAccountID = data.content
-				this.validateDestination()
-			}
-		})
 	}
 
 	copied () {
-		this.notificationService.removeNotification('success-copied')
-		this.notificationService.sendSuccess(`Successfully copied to clipboard!`, { identifier: 'success-copied' })
+		this.svcNotifications.removeNotification('success-copied')
+		this.svcNotifications.sendSuccess('Copied to clipboard', { identifier: 'success-copied' })
 	}
 }
