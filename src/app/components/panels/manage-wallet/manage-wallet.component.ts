@@ -52,9 +52,14 @@ export class ManageWalletComponent implements OnInit {
 	get isLedger () {
 		return this.svcWallet.isLedger()
 	}
-
 	get isLocked () {
 		return this.svcWallet.isLocked()
+	}
+	get selectedWallet () {
+		return this.svcWallet.selectedWallet()
+	}
+	get selectedWalletName () {
+		return this.svcWallet.walletNames.get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
 	}
 
 	async ngOnInit () {
@@ -73,30 +78,19 @@ export class ManageWalletComponent implements OnInit {
 	}
 
 	async changePassword () {
-		if (this.newPassword.length < 6) {
-			return this.notifications.sendError(
-				this.translocoService.translate(
-					'configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long',
-					{ minCharacters: 6 }
-				)
-			)
-		}
-		if (this.newPassword !== this.confirmPassword) {
-			return this.notifications.sendError(
-				this.translocoService.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match')
-			)
-		}
 		if (this.svcWallet.isLocked()) {
-			const wasUnlocked = await this.svcWallet.requestUnlock()
-			if (wasUnlocked === false) {
+			const isUnlocked = await this.svcWallet.requestUnlock()
+			if (!isUnlocked) {
 				return
 			}
 		}
+		const isChanged = await this.svcWallet.requestChangePassword()
 		await this.svcWallet.saveWalletExport()
 		this.newPassword = ''
 		this.confirmPassword = ''
-		this.notifications.sendSuccess(`Wallet password successfully updated`)
-
+		isChanged
+			? this.notifications.sendSuccess('Wallet password changed.')
+			: this.notifications.sendError('Failed to change wallet password.')
 		this.showQRExport = false
 	}
 
