@@ -173,19 +173,20 @@ export class SendComponent implements AfterViewInit {
 		try {
 			switch (unit) {
 				case 'fiat': {
-					const fiat = this.amounts.fiat.value
+					const fiat = Number(this.amounts.fiat.value)
 					this.amounts.nano.setValue(fiat ? fiat / this.lastPrice : null)
 					this.amounts.raw.setValue(fiat ? Tools.convert(fiat / this.lastPrice, 'nano', 'raw', 'bigint') : null)
 					return
 				}
 				case 'nano': {
-					const nano = this.amounts.nano.value
+					debugger
+					const nano = Number(this.amounts.nano.value)
 					this.amounts.fiat.setValue(nano ? nano * this.lastPrice : null)
 					this.amounts.raw.setValue(nano ? Tools.convert(nano, 'nano', 'raw', 'bigint') : null)
 					return
 				}
 				case 'raw': {
-					const raw = this.amounts.raw.value
+					const raw = BigInt(this.amounts.raw.value)
 					this.amounts.nano.setValue(raw ? Tools.convert(raw, 'raw', 'nano', 'number') : null)
 					this.amounts.fiat.setValue(raw ? Tools.convert(raw, 'raw', 'nano', 'number') * this.lastPrice : null)
 					return
