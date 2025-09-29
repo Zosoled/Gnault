@@ -189,10 +189,8 @@ export class ConfigureWalletComponent {
 	}
 
 	async setPasswordInit () {
-		// if importing from existing, the format check must be done prior the password page
 		if (this.isNewWallet) {
-			const req = this.svcWallet.createNewWallet('')
-			const { mnemonic, seed } = await req
+			const { mnemonic, seed } = await this.svcWallet.createNewWallet('')
 			this.newWalletMnemonic = mnemonic
 			this.newWalletSeed = seed
 			// Split the seed up so we can show 4 per line
@@ -293,37 +291,6 @@ export class ConfigureWalletComponent {
 		this.newWalletMnemonicLines = []
 		this.saveNewWallet()
 		this.activePanel = panels.final
-	}
-
-	saveWalletPassword () {
-		if (this.walletPasswordModel.length < 6) {
-			return this.svcNotifications.sendWarning(
-				this.svcTransloco.translate(
-					'configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long',
-					{ minCharacters: 6 }
-				)
-			)
-		}
-		if (this.walletPasswordConfirmModel !== this.walletPasswordModel) {
-			return this.svcNotifications.sendError(
-				this.svcTransloco.translate('configure-wallet.set-wallet-password.errors.passwords-do-not-match')
-			)
-		}
-		this.newPassword = this.walletPasswordModel
-		this.walletPasswordModel = ''
-		this.walletPasswordConfirmModel = ''
-
-		if (this.isNewWallet) {
-			// this.walletService.createNewWallet(this.newPassword, this.wallet.wallet)
-		} else if (this.selectedImportOption === 'mnemonic' || this.selectedImportOption === 'seed') {
-			this.importExistingWallet()
-		} else if (
-			this.selectedImportOption === 'privateKey' ||
-			this.selectedImportOption === 'expandedKey' ||
-			this.selectedImportOption === 'bip39-mnemonic'
-		) {
-			this.importSingleKeyWallet()
-		}
 	}
 
 	saveNewWallet () {
