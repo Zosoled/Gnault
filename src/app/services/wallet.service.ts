@@ -941,8 +941,12 @@ export class WalletService {
 	}
 
 	removeWalletData () {
+		for (const wallet of this.wallets()) {
+			wallet.destroy()
+		}
 		localStorage.removeItem(storeKey)
-		this.selectedWallet().destroy()
+		this.wallets.set([])
+		this.selectedWallet.set(null)
 	}
 
 	async generateWalletExport () {
