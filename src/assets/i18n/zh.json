@@ -279,14 +279,15 @@
 			"successfully-copied-secret-recovery-seed": "成功将秘密恢复种子复制到剪贴板！"
 		},
 		"set-wallet-password": {
-			"choose-a-wallet-password-that-will-be-used-to-unlock-this-application": "选择一个用于解锁此应用程序的钱包密码。",
+			"choose-a-wallet-password-that-will-be-used-to-unlock-this-application": "选择将用于解锁此钱包的密码。",
 			"errors": {
 				"password-must-be-at-least-x-characters-long": "密码至少必须是{{ minLength }}字符。",
 				"passwords-do-not-match": "密码不匹配！"
 			},
-			"for-the-safety-of-your-funds-use-a-secure-password": "为了资金安全，请使用安全的密码。",
+			"for-the-safety-of-your-funds-use-a-secure-password": "为了确保您的资金，请使用安全密码。",
 			"set-wallet-password": "设置钱包密码",
-			"while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted": "当应用程序被锁定时，秘密恢复短语将被加密，这会阻止发送/接收资金和管理账户。"
+			"wallet-passwords-are-distinct": "此密码可能与您在Gnault中创建的其他钱包不同。\n您创建的每个钱包都可以具有不同的密码，因此请注意单独跟踪它们。",
+			"while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted": "当钱包被锁定时，其助记符和种子被加密。\n这样可以禁用敏感动作，例如创建帐户，发送或接收资金，更改密码以及验证助记符或种子。"
 		}
 	},
 	"general": {

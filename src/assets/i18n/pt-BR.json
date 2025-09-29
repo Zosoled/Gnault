@@ -279,14 +279,15 @@
 			"successfully-copied-secret-recovery-seed": "Semente de Recuperação Secreta copiada com sucesso para a área de transferência!"
 		},
 		"set-wallet-password": {
-			"choose-a-wallet-password-that-will-be-used-to-unlock-this-application": "Escolha uma senha de carteira que será usada para desbloquear este aplicativo.",
+			"choose-a-wallet-password-that-will-be-used-to-unlock-this-application": "Escolha uma senha que será usada para desbloquear esta carteira.",
 			"errors": {
 				"password-must-be-at-least-x-characters-long": "A senha deve ser pelo menos {{ minLength }} caracteres.",
 				"passwords-do-not-match": "As senhas não coincidem!"
 			},
 			"for-the-safety-of-your-funds-use-a-secure-password": "Para a segurança de seus fundos, use uma senha segura.",
 			"set-wallet-password": "Definir Senha da Carteira",
-			"while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted": "Enquanto o aplicativo estiver bloqueado, a frase de recuperação secreta será criptografada, o que impede o envio/recebimento de fundos e o gerenciamento de contas."
+			"wallet-passwords-are-distinct": "Essa senha pode diferir de outras carteiras que você cria no GNAULT. \nCada carteira que você cria pode ter uma senha distinta diferente, portanto, tome cuidado para rastreá -las individualmente.",
+			"while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted": "Enquanto a carteira está trancada, seu mnemônico e sementes são criptografados. \nIsso desativa ações confidenciais, como criar contas, enviar ou receber fundos, alterar a senha e verificar o mnemônico ou a semente."
 		}
 	},
 	"general": {

@@ -279,14 +279,15 @@
 			"successfully-copied-secret-recovery-seed": "¡Semilla de recuperación secreta copiada exitosamente al portapapeles!"
 		},
 		"set-wallet-password": {
-			"choose-a-wallet-password-that-will-be-used-to-unlock-this-application": "Elige una contraseña para la billetera que se utilizará para desbloquear esta aplicación.",
+			"choose-a-wallet-password-that-will-be-used-to-unlock-this-application": "Elija una contraseña que se usará para desbloquear esta billetera.",
 			"errors": {
 				"password-must-be-at-least-x-characters-long": "La contraseña debe ser al menos {{ minLength }} caracteres.",
 				"passwords-do-not-match": "¡Las contraseñas no coinciden!"
 			},
-			"for-the-safety-of-your-funds-use-a-secure-password": "Por la seguridad de tus fondos, utiliza una contraseña segura.",
+			"for-the-safety-of-your-funds-use-a-secure-password": "Para la seguridad de sus fondos, use una contraseña segura.",
 			"set-wallet-password": "Establecer contraseña de la billetera",
-			"while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted": "Mientras la aplicación esté bloqueada, la frase de recuperación secreta estará cifrada, lo que impide enviar/recibir fondos y administrar cuentas."
+			"wallet-passwords-are-distinct": "Esta contraseña puede diferir de otras billeteras que crea en GNAULT. \nCada billetera que cree puede tener una contraseña distinta diferente, así que tenga cuidado de rastrearlas individualmente.",
+			"while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted": "Mientras la billetera está bloqueada, su mnemónica y su semilla están encriptadas. \nEsto desactiva acciones confidenciales como crear cuentas, enviar o recibir fondos, cambiar la contraseña y verificar el mnemónico o la semilla."
 		}
 	},
 	"general": {

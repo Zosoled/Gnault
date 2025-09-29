@@ -204,10 +204,7 @@ export class ConfigureWalletComponent {
 				words.slice(20, 24),
 			]
 			this.newWalletMnemonicLines = lines
-			const isUpdated = await this.svcWallet.requestChangePassword()
-			if (isUpdated) {
-				this.activePanel = panels.backup
-			}
+			this.activePanel = panels.password
 		} else {
 			// If a wallet already exists, confirm that the seed is saved
 			const confirmed = await this.confirmWalletOverwrite()
@@ -274,10 +271,14 @@ export class ConfigureWalletComponent {
 				this.keyString = accounts[0].privateKey
 				this.isExpanded = false
 			}
-			const isUpdated = await this.svcWallet.requestChangePassword()
-			if (isUpdated) {
-				this.activePanel = panels.final
-			}
+			this.activePanel = panels.password
+		}
+	}
+
+	async saveWalletPassword () {
+		const isUpdated = await this.svcWallet.requestChangePassword()
+		if (isUpdated) {
+			this.activePanel = panels.backup
 		}
 	}
 

@@ -279,14 +279,15 @@
 			"successfully-copied-secret-recovery-seed": "Seed de récupération secrète copiée avec succès dans le presse-papiers !"
 		},
 		"set-wallet-password": {
-			"choose-a-wallet-password-that-will-be-used-to-unlock-this-application": "Choisissez un mot de passe de portefeuille qui sera utilisé pour déverrouiller cette application.",
+			"choose-a-wallet-password-that-will-be-used-to-unlock-this-application": "Choisissez un mot de passe qui sera utilisé pour déverrouiller ce portefeuille.",
 			"errors": {
 				"password-must-be-at-least-x-characters-long": "Le mot de passe doit être au moins {{ minLength }} caractères.",
 				"passwords-do-not-match": "Les mots de passe ne correspondent pas !"
 			},
 			"for-the-safety-of-your-funds-use-a-secure-password": "Pour la sécurité de vos fonds, utilisez un mot de passe sécurisé.",
 			"set-wallet-password": "Définir le mot de passe du portefeuille",
-			"while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted": "Lorsque l'application est verrouillée, la phrase de récupération secrète sera cryptée, ce qui empêche l'envoi/la réception de fonds et la gestion des comptes."
+			"wallet-passwords-are-distinct": "Ce mot de passe peut différer des autres portefeuilles que vous créez à Gnault. \nChaque portefeuille que vous créez peut avoir un mot de passe distinct différent, alors veillez à les suivre individuellement.",
+			"while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted": "Pendant que le portefeuille est verrouillé, sa mnémonique et ses graines sont cryptées. \nCela désactive les actions sensibles comme la création de comptes, l'envoi ou la réception de fonds, la modification du mot de passe et la vérification de la mnémonique ou de la graine."
 		}
 	},
 	"general": {

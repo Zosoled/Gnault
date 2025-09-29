@@ -791,6 +791,40 @@
 		</div>
 	</div>
 }
+@if (activePanel === panels.password) {
+	<div class="uk-card uk-card-default">
+		<div class="uk-card-header">
+			<h3 class="uk-card-title">{{ 'configure-wallet.set-wallet-password.set-wallet-password' | transloco }}</h3>
+		</div>
+		<div class="uk-card-body">
+			<p>
+				{{
+					'configure-wallet.set-wallet-password.choose-a-wallet-password-that-will-be-used-to-unlock-this-application'
+						| transloco
+				}}
+			</p>
+			<p>
+				{{ 'configure-wallet.set-wallet-password.wallet-passwords-are-distinct' | transloco }}
+			</p>
+			<p>
+				{{
+					'configure-wallet.set-wallet-password.while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted'
+						| transloco
+				}}
+			</p>
+			<p>{{ 'configure-wallet.set-wallet-password.for-the-safety-of-your-funds-use-a-secure-password' | transloco }}</p>
+			<br />
+		</div>
+		<div class="uk-card-footer uk-text-right">
+			<button
+				class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
+				(click)="saveWalletPassword()"
+			>
+				Next
+			</button>
+		</div>
+	</div>
+}
 @if (activePanel === panels.backup) {
 	<div class="uk-card uk-card-default">
 		<div class="uk-card-header">
