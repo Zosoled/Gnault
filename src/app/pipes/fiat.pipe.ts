@@ -12,9 +12,10 @@ export class FiatPipe extends CurrencyPipe implements PipeTransform {
 		if (typeof value === 'string') {
 			value = value.replace(/0+(.)/, '$1')
 		}
-		value = Tools.convert(value, 'raw', 'nano', 'number') * this.svcPrice.lastPrice()
+		const nano = Tools.convert(value, 'raw', 'nano', 'number')
+		const fiat = nano * this.svcPrice.lastPrice()
 		const currencyCode = this.svcAppSettings.settings.displayCurrency
 		const maxFractionDigits = currencyCode === 'BTC' ? 6 : 2
-		return super.transform(value, currencyCode.toUpperCase(), 'symbol', `1.2-${maxFractionDigits}`)
+		return super.transform(fiat, currencyCode.toUpperCase(), 'symbol', `1.2-${maxFractionDigits}`)
 	}
 }
