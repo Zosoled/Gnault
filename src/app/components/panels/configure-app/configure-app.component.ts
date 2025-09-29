@@ -29,7 +29,7 @@ import { BehaviorSubject } from 'rxjs'
 })
 export class ConfigureAppComponent implements OnInit {
 	private notifications = inject(NotificationsService)
-	private appSettings = inject(AppSettingsService)
+	private svcAppSettings = inject(AppSettingsService)
 	private addressBook = inject(AddressBookService)
 	private pow = inject(PowService)
 	private api = inject(ApiService)
@@ -45,6 +45,9 @@ export class ConfigureAppComponent implements OnInit {
 	private translocoService = inject(TranslocoService)
 	private svcWallet = inject(WalletService)
 
+	get settings () {
+		return this.svcAppSettings.settings()
+	}
 	get wallet () {
 		return this.svcWallet.selectedWallet()
 	}
@@ -68,25 +71,25 @@ export class ConfigureAppComponent implements OnInit {
 	selectedStorage = this.storageOptions[0].value
 
 	currencies = [
-		{ value: 'bch', name: 'BCH - Bitcoin Cash' },
-		{ value: 'bits', name: 'BITS - Bitcoin (bits)' },
-		{ value: 'bnb', name: 'BNB - Binance Coin' },
-		{ value: 'btc', name: 'BTC - Bitcoin' },
-		{ value: 'dot', name: 'DOT - Polkadot' },
-		{ value: 'eos', name: 'EOS - EOS' },
-		{ value: 'eth', name: 'ETH - Ethereum' },
-		{ value: 'link', name: 'LINK - Chainlink' },
-		{ value: 'ltc', name: 'LTC - Litecoin' },
-		{ value: 'sats', name: 'SATS - Bitcoin (satoshis)' },
-		{ value: 'sol', name: 'SOL - Solana' },
-		{ value: 'vef', name: 'VEF - Venezuelan Bolívar (historical)' },
-		{ value: 'xag', name: 'XAG - Silver (Troy Ounce)' },
-		{ value: 'xau', name: 'XAU - Gold (Troy Ounce)' },
-		{ value: 'xlm', name: 'XLM - Stellar' },
-		{ value: 'xrp', name: 'XRP - XRP' },
-		{ value: 'yfi', name: 'YFI - yearn.finance' },
+		{ value: 'BCH', name: 'BCH - Bitcoin Cash' },
+		{ value: 'BITS', name: 'BITS - Bitcoin (bits)' },
+		{ value: 'BNB', name: 'BNB - Binance Coin' },
+		{ value: 'BTC', name: 'BTC - Bitcoin' },
+		{ value: 'DOT', name: 'DOT - Polkadot' },
+		{ value: 'EOS', name: 'EOS - EOS' },
+		{ value: 'ETH', name: 'ETH - Ethereum' },
+		{ value: 'LINK', name: 'LINK - Chainlink' },
+		{ value: 'LTC', name: 'LTC - Litecoin' },
+		{ value: 'SATS', name: 'SATS - Bitcoin (satoshis)' },
+		{ value: 'SOL', name: 'SOL - Solana' },
+		{ value: 'VEF', name: 'VEF - Venezuelan Bolívar (historical)' },
+		{ value: 'XAG', name: 'XAG - Silver (Troy Ounce)' },
+		{ value: 'XAU', name: 'XAU - Gold (Troy Ounce)' },
+		{ value: 'XLM', name: 'XLM - Stellar' },
+		{ value: 'XRP', name: 'XRP - XRP' },
+		{ value: 'YFI', name: 'YFI - yearn.finance' },
 	]
-	selectedCurrency: FormControl<string> = new FormControl<string>('usd', { nonNullable: true })
+	selectedCurrency: FormControl<string> = new FormControl<string>('USD', { nonNullable: true })
 
 	nightModeOptions = [
 		{ name: this.translocoService.translate('configure-app.night-mode-options.enabled'), value: 'enabled' },
@@ -203,7 +206,7 @@ export class ConfigureAppComponent implements OnInit {
 	async updateNodeStats (refresh = false) {
 		if (
 			!this.serverAPIUpdated ||
-			(this.serverAPIUpdated !== this.appSettings.settings.serverAPI && this.selectedServer === 'random')
+			(this.serverAPIUpdated !== this.settings.serverAPI && this.selectedServer === 'random')
 		) {
 			return
 		}
@@ -248,43 +251,41 @@ export class ConfigureAppComponent implements OnInit {
 	}
 
 	async loadFromSettings () {
-		const settings = this.appSettings.settings
-
-		const matchingLanguage = this.languages.find((language) => language.id === settings.language)
+		const matchingLanguage = this.languages.find((language) => language.id === this.settings.language)
 		this.selectedLanguage = matchingLanguage?.id || this.languages[0].id
 
 		await this.loadCurrencies()
 
-		const nightModeOptionString = settings.lightModeEnabled ? 'disabled' : 'enabled'
+		const nightModeOptionString = this.settings.lightModeEnabled ? 'disabled' : 'enabled'
 		const matchingNightModeOption = this.nightModeOptions.find((d) => d.value === nightModeOptionString)
 		this.selectedNightModeOption = matchingNightModeOption.value || this.nightModeOptions[0].value
 
-		const matchingIdenticonOptions = this.identiconOptions.find((d) => d.value === settings.identiconsStyle)
+		const matchingIdenticonOptions = this.identiconOptions.find((d) => d.value === this.settings.identiconsStyle)
 		this.selectedIdenticonOption = matchingIdenticonOptions.value || this.identiconOptions[0].value
 
-		const matchingStorage = this.storageOptions.find((d) => d.value === settings.walletStorage)
+		const matchingStorage = this.storageOptions.find((d) => d.value === this.settings.walletStorage)
 		this.selectedStorage = matchingStorage.value || this.storageOptions[0].value
 
-		const matchingInactivityMinutes = this.inactivityOptions.find((d) => d.value === settings.lockInactivityMinutes)
+		const matchingInactivityMinutes = this.inactivityOptions.find((d) => d.value === this.settings.lockInactivityMinutes)
 		this.selectedInactivityMinutes = matchingInactivityMinutes?.value ?? this.inactivityOptions[4].value
 
-		const matchingPowOption = this.powOptions.find((d) => d.value === settings.powSource)
+		const matchingPowOption = this.powOptions.find((d) => d.value === this.settings.powSource)
 		this.selectedPoWOption = matchingPowOption?.value ?? this.powOptions[0].value
 
-		this.customWorkServer = settings.customWorkServer
+		this.customWorkServer = this.settings.customWorkServer
 
-		const matchingReceivableOption = this.receivableOptions.find((d) => d.value === settings.receivableOption)
+		const matchingReceivableOption = this.receivableOptions.find((d) => d.value === this.settings.receivableOption)
 		this.selectedReceivableOption = matchingReceivableOption?.value ?? this.receivableOptions[0].value
 
-		this.serverOptions = this.appSettings.serverOptions
-		this.selectedServer = settings.serverName
-		this.serverAPI = settings.serverAPI
+		this.serverOptions = this.svcAppSettings.serverOptions
+		this.selectedServer = this.settings.serverName
+		this.serverAPI = this.settings.serverAPI
 		this.serverAPIUpdated = this.serverAPI
-		this.serverWS = settings.serverWS
-		this.serverAuth = settings.serverAuth
+		this.serverWS = this.settings.serverWS
+		this.serverAuth = this.settings.serverAuth
 
-		this.minimumReceive = settings.minimumReceive
-		this.defaultRepresentative = settings.defaultRepresentative
+		this.minimumReceive = this.settings.minimumReceive
+		this.defaultRepresentative = this.settings.defaultRepresentative
 		if (this.defaultRepresentative) {
 			this.validateRepresentative()
 		}
@@ -295,10 +296,9 @@ export class ConfigureAppComponent implements OnInit {
 	 * names based on user locale.
 	 */
 	async loadCurrencies (): Promise<void> {
-		await this.svcPrice.fetchPrice()
-		for (const currency of this.svcPrice.currencies) {
+		for (const currency of this.svcPrice.currencies()) {
 			if (this.currencies.every(c => c.value !== currency)) {
-				const lang = this.appSettings.settings.language ?? 'en'
+				const lang = this.settings.language ?? 'en'
 				const currencyName = currency.length === 3
 					? new Intl.DisplayNames([lang], { type: 'currency' }).of(currency)
 					: currency
@@ -306,36 +306,28 @@ export class ConfigureAppComponent implements OnInit {
 			}
 		}
 		this.currencies = this.currencies.sort((a, b) => a.name.localeCompare(b.name))
-		this.selectedCurrency.setValue(this.appSettings.settings.displayCurrency ?? 'usd')
+		this.selectedCurrency.setValue(this.settings.displayCurrency ?? 'USD')
 	}
 
 	async updateDisplaySettings () {
+		this.translocoService.setActiveLang(this.selectedLanguage)
+		this.svcAppSettings.setAppSetting('language', this.selectedLanguage)
+
 		if (this.selectedNightModeOption === 'disabled') {
 			this.renderer.addClass(document.body, 'light-mode')
 			this.renderer.removeClass(document.body, 'dark-mode')
-			this.appSettings.setAppSetting('lightModeEnabled', true)
+			this.svcAppSettings.setAppSetting('lightModeEnabled', true)
 		} else {
 			this.renderer.addClass(document.body, 'dark-mode')
 			this.renderer.removeClass(document.body, 'light-mode')
-			this.appSettings.setAppSetting('lightModeEnabled', false)
+			this.svcAppSettings.setAppSetting('lightModeEnabled', false)
 		}
+		this.svcAppSettings.setAppSetting('identiconsStyle', this.selectedIdenticonOption)
+		this.svcAppSettings.setAppSetting('displayCurrency', this.selectedCurrency.value)
 
-		this.appSettings.setAppSetting('identiconsStyle', this.selectedIdenticonOption)
-
-		const newCurrency = this.selectedCurrency.value
-		const reloadFiat = this.appSettings.settings.displayCurrency !== newCurrency
 		this.notifications.sendSuccess(
 			this.translocoService.translate('configure-app.app-display-settings-successfully-updated')
 		)
-
-		if (reloadFiat) {
-			this.appSettings.setAppSetting('displayCurrency', newCurrency)
-			await this.svcPrice.fetchPrice(newCurrency)
-		}
-
-		this.appSettings.setAppSetting('language', this.selectedLanguage)
-		this.translocoService.setActiveLang(this.selectedLanguage)
-
 		// if (updatePrefixes) {
 		// 	this.appSettings.setAppSetting('displayPrefix', this.selectedPrefix)
 		// 	// Go through accounts?
@@ -353,7 +345,7 @@ export class ConfigureAppComponent implements OnInit {
 
 	async updateWalletSettings () {
 		const newStorage = this.selectedStorage
-		const resaveWallet = this.appSettings.settings.walletStorage !== newStorage
+		const resaveWallet = this.settings.walletStorage !== newStorage
 
 		// ask for user confirmation before clearing the wallet cache
 		if (resaveWallet && newStorage === this.storageOptions[1].value) {
@@ -387,8 +379,8 @@ export class ConfigureAppComponent implements OnInit {
 
 		// reload receivable if threshold changes or if receive priority changes from manual to auto
 		let reloadReceivable =
-			this.appSettings.settings.minimumReceive !== this.minimumReceive ||
-			(receivableOption !== 'manual' && receivableOption !== this.appSettings.settings.receivableOption)
+			this.settings.minimumReceive !== this.minimumReceive ||
+			(receivableOption !== 'manual' && receivableOption !== this.settings.receivableOption)
 
 		if (this.defaultRepresentative && this.defaultRepresentative.length) {
 			const valid = this.util.account.isValidAccount(this.defaultRepresentative)
@@ -399,9 +391,9 @@ export class ConfigureAppComponent implements OnInit {
 			}
 		}
 
-		if (this.appSettings.settings.powSource !== newPoW) {
+		if (this.settings.powSource !== newPoW) {
 			// Cancel ongoing PoW if the old method was local PoW
-			if (this.appSettings.settings.powSource === 'client') {
+			if (this.settings.powSource === 'client') {
 				// Check if work is ongoing, and cancel it
 				if (this.pow.cancelAllPow(false)) {
 					reloadReceivable = true // force reload balance => re-work pow
@@ -427,7 +419,7 @@ export class ConfigureAppComponent implements OnInit {
 			defaultRepresentative: this.defaultRepresentative || null,
 		}
 
-		this.appSettings.setAppSettings(newSettings)
+		this.svcAppSettings.setAppSettings(newSettings)
 		this.notifications.sendSuccess(
 			this.translocoService.translate('configure-app.app-wallet-settings-successfully-updated')
 		)
@@ -473,8 +465,8 @@ export class ConfigureAppComponent implements OnInit {
 			newSettings.serverAuth = this.serverAuth
 		}
 
-		this.appSettings.setAppSettings(newSettings)
-		this.appSettings.loadAppSettings()
+		this.svcAppSettings.setAppSettings(newSettings)
+		this.svcAppSettings.loadAppSettings()
 
 		this.notifications.sendSuccess(
 			this.translocoService.translate('configure-app.server-settings-successfully-updated')
@@ -486,7 +478,7 @@ export class ConfigureAppComponent implements OnInit {
 		await this.svcWallet.reloadBalances()
 		this.websocket.forceReconnect()
 		// this is updated after setting server to random and doing recheck of wallet balance
-		this.serverAPIUpdated = this.appSettings.settings.serverAPI
+		this.serverAPIUpdated = this.settings.serverAPI
 		this.serverAPI = this.serverAPIUpdated
 		this.statsRefreshEnabled = true
 		this.updateNodeStats()
@@ -566,7 +558,7 @@ export class ConfigureAppComponent implements OnInit {
 		if (this.selectedServer === 'random' || this.selectedServer === 'offline') {
 			return optionName
 		}
-		const selectedServerOption = this.appSettings.serverOptions.find((d) => d.value === this.selectedServer)
+		const selectedServerOption = this.svcAppSettings.serverOptions.find((d) => d.value === this.selectedServer)
 		if (!selectedServerOption) {
 			return optionName
 		}
@@ -629,7 +621,7 @@ export class ConfigureAppComponent implements OnInit {
 			this.svcWallet.removeWalletData()
 			this.workPool.deleteCache()
 			this.addressBook.clearAddressBook()
-			this.appSettings.clearAppSettings()
+			this.svcAppSettings.clearAppSettings()
 			this.repService.resetRepresentativeList()
 			this.api.deleteCache()
 			this.loadFromSettings()

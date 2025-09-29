@@ -24,6 +24,7 @@ import { ClipboardModule } from 'ngx-clipboard'
 	],
 })
 export class TransactionDetailsComponent implements OnInit {
+	private svcAppSettings = inject(AppSettingsService)
 	private walletService = inject(WalletService)
 	private route = inject(ActivatedRoute)
 	private router = inject(Router)
@@ -31,8 +32,6 @@ export class TransactionDetailsComponent implements OnInit {
 	private api = inject(ApiService)
 	private notifications = inject(NotificationsService)
 	private translocoService = inject(TranslocoService)
-
-	settings = inject(AppSettingsService)
 
 	routerSub = null
 	transaction: any = {}
@@ -53,6 +52,10 @@ export class TransactionDetailsComponent implements OnInit {
 
 	amount = 0n
 	successorHash = ''
+
+	get settings () {
+		return this.svcAppSettings.settings()
+	}
 
 	async ngOnInit () {
 		this.routerSub = this.router.events.subscribe((event) => {

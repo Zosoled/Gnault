@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core'
+import { Injectable, WritableSignal, inject, signal } from '@angular/core'
 import { TranslocoService, getBrowserCultureLang, getBrowserLang } from '@jsverse/transloco'
 
 export type WalletStore = 'localStorage' | 'none'
@@ -7,7 +7,7 @@ export type LedgerConnectionType = 'usb' | 'bluetooth'
 
 interface AppSettings {
 	language: string
-	displayDenomination: string
+	denomination: string
 	walletStorage: string
 	displayCurrency: string
 	defaultRepresentative: string | null
@@ -28,13 +28,15 @@ interface AppSettings {
 
 @Injectable({ providedIn: 'root' })
 export class AppSettingsService {
-	private translate = inject(TranslocoService)
-	storeKey: 'Gnault-AppSettings' = 'Gnault-AppSettings'
-	settings: AppSettings = {
+	private svcTransloco = inject(TranslocoService)
+
+	private storeKey: 'Gnault-AppSettings' = 'Gnault-AppSettings'
+
+	settings: WritableSignal<AppSettings> = signal({
 		language: null,
-		displayDenomination: 'mnano',
+		denomination: 'nano',
 		walletStorage: 'localStorage',
-		displayCurrency: 'usd',
+		displayCurrency: 'USD',
 		defaultRepresentative: null,
 		lockOnClose: 1,
 		lockInactivityMinutes: 30,
@@ -49,7 +51,7 @@ export class AppSettingsService {
 		walletVersion: 1,
 		lightModeEnabled: false,
 		identiconsStyle: 'nanoidenticons',
-	}
+	})
 	serverOptions = [
 		{
 			name: 'Random',
@@ -120,85 +122,80 @@ export class AppSettingsService {
 	)
 
 	loadAppSettings () {
-		let settings: AppSettings = this.settings
-		const settingsStore = localStorage.getItem(this.storeKey)
-		if (settingsStore) {
-			settings = JSON.parse(settingsStore)
-		}
-		this.settings = Object.assign(this.settings, settings)
-
-		if (this.settings.language === null) {
+		const settings: AppSettings = JSON.parse(localStorage.getItem(this.storeKey) ?? '{}')
+		if (settings.language == null) {
 			const browserCultureLang = getBrowserCultureLang()
 			const browserLang = getBrowserLang()
-
-			if (this.translate.getAvailableLangs().some((lang) => lang['id'] === browserCultureLang)) {
-				this.settings.language = browserCultureLang
-			} else if (this.translate.getAvailableLangs().some((lang) => lang['id'] === browserCultureLang)) {
-				this.settings.language = browserLang
+			const availableLangs = this.svcTransloco.getAvailableLangs()
+			if (availableLangs.some((lang) => lang['id'] === browserCultureLang)) {
+				settings.language = browserCultureLang
+			} else if (availableLangs.some((lang) => lang['id'] === browserLang)) {
+				settings.language = browserLang
 			} else {
-				this.settings.language = this.translate.getDefaultLang()
+				settings.language = this.svcTransloco.getDefaultLang()
 			}
-			console.log('No language configured, setting to: ' + this.settings.language)
+			console.log('No language configured, setting to: ' + settings.language)
 			console.log('Browser culture language: ' + browserCultureLang)
 			console.log('Browser language: ' + browserLang)
 		}
+		this.settings.set(Object.assign(this.settings(), settings))
 		this.loadServerSettings()
-		return this.settings
 	}
 
 	loadServerSettings () {
-		const matchingServerOption = this.serverOptions.find((d) => d.value === this.settings.serverName)
-		if (this.settings.serverName === 'random' || !matchingServerOption) {
+		const settings = this.settings()
+		const matchingServerOption = this.serverOptions.find(({ value }) => value === settings.serverName)
+		if (settings.serverName === 'random' || !matchingServerOption) {
 			const availableServers = this.serverOptions.filter((server) => server.shouldRandom)
 			const randomServerOption = availableServers[Math.floor(Math.random() * availableServers.length)]
 			console.log('SETTINGS: Random', randomServerOption)
 
-			this.settings.serverAPI = randomServerOption.api
-			this.settings.serverWS = randomServerOption.ws
-			this.settings.serverName = 'random'
-		} else if (this.settings.serverName === 'custom') {
+			settings.serverAPI = randomServerOption.api
+			settings.serverWS = randomServerOption.ws
+			settings.serverName = 'random'
+		} else if (settings.serverName === 'custom') {
 			console.log('SETTINGS: Custom')
-		} else if (this.settings.serverName === 'offline') {
+		} else if (settings.serverName === 'offline') {
 			console.log('SETTINGS: Offline Mode')
-			this.settings.serverName = matchingServerOption.value
-			this.settings.serverAPI = matchingServerOption.api
-			this.settings.serverWS = matchingServerOption.ws
+			settings.serverName = matchingServerOption.value
+			settings.serverAPI = matchingServerOption.api
+			settings.serverWS = matchingServerOption.ws
 		} else {
 			console.log('SETTINGS: Found', matchingServerOption)
-			this.settings.serverName = matchingServerOption.value
-			this.settings.serverAPI = matchingServerOption.api
-			this.settings.serverWS = matchingServerOption.ws
+			settings.serverName = matchingServerOption.value
+			settings.serverAPI = matchingServerOption.api
+			settings.serverWS = matchingServerOption.ws
 		}
 	}
 
 	saveAppSettings () {
-		localStorage.setItem(this.storeKey, JSON.stringify(this.settings))
+		localStorage.setItem(this.storeKey, JSON.stringify(this.settings()))
 	}
 
 	getAppSetting (key) {
-		return this.settings[key] || null
+		return this.settings()[key] || null
 	}
 
 	setAppSetting (key, value) {
-		this.settings[key] = value
+		this.settings.update(current => ({ ...current, [key]: value }))
 		this.saveAppSettings()
 	}
 
 	setAppSettings (settingsObject) {
 		for (const key in settingsObject) {
 			if (!settingsObject.hasOwnProperty(key)) continue
-			this.settings[key] = settingsObject[key]
+			this.setAppSetting(key, settingsObject[key])
 		}
 		this.saveAppSettings()
 	}
 
 	clearAppSettings () {
 		localStorage.removeItem(this.storeKey)
-		this.settings = {
+		this.settings.set({
 			language: 'en',
-			displayDenomination: 'nano',
+			denomination: 'nano',
 			walletStorage: 'localStorage',
-			displayCurrency: 'usd',
+			displayCurrency: 'USD',
 			defaultRepresentative: null,
 			lockOnClose: 1,
 			lockInactivityMinutes: 30,
@@ -213,6 +210,6 @@ export class AppSettingsService {
 			walletVersion: 1,
 			lightModeEnabled: false,
 			identiconsStyle: 'nanoidenticons',
-		}
+		})
 	}
 }

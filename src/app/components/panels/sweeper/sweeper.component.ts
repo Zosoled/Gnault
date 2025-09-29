@@ -28,6 +28,7 @@ const SWEEP_MAX_RECEIVABLE = 100
 	imports: [AmountSplitPipe, FormsModule, RaiPipe, SqueezePipe],
 })
 export class SweeperComponent implements OnInit {
+	private svcAppSettings = inject(AppSettingsService)
 	private walletService = inject(WalletService)
 	private notificationService = inject(NotificationsService)
 	private appSettings = inject(AppSettingsService)
@@ -36,8 +37,6 @@ export class SweeperComponent implements OnInit {
 	private nanoBlock = inject(NanoBlockService)
 	private util = inject(UtilService)
 	private route = inject(Router)
-
-	settings = inject(AppSettingsService)
 
 	accounts = this.walletService.accounts
 	indexMax = INDEX_MAX
@@ -71,6 +70,10 @@ export class SweeperComponent implements OnInit {
 	validEndIndex = true
 	validMaxIncoming = true
 	selAccountInit = false
+
+	get settings () {
+		return this.svcAppSettings.settings()
+	}
 
 	@ViewChild('outputarea') logArea: ElementRef
 
@@ -338,15 +341,15 @@ export class SweeperComponent implements OnInit {
 		this.pendingCallback = callback
 		// check for receivable first
 		let data = null
-		if (this.appSettings.settings.minimumReceive) {
-			const minAmount = Tools.convert(this.appSettings.settings.minimumReceive, 'mnano', 'raw')
-			if (this.appSettings.settings.receivableOption === 'amount') {
+		if (this.settings.minimumReceive) {
+			const minAmount = Tools.convert(this.settings.minimumReceive, 'mnano', 'raw')
+			if (this.settings.receivableOption === 'amount') {
 				data = await this.api.receivableLimitSorted(address, this.maxIncoming, minAmount)
 			} else {
 				data = await this.api.receivableLimit(address, this.maxIncoming, minAmount)
 			}
 		} else {
-			if (this.appSettings.settings.receivableOption === 'amount') {
+			if (this.settings.receivableOption === 'amount') {
 				data = await this.api.receivableSorted(address, this.maxIncoming)
 			} else {
 				data = await this.api.receivable(address, this.maxIncoming)
@@ -401,7 +404,7 @@ export class SweeperComponent implements OnInit {
 		let balance = 0 // balance will be 0 if open block
 		this.adjustedBalance = balance.toString()
 		let previous = null // previous is null if we create open block
-		this.representative = this.settings.settings.defaultRepresentative || this.nanoBlock.getRandomRepresentative()
+		this.representative = this.settings.defaultRepresentative || this.nanoBlock.getRandomRepresentative()
 		let subType = 'open'
 
 		// retrive from RPC

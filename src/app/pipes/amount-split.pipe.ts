@@ -6,14 +6,13 @@ import { Pipe, PipeTransform } from '@angular/core'
  */
 @Pipe({ name: 'amountsplit' })
 export class AmountSplitPipe implements PipeTransform {
-	transform(input: string, index: number): string {
+	transform (input: string, index: number): string {
+		console.log(typeof input, input)
 		const splitAmount = input.split('.')[index]
-
 		// Integer
 		if (index === 0) {
 			return splitAmount.replace('BTC ', '').trim()
 		}
-
 		// Fraction
 		const fractionalAmount = (splitAmount ?? '').replace(/0+$/g, '').trim()
 		return fractionalAmount === '' ? '' : `.${fractionalAmount}`

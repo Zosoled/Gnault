@@ -32,9 +32,10 @@ import { Wallet } from 'libnemo'
 	],
 })
 export class NanoCardComponent {
-	private svcAppSettings = inject(AppSettingsService)
 	private svcNode = inject(NodeService)
 	private svcWallet = inject(WalletService)
+
+	svcAppSettings = inject(AppSettingsService)
 
 	@ViewChild('selectButton') selectButton: ElementRef
 	@ViewChild('walletsDropdown') walletsDropdown: ElementRef
@@ -44,9 +45,6 @@ export class NanoCardComponent {
 
 	get balance () {
 		return this.svcWallet.balance
-	}
-	get displayCurrency () {
-		return this.svcAppSettings.settings.displayCurrency
 	}
 	get isBalanceInitialized () {
 		return this.svcWallet.isBalanceInitialized
@@ -65,6 +63,9 @@ export class NanoCardComponent {
 	}
 	get selectedWalletName () {
 		return this.svcWallet.walletNames.get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
+	}
+	get settings () {
+		return this.svcAppSettings.settings()
 	}
 	get walletNames () {
 		return this.svcWallet.walletNames

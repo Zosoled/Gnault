@@ -155,6 +155,13 @@ export class SignComponent implements OnInit {
 
 	@ViewChild('dataAddFocus') _el: ElementRef
 
+	get displayCurrency () {
+		return this.settings.displayCurrency
+	}
+	get settings () {
+		return this.svcAppSettings.settings()
+	}
+
 	async ngOnInit () {
 		const UIkit = window['UIkit']
 		const qrModal = UIkit.modal('#qr-code-modal')
@@ -518,7 +525,7 @@ export class SignComponent implements OnInit {
 
 	async prepareTransaction () {
 		// Determine fiat value of the amount (if not offline mode)
-		if (this.svcAppSettings.settings.serverAPI) {
+		if (this.settings.serverAPI) {
 			this.amountFiat = parseFloat(Tools.convert(this.rawAmount, 'raw', 'nano')) * this.svcPrice.lastPrice()
 		}
 

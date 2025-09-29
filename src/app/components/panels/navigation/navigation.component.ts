@@ -78,7 +78,7 @@ export class NavigationComponent {
 		return this.svcWallet.balance
 	}
 	get displayCurrency () {
-		return this.svcAppSettings.settings.displayCurrency
+		return this.svcAppSettings.settings().displayCurrency
 	}
 	get hasReceivableTransactions () {
 		return this.svcWallet.hasReceivableTransactions()
@@ -105,7 +105,7 @@ export class NavigationComponent {
 		return this.svcWallet.isProcessingReceivable
 	}
 	get lightModeEnabled () {
-		return this.svcAppSettings.settings.lightModeEnabled
+		return this.svcAppSettings.settings().lightModeEnabled
 	}
 	get mobileBarHeight () {
 		return window.innerWidth < 940 ? 50 : 0
@@ -114,7 +114,7 @@ export class NavigationComponent {
 		return this.svcWallet.receivable
 	}
 	get receivableOption () {
-		return this.svcAppSettings.settings.receivableOption
+		return this.svcAppSettings.settings().receivableOption
 	}
 	get selectedAccount () {
 		return this.svcWallet.selectedAccount()
@@ -126,7 +126,7 @@ export class NavigationComponent {
 		return this.svcWallet.walletNames.get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
 	}
 	get serverAPI () {
-		return this.svcAppSettings.settings.serverAPI
+		return this.svcAppSettings.settings().serverAPI
 	}
 	get walletNames () {
 		return this.svcWallet.walletNames
@@ -183,12 +183,12 @@ export class NavigationComponent {
 			this.canToggleLightMode = true
 		}, 300)
 
-		this.svcAppSettings.setAppSetting('lightModeEnabled', !this.svcAppSettings.settings.lightModeEnabled)
+		this.svcAppSettings.setAppSetting('lightModeEnabled', !this.svcAppSettings.settings().lightModeEnabled)
 		this.updateAppTheme()
 	}
 
 	updateAppTheme () {
-		if (this.svcAppSettings.settings.lightModeEnabled) {
+		if (this.svcAppSettings.settings().lightModeEnabled) {
 			this.renderer.addClass(document.body, 'light-mode')
 			this.renderer.removeClass(document.body, 'dark-mode')
 		} else {
@@ -230,7 +230,7 @@ export class NavigationComponent {
 	}
 
 	retryConnection () {
-		if (!this.svcAppSettings.settings.serverAPI) {
+		if (!this.svcAppSettings.settings().serverAPI) {
 			this.svcNotification.sendInfo(`Wallet server settings is set to offline mode. Please change server first!`)
 			return
 		}

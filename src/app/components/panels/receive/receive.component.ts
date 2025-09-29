@@ -52,13 +52,13 @@ import * as QRCode from 'qrcode'
 export class ReceiveComponent implements OnInit, OnDestroy {
 	private router = inject(Router)
 	private svcAddressBook = inject(AddressBookService)
-	private svcAppSettings = inject(AppSettingsService)
 	private svcNanoBlock = inject(NanoBlockService)
 	private svcNotifications = inject(NotificationsService)
 	private svcTransloco = inject(TranslocoService)
 	private svcWallet = inject(WalletService)
 	private svcWebsocket = inject(WebsocketService)
 
+	svcAppSettings = inject(AppSettingsService)
 	svcPrice = inject(PriceService)
 	svcUtil = inject(UtilService)
 
@@ -102,13 +102,13 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	routerSub = null
 
 	get displayCurrency () {
-		return this.svcAppSettings.settings.displayCurrency.toUpperCase()
+		return this.svcAppSettings.settings().displayCurrency
 	}
 	get identiconsStyle () {
-		return this.svcAppSettings.settings.identiconsStyle
+		return this.svcAppSettings.settings().identiconsStyle
 	}
 	get minimumReceive () {
-		return this.svcAppSettings.settings.minimumReceive
+		return this.svcAppSettings.settings().minimumReceive
 	}
 
 	async ngOnInit () {
@@ -258,7 +258,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			this.changeQRAmount()
 			return
 		}
-		const precision = this.svcAppSettings.settings.displayCurrency === 'BTC' ? 6 : 2
+		const precision = this.displayCurrency === 'BTC' ? 6 : 2
 		const rawAmount = Tools.convert(this.amountNano || 0, 'mnano', 'raw')
 		const fiatAmount = parseFloat(Tools.convert(rawAmount, 'raw', 'mnano')) * this.svcPrice.lastPrice()
 

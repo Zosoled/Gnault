@@ -278,7 +278,7 @@ export class ConfigureWalletComponent {
 	async saveWalletPassword () {
 		const isUpdated = await this.svcWallet.requestChangePassword()
 		if (isUpdated) {
-			this.activePanel = panels.backup
+			this.activePanel = this.isNewWallet ? panels.backup : panels.final
 		}
 	}
 

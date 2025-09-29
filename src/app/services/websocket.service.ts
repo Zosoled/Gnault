@@ -15,6 +15,10 @@ export class WebsocketService {
 	newTransactions$ = new BehaviorSubject(null)
 	websocket: WebSocket = null
 
+	get settings () {
+		return this.svcAppSettings.settings()
+	}
+
 	forceReconnect () {
 		console.log('Reconnecting Websocket...')
 		if (this.isConnected && this.websocket) {
@@ -28,10 +32,10 @@ export class WebsocketService {
 	}
 
 	connect () {
-		if (this.svcAppSettings.settings.serverWS && (!this.isConnected || !this.websocket)) {
+		if (this.settings.serverWS && (!this.isConnected || !this.websocket)) {
 			// Try to erase old connections
 			delete this.websocket
-			this.websocket = new WebSocket(this.svcAppSettings.settings.serverWS)
+			this.websocket = new WebSocket(this.settings.serverWS)
 
 			this.websocket.onopen = (event: Event) => {
 				console.log('Websocket opened', event)

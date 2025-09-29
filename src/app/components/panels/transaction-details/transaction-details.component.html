@@ -117,7 +117,7 @@
 						<div class="account-snippet uk-text-truncate">
 							<div
 								class="uk-card uk-card-default uk-text-truncate"
-								[class.identicons-enabled]="settings.settings.identiconsStyle !== 'none'"
+								[class.identicons-enabled]="settings.identiconsStyle !== 'none'"
 							>
 								<div class="uk-card-header">
 									@if (blockType !== 'change') {
@@ -137,11 +137,11 @@
 											title="View Account Details"
 										>
 											<div class="identicon-address-book-row">
-												@if (settings.settings.identiconsStyle !== 'none') {
+												@if (settings.identiconsStyle !== 'none') {
 													<app-nano-identicon
 														scale="12"
 														[address]="fromAccountID"
-														[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+														[settingIdenticonsStyle]="settings.identiconsStyle"
 														class="nano-identicon"
 													></app-nano-identicon>
 												}
@@ -174,7 +174,7 @@
 						<div class="account-snippet uk-text-truncate">
 							<div
 								class="uk-card uk-card-default uk-text-truncate"
-								[class.identicons-enabled]="settings.settings.identiconsStyle !== 'none'"
+								[class.identicons-enabled]="settings.identiconsStyle !== 'none'"
 							>
 								<div class="uk-card-header">
 									@if (blockType != 'change') {
@@ -194,11 +194,11 @@
 											title="View Account Details"
 										>
 											<div class="identicon-address-book-row">
-												@if (settings.settings.identiconsStyle !== 'none') {
+												@if (settings.identiconsStyle !== 'none') {
 													<app-nano-identicon
 														scale="12"
 														[address]="toAccountID"
-														[settingIdenticonsStyle]="settings.settings.identiconsStyle"
+														[settingIdenticonsStyle]="settings.identiconsStyle"
 														class="nano-identicon"
 													></app-nano-identicon>
 												}

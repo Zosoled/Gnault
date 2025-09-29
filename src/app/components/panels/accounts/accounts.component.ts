@@ -49,10 +49,18 @@ export class AccountsComponent implements OnInit {
 	accountsChanged$ = new Subject()
 	reloadRepWarning$ = this.accountsChanged$.pipe(debounce(() => timer(5000)))
 
-	get displayCurrency () { return this.svcAppSettings.settings.displayCurrency }
-	get identiconsStyle () { return this.svcAppSettings.settings.identiconsStyle }
-	get isBalanceUpdating () { return this.svcWallet.isBalanceUpdating }
-	get isLedgerWallet () { return this.svcWallet.isLedger() }
+	get identiconsStyle () {
+		return this.settings.identiconsStyle
+	}
+	get isBalanceUpdating () {
+		return this.svcWallet.isBalanceUpdating
+	}
+	get isLedgerWallet () {
+		return this.svcWallet.isLedger()
+	}
+	get settings () {
+		return this.svcAppSettings.settings()
+	}
 
 	async ngOnInit () {
 		this.reloadRepWarning$.subscribe((a) => {

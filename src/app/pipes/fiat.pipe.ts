@@ -3,7 +3,7 @@ import { inject, Pipe, PipeTransform } from '@angular/core'
 import { AppSettingsService, PriceService } from 'app/services'
 import { Tools } from 'libnemo'
 
-@Pipe({ name: 'fiat' })
+@Pipe({ name: 'fiat', pure: false })
 export class FiatPipe extends CurrencyPipe implements PipeTransform {
 	svcAppSettings = inject(AppSettingsService)
 	svcPrice = inject(PriceService)
@@ -13,9 +13,11 @@ export class FiatPipe extends CurrencyPipe implements PipeTransform {
 			value = value.replace(/0+(.)/, '$1')
 		}
 		const nano = Tools.convert(value, 'raw', 'nano', 'number')
-		const fiat = nano * this.svcPrice.lastPrice()
-		const currencyCode = this.svcAppSettings.settings.displayCurrency
+		const lastPrice = this.svcPrice.lastPrice()
+		const fiat = nano * lastPrice
+		const currencyCode = this.svcAppSettings.settings().displayCurrency
 		const maxFractionDigits = currencyCode === 'BTC' ? 6 : 2
-		return super.transform(fiat, currencyCode.toUpperCase(), 'symbol', `1.2-${maxFractionDigits}`)
+		const result = super.transform(fiat, currencyCode, 'symbol', `1.2-${maxFractionDigits}`)
+		return result
 	}
 }

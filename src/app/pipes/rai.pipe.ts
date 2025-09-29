@@ -3,7 +3,7 @@ import { Tools } from 'libnemo'
 
 @Pipe({ name: 'rai' })
 export class RaiPipe implements PipeTransform {
-	transform(v: unknown, args: unknown): any {
+	transform (v: unknown, args: unknown): any {
 		if (typeof v === 'number' && v === 0) {
 			v = 0n
 		}
@@ -17,7 +17,7 @@ export class RaiPipe implements PipeTransform {
 		const denomination = opts[0].toLowerCase() || 'nano'
 		const hideText = opts[1] || false
 		const amount = Tools.convert(v, 'raw', denomination)
-		const rounded = denomination === 'raw' ? amount : parseFloat(amount).toFixed(6)
+		const rounded = denomination === 'raw' ? amount : Number(amount).toFixed(6)
 		return `${rounded}${!hideText ? ` ${denomination}` : ''}`
 	}
 }

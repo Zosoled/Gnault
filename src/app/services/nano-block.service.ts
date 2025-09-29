@@ -42,6 +42,10 @@ export class NanoBlockService {
 
 	newOpenBlock$: BehaviorSubject<boolean | false> = new BehaviorSubject(false)
 
+	get settings () {
+		return this.svcAppSettings.settings()
+	}
+
 	async generateChange (wallet: Wallet, walletAccount, representativeAccount, ledger = false) {
 		const account = Account.load(walletAccount.address)
 		const toAcct = await this.svcApi.accountInfo(account.address)
@@ -197,7 +201,7 @@ export class NanoBlockService {
 		const remaining = BigInt(fromAccount.balance) - rawAmount
 		const remainingDecimal = remaining.toString(10)
 
-		const representative = fromAccount.representative || (this.svcAppSettings.settings.defaultRepresentative || this.getRandomRepresentative())
+		const representative = fromAccount.representative || (this.settings.defaultRepresentative || this.getRandomRepresentative())
 		const blockData = {
 			type: 'state',
 			account: walletAccount.address,
@@ -256,7 +260,7 @@ export class NanoBlockService {
 		const openEquiv = !toAcct || !toAcct.frontier
 
 		const previousBlock = toAcct.frontier || this.zeroHash
-		const representative = toAcct.representative || (this.svcAppSettings.settings.defaultRepresentative || this.getRandomRepresentative())
+		const representative = toAcct.representative || (this.settings.defaultRepresentative || this.getRandomRepresentative())
 
 		const srcBlockInfo = await this.svcApi.blocksInfo([sourceBlock])
 		const srcAmount = BigInt(srcBlockInfo.blocks[sourceBlock].amount)

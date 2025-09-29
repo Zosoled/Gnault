@@ -109,6 +109,9 @@ export class WalletService {
 	get ledgerStatus () {
 		return this.svcLedger.status()
 	}
+	get settings () {
+		return this.svcAppSettings.settings()
+	}
 
 	constructor () {
 		effect((onCleanup) => {
@@ -133,8 +136,8 @@ export class WalletService {
 			}
 			console.log('New Transaction', transaction)
 			let shouldNotify = false
-			if (this.svcAppSettings.settings.minimumReceive) {
-				const minAmount = this.svcUtil.nano.mnanoToRaw(this.svcAppSettings.settings.minimumReceive)
+			if (this.settings.minimumReceive) {
+				const minAmount = this.svcUtil.nano.mnanoToRaw(this.settings.minimumReceive)
 				if (BigInt(transaction.amount) > BigInt(minAmount)) {
 					shouldNotify = true
 				}
@@ -161,12 +164,12 @@ export class WalletService {
 
 			if (isConfirmedIncomingTransactionForOwnWalletAccount === true) {
 				if (shouldNotify === true) {
-					if (this.isLocked() && this.svcAppSettings.settings.receivableOption !== 'manual') {
+					if (this.isLocked() && this.settings.receivableOption !== 'manual') {
 						this.svcNotifications.sendWarning(`New incoming transaction - Unlock the wallet to receive`, {
 							length: 10000,
 							identifier: 'receivable-locked',
 						})
-					} else if (this.svcAppSettings.settings.receivableOption === 'manual') {
+					} else if (this.settings.receivableOption === 'manual') {
 						this.svcNotifications.sendWarning(`New incoming transaction - Set to be received manually`, {
 							length: 10000,
 							identifier: 'receivable-locked',
@@ -176,7 +179,7 @@ export class WalletService {
 					console.log(
 						`Found new incoming block that was below minimum receive amount: `,
 						transaction.amount,
-						this.svcAppSettings.settings.minimumReceive
+						this.settings.minimumReceive
 					)
 				}
 				await this.processStateBlock(transaction)
@@ -247,7 +250,7 @@ export class WalletService {
 					console.log(
 						`Found new transaction on watch-only account that was below minimum receive amount: `,
 						transaction.amount,
-						this.svcAppSettings.settings.minimumReceive
+						this.settings.minimumReceive
 					)
 				}
 			}
@@ -285,8 +288,8 @@ export class WalletService {
 			const txAmount = BigInt(transaction.amount)
 			let aboveMinimumReceive = true
 
-			if (this.svcAppSettings.settings.minimumReceive) {
-				const minAmount = this.svcUtil.nano.mnanoToRaw(this.svcAppSettings.settings.minimumReceive)
+			if (this.settings.minimumReceive) {
+				const minAmount = this.svcUtil.nano.mnanoToRaw(this.settings.minimumReceive)
 				aboveMinimumReceive = txAmount > BigInt(minAmount)
 			}
 
@@ -335,7 +338,7 @@ export class WalletService {
 
 		this.wallets.set(await Wallet.restore())
 
-		const { walletStorage } = this.svcAppSettings.settings
+		const { walletStorage } = this.settings
 		const storage = globalThis[walletStorage]
 		const walletData = storage.getItem(storeKey)
 
@@ -669,8 +672,8 @@ export class WalletService {
 		if (walletReceivableInclUnconfirmed > 0n) {
 			let receivable
 
-			if (this.svcAppSettings.settings.minimumReceive) {
-				const minAmount = this.svcUtil.nano.nanoToRaw(this.svcAppSettings.settings.minimumReceive)
+			if (this.settings.minimumReceive) {
+				const minAmount = this.svcUtil.nano.nanoToRaw(this.settings.minimumReceive)
 				receivable = await this.svcApi.accountsReceivableLimitSorted(
 					this.accounts.map((a) => a.address),
 					minAmount
@@ -787,7 +790,7 @@ export class WalletService {
 				? await this.createLedgerAccount(index)
 				: await this.selectedWallet().account(index)
 			if (this.accounts.some(a => a.index === index)) {
-				await this.selectedWallet().refresh(this.svcAppSettings.settings.serverAPI, index)
+				await this.selectedWallet().refresh(this.settings.serverAPI, index)
 			} else {
 				this.accounts.push(newAccount)
 			}
@@ -868,12 +871,12 @@ export class WalletService {
 			this.isProcessingReceivable ||
 			this.isLocked() ||
 			!this.receivableBlocks.length ||
-			this.svcAppSettings.settings.receivableOption === 'manual'
+			this.settings.receivableOption === 'manual'
 		)
 			return
 
 		// Sort receivable by amount
-		if (this.svcAppSettings.settings.receivableOption === 'amount') {
+		if (this.settings.receivableOption === 'amount') {
 			this.receivableBlocks.sort(this.sortByAmount)
 		}
 
@@ -935,7 +938,7 @@ export class WalletService {
 	 */
 	async saveWalletExport (): Promise<void> {
 		const exportData = await this.generateWalletExport()
-		const { walletStorage } = this.svcAppSettings.settings
+		const { walletStorage } = this.settings
 		const storage = globalThis[walletStorage]
 		storage ? storage.setItem(storeKey, JSON.stringify(exportData)) : this.removeWalletData()
 	}

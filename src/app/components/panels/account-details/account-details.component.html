@@ -45,11 +45,9 @@
 									}
 								</div>
 							</div>
-							@if (svcAppSettings.settings.displayCurrency) {
+							@if (settings.displayCurrency) {
 								<div class="balance-container converted">
-									<div class="currency-name">
-										<span class="estimate-symbol">~</span>{{ svcAppSettings.settings.displayCurrency }}
-									</div>
+									<div class="currency-name"><span class="estimate-symbol">~</span>{{ settings.displayCurrency }}</div>
 									<div class="amount-container">
 										<div class="amount-integer">
 											{{ account().balance ?? 0 | fiat | amountsplit: 0 }}
@@ -85,11 +83,11 @@
 		>
 			<div class="account-details-header uk-card-header uk-visible-toggle">
 				<div uk-grid>
-					@if (svcAppSettings.settings.identiconsStyle !== 'none') {
+					@if (settings.identiconsStyle !== 'none') {
 						<app-nano-identicon
 							scale="12"
 							[address]="address"
-							[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
+							[settingIdenticonsStyle]="settings.identiconsStyle"
 							class="nano-identicon"
 						></app-nano-identicon>
 					}
@@ -215,7 +213,7 @@
 					</div>
 				</div>
 			</div>
-			@if (svcAppSettings.settings.serverAPI) {
+			@if (settings.serverAPI) {
 				<div class="uk-card-header uk-form-horizontal uk-width-expand">
 					<div uk-grid>
 						<div class="representative-details uk-width-1-1@s uk-width-1-2@l">
@@ -346,7 +344,7 @@
 					</div>
 				</div>
 			}
-			@if (svcAppSettings.settings.serverAPI) {
+			@if (settings.serverAPI) {
 				<div class="uk-card-header uk-form-horizontal">
 					<div
 						class="details-header advanced-options-link"
@@ -430,7 +428,7 @@
 						<app-nano-transaction-mobile
 							[transaction]="transaction"
 							[isHidden]="transaction.received"
-							[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
+							[settingIdenticonsStyle]="settings.identiconsStyle"
 							(click)="showMobileMenuForTransaction(transaction)"
 						></app-nano-transaction-mobile>
 					</ng-container>
@@ -465,7 +463,7 @@
 						}
 						<app-nano-transaction-mobile
 							[transaction]="transaction"
-							[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
+							[settingIdenticonsStyle]="settings.identiconsStyle"
 							(click)="showMobileMenuForTransaction(transaction)"
 						></app-nano-transaction-mobile>
 					</ng-container>
@@ -552,11 +550,11 @@
 											uk-tooltip
 										>
 											<div class="identicon-name-row uk-text-truncate">
-												@if (svcAppSettings.settings.identiconsStyle !== 'none') {
+												@if (settings.identiconsStyle !== 'none') {
 													<app-nano-identicon
 														scale="6"
 														[address]="receivable.account"
-														[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
+														[settingIdenticonsStyle]="settings.identiconsStyle"
 														class="nano-identicon"
 													></app-nano-identicon>
 												}
@@ -715,11 +713,11 @@
 											uk-tooltip
 										>
 											<div class="identicon-name-row uk-text-truncate">
-												@if (svcAppSettings.settings.identiconsStyle !== 'none') {
+												@if (settings.identiconsStyle !== 'none') {
 													<app-nano-identicon
 														scale="6"
 														[address]="history.link_as_account || history.account"
-														[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
+														[settingIdenticonsStyle]="settings.identiconsStyle"
 														class="nano-identicon"
 													></app-nano-identicon>
 												}
@@ -1176,7 +1174,7 @@
 												></a>
 											</div>
 										}
-										@if (svcAppSettings.settings.displayCurrency) {
+										@if (settings.displayCurrency) {
 											<div
 												class="uk-width-1-1"
 												style="margin-top: 10px"
@@ -1186,8 +1184,10 @@
 														class="uk-form-icon uk-link-reset uk-link-muted"
 														style="padding-left: 7px"
 														uk-tooltip
-														title="Last Price: {{ svcPrice.oneNano | fiat }} / XNO"
-														>{{ svcAppSettings.settings.displayCurrency | currencySymbol }}</a
+														title="Last Price: {{ settings.displayCurrency | currencySymbol }}{{
+															svcPrice.lastPrice()
+														}} / XNO"
+														>{{ settings.displayCurrency | currencySymbol }}</a
 													>
 													<input
 														[(ngModel)]="amountFiat"
@@ -1196,7 +1196,7 @@
 														class="uk-input"
 														id="form-horizontal-text-fiat"
 														type="text"
-														placeholder="Amount of {{ svcAppSettings.settings.displayCurrency }} to send"
+														placeholder="Amount of {{ settings.displayCurrency }} to send"
 													/>
 												</div>
 											</div>
@@ -1500,7 +1500,7 @@
 					<app-nano-transaction-mobile
 						[isInteractable]="false"
 						[transaction]="mobileTransactionData"
-						[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
+						[settingIdenticonsStyle]="settings.identiconsStyle"
 					></app-nano-transaction-mobile>
 				}
 			</div>

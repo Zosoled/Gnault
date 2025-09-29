@@ -6,7 +6,6 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import { NanoAccountIdComponent } from 'app/components/elements'
 import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
 import {
-	ApiService,
 	AppSettingsService,
 	FullRepresentativeOverview,
 	NanoBlockService,
@@ -15,7 +14,7 @@ import {
 	QrModalService,
 	RepresentativeService,
 	UtilService,
-	WalletService,
+	WalletService
 } from 'app/services'
 import { Tools } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
@@ -28,16 +27,16 @@ import { BehaviorSubject } from 'rxjs'
 })
 export class RepresentativesComponent implements OnInit {
 	private router = inject(ActivatedRoute)
-	walletService = inject(WalletService)
-	private api = inject(ApiService)
+	private svcAppSettings = inject(AppSettingsService)
 	private notifications = inject(NotificationsService)
 	private nanoBlock = inject(NanoBlockService)
 	private util = inject(UtilService)
 	private representativeService = inject(RepresentativeService)
-	settings = inject(AppSettingsService)
 	private ninja = inject(NinjaService)
 	private qrModalService = inject(QrModalService)
 	private translocoService = inject(TranslocoService)
+
+	svcWallet = inject(WalletService)
 
 	@ViewChild('repInput') repInput
 
@@ -67,6 +66,10 @@ export class RepresentativesComponent implements OnInit {
 	hideOverview = false
 
 	representativeList = []
+
+	get settings () {
+		return this.svcAppSettings.settings()
+	}
 
 	async ngOnInit () {
 		this.representativeService.loadRepresentativeList()
@@ -108,7 +111,7 @@ export class RepresentativesComponent implements OnInit {
 		const localReps = this.representativeService.getSortedRepresentatives()
 		this.representativeList.push(...localReps.filter((rep) => !rep.warn))
 
-		if (this.settings.settings.serverAPI) {
+		if (this.settings.serverAPI) {
 			const verifiedReps = await this.ninja.recommendedRandomized()
 
 			// add random recommended reps to the list
@@ -133,7 +136,7 @@ export class RepresentativesComponent implements OnInit {
 			return addressBookName
 		}
 
-		const walletAccount = this.walletService.accounts.find((a) => a.address === account.address)
+		const walletAccount = this.svcWallet.accounts.find((a) => a.address === account.address)
 
 		if (walletAccount == null) {
 			return this.translocoService.translate('general.account')
@@ -178,7 +181,7 @@ export class RepresentativesComponent implements OnInit {
 				this.selectedAccounts.push({ id: 'All Current Accounts' })
 			}
 		} else {
-			const walletAccount = this.walletService.getWalletAccount(newAccount)
+			const walletAccount = this.svcWallet.getWalletAccount(newAccount)
 			this.selectedAccounts.push(walletAccount)
 		}
 
@@ -292,8 +295,8 @@ export class RepresentativesComponent implements OnInit {
 		if (this.changingRepresentatives) {
 			return // Already running
 		}
-		if (this.walletService.isLocked()) {
-			const wasUnlocked = await this.walletService.requestUnlock()
+		if (this.svcWallet.isLocked()) {
+			const wasUnlocked = await this.svcWallet.requestUnlock()
 
 			if (wasUnlocked === false) {
 				return
@@ -312,7 +315,7 @@ export class RepresentativesComponent implements OnInit {
 		}
 
 		const accountsToChange = accounts.find((a) => a.address === 'All Current Accounts')
-			? this.walletService.accounts
+			? this.svcWallet.accounts
 			: accounts
 
 		// Remove any that don't need their represetatives to be changed
@@ -334,17 +337,17 @@ export class RepresentativesComponent implements OnInit {
 			return this.notifications.sendInfo(`None of the accounts selected need to be updated`)
 		}
 
-		const wallet = this.walletService.selectedWallet()
+		const wallet = this.svcWallet.selectedWallet()
 
 		// Now loop and change them
 		for (const account of accountsNeedingChange) {
-			const walletAccount = this.walletService.getWalletAccount(account.address)
+			const walletAccount = this.svcWallet.getWalletAccount(account.address)
 			if (!walletAccount) {
 				continue // Unable to find account in the wallet? wat?
 			}
 
 			try {
-				const changed = await this.nanoBlock.generateChange(wallet, walletAccount, newRep, this.walletService.isLedger())
+				const changed = await this.nanoBlock.generateChange(wallet, walletAccount, newRep, this.svcWallet.isLedger())
 				if (!changed) {
 					this.notifications.sendError(`Error changing representative for ${account.address}, please try again`)
 				}

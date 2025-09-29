@@ -52,7 +52,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	private svcPrice = inject(PriceService)
 	private translocoService = inject(TranslocoService)
 
-	appSettings = inject(AppSettingsService)
+	svcAppSettings = inject(AppSettingsService)
 	notificationService = inject(NotificationsService)
 	walletService = inject(WalletService)
 
@@ -82,6 +82,10 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	timeoutIdAllowingRefresh: any = null
 	loadingBalances = false
 	numberOfTrackedBalance = 0
+
+	get settings () {
+		return this.svcAppSettings.settings()
+	}
 
 	async ngOnInit () {
 		this.addressBookService.loadAddressBook()
@@ -178,8 +182,8 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 
 		// Fetch receivable of all tracked accounts
 		let receivable
-		if (this.appSettings.settings.minimumReceive) {
-			const minAmount = this.util.nano.mnanoToRaw(this.appSettings.settings.minimumReceive)
+		if (this.settings.minimumReceive) {
+			const minAmount = this.util.nano.mnanoToRaw(this.settings.minimumReceive)
 			receivable = await this.api.accountsReceivableLimitSorted(accountIDs, minAmount)
 		} else {
 			receivable = await this.api.accountsReceivableSorted(accountIDs)

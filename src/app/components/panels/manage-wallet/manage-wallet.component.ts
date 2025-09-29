@@ -15,12 +15,12 @@ import * as QRCode from 'qrcode'
 })
 export class ManageWalletComponent implements OnInit {
 	private api = inject(ApiService)
+	private svcAppSettings = inject(AppSettingsService)
 	private translocoService = inject(TranslocoService)
 	private util = inject(UtilService)
 	private svcWallet = inject(WalletService)
 
 	notifications = inject(NotificationsService)
-	settings = inject(AppSettingsService)
 
 	accounts = this.svcWallet.accounts
 	newPassword = ''
@@ -60,6 +60,9 @@ export class ManageWalletComponent implements OnInit {
 	}
 	get selectedWalletName () {
 		return this.svcWallet.walletNames.get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
+	}
+	get settings () {
+		return this.svcAppSettings.settings()
 	}
 
 	async ngOnInit () {
@@ -194,7 +197,7 @@ export class ManageWalletComponent implements OnInit {
 		if ((this.util.string.isNumeric(count) && count % 1 === 0) || count === '') {
 			// only allow beyond limit if using a custom server
 			if (
-				this.settings.settings.serverName !== 'custom' &&
+				this.settings.serverName !== 'custom' &&
 				(parseInt(count, 10) > this.transactionHistoryLimit || count === '' || count === '0')
 			) {
 				this.invalidCsvCount = true

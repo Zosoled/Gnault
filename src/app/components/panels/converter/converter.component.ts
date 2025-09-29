@@ -35,6 +35,10 @@ export class ConverterComponent implements OnInit, OnDestroy {
 	fiatPrice = '0'
 	priceSub = null
 
+	get displayCurrency () {
+		return this.svcAppSettings.settings().displayCurrency
+	}
+
 	ngOnInit (): void {
 		this.unitChange('nano')
 	}

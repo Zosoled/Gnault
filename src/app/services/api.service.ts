@@ -12,12 +12,16 @@ export class ApiService {
 	rpc: WritableSignal<Rpc> = signal(null)
 	storeKey: 'Gnault-ActiveDifficulty' = 'Gnault-ActiveDifficulty'
 
+	get settings () {
+		return this.svcAppSettings.settings()
+	}
+
 	private async request (action, data, skipError, url = '', validateResponse?, attempts = 0): Promise<any> {
 		if (attempts > 9) {
 			throw new Error('No response from repeated requests to server')
 		}
 		data.action = action
-		const apiUrl = url || this.svcAppSettings.settings.serverAPI
+		const apiUrl = url || this.settings.serverAPI
 		if (!apiUrl) {
 			this.svcNode.setOffline(null) // offline mode
 			return
@@ -31,9 +35,9 @@ export class ApiService {
 		let options: any = {
 			responseType: 'json',
 		}
-		if (this.svcAppSettings.settings.serverAuth != null && this.svcAppSettings.settings.serverAuth !== '') {
+		if (this.settings.serverAuth != null && this.settings.serverAuth !== '') {
 			options = Object.assign({}, options, {
-				headers: new HttpHeaders().set('Authorization', this.svcAppSettings.settings.serverAuth),
+				headers: new HttpHeaders().set('Authorization', this.settings.serverAuth),
 			})
 		}
 
@@ -66,7 +70,7 @@ export class ApiService {
 					console.log('Node responded with error', err.status)
 				}
 
-				if (this.svcAppSettings.settings.serverName === 'random') {
+				if (this.settings.serverName === 'random') {
 					// choose a new backend and do the request again
 					this.svcAppSettings.loadServerSettings()
 					await this.sleep(1000) // delay if all servers are down

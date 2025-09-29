@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core'
-import { NanoPow } from 'nano-pow'
-import { BehaviorSubject } from 'rxjs'
 import {
-	AppSettingsService,
 	ApiService,
+	AppSettingsService,
 	NotificationsService,
 	UtilService
 } from 'app/services'
+import { NanoPow } from 'nano-pow'
+import { BehaviorSubject } from 'rxjs'
 
 type DeferredPromise = {
 	promise: Promise<any>
@@ -27,10 +27,10 @@ export enum workState { 'success', 'cancelled', 'error' }
 
 @Injectable({ providedIn: 'root' })
 export class PowService {
-	private appSettings = inject(AppSettingsService)
-	private api = inject(ApiService)
-	private notifications = inject(NotificationsService)
-	private util = inject(UtilService)
+	private svcApi = inject(ApiService)
+	private svcAppSettings = inject(AppSettingsService)
+	private svcNotifications = inject(NotificationsService)
+	private svcUtil = inject(UtilService)
 
 	powAlertLimit = 60; // alert long pow after X sec
 	PoWPool = []
@@ -40,6 +40,10 @@ export class PowService {
 	powAlert$: BehaviorSubject<boolean | false> = new BehaviorSubject(false)
 	public shouldContinueQueue = true; // set to false to disable further processing
 	shouldAbortGpuPow = false
+
+	get settings () {
+		return this.svcAppSettings.settings()
+	}
 
 	/**
 	 * Get PoW for a hash.  If it's already being processed, return the promise.
@@ -94,7 +98,7 @@ export class PowService {
 		const queueItem = this.PoWPool[0]
 		this.powAlert$.next(false) // extra safety to ensure the alert is always reset
 
-		let powSource = this.appSettings.settings.powSource
+		let powSource = this.settings.powSource
 
 		const result = { state: null, work: '' }
 		let workServer
@@ -114,7 +118,7 @@ export class PowService {
 				workServer ??= ''
 			}
 			case 'custom': {
-				workServer ??= this.appSettings.settings.customWorkServer
+				workServer ??= this.settings.customWorkServer
 			}
 			default: {
 				const work = await this.getPowFromServer(queueItem.hash, queueItem.multiplier, workServer)
@@ -151,12 +155,12 @@ export class PowService {
 	 * Actual PoW functions
 	 */
 	async getPowFromServer (hash, multiplier, workServer = '') {
-		const newThreshold = this.util.nano.difficultyFromMultiplier(multiplier, baseThreshold)
+		const newThreshold = this.svcUtil.nano.difficultyFromMultiplier(multiplier, baseThreshold)
 		const serverString = workServer === ''
 			? 'external'
 			: 'custom'
 		console.log(`Generating work with multiplier ${multiplier} at threshold ${newThreshold} using ${serverString} server for hash: `, hash)
-		return await this.api.workGenerate(hash, newThreshold, workServer)
+		return await this.svcApi.workGenerate(hash, newThreshold, workServer)
 			.then(result => result.work)
 			.catch(async err => {
 				console.warn('Error getting work from server, falling back to client...')
@@ -169,7 +173,7 @@ export class PowService {
 	 */
 	async getPowFromClient (blockhash, multiplier) {
 		this.checkPowProcessLength() // start alert timer
-		const newThreshold = this.util.nano.difficultyFromMultiplier(multiplier, baseThreshold)
+		const newThreshold = this.svcUtil.nano.difficultyFromMultiplier(multiplier, baseThreshold)
 		console.log(`NanoPow: Generating work with multiplier ${multiplier} at threshold ${newThreshold} for hash: ${blockhash}`)
 
 		const response = this.getDeferredPromise()
@@ -244,7 +248,7 @@ export class PowService {
 			this.shouldContinueQueue = false // disable further processing
 			this.shouldAbortGpuPow = true // abort GPU pow if running
 			if (notify) {
-				this.notifications.sendInfo(`Proof of Work generation cancelled by the user`)
+				this.svcNotifications.sendInfo(`Proof of Work generation cancelled by the user`)
 			}
 			return true
 		}

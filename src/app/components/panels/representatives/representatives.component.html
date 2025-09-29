@@ -179,7 +179,7 @@
 								}
 								@if (!loadingRepresentatives && (!representativeOverview || !representativeOverview.length)) {
 									<tr class="uk-text-center">
-										@if (settings.settings.serverAPI) {
+										@if (settings.serverAPI) {
 											<td
 												colspan="3"
 												style="text-align: center"
@@ -188,7 +188,7 @@
 												change your representative!
 											</td>
 										}
-										@if (!settings.settings.serverAPI) {
+										@if (!settings.serverAPI) {
 											<td
 												colspan="3"
 												style="text-align: center"
@@ -241,7 +241,7 @@
 										>
 											<option [value]="null">Select Accounts to Change</option>
 											<option [value]="'all'">All Current Accounts</option>
-											@for (account of walletService.accounts; track account) {
+											@for (account of svcWallet.accounts; track account) {
 												<option [value]="account.address">
 													{{ account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
 													{{ account.address | squeeze }} ({{ account.balance | rai: 'mnano,true' | amountsplit: 0

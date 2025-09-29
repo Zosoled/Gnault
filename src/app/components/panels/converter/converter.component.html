@@ -13,11 +13,13 @@
 								<label
 									class="uk-form-label"
 									for="mnano"
-								>XNO <span
+									>XNO
+									<span
 										uk-icon="icon: info;"
 										uk-tooltip
 										title="The main unit used in nano wallets and exchanges."
-									></span></label>
+									></span
+								></label>
 								<div class="uk-form-controls">
 									<div uk-grid>
 										<div class="uk-width-1-1">
@@ -40,7 +42,7 @@
 													(ngModelChange)="unitChange('mnano')"
 													placeholder=""
 													autocomplete="off"
-												>
+												/>
 											</div>
 										</div>
 									</div>
@@ -54,11 +56,13 @@
 								<label
 									class="uk-form-label"
 									for="raw"
-								>raw <span
+									>raw
+									<span
 										uk-icon="icon: info;"
 										uk-tooltip
 										title="The smallest possible unit of XNO."
-									></span></label>
+									></span
+								></label>
 								<div class="uk-form-controls">
 									<div uk-grid>
 										<div class="uk-width-1-1">
@@ -81,7 +85,7 @@
 													(ngModelChange)="unitChange('raw')"
 													placeholder=""
 													autocomplete="off"
-												>
+												/>
 											</div>
 										</div>
 									</div>
@@ -95,11 +99,13 @@
 								<label
 									class="uk-form-label"
 									for="fiat"
-								>{{svcAppSettings.settings.displayCurrency}} <span
+									>{{ displayCurrency }}
+									<span
 										uk-icon="icon: info;"
 										uk-tooltip
 										title="Latest fiat price. The currency can be changed from the app settings."
-									></span></label>
+									></span
+								></label>
 								<div class="uk-form-controls">
 									<div uk-grid>
 										<div class="uk-width-1-1">
@@ -122,7 +128,7 @@
 													(ngModelChange)="unitChange('fiat')"
 													placeholder=""
 													autocomplete="off"
-												>
+												/>
 											</div>
 										</div>
 									</div>
@@ -134,3 +140,4 @@
 			</div>
 		</div>
 	</div>
+</div>

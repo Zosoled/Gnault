@@ -45,7 +45,6 @@ export class SendComponent implements AfterViewInit {
 	private route = inject(ActivatedRoute)
 	private svcAddressBook = inject(AddressBookService)
 	private svcApi = inject(ApiService)
-	private svcAppSettings = inject(AppSettingsService)
 	private svcNanoBlock = inject(NanoBlockService)
 	private svcNotifications = inject(NotificationsService)
 	private svcPrice = inject(PriceService)
@@ -54,6 +53,8 @@ export class SendComponent implements AfterViewInit {
 	private svcUtil = inject(UtilService)
 	private svcWallet = inject(WalletService)
 	private svcWorkPool = inject(WorkPoolService)
+
+	svcAppSettings = inject(AppSettingsService)
 
 	activePanel = 'send'
 	addressBookMatch = ''
@@ -73,10 +74,10 @@ export class SendComponent implements AfterViewInit {
 		return this.amounts.raw.value
 	}
 	get displayCurrency () {
-		return this.svcAppSettings.settings.displayCurrency.toUpperCase()
+		return this.svcAppSettings.settings().displayCurrency
 	}
 	get identiconsStyle () {
-		return this.svcAppSettings.settings.identiconsStyle
+		return this.svcAppSettings.settings().identiconsStyle
 	}
 	get lastPrice () {
 		return this.svcPrice.lastPrice()

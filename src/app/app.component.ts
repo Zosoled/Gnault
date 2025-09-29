@@ -67,7 +67,6 @@ export class AppComponent implements AfterViewInit {
 	nanoPrice = this.svcPrice.lastPrice
 	node = this.svcNode.node
 
-	fiatTimeout = 5 * 60 * 1000 // Update fiat prices every 5 minutes
 	inactiveSeconds = 0
 	isWalletRefreshed = false
 	navExpanded = false
@@ -116,6 +115,9 @@ export class AppComponent implements AfterViewInit {
 	get selectedWalletName (): string {
 		return this.svcWallet.walletNames.get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
 	}
+	get settings () {
+		return this.svcAppSettings.settings()
+	}
 	get walletNames (): Map<string, string> {
 		return this.svcWallet.walletNames
 	}
@@ -136,7 +138,7 @@ export class AppComponent implements AfterViewInit {
 
 	async ngAfterViewInit () {
 		this.svcAppSettings.loadAppSettings()
-		this.svcTransloco.setActiveLang(this.svcAppSettings.settings.language)
+		this.svcTransloco.setActiveLang(this.settings.language)
 
 		this.updateAppTheme()
 
@@ -209,7 +211,7 @@ export class AppComponent implements AfterViewInit {
 		if (
 			this.svcWallet.isLocked() &&
 			this.svcWallet.hasReceivableTransactions() &&
-			this.svcAppSettings.settings.receivableOption !== 'manual'
+			this.settings.receivableOption !== 'manual'
 		) {
 			this.svcNotification.sendWarning(`New incoming transaction(s) - Unlock the wallet to receive`, {
 				length: 10000,
@@ -217,7 +219,7 @@ export class AppComponent implements AfterViewInit {
 			})
 		} else if (
 			this.svcWallet.hasReceivableTransactions() &&
-			this.svcAppSettings.settings.receivableOption === 'manual'
+			this.settings.receivableOption === 'manual'
 		) {
 			this.svcNotification.sendWarning(`Incoming transaction(s) found - Set to be received manually`, {
 				length: 10000,
@@ -264,27 +266,17 @@ export class AppComponent implements AfterViewInit {
 		// Check how long the wallet has been inactive, and lock it if it's been too long
 		setInterval(() => {
 			this.inactiveSeconds += 1
-			if (!this.svcAppSettings.settings.lockInactivityMinutes) return // Do not lock on inactivity
+			if (!this.settings.lockInactivityMinutes) return // Do not lock on inactivity
 			if (this.svcWallet.isLocked()) return
 
 			// Determine if we have been inactive for longer than our lock setting
-			if (this.inactiveSeconds >= this.svcAppSettings.settings.lockInactivityMinutes * 60) {
+			if (this.inactiveSeconds >= this.settings.lockInactivityMinutes * 60) {
 				this.svcWallet.lockWallet()
 				this.svcNotification.sendSuccess(
-					`Wallet locked after ${this.svcAppSettings.settings.lockInactivityMinutes} minutes of inactivity`
+					`Wallet locked after ${this.settings.lockInactivityMinutes} minutes of inactivity`
 				)
 			}
 		}, 1000)
-
-		try {
-			if (!this.svcAppSettings.settings.serverAPI) return
-			await this.updateFiatPrices()
-		} catch (err) {
-			this.svcNotification.sendWarning(
-				`There was an issue retrieving latest nano price.  Ensure your AdBlocker is disabled on this page then reload to see accurate FIAT values.`,
-				{ length: 0, identifier: `price-adblock` }
-			)
-		}
 	}
 
 	applySwUpdate () {
@@ -322,12 +314,12 @@ export class AppComponent implements AfterViewInit {
 			this.canToggleLightMode = true
 		}, 300)
 
-		this.svcAppSettings.setAppSetting('lightModeEnabled', !this.svcAppSettings.settings.lightModeEnabled)
+		this.svcAppSettings.setAppSetting('lightModeEnabled', !this.settings.lightModeEnabled)
 		this.updateAppTheme()
 	}
 
 	updateAppTheme () {
-		if (this.svcAppSettings.settings.lightModeEnabled) {
+		if (this.settings.lightModeEnabled) {
 			this.renderer.addClass(document.body, 'light-mode')
 			this.renderer.removeClass(document.body, 'dark-mode')
 		} else {
@@ -383,17 +375,11 @@ export class AppComponent implements AfterViewInit {
 	}
 
 	retryConnection () {
-		if (!this.svcAppSettings.settings.serverAPI) {
+		if (!this.settings.serverAPI) {
 			this.svcNotification.sendInfo(`Wallet server settings is set to offline mode. Please change server first!`)
 			return
 		}
 		this.svcWallet.reloadBalances()
 		this.svcNotification.sendInfo(`Attempting to reconnect to nano node`)
-	}
-
-	async updateFiatPrices () {
-		const displayCurrency = this.svcAppSettings.getAppSetting('displayCurrency') ?? 'usd'
-		await this.svcPrice.fetchPrice(displayCurrency)
-		setTimeout(() => this.updateFiatPrices(), this.fiatTimeout)
 	}
 }

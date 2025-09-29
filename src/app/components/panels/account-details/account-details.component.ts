@@ -157,6 +157,9 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	get isConfigured () {
 		return this.svcWallet.isConfigured()
 	}
+	get settings () {
+		return this.svcAppSettings.settings()
+	}
 
 	accountColor: Signal<number> = computed((): number => {
 		const account = this.account()
@@ -228,7 +231,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		const localReps = this.svcRepresentative.getSortedRepresentatives()
 		this.representativeList.push(...localReps.filter((rep) => !rep.warn))
 
-		if (this.svcAppSettings.settings.serverAPI) {
+		if (this.settings.serverAPI) {
 			const verifiedReps = await this.svcNinja.recommendedRandomized()
 
 			// add random recommended reps to the list
@@ -484,8 +487,8 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			this.receivableBlocks = []
 			this.loadingIncomingTxList = true
 
-			if (this.svcAppSettings.settings.minimumReceive) {
-				const minAmount = await Tools.convert(this.svcAppSettings.settings.minimumReceive, 'nano', 'raw')
+			if (this.settings.minimumReceive) {
+				const minAmount = await Tools.convert(this.settings.minimumReceive, 'nano', 'raw')
 				receivable = await this.svcApi.receivableLimitSorted(address, 50, minAmount)
 			} else {
 				receivable = await this.svcApi.receivableSorted(address, 50)
@@ -792,7 +795,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			this.amountFiat = 0
 			return
 		}
-		const precision = this.svcAppSettings.settings.displayCurrency === 'BTC' ? 6 : 2
+		const precision = this.settings.displayCurrency === 'BTC' ? 6 : 2
 		const fiatAmount = (parseFloat(Tools.convert(rawAmount, 'raw', 'nano')) * this.lastPrice).toFixed(
 			precision
 		)
@@ -897,7 +900,6 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		received: boolean
 		isReceivable: boolean
 	}) {
-		debugger
 		const sourceBlock = receivableBlock.hash
 
 		if (this.svcWallet.isLocked()) {
@@ -916,7 +918,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 
 		const walletAccount = this.walletAccount()
 		try {
-			await walletAccount.refresh(this.svcAppSettings.settings.serverAPI)
+			await walletAccount.refresh(this.settings.serverAPI)
 		} catch (err) {
 			if (err.message !== 'Account not found') {
 				throw new Error('Error refreshing account', { cause: err })
@@ -924,12 +926,12 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 		walletAccount.balance ??= 0
 		walletAccount.frontier ??= ''.padStart(64, '0')
-		walletAccount.representative ??= this.svcAppSettings.settings.defaultRepresentative || this.svcNanoBlock.getRandomRepresentative()
+		walletAccount.representative ??= this.settings.defaultRepresentative || this.svcNanoBlock.getRandomRepresentative()
 		const receiveBlock = new Block(walletAccount).receive(sourceBlock, receivableBlock.amount)
 		try {
 			await receiveBlock.pow()
 			await receiveBlock.sign(this.svcWallet.selectedWallet(), walletAccount.index)
-			await receiveBlock.process(new Rpc(this.svcAppSettings.settings.serverAPI))
+			await receiveBlock.process(new Rpc(this.settings.serverAPI))
 		} catch (err) {
 			this.svcNotifications.sendError('Error receiving transaction: ' + err.message)
 			hasShownErrorNotification = true
@@ -987,7 +989,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		this.amountFiat = parseFloat(Tools.convert(rawAmount, 'raw', 'nano')) * this.lastPrice
 
 		const defaultRepresentative =
-			this.svcAppSettings.settings.defaultRepresentative || this.svcNanoBlock.getRandomRepresentative()
+			this.settings.defaultRepresentative || this.svcNanoBlock.getRandomRepresentative()
 		const representative = from.representative || defaultRepresentative
 		const block = new Block(this.address, from.balance, from.frontier, representative).send(
 			Account.load(this.toAccountID).publicKey,
@@ -1031,7 +1033,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 
 		const previousBlock = toAcct.frontier || this.zeroHash // set to zeroes if open block
 		const defaultRepresentative =
-			this.svcAppSettings.settings.defaultRepresentative || this.svcNanoBlock.getRandomRepresentative()
+			this.settings.defaultRepresentative || this.svcNanoBlock.getRandomRepresentative()
 		const representative = toAcct.representative || defaultRepresentative
 
 		const srcBlockInfo = await this.svcApi.blocksInfo([receivableHash])

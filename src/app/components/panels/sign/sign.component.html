@@ -58,7 +58,7 @@
 										<span class="amount-fractional">{{ rawAmount | rai: 'mnano,true' | amountsplit: 1 }}</span>
 										<span class="currency-name">XNO</span>
 									</div>
-									@if (svcAppSettings.settings.displayCurrency && amountFiat !== null) {
+									@if (displayCurrency && amountFiat !== null) {
 										<div
 											style="margin: 8px 0 -1px 0"
 											class="text-half-muted"
@@ -66,7 +66,7 @@
 											{{ amountFiat | fiat }}
 										</div>
 									}
-									@if (svcAppSettings.settings.displayCurrency && amountFiat !== null) {
+									@if (displayCurrency && amountFiat !== null) {
 										<div
 											style="margin: 1px 0 -1px 0"
 											class="uk-text-muted"
@@ -85,7 +85,7 @@
 						<div class="account-snippet uk-text-truncate">
 							<div
 								class="uk-card uk-card-default uk-text-truncate"
-								[class.identicons-enabled]="svcAppSettings.settings.identiconsStyle !== 'none'"
+								[class.identicons-enabled]="settings.identiconsStyle !== 'none'"
 							>
 								<div class="uk-card-header">
 									@if (txType === txTypes.change) {
@@ -105,11 +105,11 @@
 											title="View Account Details"
 										>
 											<div class="identicon-address-book-row">
-												@if (svcAppSettings.settings.identiconsStyle !== 'none') {
+												@if (settings.identiconsStyle !== 'none') {
 													<app-nano-identicon
 														scale="12"
 														[address]="fromAccountID"
-														[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
+														[settingIdenticonsStyle]="settings.identiconsStyle"
 														class="nano-identicon"
 													></app-nano-identicon>
 												}
@@ -181,7 +181,7 @@
 						<div class="account-snippet uk-text-truncate">
 							<div
 								class="uk-card uk-card-default uk-text-truncate"
-								[class.identicons-enabled]="svcAppSettings.settings.identiconsStyle !== 'none'"
+								[class.identicons-enabled]="settings.identiconsStyle !== 'none'"
 							>
 								<div class="uk-card-header">
 									@if (txType === txTypes.change) {
@@ -202,11 +202,11 @@
 												title="View Account Details"
 											>
 												<div class="identicon-address-book-row">
-													@if (svcAppSettings.settings.identiconsStyle !== 'none') {
+													@if (settings.identiconsStyle !== 'none') {
 														<app-nano-identicon
 															scale="12"
 															[address]="toAccountID"
-															[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
+															[settingIdenticonsStyle]="settings.identiconsStyle"
 															class="nano-identicon"
 														></app-nano-identicon>
 													}
@@ -246,11 +246,11 @@
 												title="View Account Details"
 											>
 												<div class="identicon-address-book-row">
-													@if (svcAppSettings.settings.identiconsStyle !== 'none') {
+													@if (settings.identiconsStyle !== 'none') {
 														<app-nano-identicon
 															scale="12"
 															[address]="currentBlock.representative"
-															[settingIdenticonsStyle]="svcAppSettings.settings.identiconsStyle"
+															[settingIdenticonsStyle]="settings.identiconsStyle"
 															class="nano-identicon"
 														></app-nano-identicon>
 													}
