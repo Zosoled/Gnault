@@ -10,7 +10,7 @@ import {
 import { FormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
 import { TranslocoPipe } from '@jsverse/transloco'
-import { AmountSplitPipe, CurrencySymbolPipe, FiatPipe, RaiPipe } from 'app/pipes'
+import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AppSettingsService,
 	NodeService,
@@ -24,7 +24,6 @@ import { Wallet } from 'libnemo'
 	styleUrls: ['./nano-card.component.css'],
 	imports: [
 		AmountSplitPipe,
-		CurrencySymbolPipe,
 		FiatPipe,
 		FormsModule,
 		RaiPipe,
