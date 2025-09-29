@@ -283,7 +283,7 @@
 				"passwords-do-not-match": "Passwörter stimmen nicht überein!"
 			},
 			"for-the-safety-of-your-funds-use-a-secure-password": "Verwenden Sie für die Sicherheit Ihrer Mittel ein sicheres Passwort.",
-			"set-wallet-password": "Wallet-Passwort festlegen",
+			"set-wallet-password": "Brieftaschenkennwort einstellen",
 			"success": "Brieftaschenkennwort erfolgreich eingestellt",
 			"wallet-passwords-are-distinct": "Dieses Passwort kann von anderen Brieftaschen unterscheiden, die Sie in Gnault erstellen. \nJede Brieftasche, die Sie erstellen, kann ein anderes eindeutiges Passwort haben. Achten Sie daher darauf, sie einzeln zu verfolgen.",
 			"while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted": "Während die Brieftasche gesperrt ist, werden ihre mnemonischen und Samen verschlüsselt. \nDies deaktiviert sensible Aktionen wie das Erstellen von Konten, das Senden oder Empfangen von Geldern, das Ändern des Kennworts und die Überprüfung des Mnemonik- oder Saatguts."

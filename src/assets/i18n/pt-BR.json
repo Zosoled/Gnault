@@ -286,7 +286,7 @@
 				"passwords-do-not-match": "As senhas não coincidem!"
 			},
 			"for-the-safety-of-your-funds-use-a-secure-password": "Para a segurança de seus fundos, use uma senha segura.",
-			"set-wallet-password": "Definir Senha da Carteira",
+			"set-wallet-password": "Defina a senha da carteira",
 			"success": "Senha da carteira definida com sucesso",
 			"wallet-passwords-are-distinct": "Essa senha pode diferir de outras carteiras que você cria no GNAULT. \nCada carteira que você cria pode ter uma senha distinta diferente, portanto, tome cuidado para rastreá -las individualmente.",
 			"while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted": "Enquanto a carteira está trancada, seu mnemônico e sementes são criptografados. \nIsso desativa ações confidenciais, como criar contas, enviar ou receber fundos, alterar a senha e verificar o mnemônico ou a semente."
