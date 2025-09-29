@@ -219,7 +219,7 @@
 .merchant-mode-logo {
 	width: 200px;
 	height: 85px;
-	background: url('assets/img/gnault-logo.svg');
+	/* background: url(''); */
 	background-size: contain;
 	background-repeat: no-repeat;
 	flex-shrink: 0;
