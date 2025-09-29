@@ -26,7 +26,7 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 	@ViewChild('newPasswordInput') newPasswordInput: ElementRef
 	@ViewChild('confirmPasswordInput') confirmPasswordInput: ElementRef
 
-	ngAfterViewInit() {
+	ngAfterViewInit () {
 		const UIkit = (window as any).UIkit
 		this.modal = UIkit.modal(this.dialog.nativeElement)
 		UIkit.util.on(this.dialog.nativeElement, 'hidden', () => {
@@ -43,7 +43,7 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 		}
 	}
 
-	showModal() {
+	showModal () {
 		this.newPassword = ''
 		this.confirmPassword = ''
 		this.isNotMatch = false
@@ -53,7 +53,7 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 		this.newPasswordInput.nativeElement.focus()
 	}
 
-	onModalHidden() {
+	onModalHidden () {
 		this.newPassword = ''
 		this.confirmPassword = ''
 		this.isNotMatch = false
@@ -62,7 +62,7 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 		this.svcWallet.isChangePasswordRequested$.next(false)
 	}
 
-	async update() {
+	async update () {
 		if (this.newPassword.length < 6) {
 			this.isTooShort = true
 		} else if (this.newPassword !== this.confirmPassword) {
