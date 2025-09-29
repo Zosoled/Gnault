@@ -17,6 +17,9 @@ export class PriceService {
 
 	constructor () {
 		this.loadPrice()
+		if (PriceService.lastUpdate === 0) {
+			this.fetchPrice()
+		}
 	}
 
 	/**
