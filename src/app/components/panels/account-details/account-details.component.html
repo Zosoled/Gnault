@@ -102,7 +102,7 @@
 								{{ ('general.account' | transloco) + ' #' + walletAccountIndex }}
 							</div>
 						}
-						@if (!walletAccount) {
+						@if (!walletAccount()) {
 							<div
 								class="account-type-label"
 								[class.editing-name]="showEditAddressBook"
@@ -154,7 +154,7 @@
 												{{
 													addressBookEntry
 														? addressBookEntry
-														: walletAccount
+														: walletAccount()
 															? ('general.account' | transloco) + ' #' + walletAccountIndex
 															: ('account-details.no-label-set' | transloco)
 												}}
@@ -252,7 +252,7 @@
 																	></a>
 																</li>
 															}
-															@if (walletAccount) {
+															@if (walletAccount()) {
 																<li>
 																	<a
 																		uk-icon="icon: pencil;"
@@ -332,9 +332,7 @@
 									</div>
 								</div>
 								<div class="account-amounts-converted text-half-muted">
-									@if (account) {
-										{{ account().balance ?? 0 | fiat }}
-									}
+									{{ account()?.balance ?? 0 | fiat }}
 								</div>
 							} @else {
 								<div class="uk-margin-small-top">
@@ -600,42 +598,39 @@
 								>
 							</td>
 							<ng-template #transactionActionsOrDate>
-								@if (walletAccount() || remoteVisible) {
-									@if (walletAccount) {
-										<div class="button-container">
-											@if (!receivable.loading) {
-												<button
-													class="uk-button uk-button-primary uk-text-center uk-width-auto"
-													type="button"
-													(click)="receiveReceivableBlock(receivable)"
-												>
-													RECEIVE
-												</button>
-											}
-											@if (receivable.loading) {
-												<button
-													class="uk-button uk-button-secondary uk-disabled uk-button-small nlt-icon-button nlt-icon-button-inline"
-												>
-													<span
-														class="spinner"
-														uk-spinner="ratio: 0.5;"
-													></span>
-													Receiving
-												</button>
-											}
-										</div>
-									}
-									@if (remoteVisible) {
-										<div class="button-container">
+								@if (walletAccount()) {
+									<div class="button-container">
+										@if (!receivable.loading) {
 											<button
-												class="uk-button uk-button-primary uk-text-center uk-width-auto remote-sign"
+												class="uk-button uk-button-primary uk-text-center uk-width-auto"
 												type="button"
-												(click)="generateReceive(receivable.hash)"
+												(click)="receiveReceivableBlock(receivable)"
 											>
-												SIGN BLOCK
+												RECEIVE
 											</button>
-										</div>
-									}
+										}
+										@if (receivable.loading) {
+											<button
+												class="uk-button uk-button-secondary uk-disabled uk-button-small nlt-icon-button nlt-icon-button-inline"
+											>
+												<span
+													class="spinner"
+													uk-spinner="ratio: 0.5;"
+												></span>
+												Receiving
+											</button>
+										}
+									</div>
+								} @else if (remoteVisible) {
+									<div class="button-container">
+										<button
+											class="uk-button uk-button-primary uk-text-center uk-width-auto remote-sign"
+											type="button"
+											(click)="generateReceive(receivable.hash)"
+										>
+											SIGN BLOCK
+										</button>
+									</div>
 								} @else {
 									<span
 										class="transaction-date"
@@ -1409,7 +1404,7 @@
 					{{
 						addressBookEntry
 							? addressBookEntry
-							: walletAccount
+							: walletAccount()
 								? ('general.account' | transloco) + ' #' + walletAccountIndex
 								: ('account-details.external-address' | transloco)
 					}}
@@ -1460,7 +1455,7 @@
 					{{
 						addressBookEntry
 							? addressBookEntry
-							: walletAccount
+							: walletAccount()
 								? ('general.account' | transloco) + ' #' + walletAccountIndex
 								: ('account-details.external-address' | transloco)
 					}}
@@ -1513,7 +1508,7 @@
 				<div class="uk-width-1-1">
 					<hr />
 					@if (mobileTransactionData.isReceivable === true) {
-						@if (walletAccount) {
+						@if (walletAccount()) {
 							<div
 								class="menu-option uk-text-success"
 								(click)="onReceiveFundsPress(mobileTransactionData)"
