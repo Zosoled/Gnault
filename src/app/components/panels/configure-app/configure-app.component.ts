@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { Component, inject, OnInit, Renderer2 } from '@angular/core'
+import { Component, computed, inject, OnInit, Renderer2, signal } from '@angular/core'
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { translate, TranslocoDirective, TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import {
@@ -28,22 +28,22 @@ import { BehaviorSubject } from 'rxjs'
 	imports: [CommonModule, FormsModule, ReactiveFormsModule, TranslocoDirective, TranslocoPipe],
 })
 export class ConfigureAppComponent implements OnInit {
-	private notifications = inject(NotificationsService)
-	private svcAppSettings = inject(AppSettingsService)
-	private addressBook = inject(AddressBookService)
-	private pow = inject(PowService)
-	private api = inject(ApiService)
-	private websocket = inject(WebsocketService)
-	private workPool = inject(WorkPoolService)
-	private repService = inject(RepresentativeService)
-	private node = inject(NodeService)
-	private util = inject(UtilService)
-	private svcPrice = inject(PriceService)
-	private ninja = inject(NinjaService)
 	private renderer = inject(Renderer2)
-	private qrModalService = inject(QrModalService)
-	private translocoService = inject(TranslocoService)
+	private svcAddressBook = inject(AddressBookService)
+	private svcApi = inject(ApiService)
+	private svcAppSettings = inject(AppSettingsService)
+	private svcNinja = inject(NinjaService)
+	private svcNode = inject(NodeService)
+	private svcNotifications = inject(NotificationsService)
+	private svcQrModal = inject(QrModalService)
+	private svcPow = inject(PowService)
+	private svcPrice = inject(PriceService)
+	private svcRepresentative = inject(RepresentativeService)
+	private svcTransloco = inject(TranslocoService)
+	private svcUtil = inject(UtilService)
 	private svcWallet = inject(WalletService)
+	private svcWebsocket = inject(WebsocketService)
+	private svcWorkPool = inject(WorkPoolService)
 
 	get settings () {
 		return this.svcAppSettings.settings()
@@ -51,15 +51,17 @@ export class ConfigureAppComponent implements OnInit {
 	get wallet () {
 		return this.svcWallet.selectedWallet()
 	}
-	languages = this.translocoService.getAvailableLangs() as [{ id: string; label: string }]
-	selectedLanguage = this.languages[0].id
+	languages = computed(() => {
+		return this.svcTransloco.getAvailableLangs() as [{ id: string; label: string }]
+	})
+	selectedLanguage = signal(this.languages()[0].id)
 
 	denominations = [
-		{ name: 'XNO', value: 'mnano' },
+		{ name: 'XNO', value: 'nano' },
 		{ name: 'knano', value: 'knano' },
-		{ name: 'nano', value: 'nano' },
+		{ name: 'mnano', value: 'mnano' },
 	]
-	selectedDenomination = this.denominations[0].value
+	selectedDenomination = signal(this.denominations[0].value)
 
 	storageOptions = [
 		{
@@ -182,11 +184,11 @@ export class ConfigureAppComponent implements OnInit {
 
 	async populateRepresentativeList () {
 		// add trusted/regular local reps to the list
-		const localReps = this.repService.getSortedRepresentatives()
+		const localReps = this.svcRepresentative.getSortedRepresentatives()
 		this.representativeList.push(...localReps.filter((rep) => !rep.warn))
 
 		if (this.serverAPI) {
-			const verifiedReps = await this.ninja.recommendedRandomized()
+			const verifiedReps = await this.svcNinja.recommendedRandomized()
 
 			// add random recommended reps to the list
 			for (const representative of verifiedReps) {
@@ -221,7 +223,7 @@ export class ConfigureAppComponent implements OnInit {
 		this.statsRefreshEnabled = false
 
 		try {
-			const blockCount = await this.api.blockCount()
+			const blockCount = await this.svcApi.blockCount()
 			this.nodeBlockCount = Number(blockCount.count).toLocaleString('en-US')
 			this.nodeUnchecked = Number(blockCount.unchecked).toLocaleString('en-US')
 			this.nodeCemented = Number(blockCount.cemented).toLocaleString('en-US')
@@ -231,16 +233,16 @@ export class ConfigureAppComponent implements OnInit {
 		}
 
 		try {
-			const quorumData = await this.api.confirmationQuorum()
-			this.peersStakeReq = Number(this.util.nano.rawToMnano(quorumData?.quorum_delta)).toLocaleString('en-US') ?? null
+			const quorumData = await this.svcApi.confirmationQuorum()
+			this.peersStakeReq = Number(this.svcUtil.nano.rawToMnano(quorumData?.quorum_delta)).toLocaleString('en-US') ?? null
 			this.peersStakeTotal =
-				Number(this.util.nano.rawToMnano(quorumData?.peers_stake_total)).toLocaleString('en-US') ?? null
+				Number(this.svcUtil.nano.rawToMnano(quorumData?.peers_stake_total)).toLocaleString('en-US') ?? null
 		} catch {
 			console.warn('Failed to get node stats: confirmation quorum')
 		}
 
 		try {
-			const version = await this.api.version()
+			const version = await this.svcApi.version()
 			this.nodeVendor = version.node_vendor
 			this.nodeNetwork = version.network
 		} catch {
@@ -251,8 +253,8 @@ export class ConfigureAppComponent implements OnInit {
 	}
 
 	async loadFromSettings () {
-		const matchingLanguage = this.languages.find((language) => language.id === this.settings.language)
-		this.selectedLanguage = matchingLanguage?.id || this.languages[0].id
+		const matchingLanguage = this.languages().find((language) => language.id === this.settings.language)
+		this.selectedLanguage.set(matchingLanguage?.id || this.languages[0].id)
 
 		await this.loadCurrencies()
 
@@ -310,8 +312,8 @@ export class ConfigureAppComponent implements OnInit {
 	}
 
 	async updateDisplaySettings () {
-		this.translocoService.setActiveLang(this.selectedLanguage)
-		this.svcAppSettings.setAppSetting('language', this.selectedLanguage)
+		this.svcTransloco.setActiveLang(this.selectedLanguage())
+		this.svcAppSettings.setAppSetting('language', this.selectedLanguage())
 
 		if (this.selectedNightModeOption === 'disabled') {
 			this.renderer.addClass(document.body, 'light-mode')
@@ -325,7 +327,7 @@ export class ConfigureAppComponent implements OnInit {
 		this.svcAppSettings.setAppSetting('identiconsStyle', this.selectedIdenticonOption)
 		this.svcAppSettings.setAppSetting('displayCurrency', this.selectedCurrency.value)
 
-		this.notifications.sendSuccess(
+		this.svcNotifications.sendSuccess(
 			translate('configure-app.app-display-settings-successfully-updated')
 		)
 		// if (updatePrefixes) {
@@ -362,7 +364,7 @@ export class ConfigureAppComponent implements OnInit {
 			} catch (err) {
 				// pressing cancel, reset storage setting and interrupt
 				this.selectedStorage = this.storageOptions[0].value
-				this.notifications.sendInfo(
+				this.svcNotifications.sendInfo(
 					translate('configure-app.switched-back-to-browser-local-storage-for-the-wallet-data'),
 					{ length: 10000 }
 				)
@@ -373,7 +375,7 @@ export class ConfigureAppComponent implements OnInit {
 		let newPoW = this.selectedPoWOption
 		const receivableOption = this.selectedReceivableOption
 		let minReceive = null
-		if (this.util.account.isValidNanoAmount(this.minimumReceive)) {
+		if (this.svcUtil.account.isValidNanoAmount(this.minimumReceive)) {
 			minReceive = this.minimumReceive
 		}
 
@@ -383,9 +385,9 @@ export class ConfigureAppComponent implements OnInit {
 			(receivableOption !== 'manual' && receivableOption !== this.settings.receivableOption)
 
 		if (this.defaultRepresentative && this.defaultRepresentative.length) {
-			const valid = this.util.account.isValidAccount(this.defaultRepresentative)
+			const valid = this.svcUtil.account.isValidAccount(this.defaultRepresentative)
 			if (!valid) {
-				return this.notifications.sendWarning(
+				return this.svcNotifications.sendWarning(
 					translate('configure-app.default-representative-is-not-a-valid-account')
 				)
 			}
@@ -395,7 +397,7 @@ export class ConfigureAppComponent implements OnInit {
 			// Cancel ongoing PoW if the old method was local PoW
 			if (this.settings.powSource === 'client') {
 				// Check if work is ongoing, and cancel it
-				if (this.pow.cancelAllPow(false)) {
+				if (this.svcPow.cancelAllPow(false)) {
 					reloadReceivable = true // force reload balance => re-work pow
 				}
 			}
@@ -420,7 +422,7 @@ export class ConfigureAppComponent implements OnInit {
 		}
 
 		this.svcAppSettings.setAppSettings(newSettings)
-		this.notifications.sendSuccess(
+		this.svcNotifications.sendSuccess(
 			translate('configure-app.app-wallet-settings-successfully-updated')
 		)
 
@@ -445,7 +447,7 @@ export class ConfigureAppComponent implements OnInit {
 			if (this.serverAPI.startsWith('https://') || this.serverAPI.startsWith('http://')) {
 				newSettings.serverAPI = this.serverAPI
 			} else {
-				return this.notifications.sendWarning(
+				return this.svcNotifications.sendWarning(
 					translate('configure-app.custom-api-server-has-an-invalid-address')
 				)
 			}
@@ -455,7 +457,7 @@ export class ConfigureAppComponent implements OnInit {
 			if (this.serverWS.startsWith('wss://') || this.serverWS.startsWith('ws://')) {
 				newSettings.serverWS = this.serverWS
 			} else {
-				return this.notifications.sendWarning(
+				return this.svcNotifications.sendWarning(
 					translate('configure-app.custom-update-server-has-an-invalid-address')
 				)
 			}
@@ -468,15 +470,15 @@ export class ConfigureAppComponent implements OnInit {
 		this.svcAppSettings.setAppSettings(newSettings)
 		this.svcAppSettings.loadAppSettings()
 
-		this.notifications.sendSuccess(
+		this.svcNotifications.sendSuccess(
 			translate('configure-app.server-settings-successfully-updated')
 		)
 
-		this.node.node.status = false // Directly set node to offline since API url changed.  Status will get set by reloadBalances
+		this.svcNode.node.status = false // Directly set node to offline since API url changed.  Status will get set by reloadBalances
 
 		// Reload balances which triggers an api check + reconnect to websocket server
 		await this.svcWallet.reloadBalances()
-		this.websocket.forceReconnect()
+		this.svcWebsocket.forceReconnect()
 		// this is updated after setting server to random and doing recheck of wallet balance
 		this.serverAPIUpdated = this.settings.serverAPI
 		this.serverAPI = this.serverAPIUpdated
@@ -485,7 +487,7 @@ export class ConfigureAppComponent implements OnInit {
 	}
 
 	searchRepresentatives () {
-		if (this.defaultRepresentative && !this.util.account.isValidAccount(this.defaultRepresentative)) this.repStatus = 0
+		if (this.defaultRepresentative && !this.svcUtil.account.isValidAccount(this.defaultRepresentative)) this.repStatus = 0
 		else this.repStatus = null
 
 		this.showRepresentatives = true
@@ -494,7 +496,7 @@ export class ConfigureAppComponent implements OnInit {
 		const matches = this.representativeList
 			.filter((a) => a.name.toLowerCase().indexOf(search.toLowerCase()) !== -1)
 			// remove duplicate accounts
-			.filter((item, pos, self) => this.util.array.findWithAttr(self, 'id', item.id) === pos)
+			.filter((item, pos, self) => this.svcUtil.array.findWithAttr(self, 'id', item.id) === pos)
 			.slice(0, 5)
 
 		this.representativeResults$.next(matches)
@@ -516,8 +518,8 @@ export class ConfigureAppComponent implements OnInit {
 			return
 		}
 
-		const rep = this.repService.getRepresentative(this.defaultRepresentative)
-		const ninjaRep = await this.ninja.getAccount(this.defaultRepresentative)
+		const rep = this.svcRepresentative.getRepresentative(this.defaultRepresentative)
+		const ninjaRep = await this.svcNinja.getAccount(this.defaultRepresentative)
 
 		if (rep) {
 			this.representativeListMatch = rep.name
@@ -575,8 +577,8 @@ export class ConfigureAppComponent implements OnInit {
 				translate('configure-app.are-you-sure') +
 				'</b></p>'
 			)
-			this.workPool.clearCache()
-			this.notifications.sendSuccess(
+			this.svcWorkPool.clearCache()
+			this.svcNotifications.sendSuccess(
 				translate('configure-app.successfully-cleared-the-work-cache')
 			)
 			return true
@@ -599,7 +601,7 @@ export class ConfigureAppComponent implements OnInit {
 			)
 			this.svcWallet.resetWallet()
 			this.svcWallet.removeWalletData()
-			this.notifications.sendSuccess(
+			this.svcNotifications.sendSuccess(
 				translate('configure-app.successfully-deleted-all-wallet-data')
 			)
 		} catch (err) { }
@@ -619,13 +621,13 @@ export class ConfigureAppComponent implements OnInit {
 			)
 			this.svcWallet.resetWallet()
 			this.svcWallet.removeWalletData()
-			this.workPool.deleteCache()
-			this.addressBook.clearAddressBook()
+			this.svcWorkPool.deleteCache()
+			this.svcAddressBook.clearAddressBook()
 			this.svcAppSettings.clearAppSettings()
-			this.repService.resetRepresentativeList()
-			this.api.deleteCache()
+			this.svcRepresentative.resetRepresentativeList()
+			this.svcApi.deleteCache()
 			this.loadFromSettings()
-			this.notifications.sendSuccess(
+			this.svcNotifications.sendSuccess(
 				translate(
 					'configure-app.clear-all-data.successfully-deleted-locally-stored-data-and-reset-the'
 				)
@@ -637,7 +639,7 @@ export class ConfigureAppComponent implements OnInit {
 
 	// open qr reader modal
 	openQR (reference, type) {
-		const qrResult = this.qrModalService.openQR(reference, type)
+		const qrResult = this.svcQrModal.openQR(reference, type)
 		qrResult.then(
 			(data) => {
 				switch (data.reference) {

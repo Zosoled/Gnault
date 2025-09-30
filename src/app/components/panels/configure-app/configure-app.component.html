@@ -30,7 +30,7 @@
 										[(ngModel)]="selectedLanguage"
 										id="languageselector"
 									>
-										@for (language of languages; track language) {
+										@for (language of languages(); track language.id) {
 											<option [value]="language.id">
 												{{ language.label }}
 											</option>
