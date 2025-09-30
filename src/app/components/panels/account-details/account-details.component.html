@@ -30,10 +30,9 @@
 					<div class="account-balances">
 						@if (!loadingAccountDetails) {
 							<div class="balance-container primary">
-								<div class="currency-name">XNO</div>
 								<div class="amount-container">
 									<div class="amount-integer">
-										{{ account()?.balance ?? 0 | rai: 'nano,true' | amountsplit: 0 }}
+										&#xE001;{{ account()?.balance ?? 0 | rai: 'nano,true' | amountsplit: 0 }}
 									</div>
 									<div class="amount-fractional">
 										{{ account()?.balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }}
@@ -47,13 +46,13 @@
 							</div>
 							@if (settings.displayCurrency) {
 								<div class="balance-container converted">
-									<div class="currency-name"><span class="estimate-symbol">~</span>{{ settings.displayCurrency }}</div>
 									<div class="amount-container">
+										<span class="estimate-symbol">~</span>
 										<div class="amount-integer">
-											{{ account().balance ?? 0 | fiat | amountsplit: 0 }}
+											{{ account()?.balance ?? 0 | fiat | amountsplit: 0 }}
 										</div>
 										<div class="amount-fractional">
-											{{ account().balance ?? 0 | fiat | amountsplit: 1 }}
+											{{ account()?.balance ?? 0 | fiat | amountsplit: 1 }}
 										</div>
 									</div>
 								</div>
@@ -675,7 +674,7 @@
 							</td>
 						</tr>
 					}
-					@for (history of accountHistory; track $index) {
+					@for (history of accountHistory; track history.hash) {
 						<tr>
 							<td class="type-column">
 								@if (history.type == 'receive' || history.subtype == 'receive' || history.type == 'open') {

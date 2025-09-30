@@ -475,6 +475,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 
 		this.account.set(Account.load(address))
+		await this.account().refresh(new Rpc(this.settings.serverAPI))
 
 		this.updateRepresentativeInfo()
 
