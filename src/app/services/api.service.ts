@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { Injectable, Signal, computed, inject } from '@angular/core'
 import { AppSettingsService, NodeService, TxType } from 'app/services'
 import { Rpc } from 'libnemo'
+import { firstValueFrom } from 'rxjs'
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -43,50 +44,46 @@ export class ApiService {
 			})
 		}
 
-		return await this.http
-			.post(apiUrl, data, options)
-			.toPromise()
-			.then((res) => {
-				if (typeof validateResponse === 'function') {
-					const { err } = validateResponse(res)
-					const isValidResponse = err == null
-
-					if (isValidResponse === false) {
-						throw {
-							isValidationFailure: true,
-							status: 500,
-							reason: err,
-							res,
-						}
+		try {
+			const res = await firstValueFrom(this.http.post(apiUrl, data, options))
+			if (typeof validateResponse === 'function') {
+				const { err } = validateResponse(res)
+				const isValidResponse = err == null
+				if (isValidResponse === false) {
+					throw {
+						isValidationFailure: true,
+						status: 500,
+						reason: err,
+						res,
 					}
 				}
-				this.svcNode.setOnline()
-				return res
-			})
-			.catch(async (err) => {
-				if (skipError) return
-
-				if (err.isValidationFailure === true) {
-					console.log('Node response failed validation.', err.reason, err.res)
+			}
+			this.svcNode.setOnline()
+			return res
+		} catch (err) {
+			if (skipError) {
+				return
+			}
+			if (err.isValidationFailure === true) {
+				console.log('Node response failed validation.', err.reason, err.res)
+			} else {
+				console.log('Node responded with error', err.status)
+			}
+			if (this.settings.serverName === 'random') {
+				// choose a new backend and do the request again
+				this.svcAppSettings.loadServerSettings()
+				await this.sleep(1000) // delay if all servers are down
+				return this.request(action, data, skipError, '', validateResponse, attempts + 1)
+			} else {
+				// hard exit
+				if (err.status === 429) {
+					this.svcNode.setOffline('Too Many Requests to the node. Try again later or choose a different node.')
 				} else {
-					console.log('Node responded with error', err.status)
+					this.svcNode.setOffline()
 				}
-
-				if (this.settings.serverName === 'random') {
-					// choose a new backend and do the request again
-					this.svcAppSettings.loadServerSettings()
-					await this.sleep(1000) // delay if all servers are down
-					return this.request(action, data, skipError, '', validateResponse, attempts + 1)
-				} else {
-					// hard exit
-					if (err.status === 429) {
-						this.svcNode.setOffline('Too Many Requests to the node. Try again later or choose a different node.')
-					} else {
-						this.svcNode.setOffline()
-					}
-					throw err
-				}
-			})
+				throw err
+			}
+		}
 	}
 
 	async accountsBalances (accounts: string[]): Promise<{ balances: any }> {
@@ -97,7 +94,7 @@ export class ApiService {
 		return await this.request('accounts_frontiers', { accounts }, false)
 	}
 
-	async accountsReceivable (accounts: string[], count: number = 50): Promise<{ blocks: any }> {
+	async accountsReceivable (accounts: string[], count: number = 50): Promise<{ blocks: { [address: string]: { [hash: string]: { amount: string, source: string } } } }> {
 		const data = { accounts, count, source: true, include_only_confirmed: true }
 		let response
 		try {
@@ -108,7 +105,7 @@ export class ApiService {
 		return response
 	}
 
-	async accountsReceivableLimit (accounts: string[], threshold: string, count: number = 50): Promise<{ blocks: any }> {
+	async accountsReceivableLimit (accounts: string[], threshold: string, count: number = 50): Promise<{ blocks: { [address: string]: { [hash: string]: { amount: string, source: string } } } }> {
 		const data = { accounts, count, threshold, source: true, include_only_confirmed: true }
 		try {
 			return await this.request('accounts_pending', data, false)
@@ -117,7 +114,7 @@ export class ApiService {
 		}
 	}
 
-	async accountsReceivableSorted (accounts: string[], count: number = 50): Promise<{ blocks: any }> {
+	async accountsReceivableSorted (accounts: string[], count: number = 50): Promise<{ blocks: { [address: string]: { [hash: string]: { amount: string, source: string } } } }> {
 		const data = { accounts, count, source: true, include_only_confirmed: true, sorting: true }
 		let response
 		try {
@@ -128,11 +125,7 @@ export class ApiService {
 		return response
 	}
 
-	async accountsReceivableLimitSorted (
-		accounts: string[],
-		threshold: string,
-		count: number = 50
-	): Promise<{ blocks: any }> {
+	async accountsReceivableLimitSorted (accounts: string[], threshold: string, count: number = 50): Promise<{ blocks: { [address: string]: { [hash: string]: { amount: string, source: string } } } }> {
 		const data = { accounts, count, threshold, source: true, include_only_confirmed: true, sorting: true }
 		let response
 		try {
