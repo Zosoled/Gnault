@@ -156,7 +156,7 @@
 											class="uk-select"
 											[(ngModel)]="selectedInactivityMinutes"
 										>
-											@for (option of inactivityOptions; track option) {
+											@for (option of inactivityOptions; track option.value) {
 												<option [value]="option.value">
 													{{ option.name }}
 												</option>
