@@ -9,7 +9,7 @@ import {
 	WalletAccount,
 	WorkPoolService
 } from 'app/services'
-import { Account, Block, Wallet } from 'libnemo'
+import { Account, Block, Rpc, Wallet } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
 
 @Injectable({ providedIn: 'root' })
@@ -193,11 +193,11 @@ export class NanoBlockService {
 	//
 	// }
 
-	async generateSend (wallet: Wallet, walletAccount, toAccountID, rawAmount, ledger = false) {
+	async generateSend (wallet: Wallet, walletAccount, toAddress: string, rawAmount, ledger = false) {
 		const account = Account.load(walletAccount.address)
 		const fromAccount = await this.svcApi.accountInfo(account.address)
 		if (!fromAccount) throw new Error(`Unable to get account information for ${account.address}`)
-
+		const toAccount = Account.load(toAddress)
 		const remaining = BigInt(fromAccount.balance) - rawAmount
 		const remainingDecimal = remaining.toString(10)
 
@@ -208,17 +208,19 @@ export class NanoBlockService {
 			previous: fromAccount.frontier,
 			representative: representative,
 			balance: remainingDecimal,
-			link: Account.load(toAccountID).publicKey,
+			link: Account.load(toAddress).publicKey,
 			work: null,
 			signature: null,
 		}
+		const block = new Block(walletAccount, fromAccount.balance, fromAccount.frontier, representative)
+			.send(toAccount, rawAmount)
 
 		if (ledger) {
 			const ledgerBlock = {
 				previousBlock: fromAccount.frontier,
 				representative: representative,
 				balance: remainingDecimal,
-				recipient: toAccountID,
+				recipient: toAddress,
 			}
 			try {
 				this.sendLedgerNotification()
@@ -231,8 +233,11 @@ export class NanoBlockService {
 				return
 			}
 		} else {
-			this.validateAccount(fromAccount, fromAccount.publicKey)
-			await wallet.sign(account.index, blockData as unknown as Block)
+			await block.pow()
+			await block.sign(wallet, walletAccount.index)
+			const hash = await block.process(new Rpc(this.svcAppSettings.settings().serverAPI))
+			console.log(hash)
+			return hash
 		}
 
 		if (!this.svcWorkPool.workExists(fromAccount.frontier)) {

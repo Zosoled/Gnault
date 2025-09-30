@@ -357,15 +357,17 @@ export class SendComponent implements AfterViewInit {
 				wallet,
 				walletAccount,
 				destinationAddress,
-				this.amounts.raw.value,
+				this.amount,
 				this.svcWallet.isLedger()
 			)
 			if (newHash) {
 				this.svcNotifications.removeNotification('success-send')
-				this.svcNotifications.sendSuccess(`Successfully sent XNO ${this.amounts.nano}!`, {
+				this.svcNotifications.sendSuccess(`Successfully sent \uE001${this.amounts.nano}!`, {
 					identifier: 'success-send',
 				})
 				this.activePanel = 'send'
+				this.amounts.fiat.setValue(0)
+				this.amounts.nano.setValue(0)
 				this.amounts.raw.setValue(0n)
 				this.toAddress = ''
 				this.toOwnAddress = ''
