@@ -18,7 +18,7 @@ import {
 	UtilService,
 	WalletService,
 } from 'app/services'
-import { Account, Block, Rpc, Tools } from 'libnemo'
+import { Account, Block, Tools } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 import * as QRCode from 'qrcode'
 import { BehaviorSubject } from 'rxjs'
@@ -475,7 +475,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		}
 
 		this.account.set(Account.load(address))
-		await this.account().refresh(new Rpc(this.settings.serverAPI))
+		await this.account().refresh(this.svcApi.rpc())
 
 		this.updateRepresentativeInfo()
 
@@ -932,7 +932,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		try {
 			await receiveBlock.pow()
 			await receiveBlock.sign(this.svcWallet.selectedWallet(), walletAccount.index)
-			await receiveBlock.process(new Rpc(this.settings.serverAPI))
+			await receiveBlock.process(this.svcApi.rpc())
 		} catch (err) {
 			this.svcNotifications.sendError('Error receiving transaction: ' + err.message)
 			hasShownErrorNotification = true

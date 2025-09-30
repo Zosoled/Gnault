@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http'
-import { Injectable, WritableSignal, inject, signal } from '@angular/core'
+import { Injectable, Signal, computed, inject } from '@angular/core'
 import { AppSettingsService, NodeService, TxType } from 'app/services'
 import { Rpc } from 'libnemo'
 
@@ -9,7 +9,9 @@ export class ApiService {
 	private svcAppSettings = inject(AppSettingsService)
 	private svcNode = inject(NodeService)
 
-	rpc: WritableSignal<Rpc> = signal(null)
+	rpc: Signal<Rpc> = computed(() => {
+		return new Rpc(this.svcAppSettings.settings().serverAPI)
+	})
 	storeKey: 'Gnault-ActiveDifficulty' = 'Gnault-ActiveDifficulty'
 
 	get settings () {

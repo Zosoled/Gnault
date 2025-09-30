@@ -9,7 +9,7 @@ import {
 	WalletAccount,
 	WorkPoolService
 } from 'app/services'
-import { Account, Block, Rpc, Wallet } from 'libnemo'
+import { Account, Block, Wallet } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
 
 @Injectable({ providedIn: 'root' })
@@ -235,7 +235,7 @@ export class NanoBlockService {
 		} else {
 			await block.pow()
 			await block.sign(wallet, walletAccount.index)
-			const hash = await block.process(new Rpc(this.svcAppSettings.settings().serverAPI))
+			const hash = await block.process(this.svcApi.rpc())
 			console.log(hash)
 			return hash
 		}
