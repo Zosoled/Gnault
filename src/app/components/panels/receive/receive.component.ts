@@ -110,6 +110,9 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	get minimumReceive () {
 		return this.svcAppSettings.settings().minimumReceive
 	}
+	get selectedAccount () {
+		return this.svcWallet.selectedAccount()
+	}
 
 	async ngOnInit () {
 		const UIkit = window['UIkit']
@@ -145,9 +148,9 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 
 		await this.updateReceivableBlocks()
 
-		if (this.svcWallet.selectedAccount !== null) {
+		if (this.selectedAccount !== null) {
 			// Set the account selected in the sidebar as default
-			this.receivableAccountModel = this.svcWallet.selectedAccount().address
+			this.receivableAccountModel = this.selectedAccount.address
 			this.onSelectedAccountChange(this.receivableAccountModel)
 		} else if (this.accounts.length === 1) {
 			// Auto-select account if it is the only account in the wallet
