@@ -257,27 +257,28 @@ export class NanoBlockService {
 		return processResponse.hash
 	}
 
-	async generateReceive (wallet: Wallet, walletAccount: Account, sourceBlock, ledger = false) {
-		const toAcct = await this.svcApi.accountInfo(walletAccount.address)
+	async generateReceive (wallet: Wallet, account: Account, sourceBlock, ledger = false) {
+		await account.refresh(this.svcApi.rpc())
 
 		let workBlock = null
 
-		const openEquiv = !toAcct || !toAcct.frontier
+		const openEquiv = !account?.frontier
 
-		const previousBlock = toAcct.frontier || this.zeroHash
-		const representative = toAcct.representative || (this.settings.defaultRepresentative || this.getRandomRepresentative())
+		const previousBlock = account.frontier ?? this.zeroHash
+		console.log(previousBlock)
+		const representative = account.representative ?? this.settings.defaultRepresentative ?? this.getRandomRepresentative()
 
 		const srcBlockInfo = await this.svcApi.blocksInfo([sourceBlock])
 		const srcAmount = BigInt(srcBlockInfo.blocks[sourceBlock].amount)
 		const newBalance = openEquiv
 			? srcAmount
-			: BigInt(toAcct.balance) + srcAmount
+			: BigInt(account.balance) + srcAmount
 		const newBalanceDecimal = newBalance.toString(10)
 		let newBalancePadded = newBalance.toString(16)
 		while (newBalancePadded.length < 32) newBalancePadded = '0' + newBalancePadded // Left pad with 0's
 		const blockData = {
 			type: 'state',
-			account: walletAccount.address,
+			account: account.address,
 			previous: previousBlock,
 			representative: representative,
 			balance: newBalanceDecimal,
@@ -285,6 +286,7 @@ export class NanoBlockService {
 			signature: null,
 			work: null
 		}
+		const block = new Block(account).receive(sourceBlock, srcAmount)
 
 		// We have everything we need, we need to obtain a signature
 		if (ledger) {
@@ -294,25 +296,29 @@ export class NanoBlockService {
 				sourceBlock: sourceBlock,
 			}
 			if (!openEquiv) {
-				ledgerBlock.previousBlock = toAcct.frontier
+				ledgerBlock.previousBlock = account.frontier
 			}
 			try {
 				this.sendLedgerNotification()
-				await wallet.sign(walletAccount.index, ledgerBlock, toAcct.frontier)
-				this.svcNotifications.removeNotification('ledger-sign')
-				blockData.signature = ledgerBlock.signature.toUpperCase()
+				const signature = await wallet.sign(account.index, ledgerBlock as unknown as Block, ledgerBlock.previousBlock)
+				this.clearLedgerNotification()
+				blockData.signature = signature
 			} catch (err) {
-				this.svcNotifications.removeNotification('ledger-sign')
+				this.clearLedgerNotification()
 				this.svcNotifications.sendWarning(err.message || `Transaction denied on Ledger device`)
 				return
 			}
 		} else {
-			this.validateAccount(toAcct, toAcct.publicKey)
-			await wallet.sign(walletAccount.index, blockData as unknown as Block)
+			await block.pow()
+			await block.sign(wallet, account.index)
+			console.log(block.toJSON())
+			const hash = await block.process(this.svcApi.rpc())
+			console.log(hash)
+			return hash
 		}
 
 		workBlock = openEquiv
-			? Account.load(walletAccount.address).publicKey
+			? Account.load(account.address).publicKey
 			: previousBlock
 		if (!this.svcWorkPool.workExists(workBlock)) {
 			this.svcNotifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
@@ -328,7 +334,7 @@ export class NanoBlockService {
 				: TxType.receive
 		)
 		if (processResponse && processResponse.hash) {
-			walletAccount.frontier = processResponse.hash
+			account.frontier = processResponse.hash
 			// Add new hash into the work pool, high PoW threshold since we don't know what the next one will be
 			// Skip adding new work cache directly, let reloadBalances() check for receivable and decide instead
 			// this.workPool.addWorkToCache(processResponse.hash, 1)
