@@ -348,6 +348,7 @@
 		"wallet-must-be-unlocked": "钱包必须解锁",
 		"yes": "是"
 	},
+	"language": "中国人",
 	"nav": {
 		"accounts": "帐户",
 		"wallets": "钱包"

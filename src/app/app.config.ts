@@ -29,7 +29,8 @@ export const appConfig: ApplicationConfig = {
 					{ id: 'de', label: 'Deutsch' },
 					{ id: 'es', label: 'Español' },
 					{ id: 'fr', label: 'Français' },
-					{ id: 'pt-br', label: 'Português (Brasil)' }
+					{ id: 'pt-BR', label: 'Português (Brasil)' },
+					{ id: 'zh', label: '中国人' }
 				],
 				defaultLang: 'en',
 				fallbackLang: 'en',

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { Component, computed, inject, OnInit, Renderer2, signal } from '@angular/core'
+import { Component, computed, effect, inject, OnInit, Renderer2, signal, WritableSignal } from '@angular/core'
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { translate, TranslocoDirective, TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import {
@@ -51,28 +51,18 @@ export class ConfigureAppComponent implements OnInit {
 	get wallet () {
 		return this.svcWallet.selectedWallet()
 	}
+
 	languages = computed(() => {
 		return this.svcTransloco.getAvailableLangs() as [{ id: string; label: string }]
 	})
-	selectedLanguage = signal(this.languages()[0].id)
+	selectedLanguage = signal(this.svcAppSettings.settings().language ?? this.languages()[0].id)
+	selectedLanguageChanged = effect(() => {
+		this.svcTransloco.setActiveLang(this.selectedLanguage())
+		this.settings.language = this.selectedLanguage()
+		this.svcAppSettings.saveAppSettings()
+	})
 
-	denominations = [
-		{ name: 'XNO', value: 'nano' },
-		{ name: 'knano', value: 'knano' },
-		{ name: 'mnano', value: 'mnano' },
-	]
-	selectedDenomination = signal(this.denominations[0].value)
-
-	storageOptions = [
-		{
-			name: translate('configure-app.storage-options.browser-local-storage'),
-			value: 'localStorage',
-		},
-		{ name: translate('configure-app.storage-options.none'), value: 'none' },
-	]
-	selectedStorage = this.storageOptions[0].value
-
-	currencies = [
+	private currenciesCustomized = [
 		{ value: 'BCH', name: 'BCH - Bitcoin Cash' },
 		{ value: 'BITS', name: 'BITS - Bitcoin (bits)' },
 		{ value: 'BNB', name: 'BNB - Binance Coin' },
@@ -91,7 +81,46 @@ export class ConfigureAppComponent implements OnInit {
 		{ value: 'XRP', name: 'XRP - XRP' },
 		{ value: 'YFI', name: 'YFI - yearn.finance' },
 	]
-	selectedCurrency: FormControl<string> = new FormControl<string>('USD', { nonNullable: true })
+
+	/**
+	 * Populates currency settings with up-to-date list of abbreviations and
+	 * names based on user locale.
+	 */
+	currencies = computed(() => {
+		const availableCurrencies = this.svcPrice.currencies()
+		const list = [...this.currenciesCustomized]
+		for (const currency of availableCurrencies) {
+			if (list.every(c => c.value !== currency)) {
+				const lang = this.selectedLanguage()
+				const currencyName = currency.length === 3
+					? new Intl.DisplayNames([lang], { type: 'currency' }).of(currency)
+					: currency
+				list.push({ value: currency, name: `${currency.toUpperCase()} - ${currencyName}` })
+			}
+		}
+		return list.sort((a, b) => a.name.localeCompare(b.name))
+	})
+	selectedCurrency = signal(this.settings.displayCurrency ?? 'USD')
+	selectedCurrencyChanged = effect(() => {
+		this.settings.displayCurrency = this.selectedCurrency()
+		this.svcAppSettings.saveAppSettings()
+	})
+
+	denominations = [
+		{ name: 'XNO', value: 'nano' },
+		{ name: 'knano', value: 'knano' },
+		{ name: 'mnano', value: 'mnano' },
+	]
+	selectedDenomination = new FormControl(this.denominations[0].value)
+
+	storageOptions = [
+		{
+			name: translate('configure-app.storage-options.browser-local-storage'),
+			value: 'localStorage',
+		},
+		{ name: translate('configure-app.storage-options.none'), value: 'none' },
+	]
+	selectedStorage = this.storageOptions[0].value
 
 	nightModeOptions = [
 		{ name: translate('configure-app.night-mode-options.enabled'), value: 'enabled' },
@@ -182,6 +211,26 @@ export class ConfigureAppComponent implements OnInit {
 		setTimeout(() => this.populateRepresentativeList(), 500)
 	}
 
+	onCheckboxInput (signal: WritableSignal<boolean>, e: Event) {
+		const input = e.target as HTMLInputElement
+		signal.set(input.checked)
+	}
+
+	onNumberInput (signal: WritableSignal<number>, e: Event) {
+		const input = e.target as HTMLInputElement
+		signal.set(input.valueAsNumber)
+	}
+
+	onSelectInput (signal: WritableSignal<string>, e: Event) {
+		const input = e.target as HTMLSelectElement
+		signal.set(input.value)
+	}
+
+	onTextInput (signal: WritableSignal<string>, e: Event) {
+		const input = e.target as HTMLInputElement
+		signal.set(input.value)
+	}
+
 	async populateRepresentativeList () {
 		// add trusted/regular local reps to the list
 		const localReps = this.svcRepresentative.getSortedRepresentatives()
@@ -253,10 +302,8 @@ export class ConfigureAppComponent implements OnInit {
 	}
 
 	async loadFromSettings () {
-		const matchingLanguage = this.languages().find((language) => language.id === this.settings.language)
+		const matchingLanguage = this.languages().find((lang) => lang.id === this.settings.language)
 		this.selectedLanguage.set(matchingLanguage?.id || this.languages[0].id)
-
-		await this.loadCurrencies()
 
 		const nightModeOptionString = this.settings.lightModeEnabled ? 'disabled' : 'enabled'
 		const matchingNightModeOption = this.nightModeOptions.find((d) => d.value === nightModeOptionString)
@@ -293,28 +340,7 @@ export class ConfigureAppComponent implements OnInit {
 		}
 	}
 
-	/**
-	 * Populates currency settings with up-to-date list of abbreviations and
-	 * names based on user locale.
-	 */
-	async loadCurrencies (): Promise<void> {
-		for (const currency of this.svcPrice.currencies()) {
-			if (this.currencies.every(c => c.value !== currency)) {
-				const lang = this.settings.language ?? 'en'
-				const currencyName = currency.length === 3
-					? new Intl.DisplayNames([lang], { type: 'currency' }).of(currency)
-					: currency
-				this.currencies.push({ value: currency, name: `${currency.toUpperCase()} - ${currencyName}` })
-			}
-		}
-		this.currencies = this.currencies.sort((a, b) => a.name.localeCompare(b.name))
-		this.selectedCurrency.setValue(this.settings.displayCurrency ?? 'USD')
-	}
-
 	async updateDisplaySettings () {
-		this.svcTransloco.setActiveLang(this.selectedLanguage())
-		this.svcAppSettings.setAppSetting('language', this.selectedLanguage())
-
 		if (this.selectedNightModeOption === 'disabled') {
 			this.renderer.addClass(document.body, 'light-mode')
 			this.renderer.removeClass(document.body, 'dark-mode')
@@ -325,24 +351,6 @@ export class ConfigureAppComponent implements OnInit {
 			this.svcAppSettings.setAppSetting('lightModeEnabled', false)
 		}
 		this.svcAppSettings.setAppSetting('identiconsStyle', this.selectedIdenticonOption)
-		this.svcAppSettings.setAppSetting('displayCurrency', this.selectedCurrency.value)
-
-		this.svcNotifications.sendSuccess(
-			translate('configure-app.app-display-settings-successfully-updated')
-		)
-		// if (updatePrefixes) {
-		// 	this.appSettings.setAppSetting('displayPrefix', this.selectedPrefix)
-		// 	// Go through accounts?
-		// 	this.wallet.accounts.forEach(account => {
-		// 		account.address = this.util.account.setPrefix(account.address, this.selectedPrefix)
-		// 	})
-		// 	this.walletService.saveWalletExport()
-		//
-		// 	this.addressBook.addressBook.forEach(entry => {
-		// 		entry.account = this.util.account.setPrefix(entry.account, this.selectedPrefix)
-		// 	})
-		// 	this.addressBook.saveAddressBook()
-		// }
 	}
 
 	async updateWalletSettings () {

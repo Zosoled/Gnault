@@ -27,11 +27,14 @@
 								<div class="uk-form-controls">
 									<select
 										class="uk-select"
-										[(ngModel)]="selectedLanguage"
+										(input)="onSelectInput(selectedLanguage, $event)"
 										id="languageselector"
 									>
 										@for (language of languages(); track language.id) {
-											<option [value]="language.id">
+											<option
+												[value]="language.id"
+												[selected]="language.id === selectedLanguage()"
+											>
 												{{ language.label }}
 											</option>
 										}
@@ -58,10 +61,13 @@
 									<select
 										id="form-horizontal-select-fiat-currency"
 										class="uk-select"
-										[formControl]="selectedCurrency"
+										(change)="onSelectInput(selectedCurrency, $event)"
 									>
-										@for (currency of currencies; track currency.value) {
-											<option [value]="currency.value">
+										@for (currency of currencies(); track currency.value) {
+											<option
+												[value]="currency.value"
+												[selected]="currency.value === selectedCurrency()"
+											>
 												{{ currency.name }}
 											</option>
 										}
@@ -121,14 +127,6 @@
 						</div>
 					</div>
 				</div>
-			</div>
-			<div class="uk-card-footer uk-text-right@s uk-text-center nlt-button-group">
-				<button
-					(click)="updateDisplaySettings()"
-					class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
-				>
-					{{ 'configure-app.update-display-settings' | transloco }}
-				</button>
 			</div>
 		</div>
 		<div class="uk-card uk-card-default uk-margin">
