@@ -24,7 +24,7 @@ export class PriceService {
 		return prices[displayCurrency] ?? 0
 	})
 	oneNano: bigint = 10n ** 30n
-	prices: WritableSignal<{ [currency: string]: number }> = signal(null)
+	prices: WritableSignal<{ [currency: string]: number }> = signal({})
 
 	constructor () {
 		this.loadPrice()
