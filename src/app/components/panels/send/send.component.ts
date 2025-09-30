@@ -45,6 +45,7 @@ export class SendComponent implements AfterViewInit {
 	private route = inject(ActivatedRoute)
 	private svcAddressBook = inject(AddressBookService)
 	private svcApi = inject(ApiService)
+	private svcAppSettings = inject(AppSettingsService)
 	private svcNanoBlock = inject(NanoBlockService)
 	private svcNotifications = inject(NotificationsService)
 	private svcPrice = inject(PriceService)
@@ -53,8 +54,6 @@ export class SendComponent implements AfterViewInit {
 	private svcUtil = inject(UtilService)
 	private svcWallet = inject(WalletService)
 	private svcWorkPool = inject(WorkPoolService)
-
-	svcAppSettings = inject(AppSettingsService)
 
 	activePanel = 'send'
 	addressBookMatch = ''
