@@ -166,6 +166,7 @@ export class AppSettingsService {
 			settings.serverAPI = matchingServerOption.api
 			settings.serverWS = matchingServerOption.ws
 		}
+		this.settings.set(Object.assign(this.settings(), settings))
 	}
 
 	saveAppSettings () {
