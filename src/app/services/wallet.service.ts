@@ -670,17 +670,10 @@ export class WalletService {
 		}
 
 		if (walletReceivableInclUnconfirmed > 0n) {
-			let receivable
-
-			if (this.settings.minimumReceive) {
-				const minAmount = this.svcUtil.nano.nanoToRaw(this.settings.minimumReceive)
-				receivable = await this.svcApi.accountsReceivableLimitSorted(
-					this.accounts.map((a) => a.address),
-					minAmount
-				)
-			} else {
-				receivable = await this.svcApi.accountsReceivableSorted(this.accounts.map((a) => a.address))
-			}
+			const min = this.svcUtil.nano.nanoToRaw(this.settings.minimumReceive ?? 0)
+			const receivable = min === '0'
+				? await this.svcApi.accountsReceivableSorted(this.accounts.map((a) => a.address))
+				: await this.svcApi.accountsReceivableLimitSorted(this.accounts.map((a) => a.address), min)
 
 			if (receivable && receivable.blocks) {
 				for (const block in receivable.blocks) {
@@ -706,13 +699,14 @@ export class WalletService {
 							)
 
 							if (isNewBlock === true) {
-								accountReceivable += receivable.blocks[block][hash].amount
-								walletReceivableAboveThresholdConfirmed += receivable.blocks[block][hash].amount
+								const amount = BigInt(receivable.blocks[block][hash].amount)
+								accountReceivable += amount
+								walletReceivableAboveThresholdConfirmed += amount
 							}
 						}
 
 						walletAccount.receivable = accountReceivable
-						walletAccount.receivableFiat = parseFloat(Tools.convert(accountReceivable, 'raw', 'mnano')) * fiatPrice
+						walletAccount.receivableFiat = Tools.convert(accountReceivable, 'raw', 'nano', 'number') * fiatPrice
 
 						// If there is a receivable, it means we want to add to work cache as receive-threshold
 						if (walletAccount.receivableNano > 0n) {
@@ -997,10 +991,9 @@ export class WalletService {
 		this.refresh$.next(false)
 	}
 
-	async requestUnlock (): Promise<boolean> {
+	async requestUnlock (): Promise<void> {
 		if (this.isLedger()) {
 			await this.selectedWallet().unlock()
-			return this.isLocked()
 		}
 		this.isUnlockRequested$.next(true)
 		return new Promise((resolve): void => {
@@ -1008,7 +1001,7 @@ export class WalletService {
 			subUnlock = this.isUnlockRequested$.subscribe((isVisible) => {
 				if (!isVisible) {
 					subUnlock?.unsubscribe()
-					resolve(this.isLocked())
+					resolve()
 				}
 			})
 		})
