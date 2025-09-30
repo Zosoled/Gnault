@@ -174,7 +174,7 @@
 			"never": "Nunca",
 			"none": "Nenhum",
 			"x-hours": "{{ hours }} Horas",
-			"x-minutes": "{{ minutes }} Minutos"
+			"x-minutes": "{{ minutes }} minutos"
 		},
 		"identicons": "Identicons",
 		"if-automatically-receiving-incoming-transactions-with-the": "Se receber automaticamente transações recebidas com o maior valor primeiro ou cronologicamente a partir do tempo registrado. Manual permitirá que você escolha suas próprias transações na tela de recebimento.",

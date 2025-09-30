@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common'
 import { Component, inject, OnInit, Renderer2 } from '@angular/core'
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms'
-import { TranslocoDirective, TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { translate, TranslocoDirective, TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import {
 	AddressBookService,
 	ApiService,
@@ -63,10 +63,10 @@ export class ConfigureAppComponent implements OnInit {
 
 	storageOptions = [
 		{
-			name: this.translocoService.translate('configure-app.storage-options.browser-local-storage'),
+			name: translate('configure-app.storage-options.browser-local-storage'),
 			value: 'localStorage',
 		},
-		{ name: this.translocoService.translate('configure-app.storage-options.none'), value: 'none' },
+		{ name: translate('configure-app.storage-options.none'), value: 'none' },
 	]
 	selectedStorage = this.storageOptions[0].value
 
@@ -92,52 +92,52 @@ export class ConfigureAppComponent implements OnInit {
 	selectedCurrency: FormControl<string> = new FormControl<string>('USD', { nonNullable: true })
 
 	nightModeOptions = [
-		{ name: this.translocoService.translate('configure-app.night-mode-options.enabled'), value: 'enabled' },
-		{ name: this.translocoService.translate('configure-app.night-mode-options.disabled'), value: 'disabled' },
+		{ name: translate('configure-app.night-mode-options.enabled'), value: 'enabled' },
+		{ name: translate('configure-app.night-mode-options.disabled'), value: 'disabled' },
 	]
 	selectedNightModeOption = this.nightModeOptions[0].value
 
 	identiconOptions = [
-		{ name: this.translocoService.translate('configure-app.identicon-options.none'), value: 'none' },
+		{ name: translate('configure-app.identicon-options.none'), value: 'none' },
 		{
-			name: this.translocoService.translate('configure-app.identicon-options.nanoidenticons-by-keerifox'),
+			name: translate('configure-app.identicon-options.nanoidenticons-by-keerifox'),
 			value: 'nanoidenticons',
 		},
 		{
-			name: this.translocoService.translate('configure-app.identicon-options.natricon-by-appditto'),
+			name: translate('configure-app.identicon-options.natricon-by-appditto'),
 			value: 'natricon',
 		},
 	]
 	selectedIdenticonOption = this.identiconOptions[0].value
 
 	inactivityOptions = [
-		{ name: this.translocoService.translate('configure-app.identicon-options.never'), value: 0 },
-		{ name: this.translocoService.translate('configure-app.identicon-options.1-minute'), value: 1 },
-		{ name: this.translocoService.translate('configure-app.identicon-options.x-minutes', { minutes: 5 }), value: 5 },
-		{ name: this.translocoService.translate('configure-app.identicon-options.x-minutes', { minutes: 15 }), value: 15 },
-		{ name: this.translocoService.translate('configure-app.identicon-options.x-minutes', { minutes: 30 }), value: 30 },
-		{ name: this.translocoService.translate('configure-app.identicon-options.1-hour'), value: 60 },
-		{ name: this.translocoService.translate('configure-app.identicon-options.x-hours', { hours: 6 }), value: 360 },
+		{ name: translate('configure-app.identicon-options.never'), value: 0 },
+		{ name: translate('configure-app.identicon-options.1-minute'), value: 1 },
+		{ name: translate('configure-app.identicon-options.x-minutes', { minutes: 5 }), value: 5 },
+		{ name: translate('configure-app.identicon-options.x-minutes', { minutes: 15 }), value: 15 },
+		{ name: translate('configure-app.identicon-options.x-minutes', { minutes: 30 }), value: 30 },
+		{ name: translate('configure-app.identicon-options.1-hour'), value: 60 },
+		{ name: translate('configure-app.identicon-options.x-hours', { hours: 6 }), value: 360 },
 	]
 	selectedInactivityMinutes = this.inactivityOptions[4].value
 
 	powOptions: { name: string; value: PoWSource }[] = [
-		{ name: this.translocoService.translate('configure-app.pow-options.external-selected-server'), value: 'server' },
-		{ name: this.translocoService.translate('configure-app.pow-options.external-custom-server'), value: 'custom' },
-		{ name: this.translocoService.translate('configure-app.pow-options.internal-client'), value: 'client' },
+		{ name: translate('configure-app.pow-options.external-selected-server'), value: 'server' },
+		{ name: translate('configure-app.pow-options.external-custom-server'), value: 'custom' },
+		{ name: translate('configure-app.pow-options.internal-client'), value: 'client' },
 	]
 	selectedPoWOption = this.powOptions[0].value
 
 	receivableOptions = [
 		{
-			name: this.translocoService.translate('configure-app.receivable-options.automatic-largest-amount-first'),
+			name: translate('configure-app.receivable-options.automatic-largest-amount-first'),
 			value: 'amount',
 		},
 		{
-			name: this.translocoService.translate('configure-app.receivable-options.automatic-oldest-transaction-first'),
+			name: translate('configure-app.receivable-options.automatic-oldest-transaction-first'),
 			value: 'date',
 		},
-		{ name: this.translocoService.translate('configure-app.receivable-options.manual'), value: 'manual' },
+		{ name: translate('configure-app.receivable-options.manual'), value: 'manual' },
 	]
 	selectedReceivableOption = this.receivableOptions[0].value
 
@@ -326,7 +326,7 @@ export class ConfigureAppComponent implements OnInit {
 		this.svcAppSettings.setAppSetting('displayCurrency', this.selectedCurrency.value)
 
 		this.notifications.sendSuccess(
-			this.translocoService.translate('configure-app.app-display-settings-successfully-updated')
+			translate('configure-app.app-display-settings-successfully-updated')
 		)
 		// if (updatePrefixes) {
 		// 	this.appSettings.setAppSetting('displayPrefix', this.selectedPrefix)
@@ -350,12 +350,12 @@ export class ConfigureAppComponent implements OnInit {
 		// ask for user confirmation before clearing the wallet cache
 		if (resaveWallet && newStorage === this.storageOptions[1].value) {
 			const UIkit = window['UIkit']
-			const saveSeedWarning = `<br><b style="font-size: 18px;">${this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed')}</b><br><br><span style="font-size: 18px;"><b>${this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup')}</b></span></p><br>`
+			const saveSeedWarning = `<br><b style="font-size: 18px;">${translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed')}</b><br><br><span style="font-size: 18px;"><b>${translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup')}</b></span></p><br>`
 			try {
 				await UIkit.modal.confirm(
 					`<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span>
 					<span style="font-size: 18px;">
-					${this.translocoService.translate('configure-app.you-are-about-to-disable-storage-of-all-wallet-data-which')}
+					${translate('configure-app.you-are-about-to-disable-storage-of-all-wallet-data-which')}
 					</span><br>
 					${this.svcWallet.isConfigured() ? saveSeedWarning : ''}`
 				)
@@ -363,7 +363,7 @@ export class ConfigureAppComponent implements OnInit {
 				// pressing cancel, reset storage setting and interrupt
 				this.selectedStorage = this.storageOptions[0].value
 				this.notifications.sendInfo(
-					this.translocoService.translate('configure-app.switched-back-to-browser-local-storage-for-the-wallet-data'),
+					translate('configure-app.switched-back-to-browser-local-storage-for-the-wallet-data'),
 					{ length: 10000 }
 				)
 				return
@@ -386,7 +386,7 @@ export class ConfigureAppComponent implements OnInit {
 			const valid = this.util.account.isValidAccount(this.defaultRepresentative)
 			if (!valid) {
 				return this.notifications.sendWarning(
-					this.translocoService.translate('configure-app.default-representative-is-not-a-valid-account')
+					translate('configure-app.default-representative-is-not-a-valid-account')
 				)
 			}
 		}
@@ -421,7 +421,7 @@ export class ConfigureAppComponent implements OnInit {
 
 		this.svcAppSettings.setAppSettings(newSettings)
 		this.notifications.sendSuccess(
-			this.translocoService.translate('configure-app.app-wallet-settings-successfully-updated')
+			translate('configure-app.app-wallet-settings-successfully-updated')
 		)
 
 		if (resaveWallet) {
@@ -446,7 +446,7 @@ export class ConfigureAppComponent implements OnInit {
 				newSettings.serverAPI = this.serverAPI
 			} else {
 				return this.notifications.sendWarning(
-					this.translocoService.translate('configure-app.custom-api-server-has-an-invalid-address')
+					translate('configure-app.custom-api-server-has-an-invalid-address')
 				)
 			}
 		}
@@ -456,7 +456,7 @@ export class ConfigureAppComponent implements OnInit {
 				newSettings.serverWS = this.serverWS
 			} else {
 				return this.notifications.sendWarning(
-					this.translocoService.translate('configure-app.custom-update-server-has-an-invalid-address')
+					translate('configure-app.custom-update-server-has-an-invalid-address')
 				)
 			}
 		}
@@ -469,7 +469,7 @@ export class ConfigureAppComponent implements OnInit {
 		this.svcAppSettings.loadAppSettings()
 
 		this.notifications.sendSuccess(
-			this.translocoService.translate('configure-app.server-settings-successfully-updated')
+			translate('configure-app.server-settings-successfully-updated')
 		)
 
 		this.node.node.status = false // Directly set node to offline since API url changed.  Status will get set by reloadBalances
@@ -537,8 +537,8 @@ export class ConfigureAppComponent implements OnInit {
 			this.serverWS = custom.ws
 			this.serverAuth = custom.auth
 			this.shouldRandom = custom.shouldRandom
-				? this.translocoService.translate('general.yes')
-				: this.translocoService.translate('general.no')
+				? translate('general.yes')
+				: translate('general.no')
 		}
 
 		// reset server stats until updated
@@ -554,7 +554,7 @@ export class ConfigureAppComponent implements OnInit {
 	}
 
 	getRemotePoWOptionName () {
-		const optionName = this.translocoService.translate('configure-app.pow-options.external-selected-server')
+		const optionName = translate('configure-app.pow-options.external-selected-server')
 		if (this.selectedServer === 'random' || this.selectedServer === 'offline') {
 			return optionName
 		}
@@ -570,14 +570,14 @@ export class ConfigureAppComponent implements OnInit {
 		try {
 			await UIkit.modal.confirm(
 				'<p style="text-align: center;">' +
-				this.translocoService.translate('configure-app.you-are-about-to-delete-all-locally-cached-proof-of-work') +
+				translate('configure-app.you-are-about-to-delete-all-locally-cached-proof-of-work') +
 				'<br><br><b>' +
-				this.translocoService.translate('configure-app.are-you-sure') +
+				translate('configure-app.are-you-sure') +
 				'</b></p>'
 			)
 			this.workPool.clearCache()
 			this.notifications.sendSuccess(
-				this.translocoService.translate('configure-app.successfully-cleared-the-work-cache')
+				translate('configure-app.successfully-cleared-the-work-cache')
 			)
 			return true
 		} catch (err) {
@@ -590,17 +590,17 @@ export class ConfigureAppComponent implements OnInit {
 		try {
 			await UIkit.modal.confirm(
 				'<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">' +
-				this.translocoService.translate('configure-app.you-are-about-to-delete-all-locally-stored-data-about-your') +
+				translate('configure-app.you-are-about-to-delete-all-locally-stored-data-about-your') +
 				'</span><br><br><b style="font-size: 18px;">' +
-				this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
+				translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
 				'</b><br><br><span style="font-size: 18px;"><b>' +
-				this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
+				translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
 				'</b></span></p><br>'
 			)
 			this.svcWallet.resetWallet()
 			this.svcWallet.removeWalletData()
 			this.notifications.sendSuccess(
-				this.translocoService.translate('configure-app.successfully-deleted-all-wallet-data')
+				translate('configure-app.successfully-deleted-all-wallet-data')
 			)
 		} catch (err) { }
 	}
@@ -610,11 +610,11 @@ export class ConfigureAppComponent implements OnInit {
 		try {
 			await UIkit.modal.confirm(
 				'<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">' +
-				this.translocoService.translate('configure-app.clear-all-data.1') +
+				translate('configure-app.clear-all-data.1') +
 				'</span><br><br><b style="font-size: 18px;">' +
-				this.translocoService.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
+				translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
 				'</b><br><br><span style="font-size: 18px;"><b>' +
-				this.translocoService.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
+				translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
 				'</b></span></p><br>'
 			)
 			this.svcWallet.resetWallet()
@@ -626,7 +626,7 @@ export class ConfigureAppComponent implements OnInit {
 			this.api.deleteCache()
 			this.loadFromSettings()
 			this.notifications.sendSuccess(
-				this.translocoService.translate(
+				translate(
 					'configure-app.clear-all-data.successfully-deleted-locally-stored-data-and-reset-the'
 				)
 			)
