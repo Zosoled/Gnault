@@ -82,8 +82,8 @@ export class ManageWalletComponent implements OnInit {
 
 	async changePassword () {
 		if (this.svcWallet.isLocked()) {
-			const isUnlocked = await this.svcWallet.requestUnlock()
-			if (!isUnlocked) {
+			await this.svcWallet.requestUnlock()
+			if (this.svcWallet.isLocked()) {
 				return
 			}
 		}
@@ -99,8 +99,8 @@ export class ManageWalletComponent implements OnInit {
 
 	async exportWallet () {
 		if (this.svcWallet.isLocked()) {
-			const wasUnlocked = await this.svcWallet.requestUnlock()
-			if (wasUnlocked === false) {
+			await this.svcWallet.requestUnlock()
+			if (this.svcWallet.isLocked()) {
 				return
 			}
 		}
@@ -182,8 +182,8 @@ export class ManageWalletComponent implements OnInit {
 
 	async exportToFile () {
 		if (this.svcWallet.isLocked()) {
-			const wasUnlocked = await this.svcWallet.requestUnlock()
-			if (wasUnlocked === false) {
+			await this.svcWallet.requestUnlock()
+			if (this.svcWallet.isLocked()) {
 				return
 			}
 		}

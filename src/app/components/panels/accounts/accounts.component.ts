@@ -156,9 +156,8 @@ export class AccountsComponent implements OnInit {
 
 	async deleteAccount (account) {
 		if (this.svcWallet.isLocked()) {
-			const wasUnlocked = await this.svcWallet.requestUnlock()
-
-			if (wasUnlocked === false) {
+			await this.svcWallet.requestUnlock()
+			if (this.svcWallet.isLocked()) {
 				return
 			}
 		}

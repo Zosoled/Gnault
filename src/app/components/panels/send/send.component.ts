@@ -178,7 +178,6 @@ export class SendComponent implements AfterViewInit {
 					return
 				}
 				case 'nano': {
-					debugger
 					const nano = Number(this.amounts.nano.value)
 					this.amounts.fiat.setValue(nano ? nano * this.lastPrice : null)
 					this.amounts.raw.setValue(nano ? Tools.convert(nano, 'nano', 'raw', 'bigint') : null)
@@ -317,7 +316,6 @@ export class SendComponent implements AfterViewInit {
 			}
 
 			const bigBalanceFrom = BigInt(from.balance ?? 0n)
-			const bigBalanceTo = BigInt(to.balance ?? 0n)
 
 			this.fromAccount = from
 			this.toAccount = to
@@ -345,8 +343,8 @@ export class SendComponent implements AfterViewInit {
 			throw new Error(`Unable to find sending account in wallet`)
 		}
 		if (this.svcWallet.isLocked()) {
-			const wasUnlocked = await this.svcWallet.requestUnlock()
-			if (wasUnlocked === false) {
+			await this.svcWallet.requestUnlock()
+			if (this.svcWallet.isLocked()) {
 				return
 			}
 		}

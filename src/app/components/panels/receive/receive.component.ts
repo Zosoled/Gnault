@@ -373,9 +373,8 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		}
 
 		if (this.svcWallet.isLocked()) {
-			const wasUnlocked = await this.svcWallet.requestUnlock()
-
-			if (wasUnlocked === false) {
+			await this.svcWallet.requestUnlock()
+			if (this.svcWallet.isLocked()) {
 				return
 			}
 		}

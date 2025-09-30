@@ -559,9 +559,8 @@ export class SignComponent implements OnInit {
 		// using internal wallet
 		if (this.signTypeSelected === this.signTypes[0] && walletAccount) {
 			if (this.walletService.isLocked()) {
-				const wasUnlocked = await this.walletService.requestUnlock()
-
-				if (wasUnlocked === false) {
+				await this.walletService.requestUnlock()
+				if (this.walletService.isLocked()) {
 					return
 				}
 			}
