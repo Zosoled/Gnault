@@ -81,31 +81,6 @@
 							<div class="uk-margin">
 								<label
 									class="uk-form-label"
-									for="form-horizontal-select-dark-mode"
-								>
-									{{ 'configure-app.dark-mode' | transloco }}
-								</label>
-								<div class="uk-form-controls">
-									<select
-										class="uk-select"
-										[(ngModel)]="selectedDarkModeOption"
-										id="form-horizontal-select-dark-mode"
-									>
-										@for (darkModeOption of darkModeOptions; track darkModeOption) {
-											<option [value]="darkModeOption.value">
-												{{ darkModeOption.name }}
-											</option>
-										}
-									</select>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="uk-width-1-1">
-						<div class="uk-form-horizontal">
-							<div class="uk-margin">
-								<label
-									class="uk-form-label"
 									for="form-horizontal-select-identicon-option"
 								>
 									{{ 'configure-app.identicons' | transloco }}

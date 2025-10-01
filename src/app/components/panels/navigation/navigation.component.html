@@ -372,7 +372,7 @@
 		</div>
 		<div class="uk-width-1-3 uk-text-center dark-mode-column">
 			<div
-				[class]="{ 'dark-mode-click-area': true, enabled: !settings.darkModeEnabled }"
+				[class]="{ 'dark-mode-click-area': true, enabled: settings.darkModeEnabled }"
 				(click)="toggleDarkMode()"
 			>
 				<div class="dark-mode-area">
@@ -403,7 +403,7 @@
 						</svg>
 					</div>
 				</div>
-				<div class="section-caption">Night Mode</div>
+				<div class="section-caption">Dark Mode</div>
 			</div>
 		</div>
 	</div>

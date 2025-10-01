@@ -122,12 +122,6 @@ export class ConfigureAppComponent implements OnInit {
 	]
 	selectedStorage = this.storageOptions[0].value
 
-	darkModeOptions = [
-		{ name: translate('configure-app.dark-mode-options.enabled'), value: 'enabled' },
-		{ name: translate('configure-app.dark-mode-options.disabled'), value: 'disabled' },
-	]
-	selectedDarkModeOption = this.darkModeOptions[0].value
-
 	identiconOptions = [
 		{ name: translate('configure-app.identicon-options.none'), value: 'none' },
 		{
@@ -305,10 +299,6 @@ export class ConfigureAppComponent implements OnInit {
 		const matchingLanguage = this.languages().find((lang) => lang.id === this.settings.language)
 		this.selectedLanguage.set(matchingLanguage?.id || this.languages[0].id)
 
-		const darkModeOptionString = this.settings.darkModeEnabled ? 'disabled' : 'enabled'
-		const matchingDarkModeOption = this.darkModeOptions.find((d) => d.value === darkModeOptionString)
-		this.selectedDarkModeOption = matchingDarkModeOption.value || this.darkModeOptions[0].value
-
 		const matchingIdenticonOptions = this.identiconOptions.find((d) => d.value === this.settings.identiconsStyle)
 		this.selectedIdenticonOption = matchingIdenticonOptions.value || this.identiconOptions[0].value
 
@@ -338,19 +328,6 @@ export class ConfigureAppComponent implements OnInit {
 		if (this.defaultRepresentative) {
 			this.validateRepresentative()
 		}
-	}
-
-	async updateDisplaySettings () {
-		if (this.selectedDarkModeOption === 'disabled') {
-			this.renderer.addClass(document.body, 'light-mode')
-			this.renderer.removeClass(document.body, 'dark-mode')
-			this.svcAppSettings.setAppSetting('darkModeEnabled', true)
-		} else {
-			this.renderer.addClass(document.body, 'dark-mode')
-			this.renderer.removeClass(document.body, 'light-mode')
-			this.svcAppSettings.setAppSetting('darkModeEnabled', false)
-		}
-		this.svcAppSettings.setAppSetting('identiconsStyle', this.selectedIdenticonOption)
 	}
 
 	async updateWalletSettings () {
