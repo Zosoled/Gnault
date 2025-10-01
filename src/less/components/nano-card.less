@@ -79,7 +79,9 @@
 			margin-right: 10px;
 			border-bottom: 2px solid transparent;
 			padding-top: 1px;
-			.truncated-text();
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 
 			font-size: 14px;
 
@@ -240,7 +242,9 @@
 			overflow: hidden;
 
 			>.amount-fractional {
-				.truncated-text();
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
 			}
 
 			>.amount-updating {
