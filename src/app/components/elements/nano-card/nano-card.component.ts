@@ -80,7 +80,6 @@ export class NanoCardComponent {
 		return Number(mod)
 	})
 
-
 	@HostListener('document:mousedown', ['$event']) onGlobalClick (event): void {
 		if (
 			this.selectButton.nativeElement.contains(event.target) === false &&
