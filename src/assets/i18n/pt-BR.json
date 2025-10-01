@@ -159,11 +159,6 @@
 		},
 		"custom-api-server-has-an-invalid-address": "O servidor API personalizado tem um endereço inválido.",
 		"custom-update-server-has-an-invalid-address": "O servidor de atualização personalizado tem um endereço inválido.",
-		"dark-mode": "Modo escuro",
-		"dark-mode-options": {
-			"disabled": "Desativado",
-			"enabled": "Ativado"
-		},
 		"default-representative": "Representante Padrão",
 		"default-representative-is-not-a-valid-account": "O representante padrão não é uma conta válida",
 		"delete-all-data": "Excluir TODOS os Dados",
@@ -223,6 +218,11 @@
 		"successfully-deleted-all-wallet-data": "Todos os dados da carteira foram excluídos com sucesso!",
 		"successfully-updated": "Atualizado com sucesso!",
 		"switched-back-to-browser-local-storage-for-the-wallet-data": "Voltou para 'Armazenamento Local do Navegador' para os dados da carteira. Use o botão novamente se quiser salvar outras configurações.",
+		"theme": "Tema",
+		"themes": {
+			"dark": "Escuro",
+			"light": "Luz"
+		},
 		"this-has-to-be-a-valid-authorization-header": "Isso tem que ser um cabeçalho de Autorização válido.",
 		"this-has-to-be-a-valid-rpc": {
 			"1": "Isso tem que ser um",

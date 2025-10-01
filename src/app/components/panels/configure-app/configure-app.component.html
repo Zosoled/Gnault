@@ -81,9 +81,9 @@
 							<div class="uk-margin">
 								<label
 									class="uk-form-label"
-									for="form-horizontal-select-dark-mode"
+									for="form-horizontal-select-theme"
 								>
-									{{ 'configure-app.dark-mode' | transloco }}
+									{{ t('configure-app.theme') }}
 								</label>
 								<div class="uk-form-controls">
 									<select
@@ -96,7 +96,7 @@
 												[value]="theme.value"
 												[selected]="theme.value === selectedTheme()"
 											>
-												{{ theme.name }}
+												{{ theme.name() }}
 											</option>
 										}
 									</select>
@@ -121,7 +121,7 @@
 									>
 										@for (identiconOption of identiconOptions; track identiconOption) {
 											<option [value]="identiconOption.value">
-												{{ identiconOption.name }}
+												{{ identiconOption.name() }}
 											</option>
 										}
 									</select>
@@ -159,7 +159,7 @@
 										>
 											@for (option of inactivityOptions; track option.value) {
 												<option [value]="option.value">
-													{{ option.name }}
+													{{ option.name() }}
 												</option>
 											}
 										</select>
@@ -187,7 +187,7 @@
 										>
 											@for (storage of storageOptions; track storage) {
 												<option [value]="storage.value">
-													{{ storage.name }}
+													{{ storage.name() }}
 												</option>
 											}
 										</select>
@@ -206,15 +206,14 @@
 									<div class="uk-inline uk-width-1-1">
 										<select
 											class="uk-select"
-											[(ngModel)]="selectedPoWOption"
+											(change)="onSelectInput(selectedPowSource, $event)"
 										>
-											@for (pow of powOptions; track pow) {
+											@for (pow of powSources; track pow.value) {
 												<option [value]="pow.value">
 													@if (pow.value === 'server') {
-														{{ getRemotePoWOptionName() }}
-													}
-													@if (pow.value !== 'server') {
-														{{ pow.name }}
+														{{ getRemotePowOptionName() }}
+													} @else {
+														{{ pow.name() }}
 													}
 												</option>
 											}
@@ -222,7 +221,7 @@
 									</div>
 								</div>
 							</div>
-							@if (selectedPoWOption === 'custom') {
+							@if (selectedPowSource() === 'custom') {
 								<div class="uk-margin">
 									<label class="uk-form-label">
 										{{ 'configure-app.work-server' | transloco }}
@@ -269,7 +268,7 @@
 										>
 											@for (receivable of receivableOptions; track receivable) {
 												<option [value]="receivable.value">
-													{{ receivable.name }}
+													{{ receivable.name() }}
 												</option>
 											}
 										</select>

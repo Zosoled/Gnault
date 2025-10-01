@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { Injectable, Signal } from '@angular/core'
 import * as Rx from 'rxjs'
 
 type NotificationType = 'info' | 'success' | 'warning' | 'error'
@@ -19,19 +19,23 @@ export class NotificationsService {
 		this.removeNotification$.next(identifier)
 	}
 
-	sendInfo (message: string, options = {}) {
+	sendInfo (message: string | Signal<string>, options = {}) {
+		message = typeof message === 'string' ? message : message()
 		this.sendNotification('info', message, options)
 	}
 
-	sendSuccess (message: string, options = {}) {
+	sendSuccess (message: string | Signal<string>, options = {}) {
+		message = typeof message === 'string' ? message : message()
 		this.sendNotification('success', message, options)
 	}
 
-	sendWarning (message: string, options = {}) {
+	sendWarning (message: string | Signal<string>, options = {}) {
+		message = typeof message === 'string' ? message : message()
 		this.sendNotification('warning', message, options)
 	}
 
-	sendError (message: string, options = {}) {
+	sendError (message: string | Signal<string>, options = {}) {
+		message = typeof message === 'string' ? message : message()
 		this.sendNotification('error', message, options)
 	}
 

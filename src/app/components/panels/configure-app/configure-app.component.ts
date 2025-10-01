@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common'
-import { Component, computed, effect, inject, OnInit, Renderer2, signal, WritableSignal } from '@angular/core'
+import { Component, computed, effect, inject, OnInit, Renderer2, Signal, signal, WritableSignal } from '@angular/core'
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms'
-import { translate, TranslocoDirective, TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { translateSignal, TranslocoDirective, TranslocoPipe, TranslocoService } from '@jsverse/transloco'
 import {
 	AddressBookService,
 	ApiService,
@@ -10,7 +10,6 @@ import {
 	NodeService,
 	NotificationsService,
 	PowService,
-	PoWSource,
 	PriceService,
 	QrModalService,
 	RepresentativeService,
@@ -81,7 +80,6 @@ export class ConfigureAppComponent implements OnInit {
 		{ value: 'XRP', name: 'XRP - XRP' },
 		{ value: 'YFI', name: 'YFI - yearn.finance' },
 	]
-
 	/**
 	 * Populates currency settings with up-to-date list of abbreviations and
 	 * names based on user locale.
@@ -106,9 +104,12 @@ export class ConfigureAppComponent implements OnInit {
 		this.svcAppSettings.saveAppSettings()
 	})
 
+	/**
+	 * Applies styling to the entire application.
+	 */
 	themes = [
-		{ name: translate('configure-app.dark-mode-options.enabled'), value: 'dark' },
-		{ name: translate('configure-app.dark-mode-options.disabled'), value: 'light' },
+		{ name: translateSignal('configure-app.themes.dark'), value: 'dark' },
+		{ name: translateSignal('configure-app.themes.light'), value: 'light' },
 	]
 	selectedTheme = signal(this.settings.theme ?? 'dark')
 	selectedThemeChanged = effect(() => {
@@ -132,54 +133,69 @@ export class ConfigureAppComponent implements OnInit {
 
 	storageOptions = [
 		{
-			name: translate('configure-app.storage-options.browser-local-storage'),
+			name: translateSignal('configure-app.storage-options.browser-local-storage'),
 			value: 'localStorage',
 		},
-		{ name: translate('configure-app.storage-options.none'), value: 'none' },
+		{ name: translateSignal('configure-app.storage-options.none'), value: 'none' },
 	]
 	selectedStorage = this.storageOptions[0].value
 
 	identiconOptions = [
-		{ name: translate('configure-app.identicon-options.none'), value: 'none' },
+		{ name: translateSignal('configure-app.identicon-options.none'), value: 'none' },
 		{
-			name: translate('configure-app.identicon-options.nanoidenticons-by-keerifox'),
+			name: translateSignal('configure-app.identicon-options.nanoidenticons-by-keerifox'),
 			value: 'nanoidenticons',
 		},
 		{
-			name: translate('configure-app.identicon-options.natricon-by-appditto'),
+			name: translateSignal('configure-app.identicon-options.natricon-by-appditto'),
 			value: 'natricon',
 		},
 	]
 	selectedIdenticonOption = this.identiconOptions[0].value
 
 	inactivityOptions = [
-		{ name: translate('configure-app.identicon-options.never'), value: 0 },
-		{ name: translate('configure-app.identicon-options.1-minute'), value: 1 },
-		{ name: translate('configure-app.identicon-options.x-minutes', { minutes: 5 }), value: 5 },
-		{ name: translate('configure-app.identicon-options.x-minutes', { minutes: 15 }), value: 15 },
-		{ name: translate('configure-app.identicon-options.x-minutes', { minutes: 30 }), value: 30 },
-		{ name: translate('configure-app.identicon-options.1-hour'), value: 60 },
-		{ name: translate('configure-app.identicon-options.x-hours', { hours: 6 }), value: 360 },
+		{ name: translateSignal('configure-app.identicon-options.never'), value: 0 },
+		{ name: translateSignal('configure-app.identicon-options.1-minute'), value: 1 },
+		{ name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 5 }), value: 5 },
+		{ name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 15 }), value: 15 },
+		{ name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 30 }), value: 30 },
+		{ name: translateSignal('configure-app.identicon-options.1-hour'), value: 60 },
+		{ name: translateSignal('configure-app.identicon-options.x-hours', { hours: 6 }), value: 360 },
 	]
 	selectedInactivityMinutes = this.inactivityOptions[4].value
 
-	powOptions: { name: string; value: PoWSource }[] = [
-		{ name: translate('configure-app.pow-options.external-selected-server'), value: 'server' },
-		{ name: translate('configure-app.pow-options.external-custom-server'), value: 'custom' },
-		{ name: translate('configure-app.pow-options.internal-client'), value: 'client' },
+	powSources: { name: Signal<string>; value: 'client' | 'custom' | 'server' }[] = [
+		{ name: translateSignal('configure-app.pow-options.external-selected-server'), value: 'server' },
+		{ name: translateSignal('configure-app.pow-options.external-custom-server'), value: 'custom' },
+		{ name: translateSignal('configure-app.pow-options.internal-client'), value: 'client' },
 	]
-	selectedPoWOption = this.powOptions[0].value
+	selectedPowSource = signal(this.settings.powSource ?? 'server')
+	selectedPowSourceChanged = effect(() => {
+		this.settings.powSource = this.selectedPowSource()
+		this.svcAppSettings.saveAppSettings()
+	})
+
+	getRemotePowOptionName () {
+		if (this.selectedServer === 'random' || this.selectedServer === 'offline') {
+			return this.powSources[0].name()
+		}
+		const selectedServerOption = this.svcAppSettings.serverOptions.find((d) => d.value === this.selectedServer)
+		if (!selectedServerOption) {
+			return this.powSources[0].name()
+		}
+		return this.powSources[0].name() + ' (' + selectedServerOption.name + ')'
+	}
 
 	receivableOptions = [
 		{
-			name: translate('configure-app.receivable-options.automatic-largest-amount-first'),
+			name: translateSignal('configure-app.receivable-options.automatic-largest-amount-first'),
 			value: 'amount',
 		},
 		{
-			name: translate('configure-app.receivable-options.automatic-oldest-transaction-first'),
+			name: translateSignal('configure-app.receivable-options.automatic-oldest-transaction-first'),
 			value: 'date',
 		},
-		{ name: translate('configure-app.receivable-options.manual'), value: 'manual' },
+		{ name: translateSignal('configure-app.receivable-options.manual'), value: 'manual' },
 	]
 	selectedReceivableOption = this.receivableOptions[0].value
 
@@ -328,8 +344,8 @@ export class ConfigureAppComponent implements OnInit {
 		const matchingInactivityMinutes = this.inactivityOptions.find((d) => d.value === this.settings.lockInactivityMinutes)
 		this.selectedInactivityMinutes = matchingInactivityMinutes?.value ?? this.inactivityOptions[4].value
 
-		const matchingPowOption = this.powOptions.find((d) => d.value === this.settings.powSource)
-		this.selectedPoWOption = matchingPowOption?.value ?? this.powOptions[0].value
+		const matchingPowOption = this.powSources.find((d) => d.value === this.settings.powSource)
+		this.selectedPowSource.set(matchingPowOption?.value ?? this.powSources[0].value)
 
 		this.customWorkServer = this.settings.customWorkServer
 
@@ -361,12 +377,12 @@ export class ConfigureAppComponent implements OnInit {
 		// ask for user confirmation before clearing the wallet cache
 		if (resaveWallet && newStorage === this.storageOptions[1].value) {
 			const UIkit = window['UIkit']
-			const saveSeedWarning = `<br><b style="font-size: 18px;">${translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed')}</b><br><br><span style="font-size: 18px;"><b>${translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup')}</b></span></p><br>`
+			const saveSeedWarning = `<br><b style="font-size: 18px;">${translateSignal('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed')}</b><br><br><span style="font-size: 18px;"><b>${translateSignal('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup')}</b></span></p><br>`
 			try {
 				await UIkit.modal.confirm(
 					`<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span>
 					<span style="font-size: 18px;">
-					${translate('configure-app.you-are-about-to-disable-storage-of-all-wallet-data-which')}
+					${translateSignal('configure-app.you-are-about-to-disable-storage-of-all-wallet-data-which')}
 					</span><br>
 					${this.svcWallet.isConfigured() ? saveSeedWarning : ''}`
 				)
@@ -374,14 +390,14 @@ export class ConfigureAppComponent implements OnInit {
 				// pressing cancel, reset storage setting and interrupt
 				this.selectedStorage = this.storageOptions[0].value
 				this.svcNotifications.sendInfo(
-					translate('configure-app.switched-back-to-browser-local-storage-for-the-wallet-data'),
+					translateSignal('configure-app.switched-back-to-browser-local-storage-for-the-wallet-data'),
 					{ length: 10000 }
 				)
 				return
 			}
 		}
 
-		let newPoW = this.selectedPoWOption
+		let newPoW = this.selectedPowSource
 		const receivableOption = this.selectedReceivableOption
 		let minReceive = null
 		if (this.svcUtil.account.isValidNanoAmount(this.minimumReceive)) {
@@ -397,12 +413,12 @@ export class ConfigureAppComponent implements OnInit {
 			const valid = this.svcUtil.account.isValidAccount(this.defaultRepresentative)
 			if (!valid) {
 				return this.svcNotifications.sendWarning(
-					translate('configure-app.default-representative-is-not-a-valid-account')
+					translateSignal('configure-app.default-representative-is-not-a-valid-account')
 				)
 			}
 		}
 
-		if (this.settings.powSource !== newPoW) {
+		if (this.settings.powSource !== newPoW()) {
 			// Cancel ongoing PoW if the old method was local PoW
 			if (this.settings.powSource === 'client') {
 				// Check if work is ongoing, and cancel it
@@ -413,7 +429,7 @@ export class ConfigureAppComponent implements OnInit {
 		}
 
 		// reset work cache so that the new PoW will be used but only if larger than before
-		if (newPoW === 'client') {
+		if (newPoW() === 'client') {
 			// if user accept to reset cache
 			if (await this.clearWorkCache()) {
 				reloadReceivable = true // force reload balance => re-work pow
@@ -432,7 +448,7 @@ export class ConfigureAppComponent implements OnInit {
 
 		this.svcAppSettings.setAppSettings(newSettings)
 		this.svcNotifications.sendSuccess(
-			translate('configure-app.app-wallet-settings-successfully-updated')
+			translateSignal('configure-app.app-wallet-settings-successfully-updated')
 		)
 
 		if (resaveWallet) {
@@ -457,7 +473,7 @@ export class ConfigureAppComponent implements OnInit {
 				newSettings.serverAPI = this.serverAPI
 			} else {
 				return this.svcNotifications.sendWarning(
-					translate('configure-app.custom-api-server-has-an-invalid-address')
+					translateSignal('configure-app.custom-api-server-has-an-invalid-address')
 				)
 			}
 		}
@@ -467,7 +483,7 @@ export class ConfigureAppComponent implements OnInit {
 				newSettings.serverWS = this.serverWS
 			} else {
 				return this.svcNotifications.sendWarning(
-					translate('configure-app.custom-update-server-has-an-invalid-address')
+					translateSignal('configure-app.custom-update-server-has-an-invalid-address')
 				)
 			}
 		}
@@ -480,7 +496,7 @@ export class ConfigureAppComponent implements OnInit {
 		this.svcAppSettings.loadAppSettings()
 
 		this.svcNotifications.sendSuccess(
-			translate('configure-app.server-settings-successfully-updated')
+			translateSignal('configure-app.server-settings-successfully-updated')
 		)
 
 		this.svcNode.node.status = false // Directly set node to offline since API url changed.  Status will get set by reloadBalances
@@ -548,8 +564,8 @@ export class ConfigureAppComponent implements OnInit {
 			this.serverWS = custom.ws
 			this.serverAuth = custom.auth
 			this.shouldRandom = custom.shouldRandom
-				? translate('general.yes')
-				: translate('general.no')
+				? translateSignal('general.yes')
+				: translateSignal('general.no')
 		}
 
 		// reset server stats until updated
@@ -564,31 +580,19 @@ export class ConfigureAppComponent implements OnInit {
 		this.statsRefreshEnabled = newServer !== 'random'
 	}
 
-	getRemotePoWOptionName () {
-		const optionName = translate('configure-app.pow-options.external-selected-server')
-		if (this.selectedServer === 'random' || this.selectedServer === 'offline') {
-			return optionName
-		}
-		const selectedServerOption = this.svcAppSettings.serverOptions.find((d) => d.value === this.selectedServer)
-		if (!selectedServerOption) {
-			return optionName
-		}
-		return optionName + ' (' + selectedServerOption.name + ')'
-	}
-
 	async clearWorkCache () {
 		const UIkit = window['UIkit']
 		try {
 			await UIkit.modal.confirm(
 				'<p style="text-align: center;">' +
-				translate('configure-app.you-are-about-to-delete-all-locally-cached-proof-of-work') +
+				translateSignal('configure-app.you-are-about-to-delete-all-locally-cached-proof-of-work') +
 				'<br><br><b>' +
-				translate('configure-app.are-you-sure') +
+				translateSignal('configure-app.are-you-sure') +
 				'</b></p>'
 			)
 			this.svcWorkPool.clearCache()
 			this.svcNotifications.sendSuccess(
-				translate('configure-app.successfully-cleared-the-work-cache')
+				translateSignal('configure-app.successfully-cleared-the-work-cache')
 			)
 			return true
 		} catch (err) {
@@ -601,17 +605,17 @@ export class ConfigureAppComponent implements OnInit {
 		try {
 			await UIkit.modal.confirm(
 				'<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">' +
-				translate('configure-app.you-are-about-to-delete-all-locally-stored-data-about-your') +
+				translateSignal('configure-app.you-are-about-to-delete-all-locally-stored-data-about-your') +
 				'</span><br><br><b style="font-size: 18px;">' +
-				translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
+				translateSignal('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
 				'</b><br><br><span style="font-size: 18px;"><b>' +
-				translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
+				translateSignal('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
 				'</b></span></p><br>'
 			)
 			this.svcWallet.resetWallet()
 			this.svcWallet.removeWalletData()
 			this.svcNotifications.sendSuccess(
-				translate('configure-app.successfully-deleted-all-wallet-data')
+				translateSignal('configure-app.successfully-deleted-all-wallet-data')
 			)
 		} catch (err) { }
 	}
@@ -621,11 +625,11 @@ export class ConfigureAppComponent implements OnInit {
 		try {
 			await UIkit.modal.confirm(
 				'<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">' +
-				translate('configure-app.clear-all-data.1') +
+				translateSignal('configure-app.clear-all-data.1') +
 				'</span><br><br><b style="font-size: 18px;">' +
-				translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
+				translateSignal('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
 				'</b><br><br><span style="font-size: 18px;"><b>' +
-				translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
+				translateSignal('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
 				'</b></span></p><br>'
 			)
 			this.svcWallet.resetWallet()
@@ -637,7 +641,7 @@ export class ConfigureAppComponent implements OnInit {
 			this.svcApi.deleteCache()
 			this.loadFromSettings()
 			this.svcNotifications.sendSuccess(
-				translate(
+				translateSignal(
 					'configure-app.clear-all-data.successfully-deleted-locally-stored-data-and-reset-the'
 				)
 			)

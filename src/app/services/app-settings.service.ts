@@ -2,7 +2,6 @@ import { Injectable, WritableSignal, inject, signal } from '@angular/core'
 import { TranslocoService, getBrowserCultureLang, getBrowserLang } from '@jsverse/transloco'
 
 export type WalletStore = 'localStorage' | 'none'
-export type PoWSource = 'client' | 'custom' | 'server'
 export type LedgerConnectionType = 'usb' | 'bluetooth'
 
 interface AppSettings {
@@ -13,7 +12,7 @@ interface AppSettings {
 	defaultRepresentative: string | null
 	lockOnClose: number
 	lockInactivityMinutes: number
-	powSource: PoWSource
+	powSource: 'client' | 'custom' | 'server'
 	customWorkServer: string
 	receivableOption: string
 	serverName: string

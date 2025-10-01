@@ -159,11 +159,6 @@
 		},
 		"custom-api-server-has-an-invalid-address": "自定义API服务器地址无效。",
 		"custom-update-server-has-an-invalid-address": "自定义更新服务器地址无效。",
-		"dark-mode": "黑暗模式",
-		"dark-mode-options": {
-			"disabled": "禁用",
-			"enabled": "启用"
-		},
 		"default-representative": "默认代表",
 		"default-representative-is-not-a-valid-account": "默认代表不是有效账户",
 		"delete-all-data": "删除所有数据",
@@ -223,6 +218,11 @@
 		"successfully-deleted-all-wallet-data": "成功删除所有钱包数据！",
 		"successfully-updated": "更新成功！",
 		"switched-back-to-browser-local-storage-for-the-wallet-data": "已切换回\"浏览器本地存储\"以存储钱包数据。如果您想保存其他设置，请再次使用该按钮。",
+		"theme": "主题",
+		"themes": {
+			"dark": "黑暗的",
+			"light": "光"
+		},
 		"this-has-to-be-a-valid-authorization-header": "这必须是有效的Authorization头。",
 		"this-has-to-be-a-valid-rpc": {
 			"1": "这必须是有效的",

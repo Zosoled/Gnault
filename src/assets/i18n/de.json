@@ -159,11 +159,6 @@
 		},
 		"custom-api-server-has-an-invalid-address": "Benutzerdefinierter API-Server hat eine ungültige Adresse.",
 		"custom-update-server-has-an-invalid-address": "Benutzerdefinierter Update-Server hat eine ungültige Adresse.",
-		"dark-mode": "Dunkler Modus",
-		"dark-mode-options": {
-			"disabled": "Deaktiviert",
-			"enabled": "Aktiviert"
-		},
 		"default-representative": "Standard-Vertreter",
 		"default-representative-is-not-a-valid-account": "Standard-Vertreter ist kein gültiges Konto",
 		"delete-all-data": "ALLE Daten löschen",
@@ -220,6 +215,11 @@
 		"successfully-deleted-all-wallet-data": "Alle Wallet-Daten erfolgreich gelöscht!",
 		"successfully-updated": "Erfolgreich aktualisiert!",
 		"switched-back-to-browser-local-storage-for-the-wallet-data": "Auf 'Browser-Lokalspeicher' für die Wallet-Daten zurückgeschaltet. Verwenden Sie die Schaltfläche erneut, wenn Sie andere Einstellungen speichern möchten.",
+		"theme": "Thema",
+		"themes": {
+			"dark": "Dunkel",
+			"light": "Licht"
+		},
 		"this-has-to-be-a-valid-authorization-header": "Dies muss ein gültiger Autorisierungs-Header sein.",
 		"this-has-to-be-a-valid-rpc": {
 			"1": "Dies muss ein gültiger",

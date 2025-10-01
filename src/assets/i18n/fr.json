@@ -159,11 +159,6 @@
 		},
 		"custom-api-server-has-an-invalid-address": "Le serveur API personnalisé a une adresse invalide.",
 		"custom-update-server-has-an-invalid-address": "Le serveur de mise à jour personnalisé a une adresse invalide.",
-		"dark-mode": "Mode sombre",
-		"dark-mode-options": {
-			"disabled": "Désactivé",
-			"enabled": "Activé"
-		},
 		"default-representative": "Représentant par défaut",
 		"default-representative-is-not-a-valid-account": "Le représentant par défaut n'est pas un compte valide",
 		"delete-all-data": "Supprimer TOUTES les données",
@@ -223,6 +218,11 @@
 		"successfully-deleted-all-wallet-data": "Toutes les données du portefeuille ont été supprimées avec succès !",
 		"successfully-updated": "Mis à jour avec succès !",
 		"switched-back-to-browser-local-storage-for-the-wallet-data": "Retour au \"Stockage local du navigateur\" pour les données du portefeuille. Utilisez à nouveau le bouton si vous voulez enregistrer d'autres paramètres.",
+		"theme": "Thème",
+		"themes": {
+			"dark": "Sombre",
+			"light": "Lumière"
+		},
 		"this-has-to-be-a-valid-authorization-header": "Ceci doit être un en-tête d'autorisation valide.",
 		"this-has-to-be-a-valid-rpc": {
 			"1": "Ceci doit être un",

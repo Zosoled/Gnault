@@ -187,11 +187,6 @@
 		"multiplier-options": {
 			"default-1x-or-1-64x": "Default (1x or 1/64x)"
 		},
-		"dark-mode": "Dark Mode",
-		"dark-mode-options": {
-			"disabled": "Disabled",
-			"enabled": "Enabled"
-		},
 		"node-stats": "Node Stats",
 		"note-since-this-server-only-notifies-about-new-transactions": "Note: Since this server only notifies about new transactions, most of the wallet functions fine without it.",
 		"optional-increased-work-for-transaction-priority-during": "Deprecated since v22.0",
@@ -221,6 +216,11 @@
 		"successfully-deleted-all-wallet-data": "Successfully deleted all wallet data!",
 		"successfully-updated": "Successfully updated!",
 		"switched-back-to-browser-local-storage-for-the-wallet-data": "Switched back to \"Browser Local Storage\" for the wallet data. Use the button again if you want to save other settings.",
+		"theme": "Theme",
+		"themes": {
+			"dark": "Dark",
+			"light": "Light"
+		},
 		"this-has-to-be-a-valid-authorization-header": "This has to be a valid Authorization header.",
 		"this-has-to-be-a-valid-rpc": {
 			"1": "This has to be a valid",
