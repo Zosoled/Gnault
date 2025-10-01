@@ -159,6 +159,11 @@
 		},
 		"custom-api-server-has-an-invalid-address": "Le serveur API personnalisé a une adresse invalide.",
 		"custom-update-server-has-an-invalid-address": "Le serveur de mise à jour personnalisé a une adresse invalide.",
+		"dark-mode": "Mode sombre",
+		"dark-mode-options": {
+			"disabled": "Désactivé",
+			"enabled": "Activé"
+		},
 		"default-representative": "Représentant par défaut",
 		"default-representative-is-not-a-valid-account": "Le représentant par défaut n'est pas un compte valide",
 		"delete-all-data": "Supprimer TOUTES les données",
@@ -186,11 +191,6 @@
 		"minimum-nano-amount-to-receive-transactions-below-this": "Montant minimum de XNO à recevoir. Les transactions en dessous de ce montant seront ignorées par le portefeuille pour la réception et dans la liste des transactions. Laissez vide ou à 0 pour accepter toutes les transactions.",
 		"multiplier-options": {
 			"default-1x-or-1-64x": "Par défaut (1x ou 1/64x)"
-		},
-		"night-mode": "Mode Nuit",
-		"night-mode-options": {
-			"disabled": "Désactivé",
-			"enabled": "Activé"
 		},
 		"node-stats": "Statistiques du nœud",
 		"note-since-this-server-only-notifies-about-new-transactions": "Note : Comme ce serveur ne notifie que les nouvelles transactions, la plupart des fonctions du portefeuille fonctionnent bien sans lui.",

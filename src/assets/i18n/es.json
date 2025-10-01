@@ -159,6 +159,11 @@
 		},
 		"custom-api-server-has-an-invalid-address": "El servidor API personalizado tiene una dirección inválida.",
 		"custom-update-server-has-an-invalid-address": "El servidor de actualización personalizado tiene una dirección inválida.",
+		"dark-mode": "Modo oscuro",
+		"dark-mode-options": {
+			"disabled": "Deshabilitado",
+			"enabled": "Habilitado"
+		},
 		"default-representative": "Representante predeterminado",
 		"default-representative-is-not-a-valid-account": "El representante predeterminado no es una cuenta válida",
 		"delete-all-data": "Eliminar TODOS los datos",
@@ -186,11 +191,6 @@
 		"minimum-nano-amount-to-receive-transactions-below-this": "Cantidad mínima de XNO para recibir. Las transacciones por debajo de esta cantidad serán ignoradas por la billetera tanto para recibir como en la lista de transacciones. Establezca en blanco o 0 para aceptar todas las transacciones.",
 		"multiplier-options": {
 			"default-1x-or-1-64x": "Predeterminado (1x o 1/64x)"
-		},
-		"night-mode": "Modo nocturno",
-		"night-mode-options": {
-			"disabled": "Deshabilitado",
-			"enabled": "Habilitado"
 		},
 		"node-stats": "Estadísticas del nodo",
 		"note-since-this-server-only-notifies-about-new-transactions": "Nota: Dado que este servidor solo notifica sobre nuevas transacciones, la mayoría de las funciones de la billetera funcionan bien sin él.",

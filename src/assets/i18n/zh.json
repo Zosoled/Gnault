@@ -159,6 +159,11 @@
 		},
 		"custom-api-server-has-an-invalid-address": "自定义API服务器地址无效。",
 		"custom-update-server-has-an-invalid-address": "自定义更新服务器地址无效。",
+		"dark-mode": "黑暗模式",
+		"dark-mode-options": {
+			"disabled": "禁用",
+			"enabled": "启用"
+		},
 		"default-representative": "默认代表",
 		"default-representative-is-not-a-valid-account": "默认代表不是有效账户",
 		"delete-all-data": "删除所有数据",
@@ -186,11 +191,6 @@
 		"minimum-nano-amount-to-receive-transactions-below-this": "接收交易的最小XNO金额。低于此金额的交易将被钱包忽略，不会接收也不会显示在交易列表中。设置为空白或0以接受所有交易。",
 		"multiplier-options": {
 			"default-1x-or-1-64x": "默认（1x或1/64x）"
-		},
-		"night-mode": "夜间模式",
-		"night-mode-options": {
-			"disabled": "禁用",
-			"enabled": "启用"
 		},
 		"node-stats": "节点统计",
 		"note-since-this-server-only-notifies-about-new-transactions": "注意：由于此服务器只通知新交易，大多数钱包功能无需它也能正常工作。",

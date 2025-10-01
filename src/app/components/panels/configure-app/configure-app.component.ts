@@ -122,11 +122,11 @@ export class ConfigureAppComponent implements OnInit {
 	]
 	selectedStorage = this.storageOptions[0].value
 
-	nightModeOptions = [
-		{ name: translate('configure-app.night-mode-options.enabled'), value: 'enabled' },
-		{ name: translate('configure-app.night-mode-options.disabled'), value: 'disabled' },
+	darkModeOptions = [
+		{ name: translate('configure-app.dark-mode-options.enabled'), value: 'enabled' },
+		{ name: translate('configure-app.dark-mode-options.disabled'), value: 'disabled' },
 	]
-	selectedNightModeOption = this.nightModeOptions[0].value
+	selectedDarkModeOption = this.darkModeOptions[0].value
 
 	identiconOptions = [
 		{ name: translate('configure-app.identicon-options.none'), value: 'none' },
@@ -305,9 +305,9 @@ export class ConfigureAppComponent implements OnInit {
 		const matchingLanguage = this.languages().find((lang) => lang.id === this.settings.language)
 		this.selectedLanguage.set(matchingLanguage?.id || this.languages[0].id)
 
-		const nightModeOptionString = this.settings.lightModeEnabled ? 'disabled' : 'enabled'
-		const matchingNightModeOption = this.nightModeOptions.find((d) => d.value === nightModeOptionString)
-		this.selectedNightModeOption = matchingNightModeOption.value || this.nightModeOptions[0].value
+		const darkModeOptionString = this.settings.darkModeEnabled ? 'disabled' : 'enabled'
+		const matchingDarkModeOption = this.darkModeOptions.find((d) => d.value === darkModeOptionString)
+		this.selectedDarkModeOption = matchingDarkModeOption.value || this.darkModeOptions[0].value
 
 		const matchingIdenticonOptions = this.identiconOptions.find((d) => d.value === this.settings.identiconsStyle)
 		this.selectedIdenticonOption = matchingIdenticonOptions.value || this.identiconOptions[0].value
@@ -341,14 +341,14 @@ export class ConfigureAppComponent implements OnInit {
 	}
 
 	async updateDisplaySettings () {
-		if (this.selectedNightModeOption === 'disabled') {
+		if (this.selectedDarkModeOption === 'disabled') {
 			this.renderer.addClass(document.body, 'light-mode')
 			this.renderer.removeClass(document.body, 'dark-mode')
-			this.svcAppSettings.setAppSetting('lightModeEnabled', true)
+			this.svcAppSettings.setAppSetting('darkModeEnabled', true)
 		} else {
 			this.renderer.addClass(document.body, 'dark-mode')
 			this.renderer.removeClass(document.body, 'light-mode')
-			this.svcAppSettings.setAppSetting('lightModeEnabled', false)
+			this.svcAppSettings.setAppSetting('darkModeEnabled', false)
 		}
 		this.svcAppSettings.setAppSetting('identiconsStyle', this.selectedIdenticonOption)
 	}

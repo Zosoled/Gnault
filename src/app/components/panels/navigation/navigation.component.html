@@ -43,7 +43,7 @@
 							</ng-container>
 						} @else {
 							<ng-template #notProcessingReceivable>
-								@if (receivableOption !== 'manual') {
+								@if (settings.receivableOption !== 'manual') {
 									<ng-container>
 										@if (isLocked) {
 											<div class="nav-action-receive user-action-required uk-animation-slide-left">
@@ -89,10 +89,10 @@
 											</div>
 										</div>
 									</div>
-									@if (displayCurrency) {
+									@if (settings.displayCurrency) {
 										<div class="balance-container converted">
 											<div class="currency-name">
-												<span class="estimate-symbol">~</span>{{ displayCurrency | currencySymbol }}
+												<span class="estimate-symbol">~</span>{{ settings.displayCurrency | currencySymbol }}
 											</div>
 											<div class="amount-container">
 												<div class="amount-integer">
@@ -118,7 +118,7 @@
 								uk-icon="icon: warning; ratio: 1.2;"
 							></span>
 						</div>
-						@if (serverAPI) {
+						@if (settings.serverAPI) {
 							<div class="status-labels">
 								<div class="label primary uk-text-danger">Unable to connect to the server</div>
 								<div class="label secondary">
@@ -127,7 +127,7 @@
 								</div>
 							</div>
 						}
-						@if (!serverAPI) {
+						@if (!settings.serverAPI) {
 							<div class="status-labels">
 								<div class="label primary uk-text-danger">Wallet is in offline mode</div>
 								<div class="label secondary">
@@ -372,8 +372,8 @@
 		</div>
 		<div class="uk-width-1-3 uk-text-center dark-mode-column">
 			<div
-				[class]="{ 'dark-mode-click-area': true, enabled: !lightModeEnabled }"
-				(click)="toggleLightMode()"
+				[class]="{ 'dark-mode-click-area': true, enabled: !settings.darkModeEnabled }"
+				(click)="toggleDarkMode()"
 			>
 				<div class="dark-mode-area">
 					<div class="dark-mode-switch">

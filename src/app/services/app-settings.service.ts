@@ -22,7 +22,7 @@ interface AppSettings {
 	serverAuth: string | null
 	minimumReceive: string | null
 	walletVersion: number | null
-	lightModeEnabled: boolean
+	darkModeEnabled: boolean
 	identiconsStyle: string
 }
 
@@ -49,7 +49,7 @@ export class AppSettingsService {
 		serverAuth: null,
 		minimumReceive: '0.000001',
 		walletVersion: 1,
-		lightModeEnabled: false,
+		darkModeEnabled: true,
 		identiconsStyle: 'nanoidenticons',
 	})
 	serverOptions = [
@@ -209,7 +209,7 @@ export class AppSettingsService {
 			serverAuth: null,
 			minimumReceive: '0.000001',
 			walletVersion: 1,
-			lightModeEnabled: false,
+			darkModeEnabled: true,
 			identiconsStyle: 'nanoidenticons',
 		})
 	}

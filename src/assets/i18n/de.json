@@ -159,6 +159,11 @@
 		},
 		"custom-api-server-has-an-invalid-address": "Benutzerdefinierter API-Server hat eine ungültige Adresse.",
 		"custom-update-server-has-an-invalid-address": "Benutzerdefinierter Update-Server hat eine ungültige Adresse.",
+		"dark-mode": "Dunkler Modus",
+		"dark-mode-options": {
+			"disabled": "Deaktiviert",
+			"enabled": "Aktiviert"
+		},
 		"default-representative": "Standard-Vertreter",
 		"default-representative-is-not-a-valid-account": "Standard-Vertreter ist kein gültiges Konto",
 		"delete-all-data": "ALLE Daten löschen",
@@ -186,11 +191,6 @@
 		"minimum-nano-amount-to-receive-transactions-below-this": "Minimaler XNO-Betrag zum Empfangen. Transaktionen unter diesem Betrag werden von der Wallet sowohl für den Empfang als auch in der Transaktionsliste ignoriert. Leer oder 0 setzen, um alle Transaktionen zu akzeptieren.",
 		"multiplier-options": {
 			"default-1x-or-1-64x": "Standard (1x oder 1/64x)"
-		},
-		"night-mode": "Nachtmodus",
-		"night-mode-options": {
-			"disabled": "Deaktiviert",
-			"enabled": "Aktiviert"
 		},
 		"node-stats": "Node-Statistiken",
 		"note-since-this-server-only-notifies-about-new-transactions": "Hinweis: Da dieser Server nur über neue Transaktionen benachrichtigt, funktionieren die meisten Wallet-Funktionen auch ohne ihn einwandfrei.",

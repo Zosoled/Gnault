@@ -187,8 +187,8 @@
 		"multiplier-options": {
 			"default-1x-or-1-64x": "Default (1x or 1/64x)"
 		},
-		"night-mode": "Night Mode",
-		"night-mode-options": {
+		"dark-mode": "Dark Mode",
+		"dark-mode-options": {
 			"disabled": "Disabled",
 			"enabled": "Enabled"
 		},

@@ -5,6 +5,7 @@ import {
 	Renderer2,
 	Signal,
 	computed,
+	effect,
 	inject
 } from '@angular/core'
 import { FormsModule } from '@angular/forms'
@@ -67,7 +68,7 @@ export class NavigationComponent {
 	@Output() expandedChanged = new EventEmitter<boolean>()
 	isExpanded = false
 
-	canToggleLightMode = true
+	canToggleDarkMode = true
 	donationAccount = environment.donationAddress
 	isWalletsDropdownVisible = false
 	node = this.svcNode.node
@@ -76,9 +77,6 @@ export class NavigationComponent {
 
 	get balance () {
 		return this.svcWallet.balance
-	}
-	get displayCurrency () {
-		return this.svcAppSettings.settings().displayCurrency
 	}
 	get hasReceivableTransactions () {
 		return this.svcWallet.hasReceivableTransactions()
@@ -104,17 +102,11 @@ export class NavigationComponent {
 	get isProcessingReceivable () {
 		return this.svcWallet.isProcessingReceivable
 	}
-	get lightModeEnabled () {
-		return this.svcAppSettings.settings().lightModeEnabled
-	}
 	get mobileBarHeight () {
 		return window.innerWidth < 940 ? 50 : 0
 	}
 	get receivable () {
 		return this.svcWallet.receivable
-	}
-	get receivableOption () {
-		return this.svcAppSettings.settings().receivableOption
 	}
 	get selectedAccount () {
 		return this.svcWallet.selectedAccount()
@@ -125,8 +117,8 @@ export class NavigationComponent {
 	get selectedWalletName () {
 		return this.svcWallet.walletNames.get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
 	}
-	get serverAPI () {
-		return this.svcAppSettings.settings().serverAPI
+	get settings () {
+		return this.svcAppSettings.settings()
 	}
 	get walletNames () {
 		return this.svcWallet.walletNames
@@ -173,29 +165,23 @@ export class NavigationComponent {
 		}, 350)
 	}
 
-	toggleLightMode () {
-		if (this.canToggleLightMode === false) {
-			return
+	toggleDarkMode () {
+		if (this.canToggleDarkMode) {
+			this.canToggleDarkMode = false
+			setTimeout(() => { this.canToggleDarkMode = true }, 300)
+			this.svcAppSettings.setAppSetting('darkModeEnabled', !this.settings.darkModeEnabled)
 		}
-
-		this.canToggleLightMode = false
-		setTimeout(() => {
-			this.canToggleLightMode = true
-		}, 300)
-
-		this.svcAppSettings.setAppSetting('lightModeEnabled', !this.svcAppSettings.settings().lightModeEnabled)
-		this.updateAppTheme()
 	}
 
-	updateAppTheme () {
-		if (this.svcAppSettings.settings().lightModeEnabled) {
-			this.renderer.addClass(document.body, 'light-mode')
-			this.renderer.removeClass(document.body, 'dark-mode')
-		} else {
+	updateAppTheme = effect(() => {
+		if (this.settings.darkModeEnabled) {
 			this.renderer.addClass(document.body, 'dark-mode')
 			this.renderer.removeClass(document.body, 'light-mode')
+		} else {
+			this.renderer.addClass(document.body, 'light-mode')
+			this.renderer.removeClass(document.body, 'dark-mode')
 		}
-	}
+	})
 
 	selectWallet (wallet: Wallet | null) {
 		// note: wallet is null when user is switching to 'Total Balance'

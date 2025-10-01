@@ -72,7 +72,7 @@ export class AppComponent implements AfterViewInit {
 	navExpanded = false
 	navAnimating = false
 	isWalletsDropdownVisible = false
-	canToggleLightMode = true
+	canToggleDarkMode = true
 	searchData = ''
 	donationAccount = environment.donationAddress
 
@@ -139,8 +139,6 @@ export class AppComponent implements AfterViewInit {
 	async ngAfterViewInit () {
 		this.svcAppSettings.loadAppSettings()
 		this.svcTransloco.setActiveLang(this.settings.language)
-
-		this.updateAppTheme()
 
 		this.svcAddressBook.loadAddressBook()
 		this.svcWorkPool.loadWorkCache()
@@ -302,30 +300,6 @@ export class AppComponent implements AfterViewInit {
 		setTimeout(() => {
 			this.navAnimating = false
 		}, 350)
-	}
-
-	toggleLightMode () {
-		if (this.canToggleLightMode === false) {
-			return
-		}
-
-		this.canToggleLightMode = false
-		setTimeout(() => {
-			this.canToggleLightMode = true
-		}, 300)
-
-		this.svcAppSettings.setAppSetting('lightModeEnabled', !this.settings.lightModeEnabled)
-		this.updateAppTheme()
-	}
-
-	updateAppTheme () {
-		if (this.settings.lightModeEnabled) {
-			this.renderer.addClass(document.body, 'light-mode')
-			this.renderer.removeClass(document.body, 'dark-mode')
-		} else {
-			this.renderer.addClass(document.body, 'dark-mode')
-			this.renderer.removeClass(document.body, 'light-mode')
-		}
 	}
 
 	toggleWalletsDropdown () {

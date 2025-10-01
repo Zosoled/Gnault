@@ -81,19 +81,19 @@
 							<div class="uk-margin">
 								<label
 									class="uk-form-label"
-									for="form-horizontal-select-night-mode"
+									for="form-horizontal-select-dark-mode"
 								>
-									{{ 'configure-app.night-mode' | transloco }}
+									{{ 'configure-app.dark-mode' | transloco }}
 								</label>
 								<div class="uk-form-controls">
 									<select
 										class="uk-select"
-										[(ngModel)]="selectedNightModeOption"
-										id="form-horizontal-select-night-mode"
+										[(ngModel)]="selectedDarkModeOption"
+										id="form-horizontal-select-dark-mode"
 									>
-										@for (nightModeOption of nightModeOptions; track nightModeOption) {
-											<option [value]="nightModeOption.value">
-												{{ nightModeOption.name }}
+										@for (darkModeOption of darkModeOptions; track darkModeOption) {
+											<option [value]="darkModeOption.value">
+												{{ darkModeOption.name }}
 											</option>
 										}
 									</select>
