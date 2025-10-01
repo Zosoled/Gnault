@@ -106,6 +106,23 @@ export class ConfigureAppComponent implements OnInit {
 		this.svcAppSettings.saveAppSettings()
 	})
 
+	themes = [
+		{ name: translate('configure-app.dark-mode-options.enabled'), value: 'dark' },
+		{ name: translate('configure-app.dark-mode-options.disabled'), value: 'light' },
+	]
+	selectedTheme = signal(this.settings.theme ?? 'dark')
+	selectedThemeChanged = effect(() => {
+		if (this.selectedTheme() === 'dark') {
+			this.renderer.addClass(document.body, 'dark-mode')
+			this.renderer.removeClass(document.body, 'light-mode')
+		} else {
+			this.renderer.addClass(document.body, 'light-mode')
+			this.renderer.removeClass(document.body, 'dark-mode')
+		}
+		this.settings.theme = this.selectedTheme()
+		this.svcAppSettings.saveAppSettings()
+	})
+
 	denominations = [
 		{ name: 'XNO', value: 'nano' },
 		{ name: 'knano', value: 'knano' },
@@ -299,6 +316,9 @@ export class ConfigureAppComponent implements OnInit {
 		const matchingLanguage = this.languages().find((lang) => lang.id === this.settings.language)
 		this.selectedLanguage.set(matchingLanguage?.id || this.languages[0].id)
 
+		const matchingTheme = this.themes.find((theme) => theme.value === this.settings.theme)
+		this.selectedTheme.set(matchingTheme.value || this.themes[0].value)
+
 		const matchingIdenticonOptions = this.identiconOptions.find((d) => d.value === this.settings.identiconsStyle)
 		this.selectedIdenticonOption = matchingIdenticonOptions.value || this.identiconOptions[0].value
 
@@ -328,6 +348,10 @@ export class ConfigureAppComponent implements OnInit {
 		if (this.defaultRepresentative) {
 			this.validateRepresentative()
 		}
+	}
+
+	async updateDisplaySettings () {
+		this.svcAppSettings.setAppSetting('identiconsStyle', this.selectedIdenticonOption)
 	}
 
 	async updateWalletSettings () {

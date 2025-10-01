@@ -72,7 +72,6 @@ export class AppComponent implements AfterViewInit {
 	navExpanded = false
 	navAnimating = false
 	isWalletsDropdownVisible = false
-	canToggleDarkMode = true
 	searchData = ''
 	donationAccount = environment.donationAddress
 

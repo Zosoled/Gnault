@@ -81,6 +81,34 @@
 							<div class="uk-margin">
 								<label
 									class="uk-form-label"
+									for="form-horizontal-select-dark-mode"
+								>
+									{{ 'configure-app.dark-mode' | transloco }}
+								</label>
+								<div class="uk-form-controls">
+									<select
+										id="form-horizontal-select-theme"
+										class="uk-select"
+										(change)="onSelectInput(selectedTheme, $event)"
+									>
+										@for (theme of themes; track theme.value) {
+											<option
+												[value]="theme.value"
+												[selected]="theme.value === selectedTheme()"
+											>
+												{{ theme.name }}
+											</option>
+										}
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="uk-width-1-1">
+						<div class="uk-form-horizontal">
+							<div class="uk-margin">
+								<label
+									class="uk-form-label"
 									for="form-horizontal-select-identicon-option"
 								>
 									{{ 'configure-app.identicons' | transloco }}

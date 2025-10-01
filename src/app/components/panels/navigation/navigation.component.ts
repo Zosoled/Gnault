@@ -68,7 +68,6 @@ export class NavigationComponent {
 	@Output() expandedChanged = new EventEmitter<boolean>()
 	isExpanded = false
 
-	canToggleDarkMode = true
 	donationAccount = environment.donationAddress
 	isWalletsDropdownVisible = false
 	node = this.svcNode.node
@@ -165,16 +164,8 @@ export class NavigationComponent {
 		}, 350)
 	}
 
-	toggleDarkMode () {
-		if (this.canToggleDarkMode) {
-			this.canToggleDarkMode = false
-			setTimeout(() => { this.canToggleDarkMode = true }, 300)
-			this.svcAppSettings.setAppSetting('darkModeEnabled', !this.settings.darkModeEnabled)
-		}
-	}
-
 	updateAppTheme = effect(() => {
-		if (this.settings.darkModeEnabled) {
+		if (this.settings.theme) {
 			this.renderer.addClass(document.body, 'dark-mode')
 			this.renderer.removeClass(document.body, 'light-mode')
 		} else {
