@@ -1,378 +1,380 @@
-<!-- Mobile top bar -->
-<div
-	uk-grid
-	class="mobile-top-bar uk-background-primary"
->
-	<div class="uk-width-auto button-column">
-		<div
-			class="nav-button"
-			(click)="toggleNav()"
-		>
-			<span uk-icon="icon: menu;"></span>
-			<app-gnault-logo-element></app-gnault-logo-element>
-			<span class="uk-badge">{{ stage }}</span>
-		</div>
-	</div>
+<div *transloco="let t">
+	<!-- Mobile top bar -->
 	<div
-		class="uk-width-expand"
-		style="text-align: right"
-	></div>
-</div>
+		uk-grid
+		class="mobile-top-bar uk-background-primary"
+	>
+		<div class="uk-width-auto button-column">
+			<div
+				class="nav-button"
+				(click)="toggleNav()"
+			>
+				<span uk-icon="icon: menu;"></span>
+				<app-gnault-logo-element></app-gnault-logo-element>
+				<span class="uk-badge">{{ stage }}</span>
+			</div>
+		</div>
+		<div
+			class="uk-width-expand"
+			style="text-align: right"
+		></div>
+	</div>
 
-<div
-	class="uk-width-1-4 nav-container"
-	[style.top]="`${mobileBarHeight}px`"
->
-	<div class="nav-header">
-		<div uk-grid>
-			<div class="uk-width-expand">
-				<app-nano-card></app-nano-card>
-				@if (selectedAccount?.receivable > 0 || hasReceivableTransactions) {
-					<ng-container>
-						@if (isProcessingReceivable) {
-							<ng-container>
-								@if (isProcessingReceivable) {
-									<div class="nav-action-receive">
-										<div
-											class="icon"
-											uk-icon="icon: chevron-up; ratio: 1.2;"
-										></div>
-										<div class="label"><span uk-spinner="ratio: 0.5;"></span>Processing Transactions...</div>
-									</div>
-								}
-							</ng-container>
-						} @else {
-							<ng-template #notProcessingReceivable>
-								@if (settings.receivableOption !== 'manual') {
-									<ng-container>
-										@if (isLocked) {
-											<div class="nav-action-receive user-action-required uk-animation-slide-left">
-												<div
-													class="icon"
-													uk-icon="icon: chevron-up; ratio: 1.2;"
-												></div>
-												<div class="label">Unlock Wallet to Receive</div>
-											</div>
-										}
-									</ng-container>
-								} @else {
-									<ng-template #manuallyReceivingReceivable>
-										<div class="nav-action-receive uk-animation-slide-left">
+	<div
+		class="uk-width-1-4 nav-container"
+		[style.top]="`${mobileBarHeight}px`"
+	>
+		<div class="nav-header">
+			<div uk-grid>
+				<div class="uk-width-expand">
+					<app-nano-card></app-nano-card>
+					@if (selectedAccount?.receivable > 0 || hasReceivableTransactions) {
+						<ng-container>
+							@if (isProcessingReceivable) {
+								<ng-container>
+									@if (isProcessingReceivable) {
+										<div class="nav-action-receive">
 											<div
 												class="icon"
 												uk-icon="icon: chevron-up; ratio: 1.2;"
 											></div>
-											<div class="label">Set to Receive Manually</div>
-										</div>
-									</ng-template>
-								}
-							</ng-template>
-						}
-						<div class="nano-card incoming-card uk-animation-slide-left">
-							<div class="card-contents">
-								<div class="account-name-container">
-									<a
-										routerLink="/receive"
-										class="name"
-										>Incoming Balance</a
-									>
-								</div>
-								<div class="account-balances">
-									<div class="balance-container primary">
-										<div class="currency-name">XNO</div>
-										<div class="amount-container">
-											<div class="amount-integer">
-												{{ selectedAccount?.receivable ?? receivable | rai: 'nano,true' | amountsplit: 0 }}
-											</div>
-											<div class="amount-fractional">
-												{{ selectedAccount?.receivable ?? receivable | rai: 'nano,true' | amountsplit: 1 }}
-											</div>
-										</div>
-									</div>
-									@if (settings.displayCurrency) {
-										<div class="balance-container converted">
-											<div class="currency-name">
-												<span class="estimate-symbol">~</span>{{ settings.displayCurrency | currencySymbol }}
-											</div>
-											<div class="amount-container">
-												<div class="amount-integer">
-													{{ selectedAccount?.receivable ?? receivable | fiat | amountsplit: 0 }}
-												</div>
-												<div class="amount-fractional">
-													{{ selectedAccount?.receivable ?? receivable | fiat | amountsplit: 1 }}
-												</div>
-											</div>
+											<div class="label"><span uk-spinner="ratio: 0.5;"></span>Processing Transactions...</div>
 										</div>
 									}
+								</ng-container>
+							} @else {
+								<ng-template #notProcessingReceivable>
+									@if (settings.receivableOption !== 'manual') {
+										<ng-container>
+											@if (isLocked) {
+												<div class="nav-action-receive user-action-required uk-animation-slide-left">
+													<div
+														class="icon"
+														uk-icon="icon: chevron-up; ratio: 1.2;"
+													></div>
+													<div class="label">Unlock Wallet to Receive</div>
+												</div>
+											}
+										</ng-container>
+									} @else {
+										<ng-template #manuallyReceivingReceivable>
+											<div class="nav-action-receive uk-animation-slide-left">
+												<div
+													class="icon"
+													uk-icon="icon: chevron-up; ratio: 1.2;"
+												></div>
+												<div class="label">Set to Receive Manually</div>
+											</div>
+										</ng-template>
+									}
+								</ng-template>
+							}
+							<div class="nano-card incoming-card uk-animation-slide-left">
+								<div class="card-contents">
+									<div class="account-name-container">
+										<a
+											routerLink="/receive"
+											class="name"
+											>Incoming Balance</a
+										>
+									</div>
+									<div class="account-balances">
+										<div class="balance-container primary">
+											<div class="currency-name">XNO</div>
+											<div class="amount-container">
+												<div class="amount-integer">
+													{{ selectedAccount?.receivable ?? receivable | rai: 'nano,true' | amountsplit: 0 }}
+												</div>
+												<div class="amount-fractional">
+													{{ selectedAccount?.receivable ?? receivable | rai: 'nano,true' | amountsplit: 1 }}
+												</div>
+											</div>
+										</div>
+										@if (settings.displayCurrency) {
+											<div class="balance-container converted">
+												<div class="currency-name">
+													<span class="estimate-symbol">~</span>{{ settings.displayCurrency | currencySymbol }}
+												</div>
+												<div class="amount-container">
+													<div class="amount-integer">
+														{{ selectedAccount?.receivable ?? receivable | fiat | amountsplit: 0 }}
+													</div>
+													<div class="amount-fractional">
+														{{ selectedAccount?.receivable ?? receivable | fiat | amountsplit: 1 }}
+													</div>
+												</div>
+											</div>
+										}
+									</div>
 								</div>
 							</div>
+							<div class="nav-separator-top"></div>
+						</ng-container>
+					}
+					@if (node.status === false && isConfigured) {
+						<div class="nav-status-row">
+							<div class="status-icon">
+								<span
+									class="uk-text-danger"
+									uk-icon="icon: warning; ratio: 1.2;"
+								></span>
+							</div>
+							@if (settings.serverAPI) {
+								<div class="status-labels">
+									<div class="label primary uk-text-danger">Unable to connect to the server</div>
+									<div class="label secondary">
+										<a (click)="retryConnection()">Refresh</a> or
+										<a routerLink="/configure-app">select a different server</a>
+									</div>
+								</div>
+							}
+							@if (!settings.serverAPI) {
+								<div class="status-labels">
+									<div class="label primary uk-text-danger">Wallet is in offline mode</div>
+									<div class="label secondary">
+										<a routerLink="/configure-app">Select a server</a> to interact with the network
+									</div>
+								</div>
+							}
 						</div>
-						<div class="nav-separator-top"></div>
-					</ng-container>
-				}
-				@if (node.status === false && isConfigured) {
-					<div class="nav-status-row">
-						<div class="status-icon">
-							<span
-								class="uk-text-danger"
-								uk-icon="icon: warning; ratio: 1.2;"
-							></span>
-						</div>
-						@if (settings.serverAPI) {
-							<div class="status-labels">
-								<div class="label primary uk-text-danger">Unable to connect to the server</div>
-								<div class="label secondary">
-									<a (click)="retryConnection()">Refresh</a> or
-									<a routerLink="/configure-app">select a different server</a>
-								</div>
-							</div>
-						}
-						@if (!settings.serverAPI) {
-							<div class="status-labels">
-								<div class="label primary uk-text-danger">Wallet is in offline mode</div>
-								<div class="label secondary">
-									<a routerLink="/configure-app">Select a server</a> to interact with the network
-								</div>
-							</div>
-						}
-					</div>
-				}
-				@if (isConfigured) {
-					<app-change-rep-widget></app-change-rep-widget>
-				}
-				<app-wallet-widget></app-wallet-widget>
+					}
+					@if (isConfigured) {
+						<app-change-rep-widget></app-change-rep-widget>
+					}
+					<app-wallet-widget></app-wallet-widget>
+				</div>
 			</div>
 		</div>
-	</div>
-	<ul
-		role="navigation"
-		aria-label="Main"
-		class="uk-nav uk-nav-default left-nav"
-		uk-nav
-	>
-		<li>
-			<a
-				routerLink="/accounts"
-				routerLinkActive="active"
-			>
-				<div class="label">{{ 'nav.accounts' | transloco }}</div>
-			</a>
-		</li>
-		<li>
-			<a
-				routerLink="/send"
-				routerLinkActive="active"
-			>
-				<div class="label">{{ 'nav.send' | transloco }}</div>
-			</a>
-		</li>
-		<li>
-			<a
-				routerLink="/receive"
-				routerLinkActive="active"
-			>
-				<div uk-grid>
-					<div class="uk-width-3-4">
-						<div class="label">{{ 'nav.receive' | transloco }}</div>
+		<ul
+			role="navigation"
+			aria-label="Main"
+			class="uk-nav uk-nav-default left-nav"
+			uk-nav
+		>
+			<li>
+				<a
+					routerLink="/accounts"
+					routerLinkActive="active"
+				>
+					<div class="label">{{ t('nav.accounts') }}</div>
+				</a>
+			</li>
+			<li>
+				<a
+					routerLink="/send"
+					routerLinkActive="active"
+				>
+					<div class="label">{{ t('nav.send') }}</div>
+				</a>
+			</li>
+			<li>
+				<a
+					routerLink="/receive"
+					routerLinkActive="active"
+				>
+					<div uk-grid>
+						<div class="uk-width-3-4">
+							<div class="label">{{ t('nav.receive') }}</div>
+						</div>
+						<div class="uk-width-1-4 uk-text-center label-new">
+							@if (hasReceivableTransactions) {
+								<span class="uk-badge uk-text-top uk-align-center">
+									<div class="label">{{ t('general.new') }}</div>
+								</span>
+							}
+						</div>
 					</div>
-					<div class="uk-width-1-4 uk-text-center label-new">
-						@if (hasReceivableTransactions) {
-							<span class="uk-badge uk-text-top uk-align-center">
-								<div class="label">{{ 'general.new' | transloco }}</div>
-							</span>
-						}
-					</div>
-				</div>
-			</a>
-		</li>
-		<li>
-			<a
-				routerLink="/address-book"
-				routerLinkActive="active"
-			>
-				<div class="label">{{ 'general.address-book' | transloco }}</div>
-			</a>
-		</li>
-		<li>
-			<a
-				routerLink="/qr-scan"
-				routerLinkActive="active"
-			>
-				<div class="label">{{ 'general.scan-qr-code' | transloco }}</div>
-			</a>
-		</li>
-		<li class="uk-parent">
-			<a href="#">{{ 'general.settings' | transloco }}</a>
-			<ul class="uk-nav-sub">
-				<li>
-					<a
-						routerLink="/representatives"
-						[queryParams]=""
-						routerLinkActive="active"
-					>
-						<div class="label">{{ 'general.representatives' | transloco }}</div>
-					</a>
-				</li>
-				<li>
-					<a
-						routerLink="/configure-app"
-						routerLinkActive="active"
-					>
-						<div class="label">{{ 'general.app-settings' | transloco }}</div>
-					</a>
-				</li>
-				@if (isConfigured) {
+				</a>
+			</li>
+			<li>
+				<a
+					routerLink="/address-book"
+					routerLinkActive="active"
+				>
+					<div class="label">{{ t('general.address-book') }}</div>
+				</a>
+			</li>
+			<li>
+				<a
+					routerLink="/qr-scan"
+					routerLinkActive="active"
+				>
+					<div class="label">{{ t('general.scan-qr-code') }}</div>
+				</a>
+			</li>
+			<li class="uk-parent">
+				<a href="#">{{ t('general.settings') }}</a>
+				<ul class="uk-nav-sub">
 					<li>
 						<a
-							routerLink="/manage-wallet"
+							routerLink="/representatives"
+							[queryParams]=""
 							routerLinkActive="active"
 						>
-							<div class="label">{{ 'general.manage-wallet' | transloco }}</div>
+							<div class="label">{{ t('general.representatives') }}</div>
 						</a>
 					</li>
-				}
-				<li>
-					<a
-						[routerLink]="['/configure-wallet']"
-						routerLinkActive="active"
-					>
-						<div class="label">{{ 'configure-wallet.new-wallet.configure-new-wallet' | transloco }}</div>
-					</a>
-				</li>
-			</ul>
-		</li>
-		<li class="uk-parent">
-			<a href="#">{{ 'general.advanced-tools' | transloco }}</a>
-			<ul class="uk-nav-sub">
-				<li>
-					<a
-						routerLink="/sweeper"
-						routerLinkActive="active"
-					>
-						<div class="label">Wallet Sweeper</div>
-					</a>
-				</li>
-				<li>
-					<a
-						routerLink="/remote-signing"
-						routerLinkActive="active"
-					>
-						<div class="label">Remote Signing</div>
-					</a>
-				</li>
-				<li>
-					<a
-						routerLink="/multisig"
-						routerLinkActive="active"
-					>
-						<div class="label">Multi Signature</div>
-					</a>
-				</li>
-				<li>
-					<a
-						routerLink="/keygenerator"
-						routerLinkActive="active"
-					>
-						<div class="label">Keypair Generator</div>
-					</a>
-				</li>
-				<li>
-					<a
-						routerLink="/converter"
-						routerLinkActive="active"
-					>
-						<div class="label">Unit Converter</div>
-					</a>
-				</li>
-				<li>
-					<a
-						routerLink="/qr-generator"
-						routerLinkActive="active"
-					>
-						<div class="label">QR Generator</div>
-					</a>
-				</li>
-			</ul>
-		</li>
-	</ul>
-	<app-install-widget></app-install-widget>
-	<div class="nav-search">
-		<form class="uk-search uk-search-default uk-width-1-1">
-			<a
-				href="javascript:void(0)"
-				(click)="performSearch()"
-				class="uk-search-icon-flip"
-				uk-search-icon
-			></a>
-			<input
-				class="uk-search-input uk-width-1-1"
-				id="search-input"
-				type="search"
-				placeholder="Search for an account or block hash"
-				[(ngModel)]="searchData"
-				name="searchData"
-				(keyup.enter)="performSearch()"
-			/>
-		</form>
-	</div>
-	<div
-		class="footer footer-actions uk-margin-remove-top uk-flex-middle"
-		uk-grid
-	>
-		<div class="uk-width-1-3 uk-text-center">
-			<a
-				uk-icon="icon: heart; ratio: 1.2;"
-				uk-tooltip
-				title="Donate to support Gnault"
-				routerLink="/send"
-				[queryParams]="{ to: donationAccount }"
-				routerLinkActive="active"
-				class="footer-link"
-			>
-			</a>
+					<li>
+						<a
+							routerLink="/configure-app"
+							routerLinkActive="active"
+						>
+							<div class="label">{{ t('general.app-settings') }}</div>
+						</a>
+					</li>
+					@if (isConfigured) {
+						<li>
+							<a
+								routerLink="/manage-wallet"
+								routerLinkActive="active"
+							>
+								<div class="label">{{ t('general.manage-wallet') }}</div>
+							</a>
+						</li>
+					}
+					<li>
+						<a
+							[routerLink]="['/configure-wallet']"
+							routerLinkActive="active"
+						>
+							<div class="label">{{ t('configure-wallet.new-wallet.configure-new-wallet') }}</div>
+						</a>
+					</li>
+				</ul>
+			</li>
+			<li class="uk-parent">
+				<a href="#">{{ t('general.advanced-tools') }}</a>
+				<ul class="uk-nav-sub">
+					<li>
+						<a
+							routerLink="/sweeper"
+							routerLinkActive="active"
+						>
+							<div class="label">Wallet Sweeper</div>
+						</a>
+					</li>
+					<li>
+						<a
+							routerLink="/remote-signing"
+							routerLinkActive="active"
+						>
+							<div class="label">Remote Signing</div>
+						</a>
+					</li>
+					<li>
+						<a
+							routerLink="/multisig"
+							routerLinkActive="active"
+						>
+							<div class="label">Multi Signature</div>
+						</a>
+					</li>
+					<li>
+						<a
+							routerLink="/keygenerator"
+							routerLinkActive="active"
+						>
+							<div class="label">Keypair Generator</div>
+						</a>
+					</li>
+					<li>
+						<a
+							routerLink="/converter"
+							routerLinkActive="active"
+						>
+							<div class="label">Unit Converter</div>
+						</a>
+					</li>
+					<li>
+						<a
+							routerLink="/qr-generator"
+							routerLinkActive="active"
+						>
+							<div class="label">QR Generator</div>
+						</a>
+					</li>
+				</ul>
+			</li>
+		</ul>
+		<app-install-widget></app-install-widget>
+		<div class="nav-search">
+			<form class="uk-search uk-search-default uk-width-1-1">
+				<a
+					href="javascript:void(0)"
+					(click)="performSearch()"
+					class="uk-search-icon-flip"
+					uk-search-icon
+				></a>
+				<input
+					class="uk-search-input uk-width-1-1"
+					id="search-input"
+					type="search"
+					placeholder="Search for an account or block hash"
+					[(ngModel)]="searchData"
+					name="searchData"
+					(keyup.enter)="performSearch()"
+				/>
+			</form>
 		</div>
-		<div class="uk-width-1-3 uk-text-center">
-			<a
-				href="https://github.com/Zosoled/Gnault"
-				uk-icon="icon: github; ratio: 1.2;"
-				uk-tooltip
-				title="View on GitHub"
-				class="footer-link"
-				target="_blank"
-				rel="noopener noreferrer"
-			></a>
+		<div
+			class="footer footer-actions uk-margin-remove-top uk-flex-middle"
+			uk-grid
+		>
+			<div class="uk-width-1-3 uk-text-center">
+				<a
+					uk-icon="icon: heart; ratio: 1.2;"
+					uk-tooltip
+					title="Donate to support Gnault"
+					routerLink="/send"
+					[queryParams]="{ to: donationAccount }"
+					routerLinkActive="active"
+					class="footer-link"
+				>
+				</a>
+			</div>
+			<div class="uk-width-1-3 uk-text-center">
+				<a
+					href="https://github.com/Zosoled/Gnault"
+					uk-icon="icon: github; ratio: 1.2;"
+					uk-tooltip
+					title="View on GitHub"
+					class="footer-link"
+					target="_blank"
+					rel="noopener noreferrer"
+				></a>
+			</div>
+			<div class="uk-width-1-3 uk-text-center">
+				<a
+					href="https://chat.nano.org"
+					uk-icon="icon: discord; ratio: 1.2;"
+					uk-tooltip
+					title="Join the Nano community Discord"
+					class="footer-link discord-icon"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+				</a>
+			</div>
 		</div>
-		<div class="uk-width-1-3 uk-text-center">
-			<a
-				href="https://chat.nano.org"
-				uk-icon="icon: discord; ratio: 1.2;"
-				uk-tooltip
-				title="Join the Nano community Discord"
-				class="footer-link discord-icon"
-				target="_blank"
-				rel="noopener noreferrer"
-			>
-			</a>
-		</div>
-	</div>
-	<div
-		class="footer footer-attribution uk-margin-remove-top"
-		uk-grid
-	>
-		<div class="attribution uk-width-1-1 uk-text-center">
-			Forked from
-			<a
-				href="https://github.com/Nault/Nault"
-				target="_blank"
-				rel="noopener noreferrer"
-				>Nault</a
-			>, a fork of
-			<a
-				href="https://github.com/cronoh/nanovault"
-				target="_blank"
-				rel="noopener noreferrer"
-				>NanoVault</a
-			>
+		<div
+			class="footer footer-attribution uk-margin-remove-top"
+			uk-grid
+		>
+			<div class="attribution uk-width-1-1 uk-text-center">
+				Forked from
+				<a
+					href="https://github.com/Nault/Nault"
+					target="_blank"
+					rel="noopener noreferrer"
+					>Nault</a
+				>, a fork of
+				<a
+					href="https://github.com/cronoh/nanovault"
+					target="_blank"
+					rel="noopener noreferrer"
+					>NanoVault</a
+				>
+			</div>
 		</div>
 	</div>
 </div>

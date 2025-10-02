@@ -1,7 +1,7 @@
 import { formatDate } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
 import { ApiService, AppSettingsService, NotificationsService, UtilService, WalletService } from 'app/services'
 import { ClipboardModule } from 'ngx-clipboard'
@@ -11,7 +11,7 @@ import * as QRCode from 'qrcode'
 	selector: 'app-manage-wallet',
 	templateUrl: './manage-wallet.component.html',
 	styleUrls: ['./manage-wallet.component.css'],
-	imports: [AmountSplitPipe, ClipboardModule, FormsModule, RaiPipe, SqueezePipe, TranslocoPipe],
+	imports: [AmountSplitPipe, ClipboardModule, FormsModule, RaiPipe, SqueezePipe, TranslocoDirective],
 })
 export class ManageWalletComponent implements OnInit {
 	private api = inject(ApiService)

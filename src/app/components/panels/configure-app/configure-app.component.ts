@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common'
 import { Component, computed, effect, inject, OnInit, Renderer2, Signal, signal, WritableSignal } from '@angular/core'
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms'
-import { translateSignal, TranslocoDirective, TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { translateSignal, TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import {
 	AddressBookService,
 	ApiService,
@@ -24,7 +24,7 @@ import { BehaviorSubject } from 'rxjs'
 	selector: 'app-configure-app',
 	templateUrl: './configure-app.component.html',
 	styleUrls: ['./configure-app.component.css'],
-	imports: [CommonModule, FormsModule, ReactiveFormsModule, TranslocoDirective, TranslocoPipe],
+	imports: [CommonModule, FormsModule, ReactiveFormsModule, TranslocoDirective],
 })
 export class ConfigureAppComponent implements OnInit {
 	private renderer = inject(Renderer2)

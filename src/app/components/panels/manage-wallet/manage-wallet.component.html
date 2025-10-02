@@ -1,9 +1,10 @@
 <div
 	class="uk-animation-slide-left-small"
 	uk-grid
+	*transloco="let t"
 >
 	<div class="uk-width-1-1">
-		<h2 class="uk-heading-divider">{{ 'general.manage-wallet' | transloco }}</h2>
+		<h2 class="uk-heading-divider">{{ t('general.manage-wallet') }}</h2>
 		@if (!isLedger) {
 			<div class="uk-card uk-card-default uk-margin">
 				<div class="uk-card-header">

@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core'
 import { RouterLink } from '@angular/router'
-import { TranslocoPipe } from '@jsverse/transloco'
+import { TranslocoDirective } from '@jsverse/transloco'
 import { GnaultLogoElementComponent } from 'app/components'
 import { WalletService } from 'app/services'
 
@@ -8,7 +8,7 @@ import { WalletService } from 'app/services'
 	selector: 'app-welcome',
 	templateUrl: './welcome.component.html',
 	styleUrls: ['./welcome.component.css'],
-	imports: [GnaultLogoElementComponent, RouterLink, TranslocoPipe],
+	imports: [GnaultLogoElementComponent, RouterLink, TranslocoDirective],
 })
 export class WelcomeComponent {
 	private svcWallet = inject(WalletService)

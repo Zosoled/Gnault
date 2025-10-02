@@ -1,115 +1,117 @@
-<!-- Wallets dropdown -->
-<div
-	#walletsDropdown
-	[class]="['wallets-dropdown', isWalletsDropdownVisible ? 'visible' : 'hidden']"
->
-	<div class="header">Wallets</div>
-	<!-- active wallet -->
-	@if (isConfigured) {
-		<div class="wallet active">
-			<div class="name-column">
-				<div class="name">
-					{{ selectedWalletName }}
-				</div>
-			</div>
-		</div>
-	}
-	<!-- other wallets -->
-	@for (wallet of wallets; track wallet.id) {
-		<ng-container>
-			<!-- inactive wallets -->
-			@if (selectedWallet == null || selectedWallet.id !== wallet.id) {
-				<div
-					class="wallet inactive"
-					(click)="selectWallet(wallet)"
-				>
-					<div class="name-column">
-						<div class="name">
-							{{ walletNames.get(wallet.id) ?? wallet.id }}
-						</div>
+<div *transloco="let t">
+	<!-- Wallets dropdown -->
+	<div
+		#walletsDropdown
+		[class]="['wallets-dropdown', isWalletsDropdownVisible ? 'visible' : 'hidden']"
+	>
+		<div class="header">Wallets</div>
+		<!-- active wallet -->
+		@if (isConfigured) {
+			<div class="wallet active">
+				<div class="name-column">
+					<div class="name">
+						{{ selectedWalletName }}
 					</div>
 				</div>
-			}
-		</ng-container>
-	}
-	<div class="wallet active">
-		<!-- configure new wallet link -->
-		<div class="name-column">
-			<div class="name">
-				<a
-					[routerLink]="'/configure-wallet/'"
-					(click)="toggleWalletsDropdown()"
-				>
-					{{ 'configure-wallet.new-wallet.configure-new-wallet' | transloco }}
-				</a>
+			</div>
+		}
+		<!-- other wallets -->
+		@for (wallet of wallets; track wallet.id) {
+			<ng-container>
+				<!-- inactive wallets -->
+				@if (selectedWallet == null || selectedWallet.id !== wallet.id) {
+					<div
+						class="wallet inactive"
+						(click)="selectWallet(wallet)"
+					>
+						<div class="name-column">
+							<div class="name">
+								{{ walletNames.get(wallet.id) ?? wallet.id }}
+							</div>
+						</div>
+					</div>
+				}
+			</ng-container>
+		}
+		<div class="wallet active">
+			<!-- configure new wallet link -->
+			<div class="name-column">
+				<div class="name">
+					<a
+						[routerLink]="'/configure-wallet/'"
+						(click)="toggleWalletsDropdown()"
+					>
+						{{ t('configure-wallet.new-wallet.configure-new-wallet') }}
+					</a>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
 
-<div [class]="['nano-card', selectedAccount === null ? 'is-wallet' : 'is-card']">
-	<div
-		class="logo"
-		[style.--selectedAccountColor.deg]="selectedAccountColor()"
-	></div>
-	<div class="card-contents">
-		<div class="account-name-container">
-			<a
-				[routerLink]="`/accounts/${selectedAccount?.address ?? ''}`"
-				[queryParams]="{ compact: '1' }"
-				class="name"
-			>
-				{{
-					selectedAccount == null
-						? 'Total Balance'
-						: (selectedAccount.addressBookName ?? ('general.account' | transloco) + ' #' + selectedAccount.index)
-				}}
-			</a>
-			<div
-				#selectButton
-				[class]="['select-button', isWalletsDropdownVisible ? 'open' : 'closed']"
-				(click)="toggleWalletsDropdown()"
-			>
-				<div class="circle"></div>
-				<div class="circle"></div>
-				<div class="circle"></div>
+	<div [class]="['nano-card', selectedAccount === null ? 'is-wallet' : 'is-card']">
+		<div
+			class="logo"
+			[style.--selectedAccountColor.deg]="selectedAccountColor()"
+		></div>
+		<div class="card-contents">
+			<div class="account-name-container">
+				<a
+					[routerLink]="`/accounts/${selectedAccount?.address ?? ''}`"
+					[queryParams]="{ compact: '1' }"
+					class="name"
+				>
+					{{
+						selectedAccount == null
+							? 'Total Balance'
+							: (selectedAccount.addressBookName ?? t('general.account') + ' #' + selectedAccount.index)
+					}}
+				</a>
+				<div
+					#selectButton
+					[class]="['select-button', isWalletsDropdownVisible ? 'open' : 'closed']"
+					(click)="toggleWalletsDropdown()"
+				>
+					<div class="circle"></div>
+					<div class="circle"></div>
+					<div class="circle"></div>
+				</div>
 			</div>
-		</div>
-		<div class="account-balances">
-			@if ((node.status && isBalanceInitialized) || !isConfigured) {
-				<ng-container>
-					<div class="balance-container primary">
-						<div class="amount-container">
-							<div class="amount-integer">
-								&#xe001;{{ selectedAccount?.balance ?? balance ?? '0' | rai: 'nano,true' | amountsplit: 0 }}
-							</div>
-							<div class="amount-fractional">
-								{{ selectedAccount?.balance ?? balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }}
-							</div>
-							@if (isBalanceUpdating && isConfigured) {
-								<div class="amount-updating">
-									<div uk-spinner="ratio: 0.5;"></div>
-								</div>
-							}
-						</div>
-					</div>
-					@if (settings.displayCurrency) {
-						<div class="balance-container converted">
+			<div class="account-balances">
+				@if ((node.status && isBalanceInitialized) || !isConfigured) {
+					<ng-container>
+						<div class="balance-container primary">
 							<div class="amount-container">
-								<span class="estimate-symbol">~</span>
 								<div class="amount-integer">
-									{{ selectedAccount?.balance ?? balance ?? 0 | fiat | amountsplit: 0 }}
+									&#xe001;{{ selectedAccount?.balance ?? balance ?? '0' | rai: 'nano,true' | amountsplit: 0 }}
 								</div>
 								<div class="amount-fractional">
-									{{ selectedAccount?.balance ?? balance ?? 0 | fiat | amountsplit: 1 }}
+									{{ selectedAccount?.balance ?? balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }}
 								</div>
+								@if (isBalanceUpdating && isConfigured) {
+									<div class="amount-updating">
+										<div uk-spinner="ratio: 0.5;"></div>
+									</div>
+								}
 							</div>
 						</div>
-					}
-				</ng-container>
-			} @else if (node.status !== false) {
-				<ng-template [ngTemplateOutlet]="balanceLoading"></ng-template>
-			}
+						@if (settings.displayCurrency) {
+							<div class="balance-container converted">
+								<div class="amount-container">
+									<span class="estimate-symbol">~</span>
+									<div class="amount-integer">
+										{{ selectedAccount?.balance ?? balance ?? 0 | fiat | amountsplit: 0 }}
+									</div>
+									<div class="amount-fractional">
+										{{ selectedAccount?.balance ?? balance ?? 0 | fiat | amountsplit: 1 }}
+									</div>
+								</div>
+							</div>
+						}
+					</ng-container>
+				} @else if (node.status !== false) {
+					<ng-template [ngTemplateOutlet]="balanceLoading"></ng-template>
+				}
+			</div>
 		</div>
 	</div>
 </div>

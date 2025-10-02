@@ -4,14 +4,10 @@
 	*transloco="let t"
 >
 	<div class="uk-width-1-1">
-		<h2 class="uk-heading-divider">
-			{{ 'configure-app.configure-gnault' | transloco }}
-		</h2>
+		<h2 class="uk-heading-divider">{{ t('configure-app.configure-gnault') }}</h2>
 		<div class="uk-card uk-card-default uk-margin">
 			<div class="uk-card-header">
-				<h3 class="uk-card-title">
-					{{ 'configure-app.display-settings' | transloco }}
-				</h3>
+				<h3 class="uk-card-title">{{ t('configure-app.display-settings') }}</h3>
 			</div>
 			<div class="uk-card-body">
 				<div uk-grid>
@@ -22,7 +18,7 @@
 									class="uk-form-label"
 									for="languageselector"
 								>
-									{{ 'configure-app.language' | transloco }}
+									{{ t('configure-app.language') }}
 								</label>
 								<div class="uk-form-controls">
 									<select
@@ -50,7 +46,7 @@
 									class="uk-form-label"
 									for="form-horizontal-select-fiat-currency"
 								>
-									{{ 'configure-app.fiat-currency' | transloco }}
+									{{ t('configure-app.fiat-currency') }}
 									<span
 										uk-icon="icon: info;"
 										uk-tooltip
@@ -111,7 +107,7 @@
 									class="uk-form-label"
 									for="form-horizontal-select-identicon-option"
 								>
-									{{ 'configure-app.identicons' | transloco }}
+									{{ t('configure-app.identicons') }}
 								</label>
 								<div class="uk-form-controls">
 									<select
@@ -134,9 +130,7 @@
 		</div>
 		<div class="uk-card uk-card-default uk-margin">
 			<div class="uk-card-header">
-				<h3 class="uk-card-title">
-					{{ 'configure-app.wallet-settings' | transloco }}
-				</h3>
+				<h3 class="uk-card-title">{{ t('configure-app.wallet-settings') }}</h3>
 			</div>
 			<div class="uk-card-body">
 				<div uk-grid>
@@ -144,7 +138,7 @@
 						<div class="uk-form-horizontal">
 							<div class="uk-margin">
 								<label class="uk-form-label">
-									{{ 'configure-app.lock-after-inactivity' | transloco }}
+									{{ t('configure-app.lock-after-inactivity') }}
 									<span
 										uk-icon="icon: info;"
 										uk-tooltip
@@ -172,7 +166,7 @@
 						<div class="uk-form-horizontal">
 							<div class="uk-margin">
 								<label class="uk-form-label">
-									{{ 'configure-app.component.wallet-storage' | transloco }}
+									{{ t('configure-app.component.wallet-storage') }}
 									<span
 										uk-icon="icon: info;"
 										uk-tooltip
@@ -200,7 +194,7 @@
 						<div class="uk-form-horizontal">
 							<div class="uk-margin">
 								<label class="uk-form-label">
-									{{ 'configure-app.pow-source' | transloco }}
+									{{ t('configure-app.pow-source') }}
 								</label>
 								<div class="uk-form-controls">
 									<div class="uk-inline uk-width-1-1">
@@ -224,7 +218,7 @@
 							@if (selectedPowSource() === 'custom') {
 								<div class="uk-margin">
 									<label class="uk-form-label">
-										{{ 'configure-app.work-server' | transloco }}
+										{{ t('configure-app.work-server') }}
 									</label>
 									<div class="uk-form-controls">
 										<input
@@ -234,15 +228,15 @@
 											placeholder="http://my-work-server:port"
 										/>
 										<span class="uk-text-meta">
-											{{ 'configure-app.this-has-to-be-a-valid-work.1' | transloco }}
+											{{ t('configure-app.this-has-to-be-a-valid-work.1') }}
 											<a
 												href="https://docs.nault.cc/2021/02/13/custom-work-server.html"
 												target="_blank"
 												rel="noopener noreferrer"
 											>
-												{{ 'configure-app.this-has-to-be-a-valid-work.2-link-work' | transloco }}
+												{{ t('configure-app.this-has-to-be-a-valid-work.2-link-work') }}
 											</a>
-											{{ 'configure-app.this-has-to-be-a-valid-work.3' | transloco }}
+											{{ t('configure-app.this-has-to-be-a-valid-work.3') }}
 										</span>
 									</div>
 								</div>
@@ -253,7 +247,7 @@
 						<div class="uk-form-horizontal">
 							<div class="uk-margin">
 								<label class="uk-form-label">
-									{{ 'configure-app.receive-method' | transloco }}
+									{{ t('configure-app.receive-method') }}
 									<span
 										uk-icon="icon: info;"
 										uk-tooltip
@@ -281,7 +275,7 @@
 						<div class="uk-form-horizontal">
 							<div class="uk-margin">
 								<label class="uk-form-label">
-									{{ 'configure-app.min-receive-amount' | transloco }}
+									{{ t('configure-app.min-receive-amount') }}
 									<span
 										uk-icon="icon: info;"
 										uk-tooltip
@@ -316,7 +310,7 @@
 						<div class="uk-form-horizontal">
 							<div class="uk-margin">
 								<label class="uk-form-label">
-									{{ 'configure-app.default-representative' | transloco }}
+									{{ t('configure-app.default-representative') }}
 									<span
 										uk-icon="icon: info;"
 										uk-tooltip
@@ -352,7 +346,7 @@
 											>
 												<ul class="uk-nav uk-nav-default">
 													<li class="uk-nav-header">
-														{{ 'representative-search.representative-list-results' | transloco }}
+														{{ t('representative-search.representative-list-results') }}
 													</li>
 													<li class="uk-nav-divider"></li>
 													@for (rep of representativeResults$ | async; track rep) {
@@ -372,7 +366,7 @@
 																		style="margin-left: 4px"
 																	>
 																		<span uk-icon="icon: warning;"></span>
-																		{{ 'general.avoid' | transloco }}
+																		{{ t('general.avoid') }}
 																	</span>
 																}
 															</a>
@@ -402,7 +396,7 @@
 					(click)="updateWalletSettings()"
 					class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
 				>
-					{{ 'configure-app.update-wallet-settings' | transloco }}
+					{{ t('configure-app.update-wallet-settings') }}
 				</button>
 			</div>
 		</div>
@@ -412,7 +406,7 @@
 				id="server-settings"
 			>
 				<h3 class="uk-card-title">
-					{{ 'configure-app.server-settings' | transloco }}
+					{{ t('configure-app.server-settings') }}
 				</h3>
 			</div>
 			<div class="uk-card-body">
@@ -424,7 +418,7 @@
 									class="uk-form-label"
 									for="form-horizontal-select-server"
 								>
-									{{ 'configure-app.server-configuration' | transloco }}
+									{{ t('configure-app.server-configuration') }}
 									<span
 										uk-icon="icon: info;"
 										uk-tooltip
@@ -453,7 +447,7 @@
 							<div class="uk-form-horizontal">
 								<div class="">
 									<label class="uk-form-label uk-text-right">
-										{{ 'configure-app.api-server' | transloco }}
+										{{ t('configure-app.api-server') }}
 										<span
 											uk-icon="icon: info;"
 											uk-tooltip
@@ -475,15 +469,15 @@
 													placeholder="https://domain.com/path"
 												/>
 												<span class="uk-text-meta">
-													{{ 'configure-app.this-has-to-be-a-valid-rpc.1' | transloco }}
+													{{ t('configure-app.this-has-to-be-a-valid-rpc.1') }}
 													<a
 														href="https://docs.nano.org/commands/rpc-protocol/"
 														target="_blank"
 														rel="noopener noreferrer"
 													>
-														{{ 'configure-app.this-has-to-be-a-valid-rpc.2-link-rpc' | transloco }}
+														{{ t('configure-app.this-has-to-be-a-valid-rpc.2-link-rpc') }}
 													</a>
-													{{ 'configure-app.this-has-to-be-a-valid-rpc.3' | transloco }}
+													{{ t('configure-app.this-has-to-be-a-valid-rpc.3') }}
 												</span>
 											</div>
 										}
@@ -497,7 +491,7 @@
 							<div class="uk-form-horizontal">
 								<div class="">
 									<label class="uk-form-label uk-text-right">
-										{{ 'configure-app.websocket-server' | transloco }}
+										{{ t('configure-app.websocket-server') }}
 										<span
 											uk-icon="icon: info;"
 											uk-tooltip
@@ -520,18 +514,16 @@
 													placeholder="wss://domain.com/path"
 												/>
 												<span class="uk-text-meta">
-													{{ 'configure-app.this-has-to-be-a-valid-websocket.1' | transloco }}
+													{{ t('configure-app.this-has-to-be-a-valid-websocket.1') }}
 													<a
 														href="https://docs.nano.org/integration-guides/websockets/#configuration"
 														target="_blank"
 														rel="noopener noreferrer"
 													>
-														{{ 'configure-app.this-has-to-be-a-valid-websocket.2-link-websocket' | transloco }}
+														{{ t('configure-app.this-has-to-be-a-valid-websocket.2-link-websocket') }}
 													</a>
-													{{ 'configure-app.this-has-to-be-a-valid-websocket.3' | transloco }}<br />
-													<i>{{
-														'configure-app.note-since-this-server-only-notifies-about-new-transactions' | transloco
-													}}</i>
+													{{ t('configure-app.this-has-to-be-a-valid-websocket.3') }}<br />
+													<i>{{ t('configure-app.note-since-this-server-only-notifies-about-new-transactions') }}</i>
 												</span>
 											</div>
 										}
@@ -545,7 +537,7 @@
 							<div class="uk-form-horizontal">
 								<div class="">
 									<label class="uk-form-label uk-text-right">
-										{{ 'configure-app.authorization' | transloco }}
+										{{ t('configure-app.authorization') }}
 										<span
 											uk-icon="icon: info;"
 											uk-tooltip
@@ -567,8 +559,8 @@
 													placeholder="Optional"
 												/>
 												<span class="uk-text-meta">
-													{{ 'configure-app.this-has-to-be-a-valid-authorization-header' | transloco }}<br />
-													<i>{{ 'configure-app.for-example-using-basic-auth' | transloco }}</i>
+													{{ t('configure-app.this-has-to-be-a-valid-authorization-header') }}<br />
+													<i>{{ t('configure-app.for-example-using-basic-auth') }}</i>
 												</span>
 											</div>
 										}
@@ -582,7 +574,7 @@
 							<div class="uk-form-horizontal">
 								<div>
 									<label class="uk-form-label uk-text-right">
-										{{ 'configure-app.node-stats' | transloco }}
+										{{ t('configure-app.node-stats') }}
 										<span
 											class="{{ statsRefreshEnabled ? '' : 'node-stats-disabled' }}"
 											id="node-stats"
@@ -598,15 +590,15 @@
 												<table id="node-stats-table">
 													<tr>
 														<td>
-															<strong>{{ 'general.server' | transloco }}</strong>
+															<strong>{{ t('general.server') }}</strong>
 														</td>
 														<td>
-															{{ serverAPIUpdated ? serverAPI : ('configure-app.save-settings-to-update' | transloco) }}
+															{{ serverAPIUpdated ? serverAPI : t('configure-app.save-settings-to-update') }}
 														</td>
 													</tr>
 													<tr>
 														<td>
-															<strong>{{ 'general.block-count' | transloco }}</strong>
+															<strong>{{ t('general.block-count') }}</strong>
 														</td>
 														<td>
 															{{ nodeBlockCount || 'N/A' }}
@@ -614,7 +606,7 @@
 													</tr>
 													<tr>
 														<td>
-															<strong>{{ 'general.uncemented-blocks' | transloco }}</strong>
+															<strong>{{ t('general.uncemented-blocks') }}</strong>
 														</td>
 														<td>
 															{{ nodeUncemented || 'N/A' }}
@@ -622,7 +614,7 @@
 													</tr>
 													<tr>
 														<td>
-															<strong>{{ 'general.peers-stake-required' | transloco }}</strong>
+															<strong>{{ t('general.peers-stake-required') }}</strong>
 														</td>
 														<td>
 															{{ peersStakeReq || 'N/A' }}
@@ -630,7 +622,7 @@
 													</tr>
 													<tr>
 														<td>
-															<strong>{{ 'general.peers-stake-total' | transloco }}</strong>
+															<strong>{{ t('general.peers-stake-total') }}</strong>
 														</td>
 														<td>
 															{{ peersStakeTotal || 'N/A' }}
@@ -638,7 +630,7 @@
 													</tr>
 													<tr>
 														<td>
-															<strong>{{ 'general.node-version' | transloco }}</strong>
+															<strong>{{ t('general.node-version') }}</strong>
 														</td>
 														<td>
 															{{ nodeVendor || 'N/A' }}
@@ -646,7 +638,7 @@
 													</tr>
 													<tr>
 														<td>
-															<strong>{{ 'general.network' | transloco }}</strong>
+															<strong>{{ t('general.network') }}</strong>
 														</td>
 														<td>
 															{{ nodeNetwork || 'N/A' }}
@@ -655,10 +647,10 @@
 													@if (showServerValues() && !showServerConfigs()) {
 														<tr>
 															<td>
-																<strong>{{ 'configure-app.random-server' | transloco }}</strong>
+																<strong>{{ t('configure-app.random-server') }}</strong>
 															</td>
 															<td>
-																{{ shouldRandom || ('general.no' | transloco) }}
+																{{ shouldRandom || t('general.no') }}
 															</td>
 														</tr>
 													}
@@ -677,15 +669,13 @@
 					(click)="updateServerSettings()"
 					class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
 				>
-					{{ 'configure-app.update-server-settings' | transloco }}
+					{{ t('configure-app.update-server-settings') }}
 				</button>
 			</div>
 		</div>
 		<div class="uk-card uk-card-default uk-margin">
 			<div class="uk-card-header">
-				<h3 class="uk-card-title">
-					{{ 'configure-app.advanced-options' | transloco }}
-				</h3>
+				<h3 class="uk-card-title">{{ t('configure-app.advanced-options') }}</h3>
 			</div>
 			<div class="uk-card-body uk-text-center">
 				<div uk-grid>
@@ -696,7 +686,7 @@
 							uk-tooltip
 							[title]="t('configure-app.this-will-delete-all-locally-cached-proof-of-work-values')"
 						>
-							{{ 'configure-app.clear-work-cache' | transloco }}
+							{{ t('configure-app.clear-work-cache') }}
 						</button>
 					</div>
 					<div class="uk-width-1-3@m">
@@ -706,7 +696,7 @@
 							uk-tooltip
 							[title]="t('configure-app.this-will-delete-all-data-related-to-your-wallet-your-seed-a')"
 						>
-							{{ 'configure-app.delete-wallet-data' | transloco }}
+							{{ t('configure-app.delete-wallet-data') }}
 						</button>
 					</div>
 					<div class="uk-width-1-3@m">
@@ -716,7 +706,7 @@
 							uk-tooltip
 							[title]="t('configure-app.this-will-delete-all-stored-data-and-reset-app-settings-incl')"
 						>
-							{{ 'configure-app.delete-all-data' | transloco }}
+							{{ t('configure-app.delete-all-data') }}
 						</button>
 					</div>
 				</div>

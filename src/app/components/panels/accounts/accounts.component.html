@@ -1,6 +1,7 @@
 <div
 	class="uk-animation-slide-left-small"
 	uk-grid
+	*transloco="let t"
 >
 	<div class="uk-width-1-1">
 		<div
@@ -9,17 +10,13 @@
 		>
 			<div class="uk-width-expand@s uk-width-1-1">
 				<h2 class="uk-heading-divider uk-text-truncate">
-					{{ 'nav.accounts' | transloco }}
+					{{ t('nav.accounts') }}
 					<a
 						(click)="viewAdvanced = !viewAdvanced"
 						class="uk-text-truncate"
 						style="font-size: 12px; margin-left: 25px"
 					>
-						{{
-							viewAdvanced
-								? ('general.simple-mode' | transloco | uppercase)
-								: ('general.advanced-mode' | transloco | uppercase)
-						}}
+						{{ t(viewAdvanced ? 'general.simple-mode' : 'general.advanced-mode') | uppercase }}
 					</a>
 				</h2>
 			</div>
@@ -43,7 +40,7 @@
 							class="uk-button uk-button-secondary uk-width-1-1@m"
 							(click)="createAccount()"
 						>
-							{{ 'accounts.add-new-account' | transloco }}
+							{{ t('accounts.add-new-account') }}
 						</button>
 					</div>
 				</div>
@@ -58,13 +55,13 @@
 							class="account-column uk-width-3-5@m uk-width-1-2"
 							[class.identicons-enabled]="identiconsStyle !== 'none'"
 						>
-							{{ 'general.account' | transloco }}
+							{{ t('general.account') }}
 						</th>
 						<th
 							scope="col"
 							class="account-amounts-column uk-width-1-5@m uk-width-1-4 uk-text-right"
 						>
-							{{ 'general.balance' | transloco }}
+							{{ t('general.balance') }}
 						</th>
 						<th
 							scope="col"
@@ -88,7 +85,7 @@
 										@if (account.receivable > 0) {
 											<div class="incoming-label">
 												<div class="text-snippet">
-													{{ 'general.new' | transloco }}
+													{{ t('general.new') }}
 												</div>
 												<div class="text-full">
 													+{{ account?.receivable ?? 0 | rai: 'nano,true' | amountsplit: 0
@@ -123,7 +120,7 @@
 								<a
 									(click)="deleteAccount(account)"
 									class="icon-delete-account uk-text-danger"
-									[title]="'accounts.hide-account' | transloco"
+									[title]="t('accounts.hide-account')"
 									uk-tooltip
 									><span uk-icon="icon: close;"></span
 								></a>
@@ -138,7 +135,7 @@
 										uk-icon="icon: close;"
 										style="vertical-align: 1px"
 									></span
-									>{{ 'accounts.hide-account' | transloco | uppercase }}
+									>{{ t('accounts.hide-account') | uppercase }}
 								</button>
 							</ng-template>
 							<td
@@ -176,8 +173,8 @@
 															account.addressBookName
 																? account.addressBookName
 																: viewAdvanced
-																	? ('general.account' | transloco)
-																	: ('general.account' | transloco) + ' #' + account.index
+																	? t('general.account')
+																	: t('general.account') + ' #' + account.index
 														}}
 													</div>
 												</div>
@@ -198,7 +195,7 @@
 													[cbContent]="account.address"
 													(cbOnSuccess)="copied()"
 													uk-icon="icon: copy"
-													[title]="'general.copy' | transloco"
+													[title]="t('general.copy')"
 													uk-tooltip
 												></a>
 											</li>
@@ -206,7 +203,7 @@
 												<li>
 													<a
 														uk-icon="icon: commenting"
-														[title]="'accounts.confirm-address-on-ledger' | transloco"
+														[title]="t('accounts.confirm-address-on-ledger')"
 														(click)="showLedgerAddress(account)"
 														uk-tooltip
 													></a>
@@ -247,9 +244,9 @@
 								colspan="4"
 								style="text-align: center"
 							>
-								{{ 'accounts.you-dont-have-any-accounts-yet.1' | transloco }}
-								<a (click)="createAccount()">{{ 'accounts.you-dont-have-any-accounts-yet.2-link' | transloco }}</a>
-								{{ 'accounts.you-dont-have-any-accounts-yet.3' | transloco }}
+								{{ t('accounts.you-dont-have-any-accounts-yet.1') }}
+								<a (click)="createAccount()">{{ t('accounts.you-dont-have-any-accounts-yet.2-link') }}</a>
+								{{ t('accounts.you-dont-have-any-accounts-yet.3') }}
 							</td>
 						</tr>
 					}
@@ -262,13 +259,14 @@
 							colspan="4"
 							style="text-align: center"
 						>
-							<span uk-icon="icon: info"></span>{{ 'accounts.missing-accounts.1' | transloco }}
+							<span uk-icon="icon: info"></span>
+							{{ t('accounts.missing-accounts.1') }}
 							<a
 								class="hint-action"
 								(click)="createAccount()"
-								>{{ 'accounts.missing-accounts.2-link' | transloco }}</a
+								>{{ t('accounts.missing-accounts.2-link') }}</a
 							>
-							{{ 'accounts.missing-accounts.3' | transloco }}
+							{{ t('accounts.missing-accounts.3') }}
 						</td>
 					</tr>
 				</thead>

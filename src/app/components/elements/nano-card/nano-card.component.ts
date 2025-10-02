@@ -9,7 +9,7 @@ import {
 } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
-import { TranslocoPipe } from '@jsverse/transloco'
+import { TranslocoDirective } from '@jsverse/transloco'
 import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AppSettingsService,
@@ -28,7 +28,7 @@ import { Wallet } from 'libnemo'
 		FormsModule,
 		RaiPipe,
 		RouterLink,
-		TranslocoPipe,
+		TranslocoDirective,
 	],
 })
 export class NanoCardComponent {

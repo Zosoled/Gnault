@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import {
 	NotificationsService,
 	QrModalService,
@@ -28,7 +28,7 @@ const INDEX_MAX = 4294967295
 	selector: 'app-configure-wallet',
 	templateUrl: './configure-wallet.component.html',
 	styleUrls: ['./configure-wallet.component.css'],
-	imports: [ClipboardModule, FormsModule, RouterLink, TranslocoPipe],
+	imports: [ClipboardModule, FormsModule, RouterLink, TranslocoDirective],
 })
 export class ConfigureWalletComponent {
 	private router = inject(Router)

@@ -1,13 +1,13 @@
 import { AfterViewInit, Component, ElementRef, ViewChild, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import { NotificationsService, WalletService } from 'app/services'
 
 @Component({
 	selector: 'app-set-password-dialog',
 	templateUrl: './set-password-dialog.component.html',
 	styleUrls: ['./set-password-dialog.component.css'],
-	imports: [FormsModule, TranslocoPipe],
+	imports: [FormsModule, TranslocoDirective],
 })
 export class SetPasswordDialogComponent implements AfterViewInit {
 	private svcNotifications = inject(NotificationsService)

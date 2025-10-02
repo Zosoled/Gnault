@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common'
 import { Component, OnInit, ViewChild, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ActivatedRoute } from '@angular/router'
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import { NanoAccountIdComponent } from 'app/components/elements'
 import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
 import {
@@ -23,7 +23,7 @@ import { BehaviorSubject } from 'rxjs'
 	selector: 'app-representatives',
 	templateUrl: './representatives.component.html',
 	styleUrls: ['./representatives.component.css'],
-	imports: [AmountSplitPipe, CommonModule, FormsModule, NanoAccountIdComponent, RaiPipe, SqueezePipe, TranslocoPipe],
+	imports: [AmountSplitPipe, CommonModule, FormsModule, NanoAccountIdComponent, RaiPipe, SqueezePipe, TranslocoDirective],
 })
 export class RepresentativesComponent implements OnInit {
 	private router = inject(ActivatedRoute)

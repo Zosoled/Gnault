@@ -1,213 +1,202 @@
-@if (displayedRepresentatives.length > 0) {
-	<div class="nav-representative-info">
-		@for (rep of displayedRepresentatives; let repIdx = $index; track repIdx) {
-			<div
-				class="representative"
-				(mouseover)="showRepHelp = rep.address"
-				(mouseout)="showRepHelp = null"
-			>
-				<h2>
-					{{
-						repIdx === 0
-							? ('general.representative' | transloco)
-							: ('change-rep-widget.representative-for-account'
-								| transloco
-									: {
-											account: rep.accounts[0]?.addressBookName
-												? '"' + rep.accounts[0]?.addressBookName + '"'
-												: rep.accounts[0]?.id.slice(0, 10) + '...',
-									  })
-					}}
-				</h2>
-				<div class="representative-name-row">
-					<a
-						(click)="showRepSelectionForSpecificRep(rep)"
-						class="name"
-						>{{ rep.label || ('change-rep-widget.unknown-rep' | transloco) }}</a
-					>
-					@if (rep.percent > 0) {
-						<div class="weight-total">{{ rep.percent.toFixed(2) }}%</div>
-					}
-				</div>
-				@switch (true) {
-					@case (rep.statusText == 'trusted') {
-						<div class="representative-health-row health-green">
-							<div class="health-icon"></div>
-							<div class="label">{{ 'change-rep-widget.good-representative' | transloco }}</div>
-						</div>
-					}
-					@case (rep.statusText == 'ok') {
-						<div class="representative-health-row health-green">
-							<div class="health-icon"></div>
-							<div class="label">{{ 'change-rep-widget.good-representative' | transloco }}</div>
-						</div>
-					}
-					@case (rep.statusText == 'warn') {
-						<div class="representative-health-row health-yellow">
-							<div class="health-icon"></div>
-							<div class="label">{{ 'change-rep-widget.acceptable-representative' | transloco }}</div>
-						</div>
-					}
-					@case (rep.statusText == 'alert') {
-						<div class="representative-health-row health-red">
-							<div class="health-icon"></div>
-							<div class="label">{{ 'change-rep-widget.bad-representative' | transloco }}</div>
-						</div>
-					}
-					@default {
-						<div class="representative-health-row health-unknown">
-							<div class="health-icon"></div>
-							<div class="label">{{ 'change-rep-widget.unknown-status' | transloco }}</div>
-						</div>
-					}
-				}
-				<div [class]="['representative-help-tooltip', showRepHelp == rep.address ? 'visible' : 'hidden']">
-					<p class="primary">
+<div *transloco="let t">
+	@if (displayedRepresentatives.length > 0) {
+		<div class="nav-representative-info">
+			@for (rep of displayedRepresentatives; let repIdx = $index; track repIdx) {
+				<div
+					class="representative"
+					(mouseover)="showRepHelp = rep.address"
+					(mouseout)="showRepHelp = null"
+				>
+					<h2>
 						{{
-							'change-rep-widget.rep-represents-you'
-								| transloco: { name: rep.label || ('change-rep-widget.unknown-rep' | transloco) }
+							repIdx === 0
+								? t('general.representative')
+								: t('change-rep-widget.representative-for-account', {
+										account: rep.accounts[0]?.addressBookName
+											? '"' + rep.accounts[0]?.addressBookName + '"'
+											: rep.accounts[0]?.id.slice(0, 10) + '...',
+									})
 						}}
-					</p>
-					<p>{{ 'change-rep-widget.you-can-change-representative-at-any-time' | transloco }}</p>
-					<div class="header-row">
-						<div class="separator"></div>
-						<h2>{{ 'change-rep-widget.health' | transloco }}</h2>
-						<div class="separator"></div>
+					</h2>
+					<div class="representative-name-row">
+						<a
+							(click)="showRepSelectionForSpecificRep(rep)"
+							class="name"
+							>{{ rep.label || t('change-rep-widget.unknown-rep') }}</a
+						>
+						@if (rep.percent > 0) {
+							<div class="weight-total">{{ rep.percent.toFixed(2) }}%</div>
+						}
 					</div>
-					@if (rep.status.markedToAvoid) {
-						<p class="uk-text-danger">
-							<span uk-icon="icon: warning;"></span
-							>{{ 'change-rep-widget.this-representative-is-marked-as-avoid' | transloco }}
-						</p>
-					}
-					@if (rep.status.markedAsNF) {
-						<p class="uk-text-danger">
-							<span uk-icon="icon: warning;"></span
-							>{{ 'change-rep-widget.this-representative-is-marked-as-nf' | transloco }}
-						</p>
-					}
-					@if (rep.status.closing) {
-						<p class="uk-text-danger">
-							<span uk-icon="icon: warning;"></span
-							>{{ 'change-rep-widget.this-representative-has-announced-plans-to-permanently-shutdown' | transloco }}
-						</p>
-					}
-					@if (rep.status.veryHighWeight) {
-						<p class="uk-text-danger">
-							<span uk-icon="icon: warning;"></span
-							>{{ 'change-rep-widget.this-representative-has-a-very-high-voting-weight' | transloco: { percent: 3 } }}
-						</p>
-					}
-					@if (rep.status.highWeight) {
-						<p class="uk-text-warning">
-							<span uk-icon="icon: warning;"></span
-							>{{ 'change-rep-widget.this-representative-has-a-high-voting-weight' | transloco: { percent: 2 } }}
-						</p>
-					}
-					@if (rep.status.veryLowUptime && rep.status.uptime > 0) {
-						<p class="uk-text-danger">
-							<span uk-icon="icon: warning;"></span
-							>{{
-								'change-rep-widget.this-representative-is-often-offline'
-									| transloco: { percent: rep.status.uptime.toFixed(1) }
-							}}
-						</p>
-					}
-					@if (rep.status.lowUptime && rep.status.uptime > 0) {
-						<p class="uk-text-warning">
-							<span uk-icon="icon: warning;"></span
-							>{{
-								'change-rep-widget.this-representative-is-sometimes-offline'
-									| transloco: { percent: rep.status.uptime.toFixed(1) }
-							}}
-						</p>
-					}
-					@if (!rep.status.online && rep.status.uptime === 0) {
-						<p class="uk-text-danger">
-							<span uk-icon="icon: warning;"></span
-							>{{
-								'change-rep-widget.this-representative-has-been-offline-for-the-past-days'
-									| transloco: { days: rep.status.daysSinceLastVoted }
-							}}
-						</p>
-					}
-					@switch (rep.statusText) {
-						@case ('trusted') {
-							<p>
-								{{ 'change-rep-widget.you-have-marked-this-representative-as-trusted' | transloco }}
-							</p>
+					@switch (true) {
+						@case (rep.statusText == 'trusted') {
+							<div class="representative-health-row health-green">
+								<div class="health-icon"></div>
+								<div class="label">{{ t('change-rep-widget.good-representative') }}</div>
+							</div>
 						}
-						@case ('ok') {
-							<p class="uk-text-success">
-								<span uk-icon="icon: check;"></span
-								>{{ 'change-rep-widget.we-found-no-issues-with-uptime-or-weight' | transloco }}
-							</p>
+						@case (rep.statusText == 'ok') {
+							<div class="representative-health-row health-green">
+								<div class="health-icon"></div>
+								<div class="label">{{ t('change-rep-widget.good-representative') }}</div>
+							</div>
 						}
-						@case ('warn') {
-							<p>
-								{{ 'change-rep-widget.switching-to-a-different-representative-could-improve' | transloco }}
-							</p>
+						@case (rep.statusText == 'warn') {
+							<div class="representative-health-row health-yellow">
+								<div class="health-icon"></div>
+								<div class="label">{{ t('change-rep-widget.acceptable-representative') }}</div>
+							</div>
 						}
-						@case ('alert') {
-							<p>
-								{{ 'change-rep-widget.it-is-highly-advised-to-switch-to-a-different-representative' | transloco }}
-							</p>
+						@case (rep.statusText == 'alert') {
+							<div class="representative-health-row health-red">
+								<div class="health-icon"></div>
+								<div class="label">{{ t('change-rep-widget.bad-representative') }}</div>
+							</div>
 						}
 						@default {
-							<p>
-								<span uk-icon="icon: question;"></span
-								>{{ 'change-rep-widget.we-could-not-determine-status-of-this-representative' | transloco }}
-							</p>
+							<div class="representative-health-row health-unknown">
+								<div class="health-icon"></div>
+								<div class="label">{{ t('change-rep-widget.unknown-status') }}</div>
+							</div>
 						}
 					}
+					<div [class]="['representative-help-tooltip', showRepHelp == rep.address ? 'visible' : 'hidden']">
+						<p class="primary">
+							{{ t('change-rep-widget.rep-represents-you', { name: rep.label ?? t('change-rep-widget.unknown-rep') }) }}
+						</p>
+						<p>{{ t('change-rep-widget.you-can-change-representative-at-any-time') }}</p>
+						<div class="header-row">
+							<div class="separator"></div>
+							<h2>{{ t('change-rep-widget.health') }}</h2>
+							<div class="separator"></div>
+						</div>
+						@if (rep.status.markedToAvoid) {
+							<p class="uk-text-danger">
+								<span uk-icon="icon: warning;"></span
+								>{{ t('change-rep-widget.this-representative-is-marked-as-avoid') }}
+							</p>
+						}
+						@if (rep.status.markedAsNF) {
+							<p class="uk-text-danger">
+								<span uk-icon="icon: warning;"></span>{{ t('change-rep-widget.this-representative-is-marked-as-nf') }}
+							</p>
+						}
+						@if (rep.status.closing) {
+							<p class="uk-text-danger">
+								<span uk-icon="icon: warning;"></span
+								>{{ t('change-rep-widget.this-representative-has-announced-plans-to-permanently-shutdown') }}
+							</p>
+						}
+						@if (rep.status.veryHighWeight) {
+							<p class="uk-text-danger">
+								<span uk-icon="icon: warning;"></span
+								>{{ t('change-rep-widget.this-representative-has-a-very-high-voting-weight', { percent: 3 }) }}
+							</p>
+						}
+						@if (rep.status.highWeight) {
+							<p class="uk-text-warning">
+								<span uk-icon="icon: warning;"></span
+								>{{ t('change-rep-widget.this-representative-has-a-high-voting-weight', { percent: 2 }) }}
+							</p>
+						}
+						@if (rep.status.veryLowUptime && rep.status.uptime > 0) {
+							<p class="uk-text-danger">
+								<span uk-icon="icon: warning;"></span
+								>{{
+									t('change-rep-widget.this-representative-is-often-offline', { percent: rep.status.uptime.toFixed(1) })
+								}}
+							</p>
+						}
+						@if (rep.status.lowUptime && rep.status.uptime > 0) {
+							<p class="uk-text-warning">
+								<span uk-icon="icon: warning;"></span
+								>{{
+									t('change-rep-widget.this-representative-is-sometimes-offline', {
+										percent: rep.status.uptime.toFixed(1),
+									})
+								}}
+							</p>
+						}
+						@if (!rep.status.online && rep.status.uptime === 0) {
+							<p class="uk-text-danger">
+								<span uk-icon="icon: warning;"></span
+								>{{
+									t('change-rep-widget.this-representative-has-been-offline-for-the-past-days', {
+										days: rep.status.daysSinceLastVoted,
+									})
+								}}
+							</p>
+						}
+						@switch (rep.statusText) {
+							@case ('trusted') {
+								<p>{{ t('change-rep-widget.you-have-marked-this-representative-as-trusted') }}</p>
+							}
+							@case ('ok') {
+								<p class="uk-text-success">
+									<span uk-icon="icon: check;"></span
+									>{{ t('change-rep-widget.we-found-no-issues-with-uptime-or-weight') }}
+								</p>
+							}
+							@case ('warn') {
+								<p>{{ t('change-rep-widget.switching-to-a-different-representative-could-improve') }}</p>
+							}
+							@case ('alert') {
+								<p>{{ t('change-rep-widget.it-is-highly-advised-to-switch-to-a-different-representative') }}</p>
+							}
+							@default {
+								<p>
+									<span uk-icon="icon: question;"></span
+									>{{ t('change-rep-widget.we-could-not-determine-status-of-this-representative') }}
+								</p>
+							}
+						}
+					</div>
 				</div>
-			</div>
-		}
-	</div>
-} @else if (!initialLoadComplete || selectedAccountHasRepresentative) {
-	<div class="nav-representative-info">
-		<div class="representative">
-			<h2>{{ 'general.representative' | transloco }}</h2>
-			<div class="representative-name-row">
-				<div class="name no-interact">{{ 'general.loading' | transloco }}</div>
-			</div>
-			<div class="representative-health-row health-unknown health-loading">
-				<div uk-spinner="ratio: 0.5;"></div>
-				<div class="label">{{ 'change-rep-widget.checking-status' | transloco }}</div>
-			</div>
+			}
 		</div>
-	</div>
-} @else {
-	<ng-template #selectedAccountHasNoRep>
+	} @else if (!initialLoadComplete || selectedAccountHasRepresentative) {
 		<div class="nav-representative-info">
 			<div class="representative">
-				<h2>{{ 'general.representative' | transloco }}</h2>
+				<h2>{{ t('general.representative') }}</h2>
 				<div class="representative-name-row">
-					<div class="name no-interact">{{ 'change-rep-widget.representative-none' | transloco }}</div>
+					<div class="name no-interact">{{ t('general.loading') }}</div>
 				</div>
-				<div class="representative-health-row health-unknown">
-					<div class="health-icon"></div>
-					<div class="label">{{ 'change-rep-widget.receive-a-transaction-to-configure' | transloco }}</div>
+				<div class="representative-health-row health-unknown health-loading">
+					<div uk-spinner="ratio: 0.5;"></div>
+					<div class="label">{{ t('change-rep-widget.checking-status') }}</div>
 				</div>
 			</div>
 		</div>
-	</ng-template>
-}
-@if (showRepChangeRequired) {
-	<div
-		class="nav-status-row interactable uk-animation-slide-left"
-		(click)="showRepSelectionForAllChangeableReps()"
-	>
-		<div class="status-icon">
-			<span
-				class="uk-text-warning"
-				uk-icon="icon: warning; ratio: 1.2;"
-			></span>
-		</div>
-		<div class="status-labels">
-			<div class="label primary uk-text-warning">
-				{{ 'change-rep-widget.representative-change-required' | transloco }}
+	} @else {
+		<ng-template #selectedAccountHasNoRep>
+			<div class="nav-representative-info">
+				<div class="representative">
+					<h2>{{ t('general.representative') }}</h2>
+					<div class="representative-name-row">
+						<div class="name no-interact">{{ t('change-rep-widget.representative-none') }}</div>
+					</div>
+					<div class="representative-health-row health-unknown">
+						<div class="health-icon"></div>
+						<div class="label">{{ t('change-rep-widget.receive-a-transaction-to-configure') }}</div>
+					</div>
+				</div>
+			</div>
+		</ng-template>
+	}
+	@if (showRepChangeRequired) {
+		<div
+			class="nav-status-row interactable uk-animation-slide-left"
+			(click)="showRepSelectionForAllChangeableReps()"
+		>
+			<div class="status-icon">
+				<span
+					class="uk-text-warning"
+					uk-icon="icon: warning; ratio: 1.2;"
+				></span>
+			</div>
+			<div class="status-labels">
+				<div class="label primary uk-text-warning">{{ t('change-rep-widget.representative-change-required') }}</div>
 			</div>
 		</div>
-	</div>
-}
+	}
+</div>

@@ -1,147 +1,145 @@
-@if (isLedger) {
-	<div>
-		@if (ledgerStatus === 'DISCONNECTED') {
-			<div class="nav-status-row">
-				<div class="status-icon">
-					<span
-						class="uk-text-warning"
-						uk-icon="icon: warning; ratio: 1.2;"
-					></span>
-				</div>
-				<div class="status-labels">
-					<div class="label primary uk-text-warning">Ledger disconnected</div>
-					<div class="label secondary">
-						<a (click)="reloadLedger()">Reconnect</a> or
-						<a
-							href="https://docs.nault.cc/2020/08/04/ledger-guide.html#troubleshooting"
-							target="_blank"
-							rel="noopener noreferrer"
-							>view Troubleshooting Guide</a
-						>
+<div *transloco="let t">
+	@if (isLedger) {
+		<div>
+			@if (ledgerStatus === 'DISCONNECTED') {
+				<div class="nav-status-row">
+					<div class="status-icon">
+						<span
+							class="uk-text-warning"
+							uk-icon="icon: warning; ratio: 1.2;"
+						></span>
+					</div>
+					<div class="status-labels">
+						<div class="label primary uk-text-warning">Ledger disconnected</div>
+						<div class="label secondary">
+							<a (click)="reloadLedger()">Reconnect</a> or
+							<a
+								href="https://docs.nault.cc/2020/08/04/ledger-guide.html#troubleshooting"
+								target="_blank"
+								rel="noopener noreferrer"
+								>view Troubleshooting Guide</a
+							>
+						</div>
 					</div>
 				</div>
-			</div>
-		}
-		@if (ledgerStatus === 'BUSY') {
-			<div class="nav-status-row">
-				<div class="status-icon">
-					<span
-						class="uk-text-warning"
-						uk-icon="icon: warning; ratio: 1.2;"
-					></span>
-				</div>
-				<div class="status-labels">
-					<div class="label primary uk-text-warning">Ledger busy</div>
-					<div class="label secondary">Open the Nano app on the device</div>
-				</div>
-			</div>
-		}
-		@if (ledgerStatus === 'LOCKED') {
-			<div class="nav-status-row">
-				<div class="status-icon">
-					<span
-						class="uk-text-warning"
-						uk-icon="icon: warning; ratio: 1.2;"
-					></span>
-				</div>
-				<div class="status-labels">
-					<div class="label primary uk-text-warning">Ledger locked</div>
-					<div class="label secondary">
-						Unlock the device, then <a (click)="reloadLedger()">click here</a> to reconnect
+			}
+			@if (ledgerStatus === 'BUSY') {
+				<div class="nav-status-row">
+					<div class="status-icon">
+						<span
+							class="uk-text-warning"
+							uk-icon="icon: warning; ratio: 1.2;"
+						></span>
+					</div>
+					<div class="status-labels">
+						<div class="label primary uk-text-warning">Ledger busy</div>
+						<div class="label secondary">Open the Nano app on the device</div>
 					</div>
 				</div>
+			}
+			@if (ledgerStatus === 'LOCKED') {
+				<div class="nav-status-row">
+					<div class="status-icon">
+						<span
+							class="uk-text-warning"
+							uk-icon="icon: warning; ratio: 1.2;"
+						></span>
+					</div>
+					<div class="status-labels">
+						<div class="label primary uk-text-warning">Ledger locked</div>
+						<div class="label secondary">
+							Unlock the device, then <a (click)="reloadLedger()">click here</a> to reconnect
+						</div>
+					</div>
+				</div>
+			}
+			@if (ledgerStatus === 'CONNECTED') {
+				<div
+					class="nav-status-row interactable"
+					(click)="reloadLedger()"
+				>
+					<div class="status-icon">
+						<span
+							class="uk-text-success"
+							uk-icon="icon: bolt; ratio: 1.2;"
+						></span>
+					</div>
+					<div class="status-labels">
+						<div class="label primary uk-text-success">Ledger Ready</div>
+					</div>
+				</div>
+			}
+		</div>
+	}
+	@if (powAlert()) {
+		<div class="nav-status-row">
+			<div class="status-icon">
+				<span
+					class="uk-text-warning"
+					uk-icon="icon: warning; ratio: 1.2;"
+				></span>
 			</div>
-		}
-		@if (ledgerStatus === 'CONNECTED') {
+			<div class="status-labels">
+				<div class="label primary uk-text-warning">Proof of Work is taking a while...</div>
+				<div class="label secondary">
+					<a
+						routerLink="/configure-app"
+						routerLinkActive="active"
+						>Change PoW method</a
+					>
+					or <a (click)="cancelPow()">cancel PoW</a>
+				</div>
+			</div>
+		</div>
+	}
+	@if (isConfigured && !isLedger) {
+		@if (isLocked) {
 			<div
-				class="nav-status-row interactable"
-				(click)="reloadLedger()"
+				class="nav-status-row half-muted interactable"
+				(click)="requestUnlock()"
 			>
 				<div class="status-icon">
 					<span
-						class="uk-text-success"
-						uk-icon="icon: bolt; ratio: 1.2;"
+						uk-icon="icon: lock; ratio: 1.2;"
+						class="uk-text-top"
 					></span>
 				</div>
 				<div class="status-labels">
-					<div class="label primary uk-text-success">Ledger Ready</div>
+					<div class="label primary half-muted">{{ t('accounts.wallet-locked') }}</div>
 				</div>
 			</div>
 		}
-	</div>
-}
-@if (powAlert()) {
-	<div class="nav-status-row">
-		<div class="status-icon">
-			<span
-				class="uk-text-warning"
-				uk-icon="icon: warning; ratio: 1.2;"
-			></span>
-		</div>
-		<div class="status-labels">
-			<div class="label primary uk-text-warning">Proof of Work is taking a while...</div>
-			<div class="label secondary">
-				<a
-					routerLink="/configure-app"
-					routerLinkActive="active"
-					>Change PoW method</a
-				>
-				or <a (click)="cancelPow()">cancel PoW</a>
-			</div>
-		</div>
-	</div>
-}
-@if (isConfigured && !isLedger) {
-	@if (isLocked) {
-		<div
-			class="nav-status-row half-muted interactable"
-			(click)="requestUnlock()"
-		>
-			<div class="status-icon">
-				<span
-					uk-icon="icon: lock; ratio: 1.2;"
-					class="uk-text-top"
-				></span>
-			</div>
-			<div class="status-labels">
-				<div class="label primary half-muted">
-					{{ 'accounts.wallet-locked' | transloco }}
+		@if (!isLocked) {
+			<div
+				class="nav-status-row half-muted interactable"
+				(click)="lockWallet()"
+			>
+				<div class="status-icon">
+					<span
+						uk-icon="icon: unlock; ratio: 1.2;"
+						class="uk-text-top"
+					></span>
+				</div>
+				<div class="status-labels">
+					<div class="label primary half-muted">{{ t('accounts.wallet-unlocked') }}</div>
 				</div>
 			</div>
-		</div>
+		}
 	}
-	@if (!isLocked) {
-		<div
-			class="nav-status-row half-muted interactable"
-			(click)="lockWallet()"
+	@if (!isConfigured) {
+		<a
+			[routerLink]="['/configure-wallet']"
+			class="nav-status-row interactable"
 		>
 			<div class="status-icon">
 				<span
-					uk-icon="icon: unlock; ratio: 1.2;"
-					class="uk-text-top"
+					class="uk-text-warning"
+					uk-icon="icon: warning; ratio: 1.2;"
 				></span>
 			</div>
 			<div class="status-labels">
-				<div class="label primary half-muted">{{ 'accounts.wallet-unlocked' | transloco }}</div>
+				<div class="label primary uk-text-warning">{{ t('configure-wallet.new-wallet.configure-new-wallet') }}</div>
 			</div>
-		</div>
+		</a>
 	}
-}
-@if (!isConfigured) {
-	<a
-		[routerLink]="['/configure-wallet']"
-		class="nav-status-row interactable"
-	>
-		<div class="status-icon">
-			<span
-				class="uk-text-warning"
-				uk-icon="icon: warning; ratio: 1.2;"
-			></span>
-		</div>
-		<div class="status-labels">
-			<div class="label primary uk-text-warning">
-				{{ 'configure-wallet.new-wallet.configure-new-wallet' | transloco }}
-			</div>
-		</div>
-	</a>
-}
+</div>

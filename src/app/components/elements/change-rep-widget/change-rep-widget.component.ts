@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core'
 import { Router } from '@angular/router'
-import { TranslocoPipe } from '@jsverse/transloco'
+import { TranslocoDirective } from '@jsverse/transloco'
 import { NanoBlockService, RepresentativeService, WalletService } from 'app/services'
 import { Account } from 'libnemo'
 
@@ -8,7 +8,7 @@ import { Account } from 'libnemo'
 	selector: 'app-change-rep-widget',
 	templateUrl: './change-rep-widget.component.html',
 	styleUrls: ['./change-rep-widget.component.css'],
-	imports: [TranslocoPipe],
+	imports: [TranslocoDirective],
 })
 export class ChangeRepWidgetComponent implements OnInit {
 	private router = inject(Router)

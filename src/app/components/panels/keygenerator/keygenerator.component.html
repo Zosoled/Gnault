@@ -1,4 +1,7 @@
-<div uk-grid>
+<div
+	uk-grid
+	*transloco="let t"
+>
 	<div class="uk-width-1-1">
 		<h2>Keypair Generator</h2>
 		<div class="uk-card uk-card-default">
@@ -50,7 +53,7 @@
 			<div class="uk-card-body">
 				<div uk-grid>
 					<div class="uk-width-1-4@m">
-						{{ 'configure-wallet.new-wallet.secret-recovery-seed' | transloco }}
+						{{ t('configure-wallet.new-wallet.secret-recovery-seed') }}
 						<span
 							uk-icon="icon: info;"
 							uk-tooltip
@@ -67,13 +70,13 @@
 									{{ seed }}
 								</div>
 								<a
-									[title]="'configure-wallet.new-wallet.copy-secret-recovery-seed' | transloco"
+									[title]="t('configure-wallet.new-wallet.copy-secret-recovery-seed')"
 									ngxClipboard
 									[cbContent]="seed"
 									(cbOnSuccess)="copied()"
 									uk-tooltip
 								>
-									{{ 'configure-wallet.new-wallet.copy-secret-recovery-seed' | transloco }}
+									{{ t('configure-wallet.new-wallet.copy-secret-recovery-seed') }}
 								</a>
 							</div>
 						}
@@ -82,7 +85,7 @@
 				<hr class="uk-divider-icon" />
 				<div uk-grid>
 					<div class="uk-width-1-4@m">
-						{{ 'configure-wallet.new-wallet.secret-recovery-mnemonic' | transloco }}
+						{{ t('configure-wallet.new-wallet.secret-recovery-mnemonic') }}
 						<span
 							uk-icon="icon: info;"
 							uk-tooltip
@@ -101,13 +104,13 @@
                 }</span>
               }</pre>
 								<a
-									[title]="'configure-wallet.new-wallet.copy-secret-recovery-mnemonic' | transloco"
+									[title]="t('configure-wallet.new-wallet.copy-secret-recovery-mnemonic')"
 									ngxClipboard
 									[cbContent]="mnemonic"
 									(cbOnSuccess)="copied()"
 									uk-tooltip
 								>
-									{{ 'configure-wallet.new-wallet.copy-secret-recovery-mnemonic' | transloco }}
+									{{ t('configure-wallet.new-wallet.copy-secret-recovery-mnemonic') }}
 								</a>
 							</div>
 						}

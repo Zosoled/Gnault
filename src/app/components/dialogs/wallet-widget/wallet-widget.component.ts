@@ -1,14 +1,14 @@
 import { Component, OnInit, inject, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import { NotificationsService, PowService, WalletService } from 'app/services'
 
 @Component({
 	selector: 'app-wallet-widget',
 	templateUrl: './wallet-widget.component.html',
 	styleUrls: ['./wallet-widget.component.css'],
-	imports: [FormsModule, RouterLink, TranslocoPipe],
+	imports: [FormsModule, RouterLink, TranslocoDirective],
 })
 export class WalletWidgetComponent implements OnInit {
 	private svcNotifications = inject(NotificationsService)

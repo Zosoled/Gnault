@@ -3,6 +3,7 @@
 		class="rounded-area transaction"
 		[class.interactable]="isInteractable"
 		[class.identicons-enabled]="settingIdenticonsStyle !== 'none'"
+		*transloco="let t"
 	>
 		<div
 			class="column type-identicon"
@@ -98,30 +99,32 @@
 			</ng-template>
 			@switch (true) {
 				@case (isReceivableTransaction) {
-					<div class="action">{{ 'general.blockactions.ready-to-receive' | transloco }}</div>
+					<div class="action">
+						{{ t('general.blockactions.ready-to-receive') }}
+					</div>
 				}
 				@case (isRepresentativeChange) {
 					<div class="action">
-						{{ 'general.blockactions.rep-change' | transloco
-						}}<ng-template [ngTemplateOutlet]="unconfirmedIcon"></ng-template>
+						{{ t('general.blockactions.rep-change') }}
+						<ng-template [ngTemplateOutlet]="unconfirmedIcon"></ng-template>
 					</div>
 				}
 				@case (isSendTransaction) {
 					<div class="action">
-						{{ 'general.blockactions.sent' | transloco
-						}}<ng-template [ngTemplateOutlet]="unconfirmedIcon"></ng-template>
+						{{ t('general.blockactions.sent') }}
+						<ng-template [ngTemplateOutlet]="unconfirmedIcon"></ng-template>
 					</div>
 				}
 				@case (isReceiveTransaction) {
 					<div class="action">
-						{{ 'general.blockactions.received' | transloco
-						}}<ng-template [ngTemplateOutlet]="unconfirmedIcon"></ng-template>
+						{{ t('general.blockactions.received') }}
+						<ng-template [ngTemplateOutlet]="unconfirmedIcon"></ng-template>
 					</div>
 				}
 				@default {
 					<div class="action">
-						{{ 'general.blockactions.unknown-action' | transloco
-						}}<ng-template [ngTemplateOutlet]="unconfirmedIcon"></ng-template>
+						{{ t('general.blockactions.unknown-action') }}
+						<ng-template [ngTemplateOutlet]="unconfirmedIcon"></ng-template>
 					</div>
 				}
 			}

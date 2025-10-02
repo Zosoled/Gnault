@@ -2,7 +2,7 @@ import { CommonModule, UpperCasePipe } from '@angular/common'
 import { AfterViewInit, Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
-import { TranslocoDirective, TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import { NanoAccountIdComponent } from 'app/components/elements'
 import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
@@ -39,7 +39,7 @@ export interface BalanceAccount {
 		RaiPipe,
 		RouterLink,
 		TranslocoDirective,
-		TranslocoPipe,
+		TranslocoDirective,
 		UpperCasePipe,
 	],
 })

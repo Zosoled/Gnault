@@ -2,7 +2,7 @@ import { CommonModule, DecimalPipe, formatDate } from '@angular/common'
 import { Component, computed, inject, OnDestroy, OnInit, signal, Signal, WritableSignal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, ChildActivationEnd, NavigationEnd, Router, RouterLink } from '@angular/router'
-import { translate, TranslocoPipe } from '@jsverse/transloco'
+import { translate, TranslocoDirective } from '@jsverse/transloco'
 import { NanoAccountIdComponent, NanoIdenticonComponent, NanoTransactionMobileComponent } from 'app/components/elements'
 import { AmountSplitPipe, CurrencySymbolPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
@@ -40,7 +40,7 @@ import { BehaviorSubject } from 'rxjs'
 		NanoTransactionMobileComponent,
 		RaiPipe,
 		RouterLink,
-		TranslocoPipe,
+		TranslocoDirective,
 	],
 })
 export class AccountDetailsComponent implements OnInit, OnDestroy {

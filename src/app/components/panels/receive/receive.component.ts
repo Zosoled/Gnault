@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common'
 import { Component, OnDestroy, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ChildActivationEnd, Router, RouterLink } from '@angular/router'
-import { TranslocoDirective, TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import {
 	NanoAccountIdComponent,
 	NanoIdenticonComponent,
@@ -45,7 +45,6 @@ import * as QRCode from 'qrcode'
 		RouterLink,
 		SqueezePipe,
 		TranslocoDirective,
-		TranslocoPipe
 	]
 })
 

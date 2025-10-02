@@ -3,6 +3,7 @@
 	class="modal-position-bottom"
 	id="unlock-wallet-dialog-component"
 	uk-modal
+	*transloco="let t"
 >
 	<div class="uk-modal-dialog">
 		<button
@@ -11,7 +12,7 @@
 			uk-close
 		></button>
 		<div class="uk-modal-header">
-			<h2 class="uk-modal-title">{{ 'general.unlock' | transloco }}</h2>
+			<h2 class="uk-modal-title">{{ t('general.unlock') }}</h2>
 		</div>
 		<form>
 			<div class="uk-modal-body">
@@ -37,8 +38,9 @@
 				@if (!isFocused && password.length > 0 && password.length < 6) {
 					<span class="password-hint">
 						{{
-							'configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long'
-								| transloco: { minLength: 6 }
+							t('configure-wallet.set-wallet-password.errors.password-must-be-at-least-x-characters-long', {
+								minLength: 6,
+							})
 						}}
 					</span>
 				}
@@ -48,7 +50,7 @@
 					class="uk-button uk-button-default uk-modal-close"
 					type="button"
 				>
-					{{ 'general.cancel' | transloco }}
+					{{ t('general.cancel') }}
 				</button>
 				<button
 					class="uk-button uk-button-primary"
@@ -56,7 +58,7 @@
 					(click)="unlock()"
 					[disabled]="password.length < 6"
 				>
-					{{ 'general.unlock' | transloco }}
+					{{ t('general.unlock') }}
 				</button>
 			</div>
 		</form>

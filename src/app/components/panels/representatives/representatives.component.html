@@ -1,6 +1,7 @@
 <div
 	class="uk-animation-slide-left-small"
 	uk-grid
+	*transloco="let t"
 >
 	<div class="uk-width-1-1">
 		<div
@@ -107,7 +108,7 @@
 											>
 												<div class="representative-label-container">
 													<div class="account-label rep">
-														{{ rep.label ? rep.label : ('change-rep-widget.unknown-rep' | transloco) }}
+														{{ rep.label ?? t('change-rep-widget.unknown-rep') }}
 													</div>
 													<div class="representative-weight-percentage uk-width-auto uk-flex-inline uk-flex-middle">
 														@if (!rep.percent.isZero()) {

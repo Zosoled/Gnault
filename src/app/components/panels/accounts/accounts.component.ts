@@ -2,7 +2,7 @@ import { CommonModule, UpperCasePipe } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/elements'
 import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
@@ -30,7 +30,7 @@ import { debounce } from 'rxjs/operators'
 		NanoIdenticonComponent,
 		RaiPipe,
 		RouterLink,
-		TranslocoPipe,
+		TranslocoDirective,
 		UpperCasePipe,
 	],
 })

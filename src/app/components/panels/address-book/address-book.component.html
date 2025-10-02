@@ -13,15 +13,13 @@
 		>
 			<div class="uk-width-expand@s uk-width-1-1">
 				<h2 class="uk-heading-divider uk-text-truncate">
-					{{ 'general.address-book' | transloco }}
+					{{ t('general.address-book') }}
 					@if (activePanel !== 1) {
 						<a
 							(click)="activePanel = activePanel === 0 ? 2 : 0; addressBookShowFileExport = false"
 							style="font-size: 12px; margin-left: 25px"
 							>{{
-								activePanel === 2
-									? ('address-book.back-to-address-book' | transloco | uppercase)
-									: ('address-book.import-export' | transloco | uppercase)
+								t(activePanel === 2 ? 'address-book.back-to-address-book' : 'address-book.import-export') | uppercase
 							}}</a
 						>
 					}
@@ -33,7 +31,7 @@
 						class="uk-button uk-button-secondary uk-align-right uk-width-auto@s"
 						(click)="addEntry()"
 					>
-						{{ 'address-book.add-new-entry' | transloco }}
+						{{ t('address-book.add-new-entry') }}
 					</button>
 				}
 			</div>
@@ -41,15 +39,15 @@
 		@if (activePanel === 0) {
 			<div class="uk-width-1-1 nlt-page-intro">
 				<p>
-					{{ 'address-book.you-can-use-the-address-book-to-store.1' | transloco }}<br />
-					{{ 'address-book.you-can-use-the-address-book-to-store.2' | transloco }}
+					{{ t('address-book.you-can-use-the-address-book-to-store.1') }}<br />
+					{{ t('address-book.you-can-use-the-address-book-to-store.2') }}
 				</p>
 				<div class="account-amounts-primary uk-width-1-1">
 					<div
 						class="details-header advanced-options-link"
 						(click)="showAdvancedOptions = !showAdvancedOptions"
 					>
-						{{ 'address-book.show-total-tracked-balance' | transloco }}
+						{{ t('address-book.show-total-tracked-balance') }}
 						<div [class]="['chevron', showAdvancedOptions ? 'chevron-up' : 'chevron-down']"></div>
 					</div>
 					@if (showAdvancedOptions) {
@@ -61,7 +59,7 @@
 							</span>
 							@if (totalTrackedReceivable > 0) {
 								<div class="incoming-label">
-									<div class="text-snippet">{{ 'general.new' | transloco }}</div>
+									<div class="text-snippet">{{ t('general.new') }}</div>
 									<div class="text-full">
 										+{{ totalTrackedReceivable | rai: 'mnano,true' | amountsplit: 0
 										}}{{ totalTrackedReceivable | rai: 'mnano,true' | amountsplit: 1 }} XNO
@@ -89,12 +87,12 @@
 						>
 							<li class="uk-list-header">
 								<div uk-grid>
-									<div class="uk-width-2-5">{{ 'general.name' | transloco }}</div>
+									<div class="uk-width-2-5">{{ t('general.name') }}</div>
 									<div class="uk-width-expand">
-										{{ 'general.address' | transloco }}
+										{{ t('general.address') }}
 										@if (numberOfTrackedBalance > 0) {
 											<div style="display: flex">
-												{{ 'address-book.reload-balances' | transloco | uppercase }}
+												{{ t('address-book.reload-balances') | uppercase }}
 												<ul
 													class="uk-width-auto uk-iconnav uk-margin-remove-left"
 													style="margin-top: -1px"
@@ -125,7 +123,7 @@
 										class="uk-width-1-6 uk-text-center"
 										style="padding-left: 0"
 									>
-										{{ 'general.actions' | transloco }}
+										{{ t('general.actions') }}
 									</div>
 								</div>
 							</li>
@@ -248,11 +246,11 @@
 							}
 							@if (!(addressBook$ | async).length) {
 								<li class="uk-text-center">
-									{{ 'address-book.you-do-not-have-any-address-book-entries-saved-yet.1' | transloco }}
-									<a (click)="addEntry()">{{
-										'address-book.you-do-not-have-any-address-book-entries-saved-yet.2-link' | transloco
-									}}</a>
-									{{ 'address-book.you-do-not-have-any-address-book-entries-saved-yet.3' | transloco }}
+									{{ t('address-book.you-do-not-have-any-address-book-entries-saved-yet.1') }}
+									<a (click)="addEntry()">
+										{{ t('address-book.you-do-not-have-any-address-book-entries-saved-yet.2-link') }}
+									</a>
+									{{ t('address-book.you-do-not-have-any-address-book-entries-saved-yet.3') }}
 								</li>
 							}
 						</ul>
@@ -269,11 +267,7 @@
 					<div class="uk-card uk-card-default">
 						<div class="uk-card-header">
 							<h2 class="uk-card-title">
-								{{
-									creatingNewEntry
-										? ('address-book.add-new-entry' | transloco)
-										: ('address-book.edit-entry' | transloco)
-								}}
+								{{ t(creatingNewEntry ? 'address-book.add-new-entry' : 'address-book.edit-entry') }}
 							</h2>
 						</div>
 						<div class="uk-card-body">
@@ -282,7 +276,7 @@
 									<label
 										class="uk-form-label"
 										for="new-address-name"
-										>{{ 'general.name' | transloco }}</label
+										>{{ t('general.name') }}</label
 									>
 									<div class="uk-form-controls">
 										<input
@@ -300,7 +294,7 @@
 									<label
 										class="uk-form-label"
 										for="new-address-account"
-										>{{ 'general.address' | transloco }}</label
+										>{{ t('general.address') }}</label
 									>
 									<div class="uk-form-controls">
 										<div class="uk-inline uk-width-1-1">
@@ -328,7 +322,7 @@
 									<label
 										class="uk-form-label"
 										for="new-track-balance"
-										>{{ 'address-book.track-balance' | transloco }}
+										>{{ t('address-book.track-balance') }}
 										<span
 											uk-icon="icon: info;"
 											uk-tooltip
@@ -350,7 +344,7 @@
 										class="uk-form-label"
 										for="new-track-transactions"
 									>
-										{{ 'address-book.track-transactions' | transloco }}
+										{{ t('address-book.track-transactions') }}
 										<span
 											uk-icon="icon: info;"
 											uk-tooltip
@@ -374,13 +368,13 @@
 								class="uk-button uk-button-danger uk-width-1-1@s uk-width-auto@m"
 								(click)="cancelNewAddress()"
 							>
-								{{ 'general.cancel' | transloco }}
+								{{ t('general.cancel') }}
 							</button>
 							<button
 								class="uk-button uk-button-primary uk-width-1-1@s uk-width-auto@m"
 								(click)="saveNewAddress()"
 							>
-								{{ 'general.save' | transloco }}
+								{{ t('general.save') }}
 							</button>
 						</div>
 					</div>
@@ -395,10 +389,10 @@
 				<div class="uk-width-1-1">
 					<div class="uk-card uk-card-default">
 						<div class="uk-card-header">
-							<h3 class="uk-card-title">{{ 'address-book.address-book-import' | transloco }}</h3>
+							<h3 class="uk-card-title">{{ t('address-book.address-book-import') }}</h3>
 						</div>
 						<div class="uk-card-body">
-							<p>{{ 'address-book.import-address-book-entries-from-a-file' | transloco }}</p>
+							<p>{{ t('address-book.import-address-book-entries-from-a-file') }}</p>
 						</div>
 						<div class="uk-card-footer uk-text-right@s uk-text-center nlt-button-group">
 							<div
@@ -417,7 +411,7 @@
 									type="button"
 									tabindex="-1"
 								>
-									{{ 'address-book.import-address-book' | transloco }}
+									{{ t('address-book.import-address-book') }}
 								</button>
 							</div>
 						</div>
@@ -426,11 +420,11 @@
 				<div class="uk-width-1-1">
 					<div class="uk-card uk-card-default">
 						<div class="uk-card-header">
-							<h3 class="uk-card-title">{{ 'address-book.address-book-export' | transloco }}</h3>
+							<h3 class="uk-card-title">{{ t('address-book.address-book-export') }}</h3>
 						</div>
 						<div class="uk-card-body">
-							<p>{{ 'address-book.export-all-address-book-entries-to-a-file-or-qr-code-url' | transloco }}</p>
-							<p>{{ 'address-book.note-exported-address-book-will-not-be-encrypted-by-your-wal' | transloco }}</p>
+							<p>{{ t('address-book.export-all-address-book-entries-to-a-file-or-qr-code-url') }}</p>
+							<p>{{ t('address-book.note-exported-address-book-will-not-be-encrypted-by-your-wal') }}</p>
 							@if (addressBookShowFileExport) {
 								<div uk-grid>
 									<div class="uk-width-1-1">
@@ -446,8 +440,8 @@
 										}
 										@if (!addressBookShowQRExport) {
 											<span class="uk-text-warning"
-												>{{ 'address-book.address-book-too-large-for-a-qr-code' | transloco }}<br />{{
-													'address-book.if-you-need-a-qr-use-fewer-entries-or-shorter-names' | transloco
+												>{{ t('address-book.address-book-too-large-for-a-qr-code') }}<br />{{
+													t('address-book.if-you-need-a-qr-use-fewer-entries-or-shorter-names')
 												}}
 											</span>
 										}
@@ -455,19 +449,14 @@
 									<div class="uk-width-1-1@s uk-width-1-2@m uk-width-2-3@l">
 										@if (addressBookShowQRExport) {
 											<span>
-												{{ 'address-book.scan-the-qr-code-on-any-device-to-import-your-address-book' | transloco
-												}}<br /><br />
+												{{ t('address-book.scan-the-qr-code-on-any-device-to-import-your-address-book') }}<br /><br />
 											</span>
 										}
 										@if (addressBookShowQRExport) {
-											<span>{{
-												'address-book.you-can-also-import-your-address-book-by-using-the-url-below' | transloco
-											}}</span>
+											<span>{{ t('address-book.you-can-also-import-your-address-book-by-using-the-url-below') }}</span>
 										}
 										@if (!addressBookShowQRExport) {
-											<span>{{
-												'address-book.you-can-still-import-your-address-book-by-using-the-url' | transloco
-											}}</span>
+											<span>{{ t('address-book.you-can-still-import-your-address-book-by-using-the-url') }}</span>
 										}
 										<br /><br />
 										<input
@@ -484,13 +473,13 @@
 												class="uk-button uk-button-secondary uk-width-1-1@s uk-width-auto@m uk-margin-small-top"
 												style="margin-left: 0"
 											>
-												{{ 'general.copy-to-clipboard' | transloco }}
+												{{ t('general.copy-to-clipboard') }}
 											</button>
 											<button
 												(click)="exportAddressBookToFile()"
 												class="uk-button uk-button-primary uk-width-1-1@s uk-width-auto@m uk-margin-small-top"
 											>
-												{{ 'address-book.export-as-file' | transloco }}
+												{{ t('address-book.export-as-file') }}
 											</button>
 										</div>
 									</div>
@@ -503,7 +492,7 @@
 									(click)="exportAddressBook()"
 									class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
 								>
-									{{ 'address-book.export-address-book' | transloco }}
+									{{ t('address-book.export-address-book') }}
 								</button>
 							</div>
 						}

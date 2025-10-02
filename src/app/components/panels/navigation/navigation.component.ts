@@ -11,7 +11,7 @@ import {
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
 import { SwUpdate } from '@angular/service-worker'
-import { TranslocoPipe } from '@jsverse/transloco'
+import { TranslocoDirective } from '@jsverse/transloco'
 import {
 	ChangeRepWidgetComponent,
 	GnaultLogoElementComponent,
@@ -46,7 +46,7 @@ import { Wallet } from 'libnemo'
 		NanoCardComponent,
 		RaiPipe,
 		RouterLink,
-		TranslocoPipe,
+		TranslocoDirective,
 		WalletWidgetComponent,
 	],
 })

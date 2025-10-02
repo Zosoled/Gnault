@@ -1,13 +1,13 @@
 import { AfterViewInit, Component, ElementRef, ViewChild, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco'
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import { NotificationsService, WalletService } from 'app/services'
 
 @Component({
 	selector: 'app-unlock-wallet-dialog',
 	templateUrl: './unlock-wallet-dialog.component.html',
 	styleUrls: ['./unlock-wallet-dialog.component.css'],
-	imports: [FormsModule, TranslocoPipe],
+	imports: [FormsModule, TranslocoDirective],
 })
 export class UnlockWalletDialogComponent implements AfterViewInit {
 	private notificationService = inject(NotificationsService)
