@@ -11,7 +11,7 @@ interface AppSettings {
 	displayCurrency: string
 	defaultRepresentative: string | null
 	lockOnClose: number
-	lockInactivityMinutes: string
+	inactivityPeriod: string
 	powSource: 'client' | 'custom' | 'server'
 	customWorkServer: string
 	receivableOption: string
@@ -38,7 +38,7 @@ export class AppSettingsService {
 		displayCurrency: 'USD',
 		defaultRepresentative: null,
 		lockOnClose: 1,
-		lockInactivityMinutes: '5',
+		inactivityPeriod: '300',
 		powSource: 'server',
 		customWorkServer: '',
 		receivableOption: 'amount',
@@ -199,7 +199,7 @@ export class AppSettingsService {
 			displayCurrency: 'USD',
 			defaultRepresentative: null,
 			lockOnClose: 1,
-			lockInactivityMinutes: '5',
+			inactivityPeriod: '5',
 			powSource: 'server',
 			customWorkServer: '',
 			receivableOption: 'amount',

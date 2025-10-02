@@ -252,35 +252,27 @@ export class ConfigureAppComponent implements OnInit {
 
 	inactivityPeriods = [
 		{
-			value: '0',
-			name: translateSignal('configure-app.identicon-options.never'),
-		},
-		{
-			value: '1',
+			value: '60',
 			name: translateSignal('configure-app.identicon-options.1-minute'),
 		},
 		{
-			value: '5',
+			value: '300',
 			name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 5 }),
 		},
 		{
-			value: '15',
+			value: '900',
 			name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 15 }),
 		},
 		{
-			value: '30',
+			value: '1800',
 			name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 30 }),
 		},
 		{
-			value: '60',
+			value: '3600',
 			name: translateSignal('configure-app.identicon-options.1-hour'),
 		},
-		{
-			value: '360',
-			name: translateSignal('configure-app.identicon-options.x-hours', { hours: 6 }),
-		},
 	]
-	selectedInactivityPeriod = signal(this.settings.lockInactivityMinutes ?? '5')
+	selectedInactivityPeriod = signal(this.settings.inactivityPeriod ?? '5')
 	walletNotConfiguredTranslated = translateSignal('accounts.wallet-is-not-configured')
 	selectedInactivityPeriodFirstRun = true
 	selectedInactivityPeriodChanged = effect(async () => {
@@ -302,11 +294,11 @@ export class ConfigureAppComponent implements OnInit {
 			try {
 				await wallet.config({ timeout: Number(selectedInactivityPeriod) })
 			} catch (err) {
-				console.warn(err)
+				console.warn(err, err.cause)
 				this.svcNotifications.sendError(err?.message ?? err)
 				return
 			}
-			this.settings.lockInactivityMinutes = selectedInactivityPeriod
+			this.settings.inactivityPeriod = selectedInactivityPeriod
 			this.svcAppSettings.saveAppSettings()
 		}
 	})
