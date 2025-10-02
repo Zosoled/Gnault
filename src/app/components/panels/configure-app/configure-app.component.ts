@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { Component, computed, effect, inject, OnInit, Renderer2, Signal, signal, WritableSignal } from '@angular/core'
+import { Component, computed, effect, inject, OnInit, Renderer2, Signal, signal, untracked, WritableSignal } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { translateSignal, TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import {
@@ -62,23 +62,74 @@ export class ConfigureAppComponent implements OnInit {
 	})
 
 	private currenciesCustomized = [
-		{ value: 'BCH', name: 'BCH - Bitcoin Cash' },
-		{ value: 'BITS', name: 'BITS - Bitcoin (bits)' },
-		{ value: 'BNB', name: 'BNB - Binance Coin' },
-		{ value: 'BTC', name: 'BTC - Bitcoin' },
-		{ value: 'DOT', name: 'DOT - Polkadot' },
-		{ value: 'EOS', name: 'EOS - EOS' },
-		{ value: 'ETH', name: 'ETH - Ethereum' },
-		{ value: 'LINK', name: 'LINK - Chainlink' },
-		{ value: 'LTC', name: 'LTC - Litecoin' },
-		{ value: 'SATS', name: 'SATS - Bitcoin (satoshis)' },
-		{ value: 'SOL', name: 'SOL - Solana' },
-		{ value: 'VEF', name: 'VEF - Venezuelan Bolívar (historical)' },
-		{ value: 'XAG', name: 'XAG - Silver (Troy Ounce)' },
-		{ value: 'XAU', name: 'XAU - Gold (Troy Ounce)' },
-		{ value: 'XLM', name: 'XLM - Stellar' },
-		{ value: 'XRP', name: 'XRP - XRP' },
-		{ value: 'YFI', name: 'YFI - yearn.finance' },
+		{
+			value: 'BCH',
+			name: 'BCH - Bitcoin Cash',
+		},
+		{
+			value: 'BITS',
+			name: 'BITS - Bitcoin (bits)',
+		},
+		{
+			value: 'BNB',
+			name: 'BNB - Binance Coin',
+		},
+		{
+			value: 'BTC',
+			name: 'BTC - Bitcoin',
+		},
+		{
+			value: 'DOT',
+			name: 'DOT - Polkadot',
+		},
+		{
+			value: 'EOS',
+			name: 'EOS - EOS',
+		},
+		{
+			value: 'ETH',
+			name: 'ETH - Ethereum',
+		},
+		{
+			value: 'LINK',
+			name: 'LINK - Chainlink',
+		},
+		{
+			value: 'LTC',
+			name: 'LTC - Litecoin',
+		},
+		{
+			value: 'SATS',
+			name: 'SATS - Bitcoin (satoshis)',
+		},
+		{
+			value: 'SOL',
+			name: 'SOL - Solana',
+		},
+		{
+			value: 'VEF',
+			name: 'VEF - Venezuelan Bolívar (historical)',
+		},
+		{
+			value: 'XAG',
+			name: 'XAG - Silver (Troy Ounce)',
+		},
+		{
+			value: 'XAU',
+			name: 'XAU - Gold (Troy Ounce)',
+		},
+		{
+			value: 'XLM',
+			name: 'XLM - Stellar',
+		},
+		{
+			value: 'XRP',
+			name: 'XRP - XRP',
+		},
+		{
+			value: 'YFI',
+			name: 'YFI - yearn.finance',
+		},
 	]
 	/**
 	 * Populates currency settings with up-to-date list of abbreviations and
@@ -110,14 +161,38 @@ export class ConfigureAppComponent implements OnInit {
 	 */
 	denominations = computed(() => {
 		return [
-			{ value: 'nyano', name: 'Nyano - 10²⁴ raw' },
-			{ value: 'pico', name: 'Pico - 10²⁷ raw' },
-			{ value: 'nano', name: `Nano - 10³⁰ raw (${this.defaultTranslated()})` },
-			{ value: 'knano', name: 'Knano - 10³³ raw' },
-			{ value: 'mnano', name: 'Mnano - 10³⁶ raw' },
-			{ value: 'rai', name: 'Rai - 10²⁴ raw' },
-			{ value: 'krai', name: 'Krai - 10²⁷ raw' },
-			{ value: 'mrai', name: 'Mrai - 10³⁰ raw' },
+			{
+				value: 'nyano',
+				name: 'Nyano - 10²⁴ raw',
+			},
+			{
+				value: 'pico',
+				name: 'Pico - 10²⁷ raw',
+			},
+			{
+				value: 'nano',
+				name: `Nano - 10³⁰ raw (${this.defaultTranslated()})`,
+			},
+			{
+				value: 'knano',
+				name: 'Knano - 10³³ raw',
+			},
+			{
+				value: 'mnano',
+				name: 'Mnano - 10³⁶ raw',
+			},
+			{
+				value: 'rai',
+				name: 'Rai - 10²⁴ raw',
+			},
+			{
+				value: 'krai',
+				name: 'Krai - 10²⁷ raw',
+			},
+			{
+				value: 'mrai',
+				name: 'Mrai - 10³⁰ raw',
+			},
 		]
 	})
 	selectedDenomination = signal(this.settings.denomination ?? 'nano')
@@ -130,8 +205,14 @@ export class ConfigureAppComponent implements OnInit {
 	 * Applies styling to the entire application.
 	 */
 	themes = [
-		{ value: 'dark', name: translateSignal('configure-app.themes.dark') },
-		{ value: 'light', name: translateSignal('configure-app.themes.light') },
+		{
+			value: 'dark',
+			name: translateSignal('configure-app.themes.dark'),
+		},
+		{
+			value: 'light',
+			name: translateSignal('configure-app.themes.light'),
+		},
 	]
 	selectedTheme = signal(this.settings.theme ?? 'dark')
 	selectedThemeChanged = effect(() => {
@@ -146,43 +227,126 @@ export class ConfigureAppComponent implements OnInit {
 		this.svcAppSettings.saveAppSettings()
 	})
 
-	identiconOptions = [
-		{ name: translateSignal('configure-app.identicon-options.none'), value: 'none' },
+	/**
+	 * Distinguishes accounts with visually engaging icons.
+	 */
+	identicons = [
 		{
-			name: translateSignal('configure-app.identicon-options.nanoidenticons-by-keerifox'),
-			value: 'nanoidenticons',
+			value: 'none',
+			name: translateSignal('configure-app.identicon-options.none'),
 		},
 		{
-			name: translateSignal('configure-app.identicon-options.natricon-by-appditto'),
+			value: 'nanoidenticons',
+			name: translateSignal('configure-app.identicon-options.nanoidenticons-by-keerifox'),
+		},
+		{
 			value: 'natricon',
+			name: translateSignal('configure-app.identicon-options.natricon-by-appditto'),
 		},
 	]
-	selectedIdenticonOption = this.identiconOptions[0].value
+	selectedIdenticon = signal(this.settings.identiconsStyle ?? 'none')
+	selectedIdenticonChanged = effect(() => {
+		this.settings.identiconsStyle = this.selectedIdenticon()
+		this.svcAppSettings.saveAppSettings()
+	})
 
+	inactivityPeriods = [
+		{
+			value: '0',
+			name: translateSignal('configure-app.identicon-options.never'),
+		},
+		{
+			value: '1',
+			name: translateSignal('configure-app.identicon-options.1-minute'),
+		},
+		{
+			value: '5',
+			name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 5 }),
+		},
+		{
+			value: '15',
+			name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 15 }),
+		},
+		{
+			value: '30',
+			name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 30 }),
+		},
+		{
+			value: '60',
+			name: translateSignal('configure-app.identicon-options.1-hour'),
+		},
+		{
+			value: '360',
+			name: translateSignal('configure-app.identicon-options.x-hours', { hours: 6 }),
+		},
+	]
+	selectedInactivityPeriod = signal(this.settings.lockInactivityMinutes ?? '5')
+	walletNotConfiguredTranslated = translateSignal('accounts.wallet-is-not-configured')
+	selectedInactivityPeriodFirstRun = true
+	selectedInactivityPeriodChanged = effect(async () => {
+		const walletNotConfiguredTranslated = this.walletNotConfiguredTranslated()
+		const selectedInactivityPeriod = this.selectedInactivityPeriod()
+		if (this.selectedInactivityPeriodFirstRun) {
+			this.selectedInactivityPeriodFirstRun = false
+			return
+		}
+		const wallet = untracked(() => this.svcWallet.selectedWallet())
+		if (!wallet) {
+			this.svcNotifications.sendError(walletNotConfiguredTranslated)
+			return
+		}
+		if (wallet.isLocked) {
+			await this.svcWallet.requestUnlock()
+		}
+		if (!wallet.isLocked) {
+			try {
+				await wallet.config({ timeout: Number(selectedInactivityPeriod) })
+			} catch (err) {
+				console.warn(err)
+				this.svcNotifications.sendError(err?.message ?? err)
+				return
+			}
+			this.settings.lockInactivityMinutes = selectedInactivityPeriod
+			this.svcAppSettings.saveAppSettings()
+		}
+	})
+
+	/**
+	 * Saves non-sensitive appplication data in domain-specific local storage or tab-specific session storage.
+	 */
 	storageOptions = [
 		{
-			name: translateSignal('configure-app.storage-options.browser-local-storage'),
 			value: 'localStorage',
+			name: translateSignal('configure-app.storage-options.browser-local-storage'),
 		},
-		{ name: translateSignal('configure-app.storage-options.none'), value: 'none' },
+		{
+			value: 'sessionStorage',
+			name: translateSignal('configure-app.storage-options.browser-local-storage'),
+		},
+		{
+			value: 'none',
+			name: translateSignal('configure-app.storage-options.none'),
+		},
 	]
-	selectedStorage = this.storageOptions[0].value
-
-	inactivityOptions = [
-		{ name: translateSignal('configure-app.identicon-options.never'), value: 0 },
-		{ name: translateSignal('configure-app.identicon-options.1-minute'), value: 1 },
-		{ name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 5 }), value: 5 },
-		{ name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 15 }), value: 15 },
-		{ name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 30 }), value: 30 },
-		{ name: translateSignal('configure-app.identicon-options.1-hour'), value: 60 },
-		{ name: translateSignal('configure-app.identicon-options.x-hours', { hours: 6 }), value: 360 },
-	]
-	selectedInactivityMinutes = this.inactivityOptions[4].value
+	selectedStorage = signal(this.settings.walletStorage ?? 'localStorage')
+	selectedStorageChanged = effect(() => {
+		this.settings.walletStorage = this.selectedStorage()
+		this.svcAppSettings.saveAppSettings()
+	})
 
 	powSources: { name: Signal<string>; value: 'client' | 'custom' | 'server' }[] = [
-		{ name: translateSignal('configure-app.pow-options.external-selected-server'), value: 'server' },
-		{ name: translateSignal('configure-app.pow-options.external-custom-server'), value: 'custom' },
-		{ name: translateSignal('configure-app.pow-options.internal-client'), value: 'client' },
+		{
+			value: 'server',
+			name: translateSignal('configure-app.pow-options.external-selected-server'),
+		},
+		{
+			value: 'custom',
+			name: translateSignal('configure-app.pow-options.external-custom-server'),
+		},
+		{
+			value: 'client',
+			name: translateSignal('configure-app.pow-options.internal-client'),
+		},
 	]
 	selectedPowSource = signal(this.settings.powSource ?? 'server')
 	selectedPowSourceChanged = effect(() => {
@@ -203,14 +367,17 @@ export class ConfigureAppComponent implements OnInit {
 
 	receivableOptions = [
 		{
-			name: translateSignal('configure-app.receivable-options.automatic-largest-amount-first'),
 			value: 'amount',
+			name: translateSignal('configure-app.receivable-options.automatic-largest-amount-first'),
 		},
 		{
-			name: translateSignal('configure-app.receivable-options.automatic-oldest-transaction-first'),
 			value: 'date',
+			name: translateSignal('configure-app.receivable-options.automatic-oldest-transaction-first'),
 		},
-		{ name: translateSignal('configure-app.receivable-options.manual'), value: 'manual' },
+		{
+			value: 'manual',
+			name: translateSignal('configure-app.receivable-options.manual'),
+		},
 	]
 	selectedReceivableOption = this.receivableOptions[0].value
 
@@ -344,21 +511,6 @@ export class ConfigureAppComponent implements OnInit {
 	}
 
 	async loadFromSettings () {
-		const matchingLanguage = this.languages().find((lang) => lang.id === this.settings.language)
-		this.selectedLanguage.set(matchingLanguage?.id || this.languages[0].id)
-
-		const matchingTheme = this.themes.find((theme) => theme.value === this.settings.theme)
-		this.selectedTheme.set(matchingTheme.value || this.themes[0].value)
-
-		const matchingIdenticonOptions = this.identiconOptions.find((d) => d.value === this.settings.identiconsStyle)
-		this.selectedIdenticonOption = matchingIdenticonOptions.value || this.identiconOptions[0].value
-
-		const matchingStorage = this.storageOptions.find((d) => d.value === this.settings.walletStorage)
-		this.selectedStorage = matchingStorage.value || this.storageOptions[0].value
-
-		const matchingInactivityMinutes = this.inactivityOptions.find((d) => d.value === this.settings.lockInactivityMinutes)
-		this.selectedInactivityMinutes = matchingInactivityMinutes?.value ?? this.inactivityOptions[4].value
-
 		const matchingPowOption = this.powSources.find((d) => d.value === this.settings.powSource)
 		this.selectedPowSource.set(matchingPowOption?.value ?? this.powSources[0].value)
 
@@ -382,11 +534,11 @@ export class ConfigureAppComponent implements OnInit {
 	}
 
 	async updateDisplaySettings () {
-		this.svcAppSettings.setAppSetting('identiconsStyle', this.selectedIdenticonOption)
+		this.svcAppSettings.setAppSetting('identiconsStyle', this.selectedIdenticon)
 	}
 
 	async updateWalletSettings () {
-		const newStorage = this.selectedStorage
+		const newStorage = this.selectedStorage()
 		const resaveWallet = this.settings.walletStorage !== newStorage
 
 		// ask for user confirmation before clearing the wallet cache
@@ -403,7 +555,7 @@ export class ConfigureAppComponent implements OnInit {
 				)
 			} catch (err) {
 				// pressing cancel, reset storage setting and interrupt
-				this.selectedStorage = this.storageOptions[0].value
+				this.selectedStorage.set(this.storageOptions[0].value)
 				this.svcNotifications.sendInfo(
 					translateSignal('configure-app.switched-back-to-browser-local-storage-for-the-wallet-data'),
 					{ length: 10000 }
@@ -453,7 +605,7 @@ export class ConfigureAppComponent implements OnInit {
 
 		const newSettings = {
 			walletStore: newStorage,
-			lockInactivityMinutes: Number(this.selectedInactivityMinutes),
+			lockInactivityMinutes: Number(this.selectedInactivityPeriod),
 			powSource: newPoW,
 			customWorkServer: this.customWorkServer,
 			receivableOption: receivableOption,

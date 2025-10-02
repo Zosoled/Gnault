@@ -138,19 +138,22 @@
 							<div class="uk-margin">
 								<label
 									class="uk-form-label"
-									for="form-horizontal-select-identicon-option"
+									for="form-horizontal-select-identicon"
 								>
 									{{ t('configure-app.identicons') }}
 								</label>
 								<div class="uk-form-controls">
 									<select
-										id="form-horizontal-select-identicon-option"
+										id="form-horizontal-select-identicon"
 										class="uk-select"
-										[(ngModel)]="selectedIdenticonOption"
+										(change)="onSelectInput(selectedIdenticon, $event)"
 									>
-										@for (identiconOption of identiconOptions; track identiconOption) {
-											<option [value]="identiconOption.value">
-												{{ identiconOption.name() }}
+										@for (identicon of identicons; track identicon.value) {
+											<option
+												[value]="identicon.value"
+												[selected]="identicon.value === selectedIdenticon()"
+											>
+												{{ identicon.name() }}
 											</option>
 										}
 									</select>
@@ -182,11 +185,14 @@
 									<div class="uk-inline uk-width-1-1">
 										<select
 											class="uk-select"
-											[(ngModel)]="selectedInactivityMinutes"
+											(change)="onSelectInput(selectedInactivityPeriod, $event)"
 										>
-											@for (option of inactivityOptions; track option.value) {
-												<option [value]="option.value">
-													{{ option.name() }}
+											@for (inactivityPeriod of inactivityPeriods; track inactivityPeriod.value) {
+												<option
+													[value]="inactivityPeriod.value"
+													[selected]="inactivityPeriod.value === selectedInactivityPeriod()"
+												>
+													{{ inactivityPeriod.name() }}
 												</option>
 											}
 										</select>
@@ -212,8 +218,11 @@
 											class="uk-select"
 											[(ngModel)]="selectedStorage"
 										>
-											@for (storage of storageOptions; track storage) {
-												<option [value]="storage.value">
+											@for (storage of storageOptions; track storage.value) {
+												<option
+													[value]="storage.value"
+													[selected]="storage.value === selectedIdenticon()"
+												>
 													{{ storage.name() }}
 												</option>
 											}

@@ -260,6 +260,7 @@ export class AppComponent implements AfterViewInit {
 		})
 		*/
 
+		/* DEPRECATED
 		// Check how long the wallet has been inactive, and lock it if it's been too long
 		setInterval(() => {
 			this.inactiveSeconds += 1
@@ -274,6 +275,7 @@ export class AppComponent implements AfterViewInit {
 				)
 			}
 		}, 1000)
+		*/
 	}
 
 	applySwUpdate () {

@@ -11,7 +11,7 @@ interface AppSettings {
 	displayCurrency: string
 	defaultRepresentative: string | null
 	lockOnClose: number
-	lockInactivityMinutes: number
+	lockInactivityMinutes: string
 	powSource: 'client' | 'custom' | 'server'
 	customWorkServer: string
 	receivableOption: string
@@ -38,7 +38,7 @@ export class AppSettingsService {
 		displayCurrency: 'USD',
 		defaultRepresentative: null,
 		lockOnClose: 1,
-		lockInactivityMinutes: 30,
+		lockInactivityMinutes: '5',
 		powSource: 'server',
 		customWorkServer: '',
 		receivableOption: 'amount',
@@ -121,7 +121,8 @@ export class AppSettingsService {
 	)
 
 	loadAppSettings () {
-		const settings: AppSettings = JSON.parse(localStorage.getItem(this.storeKey) ?? '{}')
+		const item = localStorage.getItem(this.storeKey) ?? '{}'
+		const settings: AppSettings = JSON.parse(item, (_, v) => isNaN(v) ? v : Number(v))
 		if (settings.language == null) {
 			const browserCultureLang = getBrowserCultureLang()
 			const browserLang = getBrowserLang()
@@ -198,7 +199,7 @@ export class AppSettingsService {
 			displayCurrency: 'USD',
 			defaultRepresentative: null,
 			lockOnClose: 1,
-			lockInactivityMinutes: 30,
+			lockInactivityMinutes: '5',
 			powSource: 'server',
 			customWorkServer: '',
 			receivableOption: 'amount',
