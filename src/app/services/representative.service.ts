@@ -58,7 +58,7 @@ export class RepresentativeService {
 	storeKey: 'Gnault-Representatives' = 'Gnault-Representatives'
 
 	// Default representatives list
-	defaultRepresentatives = []
+	defaultRepresentatives: { [key: string]: unknown }[] = []
 
 	representatives$ = new BehaviorSubject([])
 	representatives = this.defaultRepresentatives

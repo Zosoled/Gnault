@@ -195,7 +195,7 @@ export class ConfigureAppComponent implements OnInit {
 			},
 		]
 	})
-	selectedDenomination = signal<string>(this.settings.denomination ?? this.denominations[2].value)
+	selectedDenomination = signal<string>(this.settings.denomination ?? this.denominations()[2]?.value)
 	selectedDenominationChanged = effect(() => {
 		this.settings.denomination = this.selectedDenomination()
 		this.svcAppSettings.saveAppSettings()
@@ -214,7 +214,7 @@ export class ConfigureAppComponent implements OnInit {
 			name: translateSignal('configure-app.themes.light'),
 		},
 	]
-	selectedTheme = signal<string>(this.settings.theme ?? this.themes[0].value)
+	selectedTheme = signal<string>(this.settings.theme ?? this.themes[0]?.value)
 	selectedThemeChanged = effect(() => {
 		if (this.selectedTheme() === 'dark') {
 			this.renderer.addClass(document.body, 'dark-mode')
@@ -244,7 +244,7 @@ export class ConfigureAppComponent implements OnInit {
 			name: translateSignal('configure-app.identicon-options.natricon-by-appditto'),
 		},
 	]
-	selectedIdenticon = signal<string>(this.settings.identiconsStyle ?? this.identicons[0].value)
+	selectedIdenticon = signal<string>(this.settings.identiconsStyle ?? this.identicons[0]?.value)
 	selectedIdenticonChanged = effect(() => {
 		this.settings.identiconsStyle = this.selectedIdenticon()
 		this.svcAppSettings.saveAppSettings()
@@ -268,7 +268,7 @@ export class ConfigureAppComponent implements OnInit {
 			name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 10 }),
 		},
 	]
-	selectedInactivityPeriod = signal<string>(this.settings.inactivityPeriod.toString() ?? this.inactivityPeriods[2].value)
+	selectedInactivityPeriod = signal<string>(this.settings.inactivityPeriod.toString() ?? this.inactivityPeriods[2]?.value)
 	selectedInactivityPeriodFirstRun = true
 	selectedInactivityPeriodChanged = effect(async () => {
 		const selectedInactivityPeriod = Number(this.selectedInactivityPeriod())
@@ -283,7 +283,7 @@ export class ConfigureAppComponent implements OnInit {
 		if (!wallet.isLocked) {
 			try {
 				await wallet.config({ timeout: Number(selectedInactivityPeriod) })
-			} catch (err) {
+			} catch (err: any) {
 				console.warn(err, err.cause)
 				this.svcNotifications.sendError(err?.message ?? err)
 				return
@@ -338,14 +338,12 @@ export class ConfigureAppComponent implements OnInit {
 	})
 
 	getRemotePowOptionName () {
-		if (this.selectedServer === 'random' || this.selectedServer === 'offline') {
-			return this.powSources[0].name()
+		const name = this.powSources[0]?.name()
+		const selectedServerOption = this.svcAppSettings.servers[this.selectedServer ?? '']
+		if (!selectedServerOption || this.selectedServer === 'random' || this.selectedServer === 'offline') {
+			return name
 		}
-		const selectedServerOption = this.svcAppSettings.servers[this.selectedServer]
-		if (!selectedServerOption) {
-			return this.powSources[0].name()
-		}
-		return this.powSources[0].name() + ' (' + selectedServerOption.name + ')'
+		return name + ' (' + selectedServerOption.name + ')'
 	}
 
 	receivableOptions = [
@@ -362,7 +360,7 @@ export class ConfigureAppComponent implements OnInit {
 			name: translateSignal('configure-app.receivable-options.manual'),
 		},
 	]
-	selectedReceivableOption = this.receivableOptions[0].value
+	selectedReceivableOption = this.receivableOptions[0]?.value
 
 	servers = computed(() => {
 		const { servers } = this.svcAppSettings
