@@ -1,9 +1,9 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
-		"outDir": "../out-tsc/app",
-		"baseUrl": "./",
 		"allowJs": false,
+		"baseUrl": "./",
+		"outDir": "../out-tsc/app",
 	},
 	"files": [
 		"main.ts",

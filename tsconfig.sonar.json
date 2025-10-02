@@ -1,28 +1,28 @@
 {
 	"compileOnSave": false,
 	"compilerOptions": {
-		"downlevelIteration": true,
-		"importHelpers": true,
-		"outDir": "./dist/out-tsc",
-		"sourceMap": true,
+		"baseUrl": "./",
 		"declaration": false,
-		"moduleResolution": "node",
+		"downlevelIteration": true,
 		"experimentalDecorators": true,
+		"importHelpers": true,
+		"lib": [
+			"es2017",
+			"dom"
+		],
+		"paths": {
+			"stream": [
+				"../node_modules/readable-stream/readable.js"
+			]
+		},
+		"outDir": "./dist/out-tsc",
+		"module": "es2015",
+		"moduleResolution": "node",
+		"sourceMap": true,
 		"target": "es2015",
 		"typeRoots": [
 			"node_modules/@types",
 			"./src/typings"
 		],
-		"lib": [
-			"es2017",
-			"dom"
-		],
-		"module": "es2015",
-		"baseUrl": "./",
-		"paths": {
-			"stream": [
-				"../node_modules/readable-stream/readable.js"
-			]
-		}
 	}
 }

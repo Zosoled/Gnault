@@ -1,20 +1,10 @@
 {
 	"compileOnSave": false,
 	"compilerOptions": {
-		"skipLibCheck": true,
-		"importHelpers": true,
-		"outDir": "./dist/out-tsc",
-		"sourceMap": true,
+		"baseUrl": "./src",
 		"declaration": false,
-		"moduleResolution": "bundler",
-		"noUncheckedIndexedAccess": true,
 		"experimentalDecorators": true,
-		"strict": true,
-		"target": "es2023",
-		"typeRoots": [
-			"node_modules/@types",
-			"./src/typings"
-		],
+		"importHelpers": true,
 		"lib": [
 			"DOM",
 			"ES2022",
@@ -22,12 +12,22 @@
 			"WebWorker"
 		],
 		"module": "es2022",
-		"baseUrl": "./src",
+		"moduleResolution": "bundler",
+		"noUncheckedIndexedAccess": true,
+		"outDir": "./dist/out-tsc",
 		"paths": {
 			"stream": [
 				"../node_modules/readable-stream/readable.js"
 			]
-		}
+		},
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"strict": true,
+		"target": "es2023",
+		"typeRoots": [
+			"node_modules/@types",
+			"./src/typings"
+		],
 	},
 	"angularCompilerOptions": {
 		"extendedTemplateDiagnostics": true,
