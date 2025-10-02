@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common'
 import { Component, computed, effect, inject, OnInit, Renderer2, Signal, signal, WritableSignal } from '@angular/core'
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { translateSignal, TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import {
 	AddressBookService,
@@ -104,12 +104,34 @@ export class ConfigureAppComponent implements OnInit {
 		this.svcAppSettings.saveAppSettings()
 	})
 
+	defaultTranslated = translateSignal('general.default')
+	/**
+	 * Displays nano in different units of measure.
+	 */
+	denominations = computed(() => {
+		return [
+			{ value: 'nyano', name: 'Nyano - 10²⁴ raw' },
+			{ value: 'pico', name: 'Pico - 10²⁷ raw' },
+			{ value: 'nano', name: `Nano - 10³⁰ raw (${this.defaultTranslated()})` },
+			{ value: 'knano', name: 'Knano - 10³³ raw' },
+			{ value: 'mnano', name: 'Mnano - 10³⁶ raw' },
+			{ value: 'rai', name: 'Rai - 10²⁴ raw' },
+			{ value: 'krai', name: 'Krai - 10²⁷ raw' },
+			{ value: 'mrai', name: 'Mrai - 10³⁰ raw' },
+		]
+	})
+	selectedDenomination = signal(this.settings.denomination ?? 'nano')
+	selectedDenominationChanged = effect(() => {
+		this.settings.denomination = this.selectedDenomination()
+		this.svcAppSettings.saveAppSettings()
+	})
+
 	/**
 	 * Applies styling to the entire application.
 	 */
 	themes = [
-		{ name: translateSignal('configure-app.themes.dark'), value: 'dark' },
-		{ name: translateSignal('configure-app.themes.light'), value: 'light' },
+		{ value: 'dark', name: translateSignal('configure-app.themes.dark') },
+		{ value: 'light', name: translateSignal('configure-app.themes.light') },
 	]
 	selectedTheme = signal(this.settings.theme ?? 'dark')
 	selectedThemeChanged = effect(() => {
@@ -124,22 +146,6 @@ export class ConfigureAppComponent implements OnInit {
 		this.svcAppSettings.saveAppSettings()
 	})
 
-	denominations = [
-		{ name: 'XNO', value: 'nano' },
-		{ name: 'knano', value: 'knano' },
-		{ name: 'mnano', value: 'mnano' },
-	]
-	selectedDenomination = new FormControl(this.denominations[0].value)
-
-	storageOptions = [
-		{
-			name: translateSignal('configure-app.storage-options.browser-local-storage'),
-			value: 'localStorage',
-		},
-		{ name: translateSignal('configure-app.storage-options.none'), value: 'none' },
-	]
-	selectedStorage = this.storageOptions[0].value
-
 	identiconOptions = [
 		{ name: translateSignal('configure-app.identicon-options.none'), value: 'none' },
 		{
@@ -152,6 +158,15 @@ export class ConfigureAppComponent implements OnInit {
 		},
 	]
 	selectedIdenticonOption = this.identiconOptions[0].value
+
+	storageOptions = [
+		{
+			name: translateSignal('configure-app.storage-options.browser-local-storage'),
+			value: 'localStorage',
+		},
+		{ name: translateSignal('configure-app.storage-options.none'), value: 'none' },
+	]
+	selectedStorage = this.storageOptions[0].value
 
 	inactivityOptions = [
 		{ name: translateSignal('configure-app.identicon-options.never'), value: 0 },

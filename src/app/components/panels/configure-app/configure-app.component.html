@@ -77,6 +77,39 @@
 							<div class="uk-margin">
 								<label
 									class="uk-form-label"
+									for="form-horizontal-select-denomination"
+								>
+									{{ t('configure-app.denomination') }}
+									<span
+										uk-icon="icon: info;"
+										uk-tooltip
+										[title]="t('configure-app.denomination-tooltip')"
+									></span>
+								</label>
+								<div class="uk-form-controls">
+									<select
+										id="form-horizontal-select-denomination"
+										class="uk-select"
+										(change)="onSelectInput(selectedDenomination, $event)"
+									>
+										@for (denomination of denominations(); track denomination.value) {
+											<option
+												[value]="denomination.value"
+												[selected]="denomination.value === selectedDenomination()"
+											>
+												{{ denomination.name }}
+											</option>
+										}
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="uk-width-1-1">
+						<div class="uk-form-horizontal">
+							<div class="uk-margin">
+								<label
+									class="uk-form-label"
 									for="form-horizontal-select-theme"
 								>
 									{{ t('configure-app.theme') }}
@@ -111,9 +144,9 @@
 								</label>
 								<div class="uk-form-controls">
 									<select
+										id="form-horizontal-select-identicon-option"
 										class="uk-select"
 										[(ngModel)]="selectedIdenticonOption"
-										id="form-horizontal-select-identicon-option"
 									>
 										@for (identiconOption of identiconOptions; track identiconOption) {
 											<option [value]="identiconOption.value">
