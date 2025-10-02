@@ -9,6 +9,7 @@
 		"moduleResolution": "bundler",
 		"noUncheckedIndexedAccess": true,
 		"experimentalDecorators": true,
+		"strict": true,
 		"target": "es2023",
 		"typeRoots": [
 			"node_modules/@types",
