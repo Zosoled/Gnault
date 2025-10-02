@@ -139,7 +139,7 @@
 		"app-wallet-settings-successfully-updated": "Paramètres du portefeuille de l'application mis à jour avec succès !",
 		"are-you-sure": "Êtes-vous sûr ?",
 		"authorization": "Autorisation",
-		"change-if-your-wallet-should-be-locked-automatically-after": "Modifiez si votre portefeuille doit être verrouillé automatiquement après une certaine période d'inactivité",
+		"change-if-your-wallet-should-be-locked-automatically-after": "Le portefeuille se verrouille automatiquement après la période d'inactivité. \nDoit être déverrouillé pour changer.",
 		"change-the-currency-pair-used-when-showing-fiat-values": "Modifiez la paire de devises utilisée pour afficher les valeurs fiat dans l'application. Sélectionnez Aucune pour masquer les paires fiat.",
 		"change-where-your-wallet-is-stored-if-you-select-none-your": "Modifiez l'endroit où votre portefeuille est stocké. Si vous sélectionnez aucun, votre portefeuille est réinitialisé à chaque rechargement.",
 		"change-which-server-is-used-to-communicate-with-the-nano": "Modifiez le serveur utilisé pour communiquer avec le réseau nano",

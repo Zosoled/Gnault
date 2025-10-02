@@ -197,7 +197,7 @@ export class ManageWalletComponent implements OnInit {
 		if ((this.util.string.isNumeric(count) && count % 1 === 0) || count === '') {
 			// only allow beyond limit if using a custom server
 			if (
-				this.settings.serverName !== 'custom' &&
+				this.settings.server !== 'custom' &&
 				(parseInt(count, 10) > this.transactionHistoryLimit || count === '' || count === '0')
 			) {
 				this.invalidCsvCount = true

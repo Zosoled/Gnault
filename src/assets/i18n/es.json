@@ -139,7 +139,7 @@
 		"app-wallet-settings-successfully-updated": "¡Configuración de la billetera de la aplicación actualizada exitosamente!",
 		"are-you-sure": "¿Estás seguro?",
 		"authorization": "Autorización",
-		"change-if-your-wallet-should-be-locked-automatically-after": "Cambiar si su billetera debe bloquearse automáticamente después de no haber interactuado con ella durante cierto período de tiempo",
+		"change-if-your-wallet-should-be-locked-automatically-after": "La billetera se bloqueará automáticamente después del período de inactividad. \nDebe desbloquearse para cambiar.",
 		"change-the-currency-pair-used-when-showing-fiat-values": "Cambiar el par de divisas utilizado al mostrar valores en moneda fiat en la aplicación. Seleccione Ninguno para ocultar pares fiat.",
 		"change-where-your-wallet-is-stored-if-you-select-none-your": "Cambiar dónde se almacena su billetera. Si selecciona ninguno, su billetera se reinicia cada vez que recarga.",
 		"change-which-server-is-used-to-communicate-with-the-nano": "Cambiar qué servidor se utiliza para comunicarse con la red nano",

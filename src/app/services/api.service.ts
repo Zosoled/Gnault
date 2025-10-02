@@ -35,13 +35,11 @@ export class ApiService {
 				this.svcNode.setLoading()
 			}
 		}
-		let options: any = {
+		const options: Parameters<HttpClient['post']>[2] = {
 			responseType: 'json',
 		}
 		if (this.settings.serverAuth != null && this.settings.serverAuth !== '') {
-			options = Object.assign({}, options, {
-				headers: new HttpHeaders().set('Authorization', this.settings.serverAuth),
-			})
+			options.headers = new HttpHeaders().set('Authorization', this.settings.serverAuth)
 		}
 
 		try {
@@ -65,11 +63,11 @@ export class ApiService {
 				return
 			}
 			if (err.isValidationFailure === true) {
-				console.log('Node response failed validation.', err.reason, err.res)
+				console.warn('Node response failed validation.', err.reason, err.res)
 			} else {
-				console.log('Node responded with error', err.status)
+				console.error('Node responded with error', err)
 			}
-			if (this.settings.serverName === 'random') {
+			if (this.settings.server === 'random') {
 				// choose a new backend and do the request again
 				this.svcAppSettings.loadServerSettings()
 				await this.sleep(1000) // delay if all servers are down

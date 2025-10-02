@@ -139,7 +139,7 @@
 		"app-wallet-settings-successfully-updated": "App-Wallet-Einstellungen erfolgreich aktualisiert!",
 		"are-you-sure": "Sind Sie sicher?",
 		"authorization": "Autorisierung",
-		"change-if-your-wallet-should-be-locked-automatically-after": "Ändern Sie, ob Ihre Wallet automatisch gesperrt werden soll, nachdem Sie für eine bestimmte Zeit nicht damit interagiert haben",
+		"change-if-your-wallet-should-be-locked-automatically-after": "Brieftasche sperrt automatisch nach Inaktivitätsdauer. \nMuss freigeschaltet werden, um sich zu ändern.",
 		"change-the-currency-pair-used-when-showing-fiat-values": "Ändern Sie das Währungspaar, das bei der Anzeige von Fiat-Werten in der Anwendung verwendet wird. Wählen Sie 'Keine', um Fiat-Paare auszublenden.",
 		"change-where-your-wallet-is-stored-if-you-select-none-your": "Ändern Sie, wo Ihre Wallet gespeichert wird. Wenn Sie 'Keine' auswählen, wird Ihre Wallet bei jedem Neuladen zurückgesetzt.",
 		"change-which-server-is-used-to-communicate-with-the-nano": "Ändern Sie, welcher Server für die Kommunikation mit dem Nano-Netzwerk verwendet wird",

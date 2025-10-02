@@ -139,7 +139,7 @@
 		"app-wallet-settings-successfully-updated": "App wallet settings successfully updated!",
 		"are-you-sure": "Are you sure?",
 		"authorization": "Authorization",
-		"change-if-your-wallet-should-be-locked-automatically-after": "Change if your wallet should be locked automatically after you have not interacted with it for a certain period of time",
+		"change-if-your-wallet-should-be-locked-automatically-after": "Wallet will lock automatically after period of inactivity. Must be unlocked to change.",
 		"change-the-currency-pair-used-when-showing-fiat-values": "Change the currency pair used when showing fiat values in the application. Select None to hide fiat pairs.",
 		"change-where-your-wallet-is-stored-if-you-select-none-your": "Change where your wallet is stored. If you select none, your wallet is reset every time you reload.",
 		"change-which-server-is-used-to-communicate-with-the-nano": "Change which server is used to communicate with the nano network",
@@ -280,7 +280,6 @@
 		},
 		"set-wallet-password": {
 			"choose-a-wallet-password-that-will-be-used-to-unlock-this-application": "Choose a password that will be used to unlock this wallet.",
-			"wallet-passwords-are-distinct": "This password may differ from other wallets you create in Gnault. Each wallet you create can have a different distinct password, so take care to track them individually.",
 			"error": "Failed to set wallet password",
 			"errors": {
 				"password-must-be-at-least-x-characters-long": "Password must be at least {{ minLength }} characters.",
@@ -289,6 +288,7 @@
 			"for-the-safety-of-your-funds-use-a-secure-password": "For the safety of your funds, use a secure password.",
 			"set-wallet-password": "Set Wallet Password",
 			"success": "Wallet password set successfully",
+			"wallet-passwords-are-distinct": "This password may differ from other wallets you create in Gnault. Each wallet you create can have a different distinct password, so take care to track them individually.",
 			"while-the-application-is-locked-the-secret-recovery-phrase-will-be-encrypted": "While the wallet is locked, its mnemonic and seed are encrypted. This disables sensitive actions like creating accounts, sending or receiving funds, changing the password, and verifying the mnemonic or seed."
 		}
 	},

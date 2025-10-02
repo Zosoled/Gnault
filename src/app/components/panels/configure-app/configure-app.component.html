@@ -186,6 +186,7 @@
 										<select
 											class="uk-select"
 											(change)="onSelectInput(selectedInactivityPeriod, $event)"
+											[disabled]="!wallet"
 										>
 											@for (inactivityPeriod of inactivityPeriods; track inactivityPeriod.value) {
 												<option
@@ -474,7 +475,7 @@
 										(change)="serverConfigChange(selectedServer)"
 										id="form-horizontal-select-server"
 									>
-										@for (server of serverOptions; track server) {
+										@for (server of servers(); track server) {
 											<option [value]="server.value">
 												{{ server.name }}
 											</option>

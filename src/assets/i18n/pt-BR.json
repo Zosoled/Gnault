@@ -139,7 +139,7 @@
 		"app-wallet-settings-successfully-updated": "Configurações da carteira do aplicativo atualizadas com sucesso!",
 		"are-you-sure": "Você tem certeza?",
 		"authorization": "Autorização",
-		"change-if-your-wallet-should-be-locked-automatically-after": "Altere se sua carteira deve ser bloqueada automaticamente após um certo período de inatividade",
+		"change-if-your-wallet-should-be-locked-automatically-after": "A carteira trava automaticamente após o período de inatividade. \nDeve ser desbloqueado para mudar.",
 		"change-the-currency-pair-used-when-showing-fiat-values": "Altere o par de moedas usado ao mostrar valores em moeda fiduciária no aplicativo. Selecione Nenhum para ocultar pares fiduciários.",
 		"change-where-your-wallet-is-stored-if-you-select-none-your": "Altere onde sua carteira é armazenada. Se você selecionar nenhum, sua carteira será redefinida toda vez que você recarregar.",
 		"change-which-server-is-used-to-communicate-with-the-nano": "Altere qual servidor é usado para se comunicar com a rede nano",

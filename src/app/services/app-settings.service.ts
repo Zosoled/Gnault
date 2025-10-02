@@ -3,26 +3,35 @@ import { TranslocoService, getBrowserCultureLang, getBrowserLang } from '@jsvers
 
 export type WalletStore = 'localStorage' | 'none'
 export type LedgerConnectionType = 'usb' | 'bluetooth'
+export type NanoServer = {
+	name: string
+	shouldRandom: boolean
+	api?: string
+	ws?: string
+	auth?: string
+}
+export type NanoServers = {
+	[key: string]: NanoServer
+}
 
 interface AppSettings {
-	language: string
-	denomination: string
-	walletStorage: string
-	displayCurrency: string
-	defaultRepresentative: string | null
-	lockOnClose: number
-	inactivityPeriod: string
-	powSource: 'client' | 'custom' | 'server'
 	customWorkServer: string
+	defaultRepresentative: string | null
+	denomination: string
+	displayCurrency: string
+	inactivityPeriod: number
+	identiconsStyle: string
+	language: string
+	minimumReceive: number | null
+	powSource: 'client' | 'custom' | 'server'
 	receivableOption: string
-	serverName: string
+	server: string
+	serverAuth: string | null
 	serverAPI: string | null
 	serverWS: string | null
-	serverAuth: string | null
-	minimumReceive: string | null
-	walletVersion: number | null
 	theme: string
-	identiconsStyle: string
+	walletStorage: string
+	walletVersion: number | null
 }
 
 @Injectable({ providedIn: 'root' })
@@ -32,97 +41,66 @@ export class AppSettingsService {
 	private storeKey: 'Gnault-AppSettings' = 'Gnault-AppSettings'
 
 	settings: WritableSignal<AppSettings> = signal({
-		language: null,
-		denomination: 'nano',
-		walletStorage: 'localStorage',
-		displayCurrency: 'USD',
-		defaultRepresentative: null,
-		lockOnClose: 1,
-		inactivityPeriod: '300',
-		powSource: 'server',
 		customWorkServer: '',
+		defaultRepresentative: null,
+		denomination: 'nano',
+		displayCurrency: 'USD',
+		identiconsStyle: 'nanoidenticons',
+		inactivityPeriod: 300,
+		language: null,
+		minimumReceive: 0.000001,
+		powSource: 'server',
 		receivableOption: 'amount',
-		serverName: 'random',
+		server: 'random',
+		serverAuth: null,
 		serverAPI: null,
 		serverWS: null,
-		serverAuth: null,
-		minimumReceive: '0.000001',
-		walletVersion: 1,
 		theme: 'dark',
-		identiconsStyle: 'nanoidenticons',
+		walletStorage: 'localStorage',
+		walletVersion: 1,
 	})
-	serverOptions = [
-		{
-			name: 'Random',
-			value: 'random',
-			api: null,
-			ws: null,
-			auth: null,
-			shouldRandom: false,
-		},
-		{
+	servers: NanoServers = {
+		rainstorm: {
 			name: 'Rainstorm City',
-			value: 'rainstorm',
+			shouldRandom: true,
 			api: 'https://rainstorm.city/api',
 			ws: 'wss://rainstorm.city/websocket',
-			auth: null,
-			shouldRandom: true,
 		},
-		{
+		nanoslo: {
 			name: 'NanOslo',
-			value: 'nanoslo',
+			shouldRandom: true, // BLOCKED 2025-09-25 as not currently working
 			api: 'https://nanoslo.0x.no/proxy',
 			ws: 'wss://nanoslo.0x.no/websocket',
-			auth: null,
-			shouldRandom: false, // BLOCKED 2025-09-25 as not currently working
 		},
-		{
+		somenano: {
 			name: 'SomeNano',
-			value: 'somenano',
+			shouldRandom: true,
 			api: 'https://node.somenano.com/proxy',
 			ws: 'wss://node.somenano.com/websocket',
-			auth: null,
-			shouldRandom: true,
 		},
-		{
+		spynano: {
 			name: 'SpyNano (New Node - Use with caution)',
-			value: 'spynano',
+			shouldRandom: false,
 			api: 'https://node.spynano.org/proxy',
 			ws: 'wss://node.spynano.org/websocket',
-			auth: null,
+		},
+		random: {
+			name: 'Random',
 			shouldRandom: false,
 		},
-		{
+		custom: {
 			name: 'Custom',
-			value: 'custom',
-			api: null,
-			ws: null,
-			auth: null,
 			shouldRandom: false,
 		},
-		{
-			name: 'Offline Mode',
-			value: 'offline',
-			api: null,
-			ws: null,
-			auth: null,
+		offline: {
+			name: 'Offline',
 			shouldRandom: false,
 		},
-	]
-
-	// Simplified list for comparison in other classes
-	knownApiEndpoints = this.serverOptions.reduce(
-		(acc, server) => {
-			if (!server.api) return acc
-			acc.push(server.api.replace(/https?:\/\//g, ''))
-			return acc
-		},
-		['node.somenano.com']
-	)
+	}
 
 	loadAppSettings () {
 		const item = localStorage.getItem(this.storeKey) ?? '{}'
-		const settings: AppSettings = JSON.parse(item, (_, v) => isNaN(v) ? v : Number(v))
+		const settings = JSON.parse(item, (_, v) => !isNaN(v) && typeof v === 'string' && v.trim() !== '' ? Number(v) : v)
 		if (settings.language == null) {
 			const browserCultureLang = getBrowserCultureLang()
 			const browserLang = getBrowserLang()
@@ -144,28 +122,31 @@ export class AppSettingsService {
 
 	loadServerSettings () {
 		const settings = this.settings()
-		const matchingServerOption = this.serverOptions.find(({ value }) => value === settings.serverName)
-		if (settings.serverName === 'random' || !matchingServerOption) {
-			const availableServers = this.serverOptions.filter((server) => server.shouldRandom)
-			const randomServerOption = availableServers[Math.floor(Math.random() * availableServers.length)]
-			console.log('SETTINGS: Random', randomServerOption)
+		const matchedServer = this.servers[settings.server]
 
-			settings.serverAPI = randomServerOption.api
-			settings.serverWS = randomServerOption.ws
-			settings.serverName = 'random'
-		} else if (settings.serverName === 'custom') {
+		if (settings.server === 'random' || !matchedServer) {
+			const availableServers = Object.values(this.servers).filter(({ shouldRandom: n }) => n)
+			const random = Math.floor(Math.random() * availableServers.length)
+			const randomServer = availableServers[random]
+			console.log('SETTINGS: Random', randomServer)
+			settings.serverAPI = randomServer.api
+			settings.serverWS = randomServer.ws
+			settings.server = 'random'
+
+		} else if (settings.server === 'custom') {
 			console.log('SETTINGS: Custom')
-		} else if (settings.serverName === 'offline') {
+
+		} else if (settings.server === 'offline') {
 			console.log('SETTINGS: Offline Mode')
-			settings.serverName = matchingServerOption.value
-			settings.serverAPI = matchingServerOption.api
-			settings.serverWS = matchingServerOption.ws
+			settings.serverAPI = matchedServer.api
+			settings.serverWS = matchedServer.ws
+
 		} else {
-			console.log('SETTINGS: Found', matchingServerOption)
-			settings.serverName = matchingServerOption.value
-			settings.serverAPI = matchingServerOption.api
-			settings.serverWS = matchingServerOption.ws
+			console.log('SETTINGS: Found', matchedServer)
+			settings.serverAPI = matchedServer.api
+			settings.serverWS = matchedServer.ws
 		}
+
 		this.settings.set(Object.assign(this.settings(), settings))
 	}
 
@@ -193,24 +174,23 @@ export class AppSettingsService {
 	clearAppSettings () {
 		localStorage.removeItem(this.storeKey)
 		this.settings.set({
-			language: 'en',
-			denomination: 'nano',
-			walletStorage: 'localStorage',
-			displayCurrency: 'USD',
-			defaultRepresentative: null,
-			lockOnClose: 1,
-			inactivityPeriod: '300',
-			powSource: 'server',
 			customWorkServer: '',
+			defaultRepresentative: null,
+			denomination: 'nano',
+			displayCurrency: 'USD',
+			inactivityPeriod: 300,
+			identiconsStyle: 'nanoidenticons',
+			language: 'en',
+			minimumReceive: 0.000001,
+			powSource: 'server',
 			receivableOption: 'amount',
-			serverName: 'random',
+			server: 'random',
+			serverAuth: null,
 			serverAPI: null,
 			serverWS: null,
-			serverAuth: null,
-			minimumReceive: '0.000001',
-			walletVersion: 1,
 			theme: 'dark',
-			identiconsStyle: 'nanoidenticons',
+			walletStorage: 'localStorage',
+			walletVersion: 1,
 		})
 	}
 }

@@ -139,7 +139,7 @@
 		"app-wallet-settings-successfully-updated": "应用钱包设置更新成功！",
 		"are-you-sure": "您确定吗？",
 		"authorization": "授权",
-		"change-if-your-wallet-should-be-locked-automatically-after": "更改您的钱包在一段时间未与之交互后是否应自动锁定",
+		"change-if-your-wallet-should-be-locked-automatically-after": "无活动期间，钱包将自动锁定。\n必须解锁才能更改。",
 		"change-the-currency-pair-used-when-showing-fiat-values": "更改在应用程序中显示法定货币值时使用的货币对。选择\"无\"以隐藏法定货币对。",
 		"change-where-your-wallet-is-stored-if-you-select-none-your": "更改钱包的存储位置。如果选择\"无\"，每次重新加载时都会重置您的钱包。",
 		"change-which-server-is-used-to-communicate-with-the-nano": "更改用于与纳米网络通信的服务器",

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common'
 import { Component, computed, effect, inject, OnInit, Renderer2, Signal, signal, untracked, WritableSignal } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
-import { translateSignal, TranslocoDirective, TranslocoService } from '@jsverse/transloco'
+import { translate, translateSignal, TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import {
 	AddressBookService,
 	ApiService,
@@ -54,7 +54,7 @@ export class ConfigureAppComponent implements OnInit {
 	languages = computed(() => {
 		return this.svcTransloco.getAvailableLangs() as [{ id: string; label: string }]
 	})
-	selectedLanguage = signal(this.svcAppSettings.settings().language ?? this.languages()[0].id)
+	selectedLanguage = signal<string>(this.svcAppSettings.settings().language ?? this.languages()[0].id)
 	selectedLanguageChanged = effect(() => {
 		this.svcTransloco.setActiveLang(this.selectedLanguage())
 		this.settings.language = this.selectedLanguage()
@@ -149,7 +149,7 @@ export class ConfigureAppComponent implements OnInit {
 		}
 		return list.sort((a, b) => a.name.localeCompare(b.name))
 	})
-	selectedCurrency = signal(this.settings.displayCurrency ?? 'USD')
+	selectedCurrency = signal<string>(this.settings.displayCurrency ?? 'USD')
 	selectedCurrencyChanged = effect(() => {
 		this.settings.displayCurrency = this.selectedCurrency()
 		this.svcAppSettings.saveAppSettings()
@@ -195,7 +195,7 @@ export class ConfigureAppComponent implements OnInit {
 			},
 		]
 	})
-	selectedDenomination = signal(this.settings.denomination ?? 'nano')
+	selectedDenomination = signal<string>(this.settings.denomination ?? this.denominations[2].value)
 	selectedDenominationChanged = effect(() => {
 		this.settings.denomination = this.selectedDenomination()
 		this.svcAppSettings.saveAppSettings()
@@ -214,7 +214,7 @@ export class ConfigureAppComponent implements OnInit {
 			name: translateSignal('configure-app.themes.light'),
 		},
 	]
-	selectedTheme = signal(this.settings.theme ?? 'dark')
+	selectedTheme = signal<string>(this.settings.theme ?? this.themes[0].value)
 	selectedThemeChanged = effect(() => {
 		if (this.selectedTheme() === 'dark') {
 			this.renderer.addClass(document.body, 'dark-mode')
@@ -244,7 +244,7 @@ export class ConfigureAppComponent implements OnInit {
 			name: translateSignal('configure-app.identicon-options.natricon-by-appditto'),
 		},
 	]
-	selectedIdenticon = signal(this.settings.identiconsStyle ?? 'none')
+	selectedIdenticon = signal<string>(this.settings.identiconsStyle ?? this.identicons[0].value)
 	selectedIdenticonChanged = effect(() => {
 		this.settings.identiconsStyle = this.selectedIdenticon()
 		this.svcAppSettings.saveAppSettings()
@@ -268,21 +268,15 @@ export class ConfigureAppComponent implements OnInit {
 			name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 10 }),
 		},
 	]
-	selectedInactivityPeriod = signal(this.settings.inactivityPeriod ?? '300')
-	walletNotConfiguredTranslated = translateSignal('accounts.wallet-is-not-configured')
+	selectedInactivityPeriod = signal<string>(this.settings.inactivityPeriod.toString() ?? this.inactivityPeriods[2].value)
 	selectedInactivityPeriodFirstRun = true
 	selectedInactivityPeriodChanged = effect(async () => {
-		const walletNotConfiguredTranslated = this.walletNotConfiguredTranslated()
-		const selectedInactivityPeriod = this.selectedInactivityPeriod()
-		if (this.selectedInactivityPeriodFirstRun) {
+		const selectedInactivityPeriod = Number(this.selectedInactivityPeriod())
+		if (this.selectedInactivityPeriodFirstRun || selectedInactivityPeriod === this.settings.inactivityPeriod) {
 			this.selectedInactivityPeriodFirstRun = false
 			return
 		}
 		const wallet = untracked(() => this.svcWallet.selectedWallet())
-		if (!wallet) {
-			this.svcNotifications.sendError(walletNotConfiguredTranslated)
-			return
-		}
 		if (wallet.isLocked) {
 			await this.svcWallet.requestUnlock()
 		}
@@ -347,7 +341,7 @@ export class ConfigureAppComponent implements OnInit {
 		if (this.selectedServer === 'random' || this.selectedServer === 'offline') {
 			return this.powSources[0].name()
 		}
-		const selectedServerOption = this.svcAppSettings.serverOptions.find((d) => d.value === this.selectedServer)
+		const selectedServerOption = this.svcAppSettings.servers[this.selectedServer]
 		if (!selectedServerOption) {
 			return this.powSources[0].name()
 		}
@@ -370,7 +364,10 @@ export class ConfigureAppComponent implements OnInit {
 	]
 	selectedReceivableOption = this.receivableOptions[0].value
 
-	serverOptions = []
+	servers = computed(() => {
+		const { servers } = this.svcAppSettings
+		return Object.entries(servers).map(([value, { name }]) => ({ value, name }))
+	})
 	selectedServer = null
 
 	defaultRepresentative = null
@@ -508,8 +505,7 @@ export class ConfigureAppComponent implements OnInit {
 		const matchingReceivableOption = this.receivableOptions.find((d) => d.value === this.settings.receivableOption)
 		this.selectedReceivableOption = matchingReceivableOption?.value ?? this.receivableOptions[0].value
 
-		this.serverOptions = this.svcAppSettings.serverOptions
-		this.selectedServer = this.settings.serverName
+		this.selectedServer = this.settings.server
 		this.serverAPI = this.settings.serverAPI
 		this.serverAPIUpdated = this.serverAPI
 		this.serverWS = this.settings.serverWS
@@ -545,10 +541,7 @@ export class ConfigureAppComponent implements OnInit {
 			} catch (err) {
 				// pressing cancel, reset storage setting and interrupt
 				this.selectedStorage.set(this.storageOptions[0].value)
-				this.svcNotifications.sendInfo(
-					translateSignal('configure-app.switched-back-to-browser-local-storage-for-the-wallet-data'),
-					{ length: 10000 }
-				)
+				this.svcNotifications.sendInfo(translate('configure-app.switched-back-to-browser-local-storage-for-the-wallet-data'), { length: 10000 })
 				return
 			}
 		}
@@ -568,9 +561,7 @@ export class ConfigureAppComponent implements OnInit {
 		if (this.defaultRepresentative && this.defaultRepresentative.length) {
 			const valid = this.svcUtil.account.isValidAccount(this.defaultRepresentative)
 			if (!valid) {
-				return this.svcNotifications.sendWarning(
-					translateSignal('configure-app.default-representative-is-not-a-valid-account')
-				)
+				return this.svcNotifications.sendWarning(translate('configure-app.default-representative-is-not-a-valid-account'))
 			}
 		}
 
@@ -603,9 +594,7 @@ export class ConfigureAppComponent implements OnInit {
 		}
 
 		this.svcAppSettings.setAppSettings(newSettings)
-		this.svcNotifications.sendSuccess(
-			translateSignal('configure-app.app-wallet-settings-successfully-updated')
-		)
+		this.svcNotifications.sendSuccess(translate('configure-app.app-wallet-settings-successfully-updated'))
 
 		if (resaveWallet) {
 			this.svcWallet.saveWalletExport() // If swapping the storage engine, resave the wallet
@@ -615,9 +604,10 @@ export class ConfigureAppComponent implements OnInit {
 		}
 	}
 
+
 	async updateServerSettings () {
 		const newSettings = {
-			serverName: this.selectedServer,
+			server: this.selectedServer,
 			serverAPI: null,
 			serverWS: null,
 			serverAuth: null,
@@ -628,8 +618,7 @@ export class ConfigureAppComponent implements OnInit {
 			if (this.serverAPI.startsWith('https://') || this.serverAPI.startsWith('http://')) {
 				newSettings.serverAPI = this.serverAPI
 			} else {
-				return this.svcNotifications.sendWarning(
-					translateSignal('configure-app.custom-api-server-has-an-invalid-address')
+				return this.svcNotifications.sendWarning(translate('configure-app.custom-api-server-has-an-invalid-address')
 				)
 			}
 		}
@@ -638,8 +627,7 @@ export class ConfigureAppComponent implements OnInit {
 			if (this.serverWS.startsWith('wss://') || this.serverWS.startsWith('ws://')) {
 				newSettings.serverWS = this.serverWS
 			} else {
-				return this.svcNotifications.sendWarning(
-					translateSignal('configure-app.custom-update-server-has-an-invalid-address')
+				return this.svcNotifications.sendWarning(translate('configure-app.custom-update-server-has-an-invalid-address')
 				)
 			}
 		}
@@ -651,8 +639,7 @@ export class ConfigureAppComponent implements OnInit {
 		this.svcAppSettings.setAppSettings(newSettings)
 		this.svcAppSettings.loadAppSettings()
 
-		this.svcNotifications.sendSuccess(
-			translateSignal('configure-app.server-settings-successfully-updated')
+		this.svcNotifications.sendSuccess(translate('configure-app.server-settings-successfully-updated')
 		)
 
 		this.svcNode.node.status = false // Directly set node to offline since API url changed.  Status will get set by reloadBalances
@@ -713,15 +700,15 @@ export class ConfigureAppComponent implements OnInit {
 
 	// When changing the Server Config option, prefill values
 	serverConfigChange (newServer) {
-		const custom = this.serverOptions.find((c) => c.value === newServer)
+		const custom = this.svcAppSettings.servers[newServer]
 		if (custom) {
 			this.serverAPI = custom.api
 			this.serverAPIUpdated = null
 			this.serverWS = custom.ws
 			this.serverAuth = custom.auth
 			this.shouldRandom = custom.shouldRandom
-				? translateSignal('general.yes')
-				: translateSignal('general.no')
+				? translate('general.yes')
+				: translate('general.no')
 		}
 
 		// reset server stats until updated
@@ -747,9 +734,7 @@ export class ConfigureAppComponent implements OnInit {
 				'</b></p>'
 			)
 			this.svcWorkPool.clearCache()
-			this.svcNotifications.sendSuccess(
-				translateSignal('configure-app.successfully-cleared-the-work-cache')
-			)
+			this.svcNotifications.sendSuccess(translate('configure-app.successfully-cleared-the-work-cache'))
 			return true
 		} catch (err) {
 			return false
@@ -770,9 +755,7 @@ export class ConfigureAppComponent implements OnInit {
 			)
 			this.svcWallet.resetWallet()
 			this.svcWallet.removeWalletData()
-			this.svcNotifications.sendSuccess(
-				translateSignal('configure-app.successfully-deleted-all-wallet-data')
-			)
+			this.svcNotifications.sendSuccess(translate('configure-app.successfully-deleted-all-wallet-data'))
 		} catch (err) { }
 	}
 
@@ -796,11 +779,7 @@ export class ConfigureAppComponent implements OnInit {
 			this.svcRepresentative.resetRepresentativeList()
 			this.svcApi.deleteCache()
 			this.loadFromSettings()
-			this.svcNotifications.sendSuccess(
-				translateSignal(
-					'configure-app.clear-all-data.successfully-deleted-locally-stored-data-and-reset-the'
-				)
-			)
+			this.svcNotifications.sendSuccess(translate('configure-app.clear-all-data.successfully-deleted-locally-stored-data-and-reset-the'))
 			// Get a new random API server or Gnault will get stuck in offline mode
 			this.updateServerSettings()
 		} catch (err) { }
