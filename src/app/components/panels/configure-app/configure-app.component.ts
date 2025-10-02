@@ -256,23 +256,19 @@ export class ConfigureAppComponent implements OnInit {
 			name: translateSignal('configure-app.identicon-options.1-minute'),
 		},
 		{
+			value: '180',
+			name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 3 }),
+		},
+		{
 			value: '300',
 			name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 5 }),
 		},
 		{
-			value: '900',
-			name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 15 }),
-		},
-		{
-			value: '1800',
-			name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 30 }),
-		},
-		{
-			value: '3600',
-			name: translateSignal('configure-app.identicon-options.1-hour'),
+			value: '600',
+			name: translateSignal('configure-app.identicon-options.x-minutes', { minutes: 10 }),
 		},
 	]
-	selectedInactivityPeriod = signal(this.settings.inactivityPeriod ?? '5')
+	selectedInactivityPeriod = signal(this.settings.inactivityPeriod ?? '300')
 	walletNotConfiguredTranslated = translateSignal('accounts.wallet-is-not-configured')
 	selectedInactivityPeriodFirstRun = true
 	selectedInactivityPeriodChanged = effect(async () => {

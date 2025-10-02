@@ -199,7 +199,7 @@ export class AppSettingsService {
 			displayCurrency: 'USD',
 			defaultRepresentative: null,
 			lockOnClose: 1,
-			inactivityPeriod: '5',
+			inactivityPeriod: '300',
 			powSource: 'server',
 			customWorkServer: '',
 			receivableOption: 'amount',
