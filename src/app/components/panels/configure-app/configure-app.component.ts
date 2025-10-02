@@ -294,6 +294,7 @@ export class ConfigureAppComponent implements OnInit {
 				this.svcNotifications.sendError(err?.message ?? err)
 				return
 			}
+			this.svcNotifications.sendSuccess('Timeout period updated.')
 			this.settings.inactivityPeriod = selectedInactivityPeriod
 			this.svcAppSettings.saveAppSettings()
 		}
