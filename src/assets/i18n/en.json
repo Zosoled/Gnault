@@ -141,7 +141,6 @@
 		"authorization": "Authorization",
 		"change-if-your-wallet-should-be-locked-automatically-after": "Wallet will lock automatically after period of inactivity. Must be unlocked to change.",
 		"change-the-currency-pair-used-when-showing-fiat-values": "Change the currency pair used when showing fiat values in the application. Select None to hide fiat pairs.",
-		"change-where-your-wallet-is-stored-if-you-select-none-your": "Change where your wallet is stored. If you select none, your wallet is reset every time you reload.",
 		"change-which-server-is-used-to-communicate-with-the-nano": "Change which server is used to communicate with the nano network",
 		"clear-all-data": {
 			"1": "You are about to delete all data stored in Gnault, which includes all locally stored data about your currently configured wallet, all entries from your address and representative books, and any other cached data. All settings will be reset to default.",
@@ -210,9 +209,13 @@
 		"server-configuration": "Server Configuration",
 		"server-settings": "Server Settings",
 		"server-settings-successfully-updated": "Server settings successfully updated!",
-		"storage-options": {
-			"browser-local-storage": "Browser Local Storage",
-			"none": "None"
+		"storage": {
+			"options": {
+				"local": "Remember data",
+				"none": "Never remember data",
+				"session": "Remember data until Gnault is closed"
+			},
+			"tooltip": "Set how your non&#x2011;sensitive account, contact, price, and transaction data is stored. Wallets persist in an encrypted state until deleted, regardless of this setting."
 		},
 		"successfully-cleared-the-work-cache": "Successfully cleared the work cache!",
 		"successfully-deleted-all-wallet-data": "Successfully deleted all wallet data!",

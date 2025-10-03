@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common'
 import { AfterViewInit, Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
-import { ClipboardModule } from 'ngx-clipboard'
-import { map } from 'rxjs/operators'
 import { NanoAccountIdComponent } from 'app/components/elements'
 import {
 	ApiService,
@@ -12,6 +10,8 @@ import {
 	RepresentativeService,
 	UtilService
 } from 'app/services'
+import { ClipboardModule } from 'ngx-clipboard'
+import { map } from 'rxjs/operators'
 
 @Component({
 	selector: 'app-manage-representatives',
@@ -44,7 +44,7 @@ export class ManageRepresentativesComponent implements OnInit, AfterViewInit {
 	// Set the online status of each representative
 	representatives$ = this.repService.representatives$.pipe(map(reps => {
 		return reps.map(rep => {
-			rep.online = this.onlineReps.indexOf(rep.id) !== -1
+			rep.online = this.onlineReps.indexOf(rep.address) !== -1
 			return rep
 		})
 	}))

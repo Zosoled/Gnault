@@ -141,7 +141,6 @@
 		"authorization": "Autorisation",
 		"change-if-your-wallet-should-be-locked-automatically-after": "Le portefeuille se verrouille automatiquement après la période d'inactivité. \nDoit être déverrouillé pour changer.",
 		"change-the-currency-pair-used-when-showing-fiat-values": "Modifiez la paire de devises utilisée pour afficher les valeurs fiat dans l'application. Sélectionnez Aucune pour masquer les paires fiat.",
-		"change-where-your-wallet-is-stored-if-you-select-none-your": "Modifiez l'endroit où votre portefeuille est stocké. Si vous sélectionnez aucun, votre portefeuille est réinitialisé à chaque rechargement.",
 		"change-which-server-is-used-to-communicate-with-the-nano": "Modifiez le serveur utilisé pour communiquer avec le réseau nano",
 		"clear-all-data": {
 			"1": "Vous êtes sur le point de supprimer toutes les données stockées dans Gnault, ce qui inclut toutes les données stockées localement sur votre portefeuille actuellement configuré, toutes les entrées de vos carnets d'adresses et de représentants, ainsi que toutes les autres données en cache. Tous les paramètres seront réinitialisés aux valeurs par défaut.",
@@ -212,9 +211,13 @@
 		"server-configuration": "Configuration du serveur",
 		"server-settings": "Paramètres du serveur",
 		"server-settings-successfully-updated": "Paramètres du serveur mis à jour avec succès !",
-		"storage-options": {
-			"browser-local-storage": "Stockage local du navigateur",
-			"none": "Aucun"
+		"storage": {
+			"options": {
+				"local": "Rappelez-vous les données",
+				"none": "Ne me souviens jamais des données",
+				"session": "Rappelez-vous les données jusqu'à ce que Gnault soit fermé"
+			},
+			"tooltip": "Définissez la façon dont vos données de compte, de contact, de prix et de transaction non sensibles sont stockées. \nLes portefeuilles persistent dans un état crypté jusqu'à supprimer, quel que soit ce cadre."
 		},
 		"successfully-cleared-the-work-cache": "Le cache de travail a été effacé avec succès !",
 		"successfully-deleted-all-wallet-data": "Toutes les données du portefeuille ont été supprimées avec succès !",

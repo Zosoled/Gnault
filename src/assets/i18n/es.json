@@ -141,7 +141,6 @@
 		"authorization": "Autorización",
 		"change-if-your-wallet-should-be-locked-automatically-after": "La billetera se bloqueará automáticamente después del período de inactividad. \nDebe desbloquearse para cambiar.",
 		"change-the-currency-pair-used-when-showing-fiat-values": "Cambiar el par de divisas utilizado al mostrar valores en moneda fiat en la aplicación. Seleccione Ninguno para ocultar pares fiat.",
-		"change-where-your-wallet-is-stored-if-you-select-none-your": "Cambiar dónde se almacena su billetera. Si selecciona ninguno, su billetera se reinicia cada vez que recarga.",
 		"change-which-server-is-used-to-communicate-with-the-nano": "Cambiar qué servidor se utiliza para comunicarse con la red nano",
 		"clear-all-data": {
 			"1": "Está a punto de eliminar todos los datos almacenados en Gnault, lo que incluye todos los datos almacenados localmente sobre su billetera configurada actualmente, todas las entradas de sus libretas de direcciones y representantes, y cualquier otro dato en caché. Todas las configuraciones se restablecerán a los valores predeterminados.",
@@ -212,9 +211,13 @@
 		"server-configuration": "Configuración del servidor",
 		"server-settings": "Configuración del servidor",
 		"server-settings-successfully-updated": "¡Configuración del servidor actualizada exitosamente!",
-		"storage-options": {
-			"browser-local-storage": "Almacenamiento local del navegador",
-			"none": "Ninguno"
+		"storage": {
+			"options": {
+				"local": "Recuerda datos",
+				"none": "Nunca recuerdo datos",
+				"session": "Recuerde los datos hasta que se cierre gnault"
+			},
+			"tooltip": "Establezca cómo se almacena su cuenta no sensible, contacto, precio y datos de transacciones. \nLas billeteras persisten en un estado encriptado hasta que se elimine, independientemente de esta configuración."
 		},
 		"successfully-cleared-the-work-cache": "¡Se limpió exitosamente el caché de trabajo!",
 		"successfully-deleted-all-wallet-data": "¡Se eliminaron exitosamente todos los datos de la billetera!",

@@ -28,10 +28,12 @@ export interface RepresentativeOverview {
 }
 
 export interface StoredRepresentative {
-	id: string
+	address: string
 	name: string
-	warn?: boolean
-	trusted?: boolean
+	warn: boolean
+	trusted: boolean
+	weight?: number
+	online?: boolean
 }
 
 export interface RepresentativeApiOverview extends BaseApiAccount {
@@ -41,7 +43,7 @@ export interface RepresentativeApiOverview extends BaseApiAccount {
 }
 
 export interface FullRepresentativeOverview extends RepresentativeApiOverview {
-	id: string
+	address: string
 	percent: number
 	statusText: string
 	label: string | null
@@ -367,8 +369,8 @@ export class RepresentativeService {
 		return true
 	}
 
-	getRepresentative (id: string): StoredRepresentative | undefined {
-		return this.representatives.find((rep) => rep.id === id)
+	getRepresentative (address: string): StoredRepresentative | undefined {
+		return this.representatives.find((rep) => rep.address === address)
 	}
 
 	// Reset representatives list to the default one
@@ -378,16 +380,16 @@ export class RepresentativeService {
 		this.loaded = false
 	}
 
-	saveRepresentative (accountID, name, trusted = false, warn = false): void {
-		const newRepresentative: any = {
-			id: accountID,
-			name: name,
+	saveRepresentative (address: string, name: string, trusted = false, warn = false): void {
+		const newRepresentative: StoredRepresentative = {
+			address,
+			name,
+			trusted,
+			warn
 		}
-		if (trusted) newRepresentative.trusted = true
-		if (warn) newRepresentative.warn = true
 
 		const existingRepresentative = this.representatives.find(
-			(r) => r.name.toLowerCase() === name.toLowerCase() || r.id.toLowerCase() === accountID.toLowerCase()
+			(r) => r.name.toLowerCase() === name.toLowerCase() || r.address.toLowerCase() === address.toLowerCase()
 		)
 		if (existingRepresentative) {
 			this.representatives.splice(this.representatives.indexOf(existingRepresentative), 1, newRepresentative)

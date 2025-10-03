@@ -300,15 +300,15 @@ export class ConfigureAppComponent implements OnInit {
 	storageOptions = [
 		{
 			value: 'localStorage',
-			name: translateSignal('configure-app.storage-options.browser-local-storage'),
+			name: translate('configure-app.storage.options.local'),
 		},
 		{
 			value: 'sessionStorage',
-			name: translateSignal('configure-app.storage-options.browser-local-storage'),
+			name: translate('configure-app.storage.options.session'),
 		},
 		{
 			value: 'none',
-			name: translateSignal('configure-app.storage-options.none'),
+			name: translate('configure-app.storage.options.none'),
 		},
 	]
 	selectedStorage = signal(this.settings.walletStorage ?? 'localStorage')

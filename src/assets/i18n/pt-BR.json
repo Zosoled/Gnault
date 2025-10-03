@@ -141,7 +141,6 @@
 		"authorization": "Autorização",
 		"change-if-your-wallet-should-be-locked-automatically-after": "A carteira trava automaticamente após o período de inatividade. \nDeve ser desbloqueado para mudar.",
 		"change-the-currency-pair-used-when-showing-fiat-values": "Altere o par de moedas usado ao mostrar valores em moeda fiduciária no aplicativo. Selecione Nenhum para ocultar pares fiduciários.",
-		"change-where-your-wallet-is-stored-if-you-select-none-your": "Altere onde sua carteira é armazenada. Se você selecionar nenhum, sua carteira será redefinida toda vez que você recarregar.",
 		"change-which-server-is-used-to-communicate-with-the-nano": "Altere qual servidor é usado para se comunicar com a rede nano",
 		"clear-all-data": {
 			"1": "Você está prestes a excluir todos os dados armazenados no Gnault, o que inclui todos os dados armazenados localmente sobre sua carteira atualmente configurada, todas as entradas de seus catálogos de endereços e representantes, e quaisquer outros dados em cache. Todas as configurações serão redefinidas para o padrão.",
@@ -212,9 +211,13 @@
 		"server-configuration": "Configuração do Servidor",
 		"server-settings": "Configurações do Servidor",
 		"server-settings-successfully-updated": "Configurações do servidor atualizadas com sucesso!",
-		"storage-options": {
-			"browser-local-storage": "Armazenamento Local do Navegador",
-			"none": "Nenhum"
+		"storage": {
+			"options": {
+				"local": "Lembre -se de dados",
+				"none": "Nunca lembre -se de dados",
+				"session": "Lembre -se de dados até que a GNAULT esteja fechada"
+			},
+			"tooltip": "Defina como os dados não sensíveis à sua conta, contato, preço e transação não sensíveis são armazenados. \nAs carteiras persistem em um estado criptografado até excluir, independentemente dessa configuração."
 		},
 		"successfully-cleared-the-work-cache": "Cache de trabalho limpo com sucesso!",
 		"successfully-deleted-all-wallet-data": "Todos os dados da carteira foram excluídos com sucesso!",

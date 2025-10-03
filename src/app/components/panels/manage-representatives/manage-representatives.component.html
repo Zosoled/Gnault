@@ -67,18 +67,18 @@
 							class="uk-list uk-list-striped"
 							style="margin-top: 0"
 						>
-							@for (representative of representatives$ | async; track representative.id) {
-								<li [attr.data-account]="representative.id">
+							@for (rep of representatives$ | async; track rep.address) {
+								<li [attr.data-account]="rep.address">
 									<div uk-grid>
 										<div class="uk-width-2-5 uk-text-truncate uk-visible-toggle">
 											<div uk-grid>
 												<div class="uk-width-expand uk-text-truncate">
 													<a
-														(click)="editEntry(representative)"
+														(click)="editEntry(rep)"
 														class="uk-link-text"
 														title="Edit Entry"
 														uk-tooltip
-														>{{ representative.name }}</a
+														>{{ rep.name }}</a
 													>
 												</div>
 												<ul
@@ -86,7 +86,7 @@
 													style="padding-left: 0"
 												>
 													<!--<li><span class="uk-sortable-handle uk-margin-small-right" uk-icon="icon: table"></span></li>-->
-													@if (representative.trusted) {
+													@if (rep.trusted) {
 														<li>
 															<span
 																class="uk-text-success"
@@ -96,7 +96,7 @@
 															></span>
 														</li>
 													}
-													@if (representative.warn) {
+													@if (rep.warn) {
 														<li>
 															<span
 																class="uk-text-small uk-text-warning"
@@ -113,19 +113,19 @@
 											<div uk-grid>
 												<div class="uk-width-expand uk-text-truncate">
 													<a
-														[routerLink]="'/accounts/' + representative.id"
+														[routerLink]="'/accounts/' + rep.address"
 														class="nano-address-clickable nano-address-monospace uk-display-block"
 														title="View Account Details"
 														uk-tooltip
 													>
-														<app-nano-account-id [address]="representative.address"></app-nano-account-id>
+														<app-nano-account-id [address]="rep.address"></app-nano-account-id>
 													</a>
 												</div>
 												<ul class="nano-address-actions uk-iconnav">
 													<li>
 														<a
 															ngxClipboard
-															[cbContent]="representative.id"
+															[cbContent]="rep.address"
 															(cbOnSuccess)="copied()"
 															uk-icon="icon: copy"
 															title="Copy Account Address"
@@ -140,7 +140,7 @@
 											style="padding-left: 0"
 										>
 											<a
-												(click)="deleteRepresentative(representative.id)"
+												(click)="deleteRepresentative(rep.address)"
 												class="uk-text-danger"
 												title="Delete Entry"
 												uk-tooltip

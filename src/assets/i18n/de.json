@@ -141,7 +141,6 @@
 		"authorization": "Autorisierung",
 		"change-if-your-wallet-should-be-locked-automatically-after": "Brieftasche sperrt automatisch nach Inaktivitätsdauer. \nMuss freigeschaltet werden, um sich zu ändern.",
 		"change-the-currency-pair-used-when-showing-fiat-values": "Ändern Sie das Währungspaar, das bei der Anzeige von Fiat-Werten in der Anwendung verwendet wird. Wählen Sie 'Keine', um Fiat-Paare auszublenden.",
-		"change-where-your-wallet-is-stored-if-you-select-none-your": "Ändern Sie, wo Ihre Wallet gespeichert wird. Wenn Sie 'Keine' auswählen, wird Ihre Wallet bei jedem Neuladen zurückgesetzt.",
 		"change-which-server-is-used-to-communicate-with-the-nano": "Ändern Sie, welcher Server für die Kommunikation mit dem Nano-Netzwerk verwendet wird",
 		"clear-all-data": {
 			"1": "Sie sind dabei, alle in Gnault gespeicherten Daten zu löschen, einschließlich aller lokal gespeicherten Daten über Ihre aktuell konfigurierte Wallet, aller Einträge aus Ihrem Adress- und Vertreterbuch und aller anderen zwischengespeicherten Daten. Alle Einstellungen werden auf die Standardwerte zurückgesetzt.",
@@ -209,9 +208,13 @@
 		"server-configuration": "Server-Konfiguration",
 		"server-settings": "Server-Einstellungen",
 		"server-settings-successfully-updated": "Server-Einstellungen erfolgreich aktualisiert!",
-		"storage-options": {
-			"browser-local-storage": "Browser-Lokalspeicher",
-			"none": "Keiner"
+		"storage": {
+			"options": {
+				"local": "Denken Sie an Daten",
+				"none": "Erinnern Sie sich nie an Daten",
+				"session": "Denken Sie daran, bis Gnault geschlossen ist"
+			},
+			"tooltip": "Legen Sie fest, wie Ihre nicht sensitiven Konto-, Kontakt-, Preis- und Transaktionsdaten gespeichert werden. \nBrieftaschen bestehen in einem verschlüsselten Zustand bis zum Löschen, unabhängig von dieser Einstellung."
 		},
 		"successfully-cleared-the-work-cache": "Work-Cache erfolgreich geleert!",
 		"successfully-deleted-all-wallet-data": "Alle Wallet-Daten erfolgreich gelöscht!",

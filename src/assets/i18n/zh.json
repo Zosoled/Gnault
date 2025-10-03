@@ -141,7 +141,6 @@
 		"authorization": "授权",
 		"change-if-your-wallet-should-be-locked-automatically-after": "无活动期间，钱包将自动锁定。\n必须解锁才能更改。",
 		"change-the-currency-pair-used-when-showing-fiat-values": "更改在应用程序中显示法定货币值时使用的货币对。选择\"无\"以隐藏法定货币对。",
-		"change-where-your-wallet-is-stored-if-you-select-none-your": "更改钱包的存储位置。如果选择\"无\"，每次重新加载时都会重置您的钱包。",
 		"change-which-server-is-used-to-communicate-with-the-nano": "更改用于与纳米网络通信的服务器",
 		"clear-all-data": {
 			"1": "您即将删除存储在Gnault中的所有数据，包括有关当前配置的钱包的所有本地存储数据、地址和代表簿中的所有条目以及任何其他缓存数据。所有设置将重置为默认值。",
@@ -212,9 +211,13 @@
 		"server-configuration": "服务器配置",
 		"server-settings": "服务器设置",
 		"server-settings-successfully-updated": "服务器设置更新成功！",
-		"storage-options": {
-			"browser-local-storage": "浏览器本地存储",
-			"none": "无"
+		"storage": {
+			"options": {
+				"local": "记住数据",
+				"none": "永远不要记住数据",
+				"session": "记住数据，直到关闭Gnault"
+			},
+			"tooltip": "设置如何存储您的非敏感帐户，联系，价格和交易数据。\n钱包一直处于加密状态，直到被删除为止，无论这种设置如何。"
 		},
 		"successfully-cleared-the-work-cache": "成功清除工作缓存！",
 		"successfully-deleted-all-wallet-data": "成功删除所有钱包数据！",

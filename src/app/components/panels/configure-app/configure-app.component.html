@@ -210,21 +210,21 @@
 									<span
 										uk-icon="icon: info;"
 										uk-tooltip
-										[title]="t('configure-app.change-where-your-wallet-is-stored-if-you-select-none-your')"
+										[title]="t('configure-app.storage.tooltip')"
 									></span>
 								</label>
 								<div class="uk-form-controls">
 									<div class="uk-inline uk-width-1-1">
 										<select
 											class="uk-select"
-											[(ngModel)]="selectedStorage"
+											(change)="onSelectInput(selectedStorage, $event)"
 										>
 											@for (storage of storageOptions; track storage.value) {
 												<option
 													[value]="storage.value"
 													[selected]="storage.value === selectedIdenticon()"
 												>
-													{{ storage.name() }}
+													{{ t(storage.name) }}
 												</option>
 											}
 										</select>

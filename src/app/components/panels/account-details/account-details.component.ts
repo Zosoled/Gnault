@@ -283,9 +283,10 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 	}
 
 	updateRepresentativeInfo () {
-		if (this.account()) {
+		const account = this.account()
+		if (account) {
 			const representativeFromOverview = this.representativesOverview.find(
-				(rep) => rep.account === this.account().representative
+				(rep) => rep.account === account.representative
 			)
 			if (representativeFromOverview != null) {
 				this.repLabel = representativeFromOverview.label
@@ -295,7 +296,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 			}
 			this.repVotingWeight = 0n
 			this.repDonationAddress = null
-			const knownRepresentative = this.svcRepresentative.getRepresentative(this.account().representative)
+			const knownRepresentative = this.svcRepresentative.getRepresentative(account.representative.address)
 			if (knownRepresentative != null) {
 				this.repLabel = knownRepresentative.name
 				return

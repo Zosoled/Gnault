@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core'
 import { Router } from '@angular/router'
 import { TranslocoDirective } from '@jsverse/transloco'
-import { NanoBlockService, RepresentativeService, WalletService } from 'app/services'
+import { FullRepresentativeOverview, NanoBlockService, RepresentativeService, WalletService } from 'app/services'
 import { Account } from 'libnemo'
 
 @Component({
@@ -18,7 +18,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 
 	changeableRepresentatives = this.svcRepresentative.changeableReps
 	displayedRepresentatives = []
-	representatives = []
+	representatives: FullRepresentativeOverview[] = []
 	showRepChangeRequired = false
 	showRepHelp = false
 	selectedAccount = null
@@ -32,7 +32,31 @@ export class ChangeRepWidgetComponent implements OnInit {
 				return
 			}
 
-			this.representatives = reps
+			this.representatives = reps.map((r) => ({
+				...r,
+				address: '',
+				percent: 0,
+				statusText: '',
+				label: null,
+				status: {
+					online: false,
+					veryHighWeight: false,
+					highWeight: false,
+					veryLowUptime: false,
+					lowUptime: false,
+					closing: false,
+					markedToAvoid: false,
+					markedAsNF: false,
+					trusted: false,
+					daysSinceLastVoted: 0,
+					changeRequired: false,
+					warn: false,
+					known: false,
+					uptime: null,
+					score: null,
+				},
+			}))
+
 			await this.updateChangeableRepresentatives()
 			this.updateDisplayedRepresentatives()
 			this.initialLoadComplete = true
@@ -98,9 +122,9 @@ export class ChangeRepWidgetComponent implements OnInit {
 
 	includeRepRequiringChange (displayedReps: any[]) {
 		const repRequiringChange = this.changeableRepresentatives
-			.sort((a, b) => b.delegatedWeight.minus(a.delegatedWeight))
+			.sort((a, b) => Number(b.delegatedWeight - a.delegatedWeight))
 			.filter((changeableRep) => {
-				const isNoDisplayedRepChangeable = displayedReps.every((displayedRep) => displayedRep.id !== changeableRep.id)
+				const isNoDisplayedRepChangeable = displayedReps.every((displayedRep) => displayedRep.address !== changeableRep.address)
 				return changeableRep.status.changeRequired && isNoDisplayedRepChangeable
 			})[0]
 
@@ -155,7 +179,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 			? this.selectedAccount.address
 			: // all accounts that delegate to this rep
 			this.representatives
-				.filter((rep) => rep.id === clickedRep.id)
+				.filter((rep) => rep.address === clickedRep.address)
 				.map((rep) => {
 					rep.accounts.map((a) => a.address).join(',')
 				})
