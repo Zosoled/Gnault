@@ -222,7 +222,6 @@
 		"successfully-cleared-the-work-cache": "¡Se limpió exitosamente el caché de trabajo!",
 		"successfully-deleted-all-wallet-data": "¡Se eliminaron exitosamente todos los datos de la billetera!",
 		"successfully-updated": "¡Actualizado exitosamente!",
-		"switched-back-to-browser-local-storage-for-the-wallet-data": "Se volvió al \"Almacenamiento local del navegador\" para los datos de la billetera. Use el botón nuevamente si desea guardar otras configuraciones.",
 		"theme": "Tema",
 		"themes": {
 			"dark": "Oscuro",

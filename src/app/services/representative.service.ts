@@ -57,7 +57,7 @@ export class RepresentativeService {
 	private svcNinja = inject(NinjaService)
 	private svcWallet = inject(WalletService)
 
-	storeKey: 'Gnault-Representatives' = 'Gnault-Representatives'
+	readonly storeKey: 'Gnault-Representatives' = 'Gnault-Representatives'
 
 	// Default representatives list
 	defaultRepresentatives: StoredRepresentative[] = []

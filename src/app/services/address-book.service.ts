@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core'
+import { inject, Injectable } from '@angular/core'
 import { BehaviorSubject } from 'rxjs'
+import { AppSettingsService } from './app-settings.service'
 
 interface AddressBookEntry {
 	account: string
@@ -10,39 +11,23 @@ interface AddressBookEntry {
 
 @Injectable({ providedIn: 'root' })
 export class AddressBookService {
-	storeKey: 'Gnault-AddressBook' = 'Gnault-AddressBook'
+	private svcAppSettings = inject(AppSettingsService)
+
+	readonly storeKey: 'Gnault-AddressBook' = 'Gnault-AddressBook'
+
 	addressBook: AddressBookEntry[] = []
 	addressBook$ = new BehaviorSubject([])
-	constructor () { }
 
-	loadAddressBook () {
-		let addressBook = []
-		const addressBookStore = localStorage.getItem(this.storeKey)
-		if (addressBookStore) {
-			addressBook = JSON.parse(addressBookStore)
-		}
-		this.addressBook = addressBook
-		this.addressBook$.next(this.addressBook)
-
-		return this.addressBook
+	get settings () {
+		return this.svcAppSettings.settings()
 	}
 
-	patchXrbPrefixData () {
-		const addressBookStore = localStorage.getItem(this.storeKey)
-		if (!addressBookStore) return
-
-		const addressBook = JSON.parse(addressBookStore)
-
-		const newAddressBook = addressBook.map(entry => {
-			if (entry.account.indexOf('xrb_') !== -1) {
-				entry.account = entry.account.replace('xrb_', 'nano_')
-			}
-			return entry
-		})
-
-		localStorage.setItem(this.storeKey, JSON.stringify(newAddressBook))
-
-		return true
+	loadAddressBook () {
+		const storage: Storage = globalThis[this.settings.storage]
+		const data = storage?.getItem?.(this.storeKey)
+		this.addressBook = JSON.parse(data ?? '[]')
+		this.addressBook$.next(this.addressBook)
+		return this.addressBook
 	}
 
 	async saveAddress (account, name, trackBalance, trackTransactions) {

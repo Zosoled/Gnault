@@ -1,5 +1,6 @@
-import { Injectable, WritableSignal, inject, signal } from '@angular/core'
-import { TranslocoService, getBrowserCultureLang, getBrowserLang } from '@jsverse/transloco'
+import { Injectable, WritableSignal, computed, effect, inject, signal } from '@angular/core'
+import { TranslocoService, getBrowserCultureLang, getBrowserLang, translate } from '@jsverse/transloco'
+import { NotificationsService } from './notification.service'
 
 export type WalletStore = 'localStorage' | 'none'
 export type LedgerConnectionType = 'usb' | 'bluetooth'
@@ -30,15 +31,15 @@ interface AppSettings {
 	serverAPI: string | null
 	serverWS: string | null
 	theme: string
-	walletStorage: string
 	walletVersion: number | null
 }
 
 @Injectable({ providedIn: 'root' })
 export class AppSettingsService {
+	private svcNotifications = inject(NotificationsService)
 	private svcTransloco = inject(TranslocoService)
 
-	private storeKey: 'Gnault-AppSettings' = 'Gnault-AppSettings'
+	readonly storeKey: 'Gnault-AppSettings' = 'Gnault-AppSettings'
 
 	settings: WritableSignal<AppSettings> = signal({
 		customWorkServer: '',
@@ -56,9 +57,9 @@ export class AppSettingsService {
 		serverAPI: null,
 		serverWS: null,
 		theme: 'dark',
-		walletStorage: 'localStorage',
 		walletVersion: 1,
 	})
+
 	servers: NanoServers = {
 		rainstorm: {
 			name: 'Rainstorm City',
@@ -98,8 +99,31 @@ export class AppSettingsService {
 		},
 	}
 
+	storage = computed(() => {
+		const storageKey = this.storageKey()
+		if (storageKey === 'localStorage') return localStorage
+		if (storageKey === 'sessionStorage') return sessionStorage
+		return undefined
+	})
+	storageKey = signal<'localStorage' | 'sessionStorage' | 'none'>('localStorage')
+	storageChanged = effect(() => {
+		const storage = this.storage()
+		if (storage) {
+			const data = Object.entries(storage)
+			localStorage.clear()
+			sessionStorage.clear()
+			for (const [key, value] of data) {
+				storage.setItem(key, value)
+			}
+			// Save selected storage locally so we can always clear if the user desires
+			localStorage.setItem('Gnault-Storage', this.storageKey())
+			this.svcNotifications.sendSuccess(translate('configure-app.storage.success'), { length: 10000 })
+		}
+	})
+
 	loadAppSettings () {
-		const item = localStorage.getItem(this.storeKey) ?? '{}'
+		const storage: Storage = globalThis[localStorage.getItem('Gnault-Storage')] ?? 'localStorage'
+		const item = storage?.getItem?.(this.storeKey) ?? localStorage.getItem(this.storeKey) ?? sessionStorage.getItem(this.storeKey) ?? '{}'
 		const settings = JSON.parse(item, (_, v) => !isNaN(v) && typeof v === 'string' && v.trim() !== '' ? Number(v) : v)
 		if (settings.language == null) {
 			const browserCultureLang = getBrowserCultureLang()
@@ -151,7 +175,8 @@ export class AppSettingsService {
 	}
 
 	saveAppSettings () {
-		localStorage.setItem(this.storeKey, JSON.stringify(this.settings()))
+		const storage: Storage = globalThis[this.storage()]
+		storage?.setItem?.(this.storeKey, JSON.stringify(settings))
 	}
 
 	getAppSetting (key) {
@@ -189,7 +214,7 @@ export class AppSettingsService {
 			serverAPI: null,
 			serverWS: null,
 			theme: 'dark',
-			walletStorage: 'localStorage',
+			storage: 'localStorage',
 			walletVersion: 1,
 		})
 	}

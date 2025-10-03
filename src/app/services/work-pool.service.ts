@@ -8,7 +8,8 @@ export class WorkPoolService {
 	private notifications = inject(NotificationsService)
 	private util = inject(UtilService)
 
-	storeKey: 'Gnault-WorkCache' = 'Gnault-WorkCache'
+	readonly storeKey: 'Gnault-WorkCache' = 'Gnault-WorkCache'
+
 	cacheLength = 25
 	workCache = []
 	currentlyProcessingHashes = {}

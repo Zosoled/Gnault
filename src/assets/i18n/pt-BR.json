@@ -222,7 +222,6 @@
 		"successfully-cleared-the-work-cache": "Cache de trabalho limpo com sucesso!",
 		"successfully-deleted-all-wallet-data": "Todos os dados da carteira foram excluídos com sucesso!",
 		"successfully-updated": "Atualizado com sucesso!",
-		"switched-back-to-browser-local-storage-for-the-wallet-data": "Voltou para 'Armazenamento Local do Navegador' para os dados da carteira. Use o botão novamente se quiser salvar outras configurações.",
 		"theme": "Tema",
 		"themes": {
 			"dark": "Escuro",

@@ -222,7 +222,6 @@
 		"successfully-cleared-the-work-cache": "Le cache de travail a été effacé avec succès !",
 		"successfully-deleted-all-wallet-data": "Toutes les données du portefeuille ont été supprimées avec succès !",
 		"successfully-updated": "Mis à jour avec succès !",
-		"switched-back-to-browser-local-storage-for-the-wallet-data": "Retour au \"Stockage local du navigateur\" pour les données du portefeuille. Utilisez à nouveau le bouton si vous voulez enregistrer d'autres paramètres.",
 		"theme": "Thème",
 		"themes": {
 			"dark": "Sombre",

@@ -26,7 +26,7 @@
 		"target": "es2023",
 		"typeRoots": [
 			"node_modules/@types",
-			"./src/typings"
+			"./src/types.d.ts"
 		],
 	},
 	"angularCompilerOptions": {

@@ -222,7 +222,6 @@
 		"successfully-cleared-the-work-cache": "成功清除工作缓存！",
 		"successfully-deleted-all-wallet-data": "成功删除所有钱包数据！",
 		"successfully-updated": "更新成功！",
-		"switched-back-to-browser-local-storage-for-the-wallet-data": "已切换回\"浏览器本地存储\"以存储钱包数据。如果您想保存其他设置，请再次使用该按钮。",
 		"theme": "主题",
 		"themes": {
 			"dark": "黑暗的",

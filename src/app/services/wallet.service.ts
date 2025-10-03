@@ -63,8 +63,6 @@ export interface WalletApiAccount extends BaseApiAccount {
 	error?: string
 }
 
-const storeKey: 'Gnault-Wallet' = `Gnault-Wallet`
-
 /**
  * Service to manage Wallet state and handle Wallet requests.
  */
@@ -80,6 +78,8 @@ export class WalletService {
 	private svcUtil = inject(UtilService)
 	private svcWebsocket = inject(WebsocketService)
 	private svcWorkPool = inject(WorkPoolService)
+
+	readonly storeKey: 'Gnault-Wallet' = `Gnault-Wallet`
 
 	selectedWallet: WritableSignal<Wallet> = signal(null)
 	wallets: WritableSignal<Wallet[]> = signal<Wallet[]>([])
@@ -338,9 +338,9 @@ export class WalletService {
 
 		this.wallets.set(await Wallet.restore())
 
-		const { walletStorage } = this.settings
+		const { storage: walletStorage } = this.settings
 		const storage = globalThis[walletStorage]
-		const walletData = storage.getItem(storeKey)
+		const walletData = storage.getItem(this.storeKey)
 
 		if (walletData) {
 			const walletJson = JSON.parse(walletData)
@@ -932,16 +932,16 @@ export class WalletService {
 	 */
 	async saveWalletExport (): Promise<void> {
 		const exportData = await this.generateWalletExport()
-		const { walletStorage } = this.settings
+		const { storage: walletStorage } = this.settings
 		const storage = globalThis[walletStorage]
-		storage ? storage.setItem(storeKey, JSON.stringify(exportData)) : this.removeWalletData()
+		storage ? storage.setItem(this.storeKey, JSON.stringify(exportData)) : this.removeWalletData()
 	}
 
 	removeWalletData () {
 		for (const wallet of this.wallets()) {
 			wallet.destroy()
 		}
-		localStorage.removeItem(storeKey)
+		localStorage.removeItem(this.storeKey)
 		this.wallets.set([])
 		this.selectedWallet.set(null)
 	}

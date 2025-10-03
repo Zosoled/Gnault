@@ -13,7 +13,8 @@ export class PriceService {
 	private age = computed(() => Date.now() - this.lastUpdated())
 	private apiUrl: string = `https://api.coingecko.com/api/v3/coins/nano?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`
 	private lastUpdated = signal(0)
-	private storeKey: 'Gnault-Price' = 'Gnault-Price'
+
+	readonly storeKey: 'Gnault-Price' = 'Gnault-Price'
 
 	currencies: Signal<string[]> = computed(() => {
 		return Object.keys(this.prices()).map(price => price.toUpperCase())
@@ -25,6 +26,10 @@ export class PriceService {
 	})
 	oneNano: bigint = 10n ** 30n
 	prices: WritableSignal<{ [currency: string]: number }> = signal({})
+
+	get storage (): Storage {
+		return globalThis[this.svcAppSettings.settings().storage]
+	}
 
 	constructor () {
 		this.loadPrice()
@@ -63,7 +68,7 @@ export class PriceService {
 	}
 
 	private loadPrice (): void {
-		const item = localStorage.getItem(this.storeKey)
+		const item = this.storage?.getItem(this.storeKey)
 		if (item) {
 			const data = JSON.parse(item)
 			this.lastUpdated.set(data.lastUpdated)
@@ -73,6 +78,6 @@ export class PriceService {
 
 	private savePrice (): void {
 		const data = { lastUpdated: this.lastUpdated(), prices: this.prices() }
-		localStorage.setItem(this.storeKey, JSON.stringify(data))
+		this.storage?.setItem(this.storeKey, JSON.stringify(data))
 	}
 }

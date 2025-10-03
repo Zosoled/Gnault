@@ -210,17 +210,22 @@
 		"server-settings": "Server Settings",
 		"server-settings-successfully-updated": "Server settings successfully updated!",
 		"storage": {
+			"errors": {
+				"data-conflict": "Conflicting data found that requires manual intervention.",
+				"unknown-option": "Unknown data storage option."
+			},
+			"label": "Data Storage",
 			"options": {
 				"local": "Remember data",
 				"none": "Never remember data",
 				"session": "Remember data until Gnault is closed"
 			},
+			"success": "Data storage set successfully.",
 			"tooltip": "Set how your non&#x2011;sensitive account, contact, price, and transaction data is stored. Wallets persist in an encrypted state until deleted, regardless of this setting."
 		},
 		"successfully-cleared-the-work-cache": "Successfully cleared the work cache!",
 		"successfully-deleted-all-wallet-data": "Successfully deleted all wallet data!",
 		"successfully-updated": "Successfully updated!",
-		"switched-back-to-browser-local-storage-for-the-wallet-data": "Switched back to \"Browser Local Storage\" for the wallet data. Use the button again if you want to save other settings.",
 		"theme": "Theme",
 		"themes": {
 			"dark": "Dark",

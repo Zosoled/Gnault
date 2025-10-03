@@ -219,7 +219,6 @@
 		"successfully-cleared-the-work-cache": "Work-Cache erfolgreich geleert!",
 		"successfully-deleted-all-wallet-data": "Alle Wallet-Daten erfolgreich gelöscht!",
 		"successfully-updated": "Erfolgreich aktualisiert!",
-		"switched-back-to-browser-local-storage-for-the-wallet-data": "Auf 'Browser-Lokalspeicher' für die Wallet-Daten zurückgeschaltet. Verwenden Sie die Schaltfläche erneut, wenn Sie andere Einstellungen speichern möchten.",
 		"theme": "Thema",
 		"themes": {
 			"dark": "Dunkel",

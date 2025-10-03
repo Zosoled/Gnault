@@ -297,7 +297,7 @@ export class ConfigureAppComponent implements OnInit {
 	/**
 	 * Saves non-sensitive appplication data in domain-specific local storage or tab-specific session storage.
 	 */
-	storageOptions = [
+	storageOptions: { value: 'localStorage' | 'sessionStorage' | 'none', name: string }[] = [
 		{
 			value: 'localStorage',
 			name: translate('configure-app.storage.options.local'),
@@ -311,10 +311,15 @@ export class ConfigureAppComponent implements OnInit {
 			name: translate('configure-app.storage.options.none'),
 		},
 	]
-	selectedStorage = signal(this.settings.walletStorage ?? 'localStorage')
+	selectedStorage = signal<'localStorage' | 'sessionStorage' | 'none'>(this.settings.storage ?? this.storageOptions[0].value)
+	selectedStorageFirstRun = true
 	selectedStorageChanged = effect(() => {
-		this.settings.walletStorage = this.selectedStorage()
-		this.svcAppSettings.saveAppSettings()
+		const selectedStorage = this.selectedStorage()
+		if (this.selectedStorageFirstRun) {
+			this.selectedStorageFirstRun = false
+			return
+		}
+		this.svcAppSettings.moveStorage(selectedStorage)
 	})
 
 	powSources: { name: Signal<string>; value: 'client' | 'custom' | 'server' }[] = [
@@ -522,7 +527,7 @@ export class ConfigureAppComponent implements OnInit {
 
 	async updateWalletSettings () {
 		const newStorage = this.selectedStorage()
-		const resaveWallet = this.settings.walletStorage !== newStorage
+		const resaveWallet = this.settings.storage !== newStorage
 
 		// ask for user confirmation before clearing the wallet cache
 		if (resaveWallet && newStorage === this.storageOptions[1].value) {
@@ -539,7 +544,6 @@ export class ConfigureAppComponent implements OnInit {
 			} catch (err) {
 				// pressing cancel, reset storage setting and interrupt
 				this.selectedStorage.set(this.storageOptions[0].value)
-				this.svcNotifications.sendInfo(translate('configure-app.switched-back-to-browser-local-storage-for-the-wallet-data'), { length: 10000 })
 				return
 			}
 		}

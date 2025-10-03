@@ -10,10 +10,11 @@ export class ApiService {
 	private svcAppSettings = inject(AppSettingsService)
 	private svcNode = inject(NodeService)
 
+	readonly storeKey: 'Gnault-ActiveDifficulty' = 'Gnault-ActiveDifficulty'
+
 	rpc: Signal<Rpc> = computed(() => {
 		return new Rpc(this.svcAppSettings.settings().serverAPI)
 	})
-	storeKey: 'Gnault-ActiveDifficulty' = 'Gnault-ActiveDifficulty'
 
 	get settings () {
 		return this.svcAppSettings.settings()
