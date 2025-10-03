@@ -17,8 +17,8 @@ export interface RepresentativeStatus {
 	warn: boolean
 	known: boolean
 	daysSinceLastVoted: number
-	uptime: string
-	score: number
+	uptime: string | null
+	score: number | null
 }
 
 export interface RepresentativeOverview {
@@ -35,8 +35,8 @@ export interface StoredRepresentative {
 }
 
 export interface RepresentativeApiOverview extends BaseApiAccount {
-	address: string
 	accounts: WalletApiAccount[]
+	address: string
 	delegatedWeight: bigint
 }
 
@@ -58,18 +58,18 @@ export class RepresentativeService {
 	storeKey: 'Gnault-Representatives' = 'Gnault-Representatives'
 
 	// Default representatives list
-	defaultRepresentatives: { [key: string]: unknown }[] = []
+	defaultRepresentatives: StoredRepresentative[] = []
 
-	representatives$ = new BehaviorSubject([])
-	representatives = this.defaultRepresentatives
+	representatives$ = new BehaviorSubject<StoredRepresentative[]>([])
+	representatives: StoredRepresentative[] = this.defaultRepresentatives
 
-	walletReps$ = new BehaviorSubject([null])
-	walletReps = []
+	walletReps$ = new BehaviorSubject<RepresentativeApiOverview[]>([])
+	walletReps: RepresentativeApiOverview[] = []
 
-	changeableReps$ = new BehaviorSubject([])
-	changeableReps = []
+	changeableReps$ = new BehaviorSubject<FullRepresentativeOverview[]>([])
+	changeableReps: FullRepresentativeOverview[] = []
 
-	onlineStakeTotal = 115202418
+	onlineStakeTotal: number | null = 115202418
 
 	loaded = false
 
@@ -117,9 +117,9 @@ export class RepresentativeService {
 		const onlineReps = await this.getOnlineRepresentatives()
 		const quorum = await this.svcApi.confirmationQuorum()
 
-		this.onlineStakeTotal = quorum ? parseFloat(Tools.convert(quorum.online_stake_total, 'raw', 'nano')) : null
+		this.onlineStakeTotal = quorum ? Tools.convert(quorum.online_stake_total, 'raw', 'nano', 'number') : null
 
-		const allReps = []
+		const allReps: FullRepresentativeOverview[] = []
 
 		// Now, loop through each representative and determine some details about it
 		for (const representative of representatives) {
@@ -271,7 +271,7 @@ export class RepresentativeService {
 	 * @returns {RepresentativeOverview[]}
 	 */
 	getUniqueRepresentatives (accounts: WalletApiAccount[]): RepresentativeOverview[] {
-		const representatives = []
+		const representatives: RepresentativeOverview[] = []
 		for (const account of accounts) {
 			if (!account || !account.representative) continue // Account doesn't exist yet
 
@@ -280,7 +280,7 @@ export class RepresentativeService {
 				existingRep.weight += BigInt(account.balance)
 				existingRep.accounts.push(account)
 			} else {
-				const newRep = {
+				const newRep: RepresentativeOverview = {
 					address: account.representative,
 					weight: BigInt(account.balance),
 					accounts: [account],
@@ -297,14 +297,14 @@ export class RepresentativeService {
 	 * @returns {Promise<string[]>}
 	 */
 	async getOnlineRepresentatives (): Promise<string[]> {
-		const representatives = []
+		const representatives: string[] = []
 		const reps = await this.svcApi.representativesOnline()
 		if (!reps) return representatives
-		for (const representative in reps.representatives) {
+		for (const representative in Object.keys(reps.representatives)) {
 			if (!reps.representatives.hasOwnProperty(representative)) {
 				continue
 			}
-			representatives.push(reps.representatives[representative])
+			representatives.push(representative)
 		}
 
 		return representatives
@@ -367,7 +367,7 @@ export class RepresentativeService {
 		return true
 	}
 
-	getRepresentative (id): StoredRepresentative | undefined {
+	getRepresentative (id: string): StoredRepresentative | undefined {
 		return this.representatives.find((rep) => rep.id === id)
 	}
 

@@ -138,8 +138,8 @@ export class ApiService {
 		return await this.request('delegators_count', { account }, false)
 	}
 
-	async representativesOnline (): Promise<{ representatives: any }> {
-		return await this.request('representatives_online', {}, false)
+	async representativesOnline (): Promise<{ representatives: { [address: string]: { weight: string } } }> {
+		return await this.request('representatives_online', { weight: true }, false)
 	}
 
 	/**
