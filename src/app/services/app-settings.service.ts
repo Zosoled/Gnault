@@ -1,5 +1,5 @@
-import { Injectable, WritableSignal, computed, effect, inject, signal } from '@angular/core'
-import { TranslocoService, getBrowserCultureLang, getBrowserLang, translate } from '@jsverse/transloco'
+import { Injectable, WritableSignal, inject, signal } from '@angular/core'
+import { TranslocoService, getBrowserCultureLang, getBrowserLang } from '@jsverse/transloco'
 import { NotificationsService } from './notification.service'
 
 export type WalletStore = 'localStorage' | 'none'
@@ -99,31 +99,27 @@ export class AppSettingsService {
 		},
 	}
 
-	storage = computed(() => {
-		const storageKey = this.storageKey()
-		if (storageKey === 'localStorage') return localStorage
-		if (storageKey === 'sessionStorage') return sessionStorage
-		return undefined
-	})
-	storageKey = signal<'localStorage' | 'sessionStorage' | 'none'>('localStorage')
-	storageChanged = effect(() => {
-		const storage = this.storage()
-		if (storage) {
-			const data = Object.entries(storage)
-			localStorage.clear()
-			sessionStorage.clear()
-			for (const [key, value] of data) {
-				storage.setItem(key, value)
-			}
-			// Save selected storage locally so we can always clear if the user desires
-			localStorage.setItem('Gnault-Storage', this.storageKey())
-			this.svcNotifications.sendSuccess(translate('configure-app.storage.success'), { length: 10000 })
+	get storage (): Storage | undefined {
+		const match = document.cookie.match(/storage=([^;]+)/)?.[1]
+		console.log('match', match)
+		if (match === 'none') return undefined
+		if (match === 'sessionStorage') return sessionStorage
+		return localStorage
+	}
+	set storage (value: 'localStorage' | 'sessionStorage' | 'none') {
+		const prevApi = this.storage
+		const nextApi = globalThis[value]
+		document.cookie = `storage=${value}; max-age=31536000; path=/`
+		const data = Object.entries(prevApi ?? {})
+		localStorage.clear()
+		sessionStorage.clear()
+		for (const [key, value] of data) {
+			nextApi?.setItem?.(key, value)
 		}
-	})
+	}
 
 	loadAppSettings () {
-		const storage: Storage = globalThis[localStorage.getItem('Gnault-Storage')] ?? 'localStorage'
-		const item = storage?.getItem?.(this.storeKey) ?? localStorage.getItem(this.storeKey) ?? sessionStorage.getItem(this.storeKey) ?? '{}'
+		const item = this.storage?.getItem(this.storeKey) ?? '{}'
 		const settings = JSON.parse(item, (_, v) => !isNaN(v) && typeof v === 'string' && v.trim() !== '' ? Number(v) : v)
 		if (settings.language == null) {
 			const browserCultureLang = getBrowserCultureLang()
@@ -175,8 +171,7 @@ export class AppSettingsService {
 	}
 
 	saveAppSettings () {
-		const storage: Storage = globalThis[this.storage()]
-		storage?.setItem?.(this.storeKey, JSON.stringify(settings))
+		this.storage?.setItem(this.storeKey, JSON.stringify(this.settings()))
 	}
 
 	getAppSetting (key) {
@@ -214,7 +209,6 @@ export class AppSettingsService {
 			serverAPI: null,
 			serverWS: null,
 			theme: 'dark',
-			storage: 'localStorage',
 			walletVersion: 1,
 		})
 	}

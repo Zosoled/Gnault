@@ -335,12 +335,8 @@ export class WalletService {
 	 */
 	async loadWallet (): Promise<void> {
 		this.resetWallet()
-
 		this.wallets.set(await Wallet.restore())
-
-		const { storage: walletStorage } = this.settings
-		const storage = globalThis[walletStorage]
-		const walletData = storage.getItem(this.storeKey)
+		const walletData = this.svcAppSettings.storage?.getItem(this.storeKey)
 
 		if (walletData) {
 			const walletJson = JSON.parse(walletData)
@@ -932,9 +928,7 @@ export class WalletService {
 	 */
 	async saveWalletExport (): Promise<void> {
 		const exportData = await this.generateWalletExport()
-		const { storage: walletStorage } = this.settings
-		const storage = globalThis[walletStorage]
-		storage ? storage.setItem(this.storeKey, JSON.stringify(exportData)) : this.removeWalletData()
+		this.svcAppSettings.storage?.setItem(this.storeKey, JSON.stringify(exportData)) ?? this.removeWalletData()
 	}
 
 	removeWalletData () {

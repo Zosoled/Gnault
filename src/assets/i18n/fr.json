@@ -331,6 +331,9 @@
 		"optional": "optionnel",
 		"peers-stake-required": "Enjeu requis des pairs",
 		"peers-stake-total": "Enjeu total des pairs",
+		"questions": {
+			"continue": "Continuer?"
+		},
 		"receive": "Recevoir",
 		"reload": "Recharger",
 		"representative": "Représentant",
@@ -379,10 +382,6 @@
 	},
 	"representative-search": {
 		"representative-list-results": "Résultats de la liste des représentants"
-	},
-	"reset-wallet": {
-		"before-continuing-make-sure-you-have-saved-the-nano-seed": "Avant de continuer, assurez-vous d'avoir sauvegardé la seed de récupération secrète et/ou la phrase mnémonique de votre portefeuille actuel.",
-		"you-will-not-be-able-to-recover-the-funds-without-a-backup": "VOUS NE POURREZ PAS RÉCUPÉRER LES FONDS sans une sauvegarde de votre portefeuille actuellement configuré."
 	},
 	"welcome": {
 		"a-secure-open-source-wallet-for-nano": "Un portefeuille sécurisé et open source pour nano",

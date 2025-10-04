@@ -27,10 +27,6 @@ export class PriceService {
 	oneNano: bigint = 10n ** 30n
 	prices: WritableSignal<{ [currency: string]: number }> = signal({})
 
-	get storage (): Storage {
-		return globalThis[this.svcAppSettings.settings().storage]
-	}
-
 	constructor () {
 		this.loadPrice()
 		if (this.lastUpdated() === 0) {
@@ -68,7 +64,7 @@ export class PriceService {
 	}
 
 	private loadPrice (): void {
-		const item = this.storage?.getItem(this.storeKey)
+		const item = this.svcAppSettings.storage?.getItem(this.storeKey)
 		if (item) {
 			const data = JSON.parse(item)
 			this.lastUpdated.set(data.lastUpdated)
@@ -78,6 +74,6 @@ export class PriceService {
 
 	private savePrice (): void {
 		const data = { lastUpdated: this.lastUpdated(), prices: this.prices() }
-		this.storage?.setItem(this.storeKey, JSON.stringify(data))
+		this.svcAppSettings.storage?.setItem(this.storeKey, JSON.stringify(data))
 	}
 }

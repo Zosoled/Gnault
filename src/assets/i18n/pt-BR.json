@@ -331,6 +331,9 @@
 		"optional": "opcional",
 		"peers-stake-required": "Stake de Pares Necessário",
 		"peers-stake-total": "Stake Total de Pares",
+		"questions": {
+			"continue": "Continuar?"
+		},
 		"receive": "Receber",
 		"reload": "Recarregar",
 		"representative": "Representante",
@@ -379,10 +382,6 @@
 	},
 	"representative-search": {
 		"representative-list-results": "Resultados da Lista de Representantes"
-	},
-	"reset-wallet": {
-		"before-continuing-make-sure-you-have-saved-the-nano-seed": "Antes de continuar, certifique-se de ter salvo a semente de recuperação secreta e/ou mnemônico da sua carteira atual.",
-		"you-will-not-be-able-to-recover-the-funds-without-a-backup": "VOCÊ NÃO SERÁ CAPAZ DE RECUPERAR OS FUNDOS sem um backup da sua carteira atualmente configurada."
 	},
 	"welcome": {
 		"a-secure-open-source-wallet-for-nano": "Uma carteira segura de código aberto para nano",

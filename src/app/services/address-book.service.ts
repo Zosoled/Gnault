@@ -23,8 +23,7 @@ export class AddressBookService {
 	}
 
 	loadAddressBook () {
-		const storage: Storage = globalThis[this.settings.storage]
-		const data = storage?.getItem?.(this.storeKey)
+		const data = this.svcAppSettings.storage?.getItem(this.storeKey)
 		this.addressBook = JSON.parse(data ?? '[]')
 		this.addressBook$.next(this.addressBook)
 		return this.addressBook

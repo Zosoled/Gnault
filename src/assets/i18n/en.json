@@ -336,6 +336,9 @@
 		"optional": "optional",
 		"peers-stake-required": "Peers Stake Required",
 		"peers-stake-total": "Peers Stake Total",
+		"questions": {
+			"continue": "Continue?"
+		},
 		"receive": "Receive",
 		"reload": "Reload",
 		"representative": "Representative",
@@ -386,10 +389,6 @@
 	},
 	"representative-search": {
 		"representative-list-results": "Representative List Results"
-	},
-	"reset-wallet": {
-		"before-continuing-make-sure-you-have-saved-the-nano-seed": "Before continuing, make sure you have saved the secret recovery seed and/or mnemonic of your current wallet.",
-		"you-will-not-be-able-to-recover-the-funds-without-a-backup": "YOU WILL NOT BE ABLE TO RECOVER THE FUNDS without a backup of your currently configured wallet."
 	},
 	"wallets": {
 		"add-new-wallet": "Add New Wallet",

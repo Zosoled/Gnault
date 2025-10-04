@@ -331,6 +331,9 @@
 		"optional": "opcional",
 		"peers-stake-required": "Participación requerida de pares",
 		"peers-stake-total": "Participación total de pares",
+		"questions": {
+			"continue": "¿Continuar?"
+		},
 		"receive": "Recibir",
 		"reload": "Recargar",
 		"representative": "Representante",
@@ -379,10 +382,6 @@
 	},
 	"representative-search": {
 		"representative-list-results": "Resultados de la lista de representantes"
-	},
-	"reset-wallet": {
-		"before-continuing-make-sure-you-have-saved-the-nano-seed": "Antes de continuar, asegúrate de haber guardado la semilla de recuperación secreta y/o la frase mnemotécnica de tu billetera actual.",
-		"you-will-not-be-able-to-recover-the-funds-without-a-backup": "NO PODRÁS RECUPERAR LOS FONDOS sin una copia de seguridad de tu billetera configurada actualmente."
 	},
 	"welcome": {
 		"a-secure-open-source-wallet-for-nano": "Una billetera segura y de código abierto para nano",

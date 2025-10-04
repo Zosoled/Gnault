@@ -303,11 +303,11 @@
 									<div class="uk-inline uk-width-1-1">
 										<select
 											class="uk-select"
-											[(ngModel)]="selectedReceivableOption"
+											(input)="onSelectInput(selectedReceivable, $event)"
 										>
-											@for (receivable of receivableOptions; track receivable) {
+											@for (receivable of receivableOptions; track receivable.value) {
 												<option [value]="receivable.value">
-													{{ receivable.name() }}
+													{{ t(receivable.name) }}
 												</option>
 											}
 										</select>
@@ -337,12 +337,12 @@
 													>&#xe001;</label
 												>
 												<input
-													[(ngModel)]="minimumReceive"
 													class="uk-input"
 													style="padding-left: 52px !important"
 													id="form-horizontal-text4"
 													type="text"
 													[placeholder]="t('configure-app.leave-blank-to-accept-transactions-of-any-amount')"
+													(input)="onNumberInput(minimumReceive, $event)"
 												/>
 											</div>
 										</div>

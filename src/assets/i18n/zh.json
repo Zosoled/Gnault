@@ -331,6 +331,9 @@
 		"optional": "可选",
 		"peers-stake-required": "所需对等节点权益",
 		"peers-stake-total": "对等节点总权益",
+		"questions": {
+			"continue": "继续？"
+		},
 		"receive": "接收",
 		"reload": "重新加载",
 		"representative": "代表",
@@ -380,10 +383,6 @@
 	},
 	"representative-search": {
 		"representative-list-results": "代表列表结果"
-	},
-	"reset-wallet": {
-		"before-continuing-make-sure-you-have-saved-the-nano-seed": "在继续之前，请确保您已保存当前钱包的秘密恢复种子和/或助记词。",
-		"you-will-not-be-able-to-recover-the-funds-without-a-backup": "如果没有当前配置钱包的备份，您将无法恢复资金。"
 	},
 	"welcome": {
 		"a-secure-open-source-wallet-for-nano": "一个安全的开源Nano钱包",

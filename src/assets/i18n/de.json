@@ -328,6 +328,9 @@
 		"optional": "optional",
 		"peers-stake-required": "Erforderlicher Peer-Einsatz",
 		"peers-stake-total": "Gesamter Peer-Einsatz",
+		"questions": {
+			"continue": "Weitermachen?"
+		},
 		"receive": "Empfangen",
 		"reload": "Neu laden",
 		"representative": "Vertreter",
@@ -376,10 +379,6 @@
 	},
 	"representative-search": {
 		"representative-list-results": "Ergebnisse der Vertreterliste"
-	},
-	"reset-wallet": {
-		"before-continuing-make-sure-you-have-saved-the-nano-seed": "Bevor Sie fortfahren, stellen Sie sicher, dass Sie den geheimen Wiederherstellungs-Seed und/oder die Mnemonik Ihrer aktuellen Wallet gespeichert haben.",
-		"you-will-not-be-able-to-recover-the-funds-without-a-backup": "SIE WERDEN NICHT IN DER LAGE SEIN, DIE GELDER OHNE EIN BACKUP Ihrer aktuell konfigurierten Wallet wiederherzustellen."
 	},
 	"welcome": {
 		"a-secure-open-source-wallet-for-nano": "Eine sichere Open-Source-Wallet für Nano",

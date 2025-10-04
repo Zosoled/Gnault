@@ -269,11 +269,11 @@ export class ConfigureAppComponent implements OnInit {
 		},
 	]
 	selectedInactivityPeriod = signal<string>(this.settings.inactivityPeriod.toString() ?? this.inactivityPeriods[2]?.value)
-	selectedInactivityPeriodFirstRun = true
+	selectedInactivityPeriodInitialized = false
 	selectedInactivityPeriodChanged = effect(async () => {
 		const selectedInactivityPeriod = Number(this.selectedInactivityPeriod())
-		if (this.selectedInactivityPeriodFirstRun || selectedInactivityPeriod === this.settings.inactivityPeriod) {
-			this.selectedInactivityPeriodFirstRun = false
+		if (!this.selectedInactivityPeriodInitialized || selectedInactivityPeriod === this.settings.inactivityPeriod) {
+			this.selectedInactivityPeriodInitialized = true
 			return
 		}
 		const wallet = untracked(() => this.svcWallet.selectedWallet())
@@ -300,26 +300,32 @@ export class ConfigureAppComponent implements OnInit {
 	storageOptions: { value: 'localStorage' | 'sessionStorage' | 'none', name: string }[] = [
 		{
 			value: 'localStorage',
-			name: translate('configure-app.storage.options.local'),
+			name: 'configure-app.storage.options.local',
 		},
 		{
 			value: 'sessionStorage',
-			name: translate('configure-app.storage.options.session'),
+			name: 'configure-app.storage.options.session',
 		},
 		{
 			value: 'none',
-			name: translate('configure-app.storage.options.none'),
+			name: 'configure-app.storage.options.none',
 		},
 	]
-	selectedStorage = signal<'localStorage' | 'sessionStorage' | 'none'>(this.settings.storage ?? this.storageOptions[0].value)
-	selectedStorageFirstRun = true
+	selectedStorage = signal(
+		this.svcAppSettings.storage === undefined
+			? this.storageOptions[2].value
+			: this.svcAppSettings.storage === sessionStorage
+				? this.storageOptions[1].value
+				: this.storageOptions[0].value)
+	selectedStorageInitialized = false
 	selectedStorageChanged = effect(() => {
 		const selectedStorage = this.selectedStorage()
-		if (this.selectedStorageFirstRun) {
-			this.selectedStorageFirstRun = false
-			return
+		this.svcAppSettings.storage = selectedStorage
+		if (this.selectedStorageInitialized) {
+			this.svcNotifications.sendSuccess(translate('configure-app.storage.success'), { length: 10000 })
+		} else {
+			this.selectedStorageInitialized = true
 		}
-		this.svcAppSettings.moveStorage(selectedStorage)
 	})
 
 	powSources: { name: Signal<string>; value: 'client' | 'custom' | 'server' }[] = [
@@ -354,18 +360,31 @@ export class ConfigureAppComponent implements OnInit {
 	receivableOptions = [
 		{
 			value: 'amount',
-			name: translateSignal('configure-app.receivable-options.automatic-largest-amount-first'),
+			name: 'configure-app.receivable-options.automatic-largest-amount-first',
 		},
 		{
 			value: 'date',
-			name: translateSignal('configure-app.receivable-options.automatic-oldest-transaction-first'),
+			name: 'configure-app.receivable-options.automatic-oldest-transaction-first',
 		},
 		{
 			value: 'manual',
-			name: translateSignal('configure-app.receivable-options.manual'),
+			name: 'configure-app.receivable-options.manual',
 		},
 	]
-	selectedReceivableOption = this.receivableOptions[0]?.value
+	selectedReceivable = signal(this.receivableOptions[0].value)
+	selectedReceivableChanged = effect(() => {
+		const selectedReceivable = this.selectedReceivable()
+		this.settings.receivableOption = selectedReceivable
+		this.svcAppSettings.saveAppSettings()
+	})
+
+	minimumReceive = signal(this.settings.minimumReceive ?? 0.000001)
+	minimumReceiveChanged = effect(() => {
+		const minimumReceive = this.minimumReceive()
+		this.settings.minimumReceive = minimumReceive
+		this.svcAppSettings.saveAppSettings()
+		this.svcWallet.reloadBalances()
+	})
 
 	servers = computed(() => {
 		const { servers } = this.svcAppSettings
@@ -384,7 +403,6 @@ export class ConfigureAppComponent implements OnInit {
 	serverAPIUpdated = null
 	serverWS = null
 	serverAuth = null
-	minimumReceive = null
 
 	nodeBlockCount = null
 	nodeUnchecked = null
@@ -505,16 +523,12 @@ export class ConfigureAppComponent implements OnInit {
 
 		this.customWorkServer = this.settings.customWorkServer
 
-		const matchingReceivableOption = this.receivableOptions.find((d) => d.value === this.settings.receivableOption)
-		this.selectedReceivableOption = matchingReceivableOption?.value ?? this.receivableOptions[0].value
-
 		this.selectedServer = this.settings.server
 		this.serverAPI = this.settings.serverAPI
 		this.serverAPIUpdated = this.serverAPI
 		this.serverWS = this.settings.serverWS
 		this.serverAuth = this.settings.serverAuth
 
-		this.minimumReceive = this.settings.minimumReceive
 		this.defaultRepresentative = this.settings.defaultRepresentative
 		if (this.defaultRepresentative) {
 			this.validateRepresentative()
@@ -524,88 +538,6 @@ export class ConfigureAppComponent implements OnInit {
 	async updateDisplaySettings () {
 		this.svcAppSettings.setAppSetting('identiconsStyle', this.selectedIdenticon)
 	}
-
-	async updateWalletSettings () {
-		const newStorage = this.selectedStorage()
-		const resaveWallet = this.settings.storage !== newStorage
-
-		// ask for user confirmation before clearing the wallet cache
-		if (resaveWallet && newStorage === this.storageOptions[1].value) {
-			const UIkit = window['UIkit']
-			const saveSeedWarning = `<br><b style="font-size: 18px;">${translateSignal('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed')}</b><br><br><span style="font-size: 18px;"><b>${translateSignal('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup')}</b></span></p><br>`
-			try {
-				await UIkit.modal.confirm(
-					`<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span>
-					<span style="font-size: 18px;">
-					${translateSignal('configure-app.you-are-about-to-disable-storage-of-all-wallet-data-which')}
-					</span><br>
-					${this.svcWallet.isConfigured() ? saveSeedWarning : ''}`
-				)
-			} catch (err) {
-				// pressing cancel, reset storage setting and interrupt
-				this.selectedStorage.set(this.storageOptions[0].value)
-				return
-			}
-		}
-
-		let newPoW = this.selectedPowSource
-		const receivableOption = this.selectedReceivableOption
-		let minReceive = null
-		if (this.svcUtil.account.isValidNanoAmount(this.minimumReceive)) {
-			minReceive = this.minimumReceive
-		}
-
-		// reload receivable if threshold changes or if receive priority changes from manual to auto
-		let reloadReceivable =
-			this.settings.minimumReceive !== this.minimumReceive ||
-			(receivableOption !== 'manual' && receivableOption !== this.settings.receivableOption)
-
-		if (this.defaultRepresentative && this.defaultRepresentative.length) {
-			const valid = this.svcUtil.account.isValidAccount(this.defaultRepresentative)
-			if (!valid) {
-				return this.svcNotifications.sendWarning(translate('configure-app.default-representative-is-not-a-valid-account'))
-			}
-		}
-
-		if (this.settings.powSource !== newPoW()) {
-			// Cancel ongoing PoW if the old method was local PoW
-			if (this.settings.powSource === 'client') {
-				// Check if work is ongoing, and cancel it
-				if (this.svcPow.cancelAllPow(false)) {
-					reloadReceivable = true // force reload balance => re-work pow
-				}
-			}
-		}
-
-		// reset work cache so that the new PoW will be used but only if larger than before
-		if (newPoW() === 'client') {
-			// if user accept to reset cache
-			if (await this.clearWorkCache()) {
-				reloadReceivable = true // force reload balance => re-work pow
-			}
-		}
-
-		const newSettings = {
-			walletStore: newStorage,
-			lockInactivityMinutes: Number(this.selectedInactivityPeriod),
-			powSource: newPoW,
-			customWorkServer: this.customWorkServer,
-			receivableOption: receivableOption,
-			minimumReceive: minReceive,
-			defaultRepresentative: this.defaultRepresentative || null,
-		}
-
-		this.svcAppSettings.setAppSettings(newSettings)
-		this.svcNotifications.sendSuccess(translate('configure-app.app-wallet-settings-successfully-updated'))
-
-		if (resaveWallet) {
-			this.svcWallet.saveWalletExport() // If swapping the storage engine, resave the wallet
-		}
-		if (reloadReceivable) {
-			this.svcWallet.reloadBalances()
-		}
-	}
-
 
 	async updateServerSettings () {
 		const newSettings = {
