@@ -263,6 +263,7 @@
 	},
 	"configure-wallet": {
 		"new-wallet": {
+			"configure-new-wallet": "Configurar una nueva billetera",
 			"copy-secret-recovery-mnemonic": "Copiar frase mnemotécnica de recuperación secreta",
 			"copy-secret-recovery-seed": "Copiar semilla de recuperación secreta",
 			"create-wallet": "Crear billetera",
@@ -303,6 +304,7 @@
 		"address": "Dirección",
 		"address-book": "Libreta de direcciones",
 		"advanced-mode": "Modo avanzado",
+		"advanced-tools": "Herramientas avanzadas",
 		"amount": "Cantidad",
 		"app-settings": "Configuración de la aplicación",
 		"avoid": "Evitar",

@@ -260,6 +260,7 @@
 	},
 	"configure-wallet": {
 		"new-wallet": {
+			"configure-new-wallet": "Neue Brieftasche konfigurieren",
 			"copy-secret-recovery-mnemonic": "Geheime Wiederherstellungs-Mnemonik kopieren",
 			"copy-secret-recovery-seed": "Geheimen Wiederherstellungs-Seed kopieren",
 			"create-wallet": "Wallet erstellen",
@@ -300,6 +301,7 @@
 		"address": "Adresse",
 		"address-book": "Adressbuch",
 		"advanced-mode": "Erweiterter Modus",
+		"advanced-tools": "Erweiterte Tools",
 		"amount": "Betrag",
 		"app-settings": "App-Einstellungen",
 		"avoid": "Vermeiden",

@@ -263,6 +263,7 @@
 	},
 	"configure-wallet": {
 		"new-wallet": {
+			"configure-new-wallet": "Configure uma nova carteira",
 			"copy-secret-recovery-mnemonic": "Copiar Mnemônico de Recuperação Secreta",
 			"copy-secret-recovery-seed": "Copiar Semente de Recuperação Secreta",
 			"create-wallet": "Criar Carteira",
@@ -303,6 +304,7 @@
 		"address": "Endereço",
 		"address-book": "Catálogo de Endereços",
 		"advanced-mode": "Modo Avançado",
+		"advanced-tools": "Ferramentas avançadas",
 		"amount": "Valor",
 		"app-settings": "Configurações do App",
 		"avoid": "Evitar",

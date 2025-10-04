@@ -263,6 +263,7 @@
 	},
 	"configure-wallet": {
 		"new-wallet": {
+			"configure-new-wallet": "配置新钱包",
 			"copy-secret-recovery-mnemonic": "复制秘密恢复助记词",
 			"copy-secret-recovery-seed": "复制秘密恢复种子",
 			"create-wallet": "创建钱包",
@@ -303,6 +304,7 @@
 		"address": "地址",
 		"address-book": "地址簿",
 		"advanced-mode": "高级模式",
+		"advanced-tools": "高级工具",
 		"amount": "金额",
 		"app-settings": "应用设置",
 		"avoid": "避免",
