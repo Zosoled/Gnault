@@ -85,6 +85,12 @@ export class AppSettingsService {
 			api: 'https://node.spynano.org/proxy',
 			ws: 'wss://node.spynano.org/websocket',
 		},
+		xnopay: {
+			name: 'XNOPay (New Node - Use with caution)',
+			shouldRandom: false,
+			api: 'https://uk1.public.xnopay.com/proxy',
+			ws: 'wss://uk1.public.xnopay.com/ws',
+		},
 		random: {
 			name: 'Random',
 			shouldRandom: false,
