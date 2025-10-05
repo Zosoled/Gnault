@@ -330,10 +330,8 @@ export class WalletService {
 	 *
 	 * If no data is stored in local storage, tries to retrieve from IndexedDB
 	 * database used by libnemo and loads the first wallet found.
-	 *
-	 * @returns
 	 */
-	async loadWallet (): Promise<void> {
+	async loadWallets (): Promise<void> {
 		this.resetWallet()
 		this.wallets.set(await Wallet.restore())
 		const walletData = this.svcAppSettings.storage?.getItem(this.storeKey)
@@ -368,9 +366,7 @@ export class WalletService {
 			await wallet.unlock(password)
 			password = ''
 			this.selectedWallet.set(wallet)
-			this.wallets.update(v => {
-				return [...v, wallet]
-			})
+			this.wallets.update((prev) => [...prev, wallet])
 
 			if (walletType === 'seed') {
 				// Old method
@@ -525,8 +521,10 @@ export class WalletService {
 	async createNewWallet () {
 		try {
 			this.resetWallet()
-			this.selectedWallet.set(await Wallet.create('BLAKE2b', ''))
+			const wallet = await Wallet.create('BLAKE2b', '')
 			await this.selectedWallet().unlock('')
+			this.selectedWallet.set(wallet)
+			this.wallets.update((prev) => [...prev, wallet])
 		} catch (err) {
 			this.svcNotifications.sendError(err?.message ?? err)
 		}
@@ -537,7 +535,9 @@ export class WalletService {
 	}
 
 	async createLedgerWallet (bluetooth: boolean) {
-		this.selectedWallet.set(await Wallet.create('Ledger'))
+		const wallet = await Wallet.create('Ledger')
+		this.selectedWallet.set(wallet)
+		this.wallets.update((prev) => [...prev, wallet])
 		if (bluetooth) {
 			await this.selectedWallet().config({ connection: 'ble' })
 		}

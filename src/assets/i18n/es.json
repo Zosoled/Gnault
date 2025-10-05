@@ -349,6 +349,7 @@
 		"show-qr-code": "Mostrar código QR",
 		"simple-mode": "Modo simple",
 		"successfully-copied-to-clipboard": "¡Copiado exitosamente al portapapeles!",
+		"type": "Tipo",
 		"uncemented-blocks": "Bloques no cementados",
 		"unknown": "Desconocido",
 		"unlock": "Desbloquear",
@@ -384,6 +385,11 @@
 	},
 	"representative-search": {
 		"representative-list-results": "Resultados de la lista de representantes"
+	},
+	"wallets": {
+		"delete-wallet": "Eliminar la billetera",
+		"edit-wallet-id": "Editar ID de billetera",
+		"edit-wallet-name": "Editar nombre de billetera"
 	},
 	"welcome": {
 		"a-secure-open-source-wallet-for-nano": "Una billetera segura y de código abierto para nano",

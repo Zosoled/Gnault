@@ -21,6 +21,7 @@ import {
 	SignComponent,
 	SweeperComponent,
 	TransactionDetailsComponent,
+	WalletsComponent,
 	WelcomeComponent,
 } from 'app/components'
 
@@ -47,4 +48,5 @@ export const routes: Routes = [
 	{ path: 'sign', component: SignComponent },
 	{ path: 'sweeper', component: SweeperComponent },
 	{ path: 'transaction/:transaction', component: TransactionDetailsComponent },
+	{ path: 'wallets', component: WalletsComponent },
 ]

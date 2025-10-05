@@ -20,5 +20,6 @@ export * from './send/send.component'
 export * from './sign/sign.component'
 export * from './sweeper/sweeper.component'
 export * from './transaction-details/transaction-details.component'
+export * from './wallets/wallets.component'
 export * from './welcome/welcome.component'
 

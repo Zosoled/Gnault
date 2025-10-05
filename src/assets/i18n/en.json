@@ -351,6 +351,7 @@
 		"show-qr-code": "Show QR Code",
 		"simple-mode": "Simple Mode",
 		"successfully-copied-to-clipboard": "Successfully copied to clipboard!",
+		"type": "Type",
 		"uncemented-blocks": "Uncemented Blocks",
 		"unknown": "Unknown",
 		"unlock": "Unlock",
@@ -392,7 +393,19 @@
 	},
 	"wallets": {
 		"add-new-wallet": "Add New Wallet",
+		"delete": {
+			"error": "Failed to delete wallet. {{ error }}",
+			"success": "Deleted wallet {{ id }}"
+		},
+		"delete-wallet": "Delete Wallet",
+		"edit-wallet-id": "Edit Wallet ID",
+		"edit-wallet-name": "Edit Wallet Name",
 		"hide-wallet": "Hide Wallet",
+		"missing-wallets": {
+			"1": "Missing wallets?",
+			"2-link": "Add new wallet",
+			"3": "to import a previously used mnemonic/seed."
+		},
 		"you-dont-have-any-wallets-yet": {
 			"1": "You don't have any wallets yet.",
 			"2-link": "Click here to create one",

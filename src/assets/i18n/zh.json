@@ -349,6 +349,7 @@
 		"show-qr-code": "显示二维码",
 		"simple-mode": "简单模式",
 		"successfully-copied-to-clipboard": "成功复制到剪贴板！",
+		"type": "类型",
 		"uncemented-blocks": "未确认区块",
 		"unknown": "未知",
 		"unlock": "解锁",
@@ -385,6 +386,11 @@
 	},
 	"representative-search": {
 		"representative-list-results": "代表列表结果"
+	},
+	"wallets": {
+		"delete-wallet": "删除钱包",
+		"edit-wallet-id": "编辑钱包ID",
+		"edit-wallet-name": "编辑钱包名称"
 	},
 	"welcome": {
 		"a-secure-open-source-wallet-for-nano": "一个安全的开源Nano钱包",

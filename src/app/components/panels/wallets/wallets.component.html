@@ -1,0 +1,160 @@
+<div
+	class="uk-animation-slide-left-small"
+	uk-grid
+	*transloco="let t"
+>
+	<div class="uk-width-1-1">
+		<div
+			class="uk-margin-bottom"
+			uk-grid
+		>
+			<div class="uk-width-expand@s uk-width-1-1">
+				<h2 class="uk-heading-divider uk-text-truncate">
+					{{ t('nav.wallets') }}
+				</h2>
+			</div>
+			<div class="uk-width-auto@m uk-width-1-1 uk-text-right">
+				<div
+					class="uk-grid-small uk-child-width-expand"
+					uk-grid
+				>
+					<div class="uk-width-auto@m">
+						<button
+							class="uk-button uk-button-secondary uk-width-1-1@m"
+							[routerLink]="'/configure-wallet'"
+						>
+							{{ t('configure-wallet.new-wallet.configure-new-wallet') }}
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="uk-card uk-overflow-hidden">
+			<table class="wallets-list uk-table uk-table-striped uk-table-small">
+				<thead>
+					<tr>
+						<th
+							scope="col"
+							class="wallet-column uk-width-3-5@m uk-width-1-2"
+						>
+							{{ t('general.wallet') }}
+						</th>
+						<th
+							scope="col"
+							class="wallet-types-column uk-width-1-5@m uk-width-1-4"
+						>
+							{{ t('general.type') }}
+						</th>
+						<th
+							scope="col"
+							class="wallet-actions-column table-header-delete-wallet uk-width-1-5@m uk-width-1-4 uk-text-right"
+						></th>
+					</tr>
+				</thead>
+				<tbody>
+					@for (wallet of wallets; track wallet.id) {
+						<tr class="uk-visible-toggle">
+							<td class="wallet-column uk-visible-toggle uk-text-truncate">
+								<div uk-grid>
+									<a
+										(click)="selectWallet(wallet); $event.stopPropagation()"
+										[routerLink]="`/accounts`"
+										[queryParams]="{ compact: '1' }"
+										[class]="[
+											'uk-width-auto',
+											'uk-text-truncate',
+											'wallet-container',
+											wallet.type === 'Ledger' ? 'wide' : 'narrow',
+										]"
+									>
+										<div class="uk-flex">
+											<div class="uk-width-expand">
+												<div class="uk-width-1-1">
+													<div class="wallet-name">
+														{{ getWalletName(wallet.id) }}
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+							</td>
+							<td class="wallet-column uk-visible-toggle uk-text-truncate">
+								<div uk-grid>
+									<div class="uk-flex">
+										<div class="uk-width-expand">
+											<div class="uk-width-1-1">
+												<div class="wallet-type">
+													{{ wallet.type }}
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</td>
+							<td class="wallet-actions-column uk-text-right">
+								<div class="uk-float-right">
+									<ul class="uk-iconnav">
+										<li>
+											<a
+												class="icon-edit-wallet-id"
+												(click)="editWalletName(wallet.id)"
+												uk-tooltip
+												[title]="t('wallets.edit-wallet-name')"
+												[aria-label]="t('wallets.edit-wallet-name')"
+											>
+												<span uk-icon="file-edit"></span>
+											</a>
+										</li>
+										<li>
+											<a
+												class="icon-delete-wallet uk-text-danger"
+												(click)="deleteWallet(wallet)"
+												uk-tooltip
+												[title]="t('wallets.delete-wallet')"
+												aria-label="Delete Wallet"
+											>
+												<span uk-icon="close"></span>
+											</a>
+										</li>
+									</ul>
+								</div>
+							</td>
+						</tr>
+					}
+					@if (!wallets.length) {
+						<tr>
+							<td
+								colspan="4"
+								style="text-align: center"
+							>
+								{{ t('wallets.you-dont-have-any-wallets-yet.1') }}
+								<a [routerLink]="'/configure-wallet'">{{ t('wallets.you-dont-have-any-wallets-yet.2-link') }}</a>
+								{{ t('wallets.you-dont-have-any-wallets-yet.3') }}
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+			<table class="uk-table uk-table-striped uk-table-small">
+				<thead>
+					<tr class="uk-alert uk-alert-primary missing-wallets-hint">
+						<td
+							colspan="4"
+							style="text-align: center"
+						>
+							<span uk-icon="icon: info"></span>
+							{{ t('wallets.missing-wallets.1') }}
+							<a
+								class="hint-action"
+								[routerLink]="'/configure-wallet'"
+								>{{ t('wallets.missing-wallets.2-link') }}</a
+							>
+							{{ t('wallets.missing-wallets.3') }}
+						</td>
+					</tr>
+				</thead>
+			</table>
+		</div>
+	</div>
+</div>

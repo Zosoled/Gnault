@@ -142,7 +142,7 @@ export class AppComponent implements AfterViewInit {
 		this.svcAddressBook.loadAddressBook()
 		this.svcWorkPool.loadWorkCache()
 
-		await this.svcWallet.loadWallet()
+		await this.svcWallet.loadWallets()
 
 		// Subscribe to any transaction tracking
 		for (const entry of this.svcAddressBook.addressBook) {

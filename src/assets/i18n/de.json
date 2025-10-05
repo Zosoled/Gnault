@@ -346,6 +346,7 @@
 		"show-qr-code": "QR-Code anzeigen",
 		"simple-mode": "Einfacher Modus",
 		"successfully-copied-to-clipboard": "Erfolgreich in die Zwischenablage kopiert!",
+		"type": "Typ",
 		"uncemented-blocks": "Nicht zementierte Blöcke",
 		"unknown": "Unbekannt",
 		"unlock": "Entsperren",
@@ -381,6 +382,11 @@
 	},
 	"representative-search": {
 		"representative-list-results": "Ergebnisse der Vertreterliste"
+	},
+	"wallets": {
+		"delete-wallet": "Brieftasche löschen",
+		"edit-wallet-id": "Wallet ID bearbeiten",
+		"edit-wallet-name": "Brieftaschenname bearbeiten"
 	},
 	"welcome": {
 		"a-secure-open-source-wallet-for-nano": "Eine sichere Open-Source-Wallet für Nano",
