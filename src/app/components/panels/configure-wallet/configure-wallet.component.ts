@@ -163,31 +163,6 @@ export class ConfigureWalletComponent {
 		}
 	}
 
-	// Send a confirmation dialog to the user if they already have a wallet configured
-	async confirmWalletOverwrite () {
-		if (!this.isConfigured) return true
-
-		const UIkit = window['UIkit']
-		try {
-			const msg = this.svcWallet.isLedger
-				? '<p class="uk-alert uk-alert-info"><br><span class="uk-flex"><span uk-icon="icon: info; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">You are about to configure a new wallet, which will <b>disconnect your Ledger device from Gnault</b>.</span><br><br>If you need to use the Ledger wallet, simply import your device again.</p><br>'
-				: '<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">You are about to configure a new wallet, which will <b>replace your currently configured wallet</b>.</span><br><br><b style="font-size: 18px;">' +
-				this.svcTransloco.translate('reset-wallet.before-continuing-make-sure-you-have-saved-the-nano-seed') +
-				'</b><br><br><b style="font-size: 18px;">' +
-				this.svcTransloco.translate('reset-wallet.you-will-not-be-able-to-recover-the-funds-without-a-backup') +
-				'</b></p><br>'
-			await UIkit.modal.confirm(msg)
-			return true
-		} catch (err) {
-			if (!this.svcWallet.isLedger) {
-				this.svcNotifications.sendInfo(
-					`You can use the 'Manage Wallet' page to backup your wallet's secret recovery seed and/or mnemonic`
-				)
-			}
-			return false
-		}
-	}
-
 	async setPasswordInit () {
 		if (this.isNewWallet) {
 			const { mnemonic, seed } = await this.svcWallet.createNewWallet()
@@ -206,9 +181,6 @@ export class ConfigureWalletComponent {
 			this.newWalletMnemonicLines = lines
 			this.activePanel = panels.password
 		} else {
-			// If a wallet already exists, confirm that the seed is saved
-			const confirmed = await this.confirmWalletOverwrite()
-			if (!confirmed) return
 			if (this.selectedImportOption === 'mnemonic' || this.selectedImportOption === 'seed') {
 				if (this.selectedImportOption === 'seed') {
 					const existingSeed = this.importSeedModel.trim()
