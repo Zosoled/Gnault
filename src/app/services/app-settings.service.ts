@@ -105,12 +105,15 @@ export class AppSettingsService {
 		},
 	}
 
-	get storage (): Storage | undefined {
+	get storage (): Storage | null {
 		const match = document.cookie.match(/storage=([^;]+)/)?.[1]
-		console.log('match', match)
-		if (match === 'none') return undefined
+		if (match == null) {
+			document.cookie = `storage=localStorage; max-age=31536000; path=/`
+			return this.storage
+		}
 		if (match === 'sessionStorage') return sessionStorage
-		return localStorage
+		if (match === 'localStorage') return localStorage
+		return null
 	}
 	set storage (value: 'localStorage' | 'sessionStorage' | 'none') {
 		const prevApi = this.storage

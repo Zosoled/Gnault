@@ -397,7 +397,7 @@ export class WalletService {
 
 			await this.reloadBalances()
 
-			if (this.selectedWallet().accounts.length) {
+			if (this.accounts.length) {
 				this.svcWebsocket.subscribeAccounts(this.accounts.map((a) => a.address))
 			}
 
@@ -522,12 +522,14 @@ export class WalletService {
 		await this.reloadBalances()
 	}
 
-	async createNewWallet (password: string) {
-		this.resetWallet()
-		this.selectedWallet.set(await Wallet.create('BLAKE2b', password))
-		const unlockRequest = this.selectedWallet().unlock(password)
-		password = ''
-		await unlockRequest
+	async createNewWallet () {
+		try {
+			this.resetWallet()
+			this.selectedWallet.set(await Wallet.create('BLAKE2b', ''))
+			await this.selectedWallet().unlock('')
+		} catch (err) {
+			this.svcNotifications.sendError(err?.message ?? err)
+		}
 		const { mnemonic, seed } = this.selectedWallet()
 		this.addWalletAccount()
 		await this.reloadBalances()
@@ -928,7 +930,11 @@ export class WalletService {
 	 */
 	async saveWalletExport (): Promise<void> {
 		const exportData = await this.generateWalletExport()
-		this.svcAppSettings.storage?.setItem(this.storeKey, JSON.stringify(exportData)) ?? this.removeWalletData()
+		if (this.svcAppSettings.storage) {
+			this.svcAppSettings.storage.setItem(this.storeKey, JSON.stringify(exportData))
+		} else {
+			this.removeWalletData()
+		}
 	}
 
 	removeWalletData () {

@@ -190,7 +190,7 @@ export class ConfigureWalletComponent {
 
 	async setPasswordInit () {
 		if (this.isNewWallet) {
-			const { mnemonic, seed } = await this.svcWallet.createNewWallet('')
+			const { mnemonic, seed } = await this.svcWallet.createNewWallet()
 			this.newWalletMnemonic = mnemonic
 			this.newWalletSeed = seed
 			// Split the seed up so we can show 4 per line
@@ -223,9 +223,9 @@ export class ConfigureWalletComponent {
 
 					// Try and decode the mnemonic
 					try {
-						this.svcWallet.loadImportedWallet('BLAKE2b', '', mnemonic, 0, [0], 'seed')
+						await this.svcWallet.loadImportedWallet('BLAKE2b', '', mnemonic, 0, [0], 'seed')
 					} catch (err) {
-						return this.svcNotifications.sendError(`Unable to decode mnemonic, double check it!`)
+						return this.svcNotifications.sendError(err?.message ?? err)
 					}
 				} else {
 					return this.svcNotifications.sendError(`Invalid import option`)
