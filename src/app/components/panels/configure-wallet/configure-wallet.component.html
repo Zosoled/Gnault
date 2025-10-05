@@ -25,7 +25,7 @@
 					class="landing-container uk-grid-divider"
 					uk-grid
 				>
-					<div class="uk-width-auto@l uk-width-1-1@m">
+					<div class="uk-width-1-1 uk-width-1-2@m uk-flex-wrap-top">
 						<button
 							class="wallet-option"
 							(click)="setPasswordInit()"
@@ -110,8 +110,6 @@
 							<h2>New<br />Wallet</h2>
 							<p>Generate seed<br />and mnemonic</p>
 						</button>
-					</div>
-					<div class="uk-width-expand">
 						<button
 							class="wallet-option"
 							(click)="setPanel(panels.import); selectedImportOption = 'ledger'"
@@ -152,16 +150,8 @@
 							<h2>Use<br />Ledger</h2>
 							<p>Nano S / Nano X</p>
 						</button>
-						<button
-							class="wallet-option"
-							(click)="setPanel(panels.import); selectedImportOption = 'seed'"
-						>
-							<div class="icon">
-								<div class="seed">{{ exampleSeed }}</div>
-							</div>
-							<h2>Import<br />Seed</h2>
-							<p>64 hex<br />characters</p>
-						</button>
+					</div>
+					<div class="uk-width-expand">
 						<button
 							class="wallet-option"
 							(click)="setPanel(panels.mnemonicTypeSelection)"
@@ -189,19 +179,17 @@
 							<h2>Import<br />Mnemonic</h2>
 							<p>12, 15, 18, 21<br />or 24 words</p>
 						</button>
-						@if (!showMoreImportOptions) {
-							<button
-								class="wallet-option more-options"
-								(click)="showMoreImportOptions = true"
-							>
-								<div class="icon">
-									<div class="more-options">···</div>
-								</div>
-								<h2>More<br />Options</h2>
-								<p>Import from file<br />or a private key</p>
-							</button>
-						}
-						@if (showMoreImportOptions) {
+						<button
+							class="wallet-option"
+							(click)="setPanel(panels.import); selectedImportOption = 'seed'"
+						>
+							<div class="icon">
+								<div class="seed">{{ exampleSeed }}</div>
+							</div>
+							<h2>Import<br />Seed</h2>
+							<p>64 hex<br />characters</p>
+						</button>
+						<!-- @if (showMoreImportOptions) {
 							<button
 								class="wallet-option"
 								(click)="setPanel(panels.import); selectedImportOption = 'file'"
@@ -225,8 +213,6 @@
 								<h2>Import<br />File</h2>
 								<p>exported<br />Gnault wallet</p>
 							</button>
-						}
-						@if (showMoreImportOptions) {
 							<button
 								class="wallet-option"
 								(click)="setPanel(panels.import); selectedImportOption = 'privateKey'"
@@ -237,8 +223,6 @@
 								<h2>Import<br />Private Key</h2>
 								<p>64 hex<br />characters</p>
 							</button>
-						}
-						@if (showMoreImportOptions) {
 							<button
 								class="wallet-option"
 								(click)="setPanel(panels.import); selectedImportOption = 'expandedKey'"
@@ -249,7 +233,18 @@
 								<h2 class="long-header">Import<br />Expanded<br />Private Key</h2>
 								<p>64 or 128 hex<br />characters</p>
 							</button>
-						}
+						} @else {
+							<button
+								class="wallet-option more-options"
+								(click)="showMoreImportOptions = true"
+							>
+								<div class="icon">
+									<div class="more-options">···</div>
+								</div>
+								<h2>More<br />Options</h2>
+								<p>Import from file<br />or a private key</p>
+							</button>
+						} -->
 					</div>
 				</div>
 			</div>
