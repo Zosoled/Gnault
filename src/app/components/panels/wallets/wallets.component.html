@@ -52,26 +52,26 @@
 					</tr>
 				</thead>
 				<tbody>
-					@for (wallet of wallets; track wallet.id) {
+					@for (namedWallet of namedWallets(); track namedWallet.name) {
 						<tr class="uk-visible-toggle">
 							<td class="wallet-column uk-visible-toggle uk-text-truncate">
 								<div uk-grid>
 									<a
-										(click)="selectWallet(wallet); $event.stopPropagation()"
+										(click)="selectWallet(namedWallet.wallet); $event.stopPropagation()"
 										[routerLink]="`/accounts`"
 										[queryParams]="{ compact: '1' }"
 										[class]="[
 											'uk-width-auto',
 											'uk-text-truncate',
 											'wallet-container',
-											wallet.type === 'Ledger' ? 'wide' : 'narrow',
+											namedWallet.wallet.type === 'Ledger' ? 'wide' : 'narrow',
 										]"
 									>
 										<div class="uk-flex">
 											<div class="uk-width-expand">
 												<div class="uk-width-1-1">
 													<div class="wallet-name">
-														{{ getWalletName(wallet.id) }}
+														{{ namedWallet.name }}
 													</div>
 												</div>
 											</div>
@@ -85,7 +85,7 @@
 										<div class="uk-width-expand">
 											<div class="uk-width-1-1">
 												<div class="wallet-type">
-													{{ wallet.type }}
+													{{ namedWallet.wallet.type }}
 												</div>
 											</div>
 										</div>
@@ -98,7 +98,7 @@
 										<li>
 											<a
 												class="icon-edit-wallet-id"
-												(click)="editWalletName(wallet.id)"
+												(click)="editWalletName(namedWallet.wallet.id)"
 												uk-tooltip
 												[title]="t('wallets.edit-wallet-name')"
 												[aria-label]="t('wallets.edit-wallet-name')"
@@ -109,7 +109,7 @@
 										<li>
 											<a
 												class="icon-delete-wallet uk-text-danger"
-												(click)="deleteWallet(wallet)"
+												(click)="deleteWallet(namedWallet.wallet)"
 												uk-tooltip
 												[title]="t('wallets.delete-wallet')"
 												aria-label="Delete Wallet"
@@ -122,7 +122,7 @@
 							</td>
 						</tr>
 					}
-					@if (!wallets.length) {
+					@if (!namedWallets().length) {
 						<tr>
 							<td
 								colspan="4"

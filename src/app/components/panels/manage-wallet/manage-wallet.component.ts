@@ -59,7 +59,7 @@ export class ManageWalletComponent implements OnInit {
 		return this.svcWallet.selectedWallet()
 	}
 	get selectedWalletName () {
-		return this.svcWallet.walletNames.get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
+		return this.svcWallet.walletNames().get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
 	}
 	get settings () {
 		return this.svcAppSettings.settings()

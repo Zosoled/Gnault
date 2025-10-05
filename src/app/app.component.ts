@@ -112,13 +112,13 @@ export class AppComponent implements AfterViewInit {
 		return this.svcWallet.selectedWallet()
 	}
 	get selectedWalletName (): string {
-		return this.svcWallet.walletNames.get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
+		return this.walletNames.get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
 	}
 	get settings () {
 		return this.svcAppSettings.settings()
 	}
 	get walletNames (): Map<string, string> {
-		return this.svcWallet.walletNames
+		return this.svcWallet.walletNames()
 	}
 	get wallets (): Wallet[] {
 		return this.svcWallet.wallets()

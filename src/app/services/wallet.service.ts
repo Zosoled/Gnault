@@ -83,7 +83,7 @@ export class WalletService {
 
 	selectedWallet: WritableSignal<Wallet> = signal(null)
 	wallets: WritableSignal<Wallet[]> = signal<Wallet[]>([])
-	walletNames: Map<string, string> = new Map()
+	walletNames = signal<Map<string, string>>(new Map())
 	balance = 0n
 	receivable = 0n
 	hasReceivable = false
@@ -348,6 +348,15 @@ export class WalletService {
 			if (walletJson.accounts?.length > 0) {
 				walletJson.accounts.forEach((a) => this.loadWalletAccount(a))
 			}
+
+			const walletNames = JSON.parse(walletJson.names)
+			if (Array.isArray(walletNames)) {
+				const names = new Map(this.walletNames())
+				for (const [k, v] of walletNames) {
+					names.set(k, v)
+				}
+				this.walletNames.set(names)
+			}
 		}
 	}
 
@@ -522,7 +531,7 @@ export class WalletService {
 		try {
 			this.resetWallet()
 			const wallet = await Wallet.create('BLAKE2b', '')
-			await this.selectedWallet().unlock('')
+			await wallet.unlock('')
 			this.selectedWallet.set(wallet)
 			this.wallets.update((prev) => [...prev, wallet])
 		} catch (err) {
@@ -947,11 +956,14 @@ export class WalletService {
 	}
 
 	async generateWalletExport () {
+		const wallet = this.selectedWallet()
 		const backup = await Wallet.backup()
-		const walletData = backup.find((v) => v.id === this.selectedWallet().id)
+		const walletData = backup.find((v) => v.id === wallet.id)
+		const walletNames = this.walletNames()
 		const data: any = {
 			...walletData,
-			selectedWalletId: this.selectedWallet().id,
+			names: JSON.stringify([...walletNames.entries()]),
+			selectedWalletId: wallet.id,
 			accounts: this.accounts.map((a) => a.toJSON()),
 			selectedAccountAddress: this.selectedAccount()?.address,
 			locked: true,

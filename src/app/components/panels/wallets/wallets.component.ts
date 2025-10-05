@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { Component, inject, OnInit } from '@angular/core'
+import { Component, computed, inject, OnInit } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
 import { translate, TranslocoDirective } from '@jsverse/transloco'
@@ -33,15 +33,18 @@ export class WalletsComponent implements OnInit {
 	walletChanged$ = new Subject<string>()
 	reloadAccountsWarning$ = this.walletChanged$.pipe(debounce(() => timer(5000)))
 
-	get wallets () {
-		return this.svcWallet.wallets()
-	}
+	namedWallets = computed(() => {
+		const wallets = this.svcWallet.wallets()
+		const names = this.svcWallet.walletNames()
+		return wallets
+			.map(wallet => ({ wallet, name: names.get(wallet.id) ?? wallet.id }))
+			.sort((a, b) => a.name.localeCompare(b.name))
+	})
 
 	async ngOnInit () {
 		this.reloadAccountsWarning$.subscribe((a) => {
 			this.svcWallet.scanAccounts()
 		})
-		this.wallets.sort((a, b) => a.id.localeCompare(b.id))
 	}
 
 	selectWallet (wallet: Wallet) {
@@ -55,14 +58,23 @@ export class WalletsComponent implements OnInit {
 	}
 
 	getWalletName (id: string) {
-		return this.svcWallet.walletNames.get(id) ?? id
+		const names = this.namedWallets()
+		const match = names.find(({ wallet }) => wallet.id === id)
+		return match?.name ?? id
 	}
 
 	async editWalletName (id: string) {
 		const name = this.getWalletName(id)
 		const UIkit = window['UIkit']
 		const response = await UIkit.modal.prompt('Edit Wallet Name', name)
-		this.svcWallet.walletNames.set(id, response)
+		if (response) {
+			this.svcWallet.walletNames.update((names) => {
+				const updated = new Map(names)
+				updated.set(id, response)
+				return updated
+			})
+		}
+		await this.svcWallet.saveWalletExport()
 	}
 
 	async deleteWallet (wallet: Wallet) {
