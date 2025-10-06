@@ -589,30 +589,35 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 			this.accountHistory = []
 			this.pageSize = 25
 		}
-
 		this.loadingTxList = true
 		this.updateTodayYesterdayDateStrings()
 
-		const accountHistory = await this.svcApi.accountHistory(address, this.pageSize, true)
+		const accountHistory = await this.svcApi.accountHistoryRaw(address, this.pageSize)
 
 		// Navigated to a different account while account history was loading
 		if (address !== this.address) {
 			return
 		}
-
 		// No response from RPC
 		if (!accountHistory?.history) {
 			this.accountHistory = []
 			this.loadingTxList = false
 			return
 		}
-		const { history } = accountHistory
 
+		const { history } = accountHistory
 		const additionalBlocksInfo = []
-		const accountConfirmationHeight = parseInt(this.account()?.confirmation_height, 10) || null
+
 		for (const h of history) {
-			h.local_date_string = h.local_timestamp ? formatDate(h.local_timestamp * 1000, 'MMM d, y', 'en-US') : 'N/A'
-			h.local_time_string = h.local_timestamp ? formatDate(h.local_timestamp * 1000, 'HH:mm:ss', 'en-US') : ''
+			const local_date_string = h.local_timestamp ? formatDate(h.local_timestamp * 1000, 'MMM d, y', 'en-US') : 'N/A'
+			const local_time_string = h.local_timestamp ? formatDate(h.local_timestamp * 1000, 'HH:mm:ss', 'en-US') : ''
+
+			const item: typeof h & {
+				local_date_string: string
+				local_time_string: string
+				link_as_account?: string
+				addressBookName?: string
+			} = Object.assign({}, h, { local_date_string, local_time_string })
 
 			if (h.type === 'state') {
 				if (h.subtype === 'open' || h.subtype === 'receive') {
@@ -626,19 +631,17 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 						knownReceivableBlock.hash !== sourceHashToFind
 					})
 				} else if (h.subtype === 'change') {
-					h.link_as_account = h.representative
-					h.addressBookName =
-						this.svcAddressBook.getAccountName(h.link_as_account) || this.getAccountLabel(h.link_as_account, null)
+					item.link_as_account = h.representative
 				} else {
-					h.link_as_account = Account.load(h.link).address
-					h.addressBookName =
-						this.svcAddressBook.getAccountName(h.link_as_account) || this.getAccountLabel(h.link_as_account, null)
+					item.link_as_account = Account.load(h.link).address
+				}
+				if (item.link_as_account) {
+					this.svcAddressBook.getAccountName(item.link_as_account) || this.getAccountLabel(item.link_as_account, null)
 				}
 			} else {
-				h.addressBookName = this.svcAddressBook.getAccountName(h.account) || this.getAccountLabel(h.account, null)
+				item.addressBookName = this.svcAddressBook.getAccountName(h.account) || this.getAccountLabel(h.account, null)
 			}
-			h.confirmed = parseInt(h.height, 10) <= accountConfirmationHeight
-			this.accountHistory.push(h)
+			this.accountHistory.push(item)
 		}
 
 		// Currently not supporting non-state rep change or state epoch blocks
@@ -873,17 +876,14 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 
 	showMobileMenuForTransaction (transaction) {
 		this.svcNotifications.removeNotification('success-copied')
-
 		this.mobileTransactionData = transaction
 		this.mobileTransactionMenuModal.show()
 	}
 
 	onReceiveFundsPress (receivableTransaction) {
-		if (receivableTransaction.loading || receivableTransaction.received) {
-			return
+		if (!receivableTransaction.loading && !receivableTransaction.received) {
+			this.receiveReceivableBlock(receivableTransaction)
 		}
-
-		this.receiveReceivableBlock(receivableTransaction)
 	}
 
 	async receiveReceivableBlock (receivableBlock: {
