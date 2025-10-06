@@ -351,30 +351,36 @@ export class ApiService {
 		)
 	}
 
-	async receivable (account, count): Promise<any> {
-		return await this.request('receivable', { account, count, source: true, include_only_confirmed: true }, false)
+	async receivable (account, count, threshold = 0, sorting = false): Promise<{
+		blocks: {
+			[address: string]: {
+				amount: string
+				source: string
+			}
+		}
+	}> {
+		const data = { account, count, threshold, sorting, source: true, include_only_confirmed: true }
+		let response
+		try {
+			response = await this.request('pending', data, false)
+		} catch {
+			response = await this.request('receivable', data, false)
+		}
+		return response
 	}
-	async receivableLimit (account, count, threshold): Promise<any> {
-		return await this.request(
-			'receivable',
-			{ account, count, threshold, source: true, include_only_confirmed: true },
-			false
-		)
+
+	async receivableLimit (account, count, threshold) {
+		return this.receivable(account, count, threshold)
 	}
-	async receivableSorted (account, count): Promise<any> {
-		return await this.request(
-			'receivable',
-			{ account, count, source: true, include_only_confirmed: true, sorting: true },
-			false
-		)
+
+	async receivableSorted (account, count) {
+		return this.receivable(account, count, 0, true)
 	}
-	async receivableLimitSorted (account, count, threshold): Promise<any> {
-		return await this.request(
-			'receivable',
-			{ account, count, threshold, source: true, include_only_confirmed: true, sorting: true },
-			false
-		)
+
+	async receivableLimitSorted (account, count, threshold) {
+		return this.receivable(account, count, threshold, true)
 	}
+
 	async version (): Promise<{
 		rpc_version: number
 		store_version: number
@@ -386,6 +392,7 @@ export class ApiService {
 	}> {
 		return await this.request('version', {}, true)
 	}
+
 	async confirmationQuorum (): Promise<{
 		quorum_delta: string
 		online_weight_quorum_percent: number
@@ -396,11 +403,12 @@ export class ApiService {
 	}> {
 		return await this.request('confirmation_quorum', {}, true)
 	}
+
 	public deleteCache () {
 		localStorage.removeItem(this.storeKey)
 	}
 
 	sleep (ms) {
-		return new Promise((resolve) => setTimeout(resolve, ms))
+		return new Promise((r) => setTimeout(r, ms))
 	}
 }
