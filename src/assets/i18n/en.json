@@ -350,6 +350,7 @@
 		"show-more": "Show More",
 		"show-qr-code": "Show QR Code",
 		"simple-mode": "Simple Mode",
+		"stop": "Stop!",
 		"successfully-copied-to-clipboard": "Successfully copied to clipboard!",
 		"type": "Type",
 		"uncemented-blocks": "Uncemented Blocks",
@@ -394,8 +395,13 @@
 	"wallets": {
 		"add-new-wallet": "Add New Wallet",
 		"delete": {
-			"error": "Failed to delete wallet. {{ error }}",
-			"success": "Deleted wallet {{ id }}"
+			"confirm": "Yes, I'm sure",
+			"error": "Failed to delete wallet. \n{{ error }}",
+			"success": "Deleted wallet \"{{ id }}\"",
+			"warning": {
+				"1": "You are about to delete a wallet. It will be unrecoverable without the original mnemonic or seed.",
+				"2": "This action is irreversible! Are you sure?"
+			}
 		},
 		"delete-wallet": "Delete Wallet",
 		"edit-wallet-id": "Edit Wallet ID",

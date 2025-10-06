@@ -345,6 +345,7 @@
 		"show-more": "Mehr anzeigen",
 		"show-qr-code": "QR-Code anzeigen",
 		"simple-mode": "Einfacher Modus",
+		"stop": "Stoppen!",
 		"successfully-copied-to-clipboard": "Erfolgreich in die Zwischenablage kopiert!",
 		"type": "Typ",
 		"uncemented-blocks": "Nicht zementierte Blöcke",
@@ -384,6 +385,11 @@
 		"representative-list-results": "Ergebnisse der Vertreterliste"
 	},
 	"wallets": {
+		"delete": {
+			"error": "Nicht löschen Brieftasche. \n{{ error }}",
+			"success": "Gelöschte Brieftasche \"{{ id }}\"",
+			"warning": "Sie löschen Ihre Brieftasche \"{{ name }}\".\n\nEs wird ohne die ursprüngliche Mnemonik oder Samen nicht wiederversichtlich sein.\n\n\nDiese Aktion ist irreversibel! \nBist du sicher?"
+		},
 		"delete-wallet": "Brieftasche löschen",
 		"edit-wallet-id": "Wallet ID bearbeiten",
 		"edit-wallet-name": "Brieftaschenname bearbeiten"

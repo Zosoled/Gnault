@@ -52,26 +52,26 @@
 					</tr>
 				</thead>
 				<tbody>
-					@for (namedWallet of namedWallets(); track namedWallet.name) {
+					@for (wallet of wallets(); track wallet.id) {
 						<tr class="uk-visible-toggle">
 							<td class="wallet-column uk-visible-toggle uk-text-truncate">
 								<div uk-grid>
 									<a
-										(click)="selectWallet(namedWallet.wallet); $event.stopPropagation()"
+										(click)="selectWallet(wallet.id); $event.stopPropagation()"
 										[routerLink]="`/accounts`"
 										[queryParams]="{ compact: '1' }"
 										[class]="[
 											'uk-width-auto',
 											'uk-text-truncate',
 											'wallet-container',
-											namedWallet.wallet.type === 'Ledger' ? 'wide' : 'narrow',
+											wallet.type === 'Ledger' ? 'wide' : 'narrow',
 										]"
 									>
 										<div class="uk-flex">
 											<div class="uk-width-expand">
 												<div class="uk-width-1-1">
 													<div class="wallet-name">
-														{{ namedWallet.name }}
+														{{ wallet.name }}
 													</div>
 												</div>
 											</div>
@@ -85,7 +85,7 @@
 										<div class="uk-width-expand">
 											<div class="uk-width-1-1">
 												<div class="wallet-type">
-													{{ namedWallet.wallet.type }}
+													{{ wallet.type }}
 												</div>
 											</div>
 										</div>
@@ -98,7 +98,7 @@
 										<li>
 											<a
 												class="icon-edit-wallet-id"
-												(click)="editWalletName(namedWallet.wallet.id)"
+												(click)="editWalletName(wallet.id)"
 												uk-tooltip
 												[title]="t('wallets.edit-wallet-name')"
 												[aria-label]="t('wallets.edit-wallet-name')"
@@ -109,7 +109,7 @@
 										<li>
 											<a
 												class="icon-delete-wallet uk-text-danger"
-												(click)="deleteWallet(namedWallet.wallet)"
+												(click)="deleteWallet(wallet.id)"
 												uk-tooltip
 												[title]="t('wallets.delete-wallet')"
 												aria-label="Delete Wallet"
@@ -122,7 +122,7 @@
 							</td>
 						</tr>
 					}
-					@if (!namedWallets().length) {
+					@if (wallets().length === 0) {
 						<tr>
 							<td
 								colspan="4"
@@ -155,6 +155,56 @@
 					</tr>
 				</thead>
 			</table>
+		</div>
+	</div>
+	<!-- Delete warning modal -->
+	<div
+		id="wallet-delete-warning"
+		uk-modal
+		class="uk-flex-top"
+	>
+		<div class="uk-modal-dialog uk-margin-auto-vertical uk-alert uk-margin-bottom-small">
+			<h1 class="uk-modal-title uk-heading-large uk-heading-line uk-text-center uk-text-danger uk-margin-medium-top">
+				<span>{{ t('general.stop') }}</span>
+			</h1>
+			<div class="uk-modal-body">
+				<div class="nlt-inline-alert">
+					<div class="icon-column">
+						<div
+							uk-icon="icon: warning; ratio: 2;"
+							class="uk-text-danger"
+						></div>
+					</div>
+					<div>
+						<p>
+							{{ t('wallets.delete.warning.1') }}
+						</p>
+						<p>
+							<b>{{ t('wallets.delete.warning.2') }}</b>
+						</p>
+					</div>
+				</div>
+				<div>
+					<form>
+						<p class="uk-text-right">
+							<button
+								class="uk-button uk-button-default uk-modal-close"
+								type="button"
+								value="cancel"
+							>
+								{{ t('general.cancel') }}
+							</button>
+							<button
+								class="uk-button uk-button-danger uk-modal-close"
+								type="button"
+								value="ok"
+							>
+								{{ t('wallets.delete.confirm') }}
+							</button>
+						</p>
+					</form>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>

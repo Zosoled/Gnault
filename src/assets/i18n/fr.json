@@ -348,6 +348,7 @@
 		"show-more": "Voir plus",
 		"show-qr-code": "Voir le code QR",
 		"simple-mode": "Mode simple",
+		"stop": "Arrêt!",
 		"successfully-copied-to-clipboard": "Copié avec succès dans le presse-papiers !",
 		"type": "Taper",
 		"uncemented-blocks": "Blocs non cimentés",
@@ -387,6 +388,11 @@
 		"representative-list-results": "Résultats de la liste des représentants"
 	},
 	"wallets": {
+		"delete": {
+			"error": "Échec de la suppression du portefeuille. \n{{ error }}",
+			"success": "Portefeuille supprimé \"{{ id }}\"",
+			"warning": "Vous êtes sur le point de supprimer votre portefeuille \"{{ name }}\".\n\nIl sera irréalisable sans le mnémonique ou la graine d'origine.\n\n\nCette action est irréversible! \nEs-tu sûr?"
+		},
 		"delete-wallet": "Supprimer le portefeuille",
 		"edit-wallet-id": "Modifier l'ID du portefeuille",
 		"edit-wallet-name": "Modifier le nom du portefeuille"

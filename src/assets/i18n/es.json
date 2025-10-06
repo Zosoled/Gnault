@@ -348,6 +348,7 @@
 		"show-more": "Mostrar más",
 		"show-qr-code": "Mostrar código QR",
 		"simple-mode": "Modo simple",
+		"stop": "¡Detener!",
 		"successfully-copied-to-clipboard": "¡Copiado exitosamente al portapapeles!",
 		"type": "Tipo",
 		"uncemented-blocks": "Bloques no cementados",
@@ -387,6 +388,11 @@
 		"representative-list-results": "Resultados de la lista de representantes"
 	},
 	"wallets": {
+		"delete": {
+			"error": "No se pudo eliminar la billetera. \n{{ error }}",
+			"success": "Billetera eliminada \"{{ id }}\"",
+			"warning": "Estás a punto de eliminar tu billetera \"{{ name }}\".\n\nSerá irracional sin el mnemónico o semilla original.\n\n\n¡Esta acción es irreversible! \n¿Está seguro?"
+		},
 		"delete-wallet": "Eliminar la billetera",
 		"edit-wallet-id": "Editar ID de billetera",
 		"edit-wallet-name": "Editar nombre de billetera"

@@ -348,6 +348,7 @@
 		"show-more": "显示更多",
 		"show-qr-code": "显示二维码",
 		"simple-mode": "简单模式",
+		"stop": "停止！",
 		"successfully-copied-to-clipboard": "成功复制到剪贴板！",
 		"type": "类型",
 		"uncemented-blocks": "未确认区块",
@@ -388,6 +389,11 @@
 		"representative-list-results": "代表列表结果"
 	},
 	"wallets": {
+		"delete": {
+			"error": "未能删除钱包。 \n{{ error }}",
+			"success": "删除的钱包 \"{{ id }}\"",
+			"warning": "您将要删除钱包 \"{{ name }}\"\n\n如果没有原始的助记符或种子，它将无法恢复。\n\n\n这个动作是不可逆转的！\n你确定吗？"
+		},
 		"delete-wallet": "删除钱包",
 		"edit-wallet-id": "编辑钱包ID",
 		"edit-wallet-name": "编辑钱包名称"

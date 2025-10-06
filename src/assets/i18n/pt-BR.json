@@ -348,6 +348,7 @@
 		"show-more": "Mostrar Mais",
 		"show-qr-code": "Mostrar Código QR",
 		"simple-mode": "Modo Simples",
+		"stop": "Parar!",
 		"successfully-copied-to-clipboard": "Copiado com sucesso para a área de transferência!",
 		"type": "Tipo",
 		"uncemented-blocks": "Blocos Não Cimentados",
@@ -387,6 +388,11 @@
 		"representative-list-results": "Resultados da Lista de Representantes"
 	},
 	"wallets": {
+		"delete": {
+			"error": "Falha ao excluir a carteira. \n{{ error }}",
+			"success": "Carteira excluída \"{{ id }}\"",
+			"warning": "Você está prestes a excluir sua carteira \"{{ name }}\".\n\nSerá irrecuperável sem o mnemônico ou semente original.\n\n\nEsta ação é irreversível! \nTem certeza?"
+		},
 		"delete-wallet": "Excluir carteira",
 		"edit-wallet-id": "Edite ID da carteira",
 		"edit-wallet-name": "Edite o nome da carteira"

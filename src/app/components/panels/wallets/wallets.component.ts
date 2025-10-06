@@ -7,7 +7,6 @@ import {
 	NotificationsService,
 	WalletService
 } from 'app/services'
-import { Wallet } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 import { Subject, timer } from 'rxjs'
 import { debounce } from 'rxjs/operators'
@@ -26,6 +25,7 @@ import { debounce } from 'rxjs/operators'
 })
 export class WalletsComponent implements OnInit {
 	private router = inject(Router)
+	private UIkit = window['UIkit']
 	private svcNotifications = inject(NotificationsService)
 	private svcWallet = inject(WalletService)
 
@@ -33,11 +33,11 @@ export class WalletsComponent implements OnInit {
 	walletChanged$ = new Subject<string>()
 	reloadAccountsWarning$ = this.walletChanged$.pipe(debounce(() => timer(5000)))
 
-	namedWallets = computed(() => {
+	wallets = computed(() => {
 		const wallets = this.svcWallet.wallets()
 		const names = this.svcWallet.walletNames()
 		return wallets
-			.map(wallet => ({ wallet, name: names.get(wallet.id) ?? wallet.id }))
+			.map(wallet => ({ id: wallet.id, name: names.get(wallet.id) ?? wallet.id, type: wallet.type }))
 			.sort((a, b) => a.name.localeCompare(b.name))
 	})
 
@@ -47,26 +47,42 @@ export class WalletsComponent implements OnInit {
 		})
 	}
 
-	selectWallet (wallet: Wallet) {
-		if (wallet == null) {
-			this.svcNotifications.sendError('Failed to select wallet.')
+	selectWallet (id: string) {
+		try {
+			if (id == null) {
+				throw new Error('No wallet ID provided.')
+			}
+			this.svcWallet.setActiveWallet(id)
+			this.router.navigate(['accounts'], { queryParams: { compact: 1 } })
+		} catch (err) {
+			this.svcNotifications.sendError('Failed to select wallet.', { error: err?.message ?? err })
 		}
-		this.svcWallet.selectedWallet.set(wallet)
-		this.svcWallet.saveWalletExport()
-
-		this.router.navigate(['accounts'], { queryParams: { compact: 1 } })
 	}
 
-	getWalletName (id: string) {
-		const names = this.namedWallets()
-		const match = names.find(({ wallet }) => wallet.id === id)
-		return match?.name ?? id
+	deleteWallet (id: string) {
+		const text = `${translate('wallets.delete.warning.1')}\n
+			${translate('wallets.delete.warning.2')}`
+		const buttons = {
+			i18n: {
+				ok: translate('wallets.delete.confirm'),
+				cancel: translate('general.cancel'),
+			},
+		}
+		this.UIkit.modal.confirm(text, buttons).catch().then(async () => {
+			try {
+				await this.svcWallet.deleteWallet(id)
+				this.svcNotifications.sendSuccess(translate('wallets.delete.success', { id }))
+				this.walletChanged$.next(id)
+			} catch (err) {
+				this.svcNotifications.sendError(translate('wallets.delete.error', { error: err?.message ?? err }))
+			}
+		})
 	}
 
 	async editWalletName (id: string) {
-		const name = this.getWalletName(id)
-		const UIkit = window['UIkit']
-		const response = await UIkit.modal.prompt('Edit Wallet Name', name)
+		const match = this.wallets().find((w) => w.id === id)
+		const name = match?.name ?? id
+		const response = await this.UIkit.modal.prompt(translate('wallets.edit-wallet-name'), name)
 		if (response) {
 			this.svcWallet.walletNames.update((names) => {
 				const updated = new Map(names)
@@ -75,18 +91,5 @@ export class WalletsComponent implements OnInit {
 			})
 		}
 		await this.svcWallet.saveWalletExport()
-	}
-
-	async deleteWallet (wallet: Wallet) {
-		try {
-			const id = wallet.id
-			await wallet.destroy()
-			this.svcNotifications.sendSuccess(translate('wallet.delete.success', { id })
-			)
-			this.walletChanged$.next(id)
-		} catch (err) {
-			this.svcNotifications.sendError(translate('wallet.delete.error', { error: err?.message ?? err })
-			)
-		}
 	}
 }

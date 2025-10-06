@@ -1037,4 +1037,21 @@ export class WalletService {
 			})
 		})
 	}
+
+	async deleteWallet (id: string) {
+		const walletToDelete = this.wallets().find((w) => w.id === id)
+		await walletToDelete.destroy()
+		this.wallets.update((v) => v.filter((w) => w.id !== id))
+		this.walletNames.update((v) => {
+			const names = new Map(v)
+			names.delete(id)
+			return names
+		})
+	}
+
+	async setActiveWallet (id: string) {
+		const walletToActivate = this.wallets().find((w) => w.id === id)
+		this.selectedWallet.set(walletToActivate)
+		await this.saveWalletExport()
+	}
 }
