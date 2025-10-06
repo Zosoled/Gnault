@@ -297,7 +297,7 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 			}
 			this.repVotingWeight = 0n
 			this.repDonationAddress = null
-			const knownRepresentative = this.svcRepresentative.getRepresentative(account.representative.address)
+			const knownRepresentative = this.svcRepresentative.getRepresentative(account.representative?.address)
 			if (knownRepresentative != null) {
 				this.repLabel = knownRepresentative.name
 				return
@@ -477,9 +477,14 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 		}
 
 		this.account.set(Account.load(address))
-		await this.account().refresh(this.svcApi.rpc())
-
-		this.updateRepresentativeInfo()
+		if (!accountInfo.error) {
+			try {
+				await this.account().refresh(this.svcApi.rpc())
+				this.updateRepresentativeInfo()
+			} catch (err) {
+				this.svcNotifications.sendError(err?.message ?? err)
+			}
+		}
 
 		// If there is a receivable balance, or the account is not opened yet, load receivable transactions
 		if (accountInfo.receivable > 0 || accountInfo.error) {
