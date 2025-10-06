@@ -25,9 +25,9 @@ import { debounce } from 'rxjs/operators'
 })
 export class WalletsComponent implements OnInit {
 	private router = inject(Router)
-	private UIkit = window['UIkit']
 	private svcNotifications = inject(NotificationsService)
 	private svcWallet = inject(WalletService)
+	UIkit = (window as any).UIkit
 
 	// Repopulate accounts when changing wallets (debounce by 5 seconds)
 	walletChanged$ = new Subject<string>()

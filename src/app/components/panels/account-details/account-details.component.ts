@@ -59,6 +59,8 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 	svcUtil = inject(UtilService)
 	svcWallet = inject(WalletService)
 
+	UIkit = (window as any).UIkit
+
 	zeroHash = '0000000000000000000000000000000000000000000000000000000000000000'
 
 	accountHistory: any[] = []
@@ -199,15 +201,9 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 			this.onReceivableBlockUpdate(receivableBlockUpdate)
 		})
 
-		const UIkit = window['UIkit']
-		const qrModal = UIkit.modal('#qr-code-modal')
-		this.qrModal = qrModal
-
-		const mobileAccountMenuModal = UIkit.modal('#mobile-account-menu-modal')
-		this.mobileAccountMenuModal = mobileAccountMenuModal
-
-		const mobileTransactionMenuModal = UIkit.modal('#mobile-transaction-menu-modal')
-		this.mobileTransactionMenuModal = mobileTransactionMenuModal
+		this.qrModal = this.UIkit.modal('#qr-code-modal')
+		this.mobileAccountMenuModal = this.UIkit.modal('#mobile-account-menu-modal')
+		this.mobileTransactionMenuModal = this.UIkit.modal('#mobile-transaction-menu-modal')
 
 		await this.loadAccountDetails()
 		this.initialLoadDone = true
@@ -1025,8 +1021,7 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 		this.qrString = null
 		this.blockHashReceive = null
 
-		const UIkit = window['UIkit']
-		const modal = UIkit.modal('#receive-modal')
+		const modal = this.UIkit.modal('#receive-modal')
 		modal.show()
 
 		const toAcct = await this.svcApi.accountInfo(this.address)
@@ -1133,8 +1128,7 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 	}
 
 	showRemoteModal () {
-		const UIkit = window['UIkit']
-		const modal = UIkit.modal('#block-modal')
+		const modal = this.UIkit.modal('#block-modal')
 		modal.show()
 		this.clearRemoteVars()
 	}

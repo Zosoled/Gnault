@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { Component, OnDestroy, OnInit, inject } from '@angular/core'
+import { AfterViewInit, Component, OnDestroy, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ChildActivationEnd, Router, RouterLink } from '@angular/router'
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
@@ -48,7 +48,7 @@ import * as QRCode from 'qrcode'
 	]
 })
 
-export class ReceiveComponent implements OnInit, OnDestroy {
+export class ReceiveComponent implements AfterViewInit, OnDestroy {
 	private router = inject(Router)
 	private svcAddressBook = inject(AddressBookService)
 	private svcNanoBlock = inject(NanoBlockService)
@@ -61,6 +61,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	svcPrice = inject(PriceService)
 	svcUtil = inject(UtilService)
 
+	UIkit = (window as any).UIkit
 	nano = 1000000000000000000000000
 	accounts = this.svcWallet.accounts
 	timeoutIdClearingRecentlyCopiedState: any = null
@@ -113,14 +114,9 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		return this.svcWallet.selectedAccount()
 	}
 
-	async ngOnInit () {
-		const UIkit = window['UIkit']
-
-		const mobileTransactionMenuModal = UIkit.modal('#mobile-transaction-menu-modal')
-		this.mobileTransactionMenuModal = mobileTransactionMenuModal
-
-		const merchantModeModal = UIkit.modal('#merchant-mode-modal')
-		this.merchantModeModal = merchantModeModal
+	async ngAfterViewInit () {
+		this.mobileTransactionMenuModal = this.UIkit.modal('#mobile-transaction-menu-modal')
+		this.merchantModeModal = this.UIkit.modal('#merchant-mode-modal')
 
 		this.routerSub = this.router.events.subscribe(event => {
 			if (event instanceof ChildActivationEnd) {
@@ -182,33 +178,23 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 	}
 
 	async updateReceivableBlocks () {
-		this.receivableBlocks =
-			this.svcWallet.receivableBlocks
-				.map(
-					(receivableBlock) =>
-						Object.assign(
-							{},
-							receivableBlock,
-							{
-								account: receivableBlock.source,
-								destination: receivableBlock.account,
-								source: null,
-								addressBookName: (
-									this.svcAddressBook.getAccountName(receivableBlock.source)
-									|| this.getAccountLabel(receivableBlock.source, null)
-								),
-								destinationAddressBookName: (
-									this.svcAddressBook.getAccountName(receivableBlock.account)
-									|| this.getAccountLabel(receivableBlock.account, this.svcTransloco.translate('general.account'))
-								),
-								isReceivable: true,
-								local_time_string: '',
-							}
-						)
-				)
-				.sort((a, b) => a.destinationAddressBookName.localeCompare(b.destinationAddressBookName)
-				)
-
+		this.receivableBlocks = this.svcWallet.receivableBlocks
+			.map((receivableBlock) => Object.assign({}, receivableBlock, {
+				account: receivableBlock.source,
+				destination: receivableBlock.account,
+				source: null,
+				addressBookName: (
+					this.svcAddressBook.getAccountName(receivableBlock.source)
+					|| this.getAccountLabel(receivableBlock.source, null)
+				),
+				destinationAddressBookName: (
+					this.svcAddressBook.getAccountName(receivableBlock.account)
+					|| this.getAccountLabel(receivableBlock.account, this.svcTransloco.translate('general.account'))
+				),
+				isReceivable: true,
+				local_time_string: '',
+			}))
+			.sort((a, b) => a.destinationAddressBookName.localeCompare(b.destinationAddressBookName))
 		this.filterReceivableBlocksForDestinationAccount(this.receivableAccountModel)
 	}
 
@@ -232,7 +218,6 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 
 	showMobileMenuForTransaction (transaction) {
 		this.svcNotifications.removeNotification('success-copied')
-
 		this.mobileTransactionData = transaction
 		this.mobileTransactionMenuModal.show()
 	}
@@ -261,8 +246,8 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			return
 		}
 		const precision = this.displayCurrency === 'BTC' ? 6 : 2
-		const rawAmount = Tools.convert(this.amountNano || 0, 'mnano', 'raw')
-		const fiatAmount = parseFloat(Tools.convert(rawAmount, 'raw', 'mnano')) * this.svcPrice.lastPrice()
+		const rawAmount = Tools.convert(this.amountNano || 0, 'nano', 'raw')
+		const fiatAmount = parseFloat(Tools.convert(rawAmount, 'raw', 'nano')) * this.svcPrice.lastPrice()
 
 		this.amountFiat = fiatAmount.toFixed(precision)
 		this.changeQRAmount(rawAmount)
@@ -276,7 +261,7 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 			return
 		}
 		const amount = parseFloat(this.amountFiat) / this.svcPrice.lastPrice()
-		const raw = Tools.convert(amount, 'mnano', 'raw')
+		const raw = Tools.convert(amount, 'nano', 'raw')
 		const nanoRounded = parseFloat(this.svcUtil.nano.rawToMnano(raw)).toFixed(6)
 		const rawRounded = this.svcUtil.nano.nanoToRaw(nanoRounded)
 
@@ -474,10 +459,10 @@ export class ReceiveComponent implements OnInit, OnDestroy {
 		}
 		this.merchantModeRawRequestedTotal = isRequestingAnyAmount
 			? 0n
-			: BigInt(Tools.convert(this.amountNano, 'mnano', 'raw'))
+			: BigInt(Tools.convert(this.amountNano, 'nano', 'raw'))
 		this.merchantModeRawRequestedQR = isRequestingAnyAmount
 			? 0n
-			: BigInt(Tools.convert(this.amountNano, 'mnano', 'raw'))
+			: BigInt(Tools.convert(this.amountNano, 'nano', 'raw'))
 		this.merchantModeSeenBlockHashes =
 			this.receivableBlocksForSelectedAccount.reduce((seenHashes, receivableBlock) => {
 				seenHashes[receivableBlock.hash] = true

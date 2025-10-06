@@ -15,19 +15,19 @@ export class UnlockWalletDialogComponent implements AfterViewInit {
 
 	walletService = inject(WalletService)
 
-	modal: any
-	password = ''
 	isFocused: boolean = false
 	isIncorrect: boolean = false
 	isPending: boolean = false
+	modal: any
+	password = ''
+	UIkit = (window as any).UIkit
 
 	@ViewChild('dialog') dialog: ElementRef
 	@ViewChild('input') input: ElementRef
 
 	ngAfterViewInit () {
-		const UIkit = (window as any).UIkit
-		this.modal = UIkit.modal(this.dialog.nativeElement)
-		UIkit.util.on(this.dialog.nativeElement, 'hidden', () => {
+		this.modal = this.UIkit.modal(this.dialog.nativeElement)
+		this.UIkit.util.on(this.dialog.nativeElement, 'hidden', () => {
 			this.onModalHidden()
 		})
 		this.walletService.isUnlockRequested$.subscribe(async (isRequested) => {

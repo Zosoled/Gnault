@@ -14,22 +14,22 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 	private svcTransloco = inject(TranslocoService)
 	private svcWallet = inject(WalletService)
 
-	modal: any
-	newPassword: string = ''
 	confirmPassword: string = ''
 	isFocused: boolean = false
 	isNotMatch: boolean = false
 	isPending: boolean = false
 	isTooShort: boolean = false
+	modal: any
+	newPassword: string = ''
+	UIkit = (window as any).UIkit
 
 	@ViewChild('dialog') dialog: ElementRef
 	@ViewChild('newPasswordInput') newPasswordInput: ElementRef
 	@ViewChild('confirmPasswordInput') confirmPasswordInput: ElementRef
 
 	ngAfterViewInit () {
-		const UIkit = (window as any).UIkit
-		this.modal = UIkit.modal(this.dialog.nativeElement)
-		UIkit.util.on(this.dialog.nativeElement, 'hidden', () => {
+		this.modal = this.UIkit.modal(this.dialog.nativeElement)
+		this.UIkit.util.on(this.dialog.nativeElement, 'hidden', () => {
 			this.onModalHidden()
 		})
 		this.svcWallet.isChangePasswordRequested$.subscribe(async (isRequested) => {

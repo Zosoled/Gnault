@@ -45,6 +45,8 @@ export class ConfigureAppComponent implements OnInit {
 	private svcWebsocket = inject(WebsocketService)
 	private svcWorkPool = inject(WorkPoolService)
 
+	UIkit = (window as any).UIkit
+
 	get settings () {
 		return this.svcAppSettings.settings()
 	}
@@ -659,9 +661,8 @@ export class ConfigureAppComponent implements OnInit {
 	}
 
 	async clearWorkCache () {
-		const UIkit = window['UIkit']
 		try {
-			await UIkit.modal.confirm(
+			await this.UIkit.modal.confirm(
 				'<p style="text-align: center;">' +
 				translateSignal('configure-app.you-are-about-to-delete-all-locally-cached-proof-of-work') +
 				'<br><br><b>' +
@@ -677,9 +678,8 @@ export class ConfigureAppComponent implements OnInit {
 	}
 
 	async clearWalletData () {
-		const UIkit = window['UIkit']
 		try {
-			await UIkit.modal.confirm(
+			await this.UIkit.modal.confirm(
 				'<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">' +
 				translateSignal('configure-app.you-are-about-to-delete-all-locally-stored-data-about-your') +
 				'</span><br><br><b style="font-size: 18px;">' +
@@ -695,9 +695,8 @@ export class ConfigureAppComponent implements OnInit {
 	}
 
 	async clearAllData () {
-		const UIkit = window['UIkit']
 		try {
-			await UIkit.modal.confirm(
+			await this.UIkit.modal.confirm(
 				'<p class="uk-alert uk-alert-danger"><br><span class="uk-flex"><span uk-icon="icon: warning; ratio: 3;" class="uk-align-center"></span></span><span style="font-size: 18px;">' +
 				translateSignal('configure-app.clear-all-data.1') +
 				'</span><br><br><b style="font-size: 18px;">' +

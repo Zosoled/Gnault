@@ -65,6 +65,7 @@ export class SignComponent implements OnInit {
 
 	paramsString = ''
 	activePanel = 'error'
+	UIkit = (window as any).UIkit
 
 	// if a block has been scanned for signing (or if it is a block to process)
 	shouldSign: boolean = null
@@ -163,8 +164,7 @@ export class SignComponent implements OnInit {
 	}
 
 	async ngOnInit () {
-		const UIkit = window['UIkit']
-		const qrModal = UIkit.modal('#qr-code-modal')
+		const qrModal = this.UIkit.modal('#qr-code-modal')
 		this.blockProcessed = false
 		this.qrModal = qrModal
 
@@ -650,8 +650,7 @@ export class SignComponent implements OnInit {
 		this.qrCodeImageBlock = null
 		this.finalSignature = null
 
-		const UIkit = window['UIkit']
-		const modal = UIkit.modal('#signed-modal')
+		const modal = this.UIkit.modal('#signed-modal')
 		modal.show()
 
 		this.finalSignature = block.signature
