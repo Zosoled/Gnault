@@ -17,10 +17,10 @@ export class ChangeRepWidgetComponent implements OnInit {
 	private svcWallet = inject(WalletService)
 
 	changeableRepresentatives = this.svcRepresentative.changeableReps
-	displayedRepresentatives = []
+	displayedRepresentatives: FullRepresentativeOverview[] = []
 	representatives: FullRepresentativeOverview[] = []
 	showRepChangeRequired = false
-	showRepHelp = false
+	showRepHelp = null
 	selectedAccount = null
 	selectedAccountHasRepresentative = false
 	initialLoadComplete = false
@@ -143,7 +143,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 		}
 	}
 
-	getDisplayedRepresentatives (representatives: any[]) {
+	getDisplayedRepresentatives (representatives: FullRepresentativeOverview[]) {
 		if (this.representatives?.length === 0) {
 			return []
 		}
@@ -161,7 +161,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 		}
 
 		// sort by ascending delegated voting weight
-		const sortedRepresentatives: any[] = [...representatives].sort((a, b) => b.delegatedWeight - a.delegatedWeight)
+		const sortedRepresentatives = [...representatives].sort((a, b) => Number(b.delegatedWeight - a.delegatedWeight))
 
 		const displayedReps = [Object.assign({}, sortedRepresentatives[0])]
 		return this.includeRepRequiringChange(displayedReps)

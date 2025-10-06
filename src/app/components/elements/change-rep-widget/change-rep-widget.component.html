@@ -1,7 +1,7 @@
 <div *transloco="let t">
 	@if (displayedRepresentatives.length > 0) {
 		<div class="nav-representative-info">
-			@for (rep of displayedRepresentatives; let repIdx = $index; track repIdx) {
+			@for (rep of displayedRepresentatives; track $index) {
 				<div
 					class="representative"
 					(mouseover)="showRepHelp = rep.address"
@@ -9,12 +9,12 @@
 				>
 					<h2>
 						{{
-							repIdx === 0
+							$index === 0
 								? t('general.representative')
 								: t('change-rep-widget.representative-for-account', {
 										account: rep.accounts[0]?.addressBookName
 											? '"' + rep.accounts[0]?.addressBookName + '"'
-											: rep.accounts[0]?.id.slice(0, 10) + '...',
+											: rep.accounts[0]?.address.slice(0, 10) + '...',
 									})
 						}}
 					</h2>
@@ -99,25 +99,27 @@
 								>{{ t('change-rep-widget.this-representative-has-a-high-voting-weight', { percent: 2 }) }}
 							</p>
 						}
-						@if (rep.status.veryLowUptime && rep.status.uptime > 0) {
+						@if (rep.status.veryLowUptime && +rep.status.uptime > 0) {
 							<p class="uk-text-danger">
 								<span uk-icon="icon: warning;"></span
 								>{{
-									t('change-rep-widget.this-representative-is-often-offline', { percent: rep.status.uptime.toFixed(1) })
-								}}
-							</p>
-						}
-						@if (rep.status.lowUptime && rep.status.uptime > 0) {
-							<p class="uk-text-warning">
-								<span uk-icon="icon: warning;"></span
-								>{{
-									t('change-rep-widget.this-representative-is-sometimes-offline', {
-										percent: rep.status.uptime.toFixed(1),
+									t('change-rep-widget.this-representative-is-often-offline', {
+										percent: (+rep.status.uptime).toFixed(1),
 									})
 								}}
 							</p>
 						}
-						@if (!rep.status.online && rep.status.uptime === 0) {
+						@if (rep.status.lowUptime && +rep.status.uptime > 0) {
+							<p class="uk-text-warning">
+								<span uk-icon="icon: warning;"></span
+								>{{
+									t('change-rep-widget.this-representative-is-sometimes-offline', {
+										percent: (+rep.status.uptime).toFixed(1),
+									})
+								}}
+							</p>
+						}
+						@if (!rep.status.online && +rep.status.uptime === 0) {
 							<p class="uk-text-danger">
 								<span uk-icon="icon: warning;"></span
 								>{{
