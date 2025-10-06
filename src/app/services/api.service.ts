@@ -264,13 +264,78 @@ export class ApiService {
 			false
 		)
 	}
-	async accountHistory (account, count = 25, raw = false, offset = 0, reverse = false): Promise<{ history: any }> {
+
+	/**
+	 * Reports send/receive information for an account.
+	 * @param account
+	 * @param count
+	 * @param raw
+	 * @param offset
+	 * @param reverse
+	 * @returns
+	 */
+	async accountHistory (account, count = 25, offset = 0, reverse = false): Promise<{
+		account: string
+		previous: string
+		history: {
+			type: string
+			account: string
+			amount: string
+			local_timestamp: number
+			height: number
+			hash: string
+			confirmed: boolean
+		}[]
+	}> {
+		const data: { [key: string]: boolean | number | string } = { account, offset, reverse }
 		// use unlimited count if 0
 		if (count === 0) {
-			return await this.request('account_history', { account, raw, offset, reverse }, false)
-		} else {
-			return await this.request('account_history', { account, count, raw, offset, reverse }, false)
+			data.count = 0
 		}
+		return await this.request('account_history', data, false)
+	}
+	/**
+	 * Reports send/receive information for an account. Instead of outputting a
+	 * simplified send or receive explanation of blocks (intended for wallets),
+	 * output all parameters of the block itself as seen in block_create or other
+	 * APIs returning blocks. It still includes the "account" and "amount"
+	 * properties you'd see without this option. State/universal blocks in the raw
+	 * history will also have a subtype field indicating their equivalent "old"
+	 * block. Unfortunately, the "account" parameter for open blocks is the
+	 * account of the source block, not the account of the open block, to preserve
+	 * similarity with the non-raw history.
+	 * @param account
+	 * @param count
+	 * @param offset
+	 * @param reverse
+	 * @returns
+	 */
+	async accountHistoryRaw (account: string, count = 25, offset = 0, reverse = false): Promise<{
+		account: string
+		previous: string
+		history: {
+			type: string
+			representative: string
+			link: string
+			balance: string
+			previous: string
+			subtype: string
+			account: string
+			amount: string
+			local_timestamp: number
+			height: number
+			hash: string
+			confirmed: boolean
+			work: string
+			signature: string
+		}[]
+	}> {
+		const data: { [key: string]: boolean | number | string } = { account, offset, reverse, raw: true }
+		// use unlimited count if 0
+		if (count === 0) {
+			data.count = 0
+		}
+		return await this.request('account_history', data, false)
 	}
 
 	/**
