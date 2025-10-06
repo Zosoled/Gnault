@@ -1,9 +1,6 @@
 import {
 	Component,
-	ElementRef,
-	HostListener,
 	Signal,
-	ViewChild,
 	computed,
 	inject
 } from '@angular/core'
@@ -16,7 +13,6 @@ import {
 	NodeService,
 	WalletService
 } from 'app/services'
-import { Wallet } from 'libnemo'
 
 @Component({
 	selector: 'app-nano-card',
@@ -32,13 +28,9 @@ import { Wallet } from 'libnemo'
 	],
 })
 export class NanoCardComponent {
+	private svcAppSettings = inject(AppSettingsService)
 	private svcNode = inject(NodeService)
 	private svcWallet = inject(WalletService)
-
-	svcAppSettings = inject(AppSettingsService)
-
-	@ViewChild('selectButton') selectButton: ElementRef
-	@ViewChild('walletsDropdown') walletsDropdown: ElementRef
 
 	isWalletsDropdownVisible = false
 	node = this.svcNode.node
@@ -67,41 +59,10 @@ export class NanoCardComponent {
 	get settings () {
 		return this.svcAppSettings.settings()
 	}
-	get walletNames () {
-		return this.svcWallet.walletNames
-	}
-	get wallets () {
-		return this.svcWallet.wallets()
-	}
 
 	selectedAccountColor: Signal<number> = computed((): number => {
 		const pk = BigInt(`0x${this.selectedAccount?.publicKey ?? 0}`)
 		const mod = pk % 360n
 		return Number(mod)
 	})
-
-	@HostListener('document:mousedown', ['$event']) onGlobalClick (event): void {
-		if (
-			this.selectButton.nativeElement.contains(event.target) === false &&
-			this.walletsDropdown.nativeElement.contains(event.target) === false
-		) {
-			this.isWalletsDropdownVisible = false
-		}
-	}
-
-	toggleWalletsDropdown () {
-		if (this.isWalletsDropdownVisible) {
-			this.isWalletsDropdownVisible = false
-		} else {
-			this.isWalletsDropdownVisible = true
-			this.walletsDropdown.nativeElement.scrollTop = 0
-		}
-	}
-
-	selectWallet (wallet: Wallet | null) {
-		// note: wallet is null when user is switching to 'Total Balance'
-		this.svcWallet.selectedWallet.set(wallet)
-		this.toggleWalletsDropdown()
-		this.svcWallet.saveWalletExport()
-	}
 }

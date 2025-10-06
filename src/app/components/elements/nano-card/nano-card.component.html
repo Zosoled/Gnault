@@ -1,53 +1,4 @@
 <div *transloco="let t">
-	<!-- Wallets dropdown -->
-	<div
-		#walletsDropdown
-		[class]="['wallets-dropdown', isWalletsDropdownVisible ? 'visible' : 'hidden']"
-	>
-		<div class="header">Wallets</div>
-		<!-- active wallet -->
-		@if (isConfigured) {
-			<div class="wallet active">
-				<div class="name-column">
-					<div class="name">
-						{{ selectedWalletName }}
-					</div>
-				</div>
-			</div>
-		}
-		<!-- other wallets -->
-		@for (wallet of wallets; track wallet.id) {
-			<ng-container>
-				<!-- inactive wallets -->
-				@if (selectedWallet == null || selectedWallet.id !== wallet.id) {
-					<div
-						class="wallet inactive"
-						(click)="selectWallet(wallet)"
-					>
-						<div class="name-column">
-							<div class="name">
-								{{ walletNames().get(wallet.id) ?? wallet.id }}
-							</div>
-						</div>
-					</div>
-				}
-			</ng-container>
-		}
-		<div class="wallet active">
-			<!-- configure new wallet link -->
-			<div class="name-column">
-				<div class="name">
-					<a
-						[routerLink]="'/configure-wallet/'"
-						(click)="toggleWalletsDropdown()"
-					>
-						{{ t('configure-wallet.new-wallet.configure-new-wallet') }}
-					</a>
-				</div>
-			</div>
-		</div>
-	</div>
-
 	<div [class]="['nano-card', selectedAccount === null ? 'is-wallet' : 'is-card']">
 		<div
 			class="logo"
@@ -66,15 +17,6 @@
 							: (selectedAccount.addressBookName ?? t('general.account') + ' #' + selectedAccount.index)
 					}}
 				</a>
-				<div
-					#selectButton
-					[class]="['select-button', isWalletsDropdownVisible ? 'open' : 'closed']"
-					(click)="toggleWalletsDropdown()"
-				>
-					<div class="circle"></div>
-					<div class="circle"></div>
-					<div class="circle"></div>
-				</div>
 			</div>
 			<div class="account-balances">
 				@if ((node.status && isBalanceInitialized) || !isConfigured) {
