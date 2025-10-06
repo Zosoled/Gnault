@@ -343,7 +343,11 @@ export class SendComponent implements AfterViewInit {
 			throw new Error(`Unable to find sending account in wallet`)
 		}
 		if (this.svcWallet.isLocked()) {
-			await this.svcWallet.requestUnlock()
+			try {
+				await this.svcWallet.requestUnlock()
+			} catch (err) {
+				this.svcNotifications.sendError(err?.message ?? err)
+			}
 			if (this.svcWallet.isLocked()) {
 				return
 			}
@@ -360,7 +364,7 @@ export class SendComponent implements AfterViewInit {
 			)
 			if (newHash) {
 				this.svcNotifications.removeNotification('success-send')
-				this.svcNotifications.sendSuccess(`Successfully sent \uE001${this.amounts.nano}!`, {
+				this.svcNotifications.sendSuccess(`Successfully sent \uE001${this.amounts.nano.value}!`, {
 					identifier: 'success-send',
 				})
 				this.activePanel = 'send'

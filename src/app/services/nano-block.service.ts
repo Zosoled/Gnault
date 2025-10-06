@@ -197,52 +197,62 @@ export class NanoBlockService {
 
 	async generateSend (wallet: Wallet, walletAccount, toAddress: string, rawAmount, ledger = false) {
 		const account = Account.load(walletAccount.address)
-		const fromAccount = await this.svcApi.accountInfo(account.address)
-		if (!fromAccount) throw new Error(`Unable to get account information for ${account.address}`)
-		const toAccount = Account.load(toAddress)
-		const remaining = BigInt(fromAccount.balance) - rawAmount
+		const accountInfo = await this.svcApi.accountInfo(account.address)
+		if (!accountInfo) throw new Error(`Unable to get account information for ${account.address}`)
+		const frontier = await this.svcApi.blockInfo(accountInfo.frontier)
+		const recipient = Account.load(toAddress)
+		const remaining = BigInt(accountInfo.balance) - rawAmount
 		const remainingDecimal = remaining.toString(10)
 
-		const representative = fromAccount.representative || (this.settings.defaultRepresentative || this.getRandomRepresentative())
+		const representative = accountInfo.representative || (this.settings.defaultRepresentative || this.getRandomRepresentative())
 		const blockData = {
 			type: 'state',
 			account: walletAccount.address,
-			previous: fromAccount.frontier,
+			previous: accountInfo.frontier,
 			representative: representative,
 			balance: remainingDecimal,
 			link: Account.load(toAddress).publicKey,
 			work: null,
 			signature: null,
 		}
-		const block = new Block(walletAccount, fromAccount.balance, fromAccount.frontier, representative)
-			.send(toAccount, rawAmount)
+		const block = new Block(walletAccount.address, accountInfo.balance, accountInfo.frontier, accountInfo.representative)
+			.send(recipient, rawAmount)
+		await block.pow()
 
 		if (ledger) {
-			const ledgerBlock = new Block(walletAccount.address, remainingDecimal, fromAccount.frontier, representative)
-				.send('0', '0')
+			const { contents } = frontier
+			const ledgerBlock = new Block(contents.account, contents.balance, contents.previous, contents.representative)
+				.send(contents.link, 0)
+				.sign(contents.signature)
 			try {
 				this.sendLedgerNotification()
-				const signature = await wallet.sign(walletAccount.index, ledgerBlock, block)
-				this.clearLedgerNotification()
-				blockData.signature = signature
+				try {
+					await wallet.sign(walletAccount.index, block, ledgerBlock)
+					this.clearLedgerNotification()
+					console.log(block.signature)
+					const hash = await block.process(this.svcApi.rpc())
+					console.log(hash)
+					return hash
+				} catch (err) {
+					console.error(err)
+				}
 			} catch (err) {
 				this.clearLedgerNotification()
 				this.sendLedgerDeniedNotification(err)
 				return
 			}
 		} else {
-			await block.pow()
 			await block.sign(wallet, walletAccount.index)
 			const hash = await block.process(this.svcApi.rpc())
 			console.log(hash)
 			return hash
 		}
 
-		if (!this.svcWorkPool.workExists(fromAccount.frontier)) {
+		if (!this.svcWorkPool.workExists(accountInfo.frontier)) {
 			this.svcNotifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
 		}
 
-		blockData.work = await this.svcWorkPool.getWork(fromAccount.frontier, 1)
+		blockData.work = await this.svcWorkPool.getWork(accountInfo.frontier, 1)
 		this.svcNotifications.removeNotification('pow')
 
 		const processResponse = await this.svcApi.process(blockData, TxType.send)
@@ -250,7 +260,7 @@ export class NanoBlockService {
 
 		walletAccount.frontier = processResponse.hash
 		this.svcWorkPool.addWorkToCache(processResponse.hash, 1) // Add new hash into the work pool, high PoW threshold for send block
-		this.svcWorkPool.removeFromCache(fromAccount.frontier)
+		this.svcWorkPool.removeFromCache(accountInfo.frontier)
 
 		return processResponse.hash
 	}
