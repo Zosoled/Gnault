@@ -42,6 +42,7 @@ export class ConfigureWalletComponent {
 	readonly isBluetoothSupported = this.isDesktop || typeof navigator?.bluetooth?.getDevices === 'function'
 	readonly isHidSupported = this.isDesktop || typeof navigator?.hid?.getDevices === 'function'
 	readonly isUsbSupported = this.isDesktop || typeof navigator?.usb?.getDevices === 'function'
+	readonly isSupported = this.isBluetoothSupported || this.isHidSupported || this.isUsbSupported
 
 	panels = panels
 	activePanel = panels.landing

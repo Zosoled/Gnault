@@ -7,7 +7,7 @@
 					class="landing-container uk-grid-divider"
 					uk-grid
 				>
-					<div class="uk-width-1-1 uk-width-1-2@m uk-flex-wrap-top">
+					<div class="uk-width-1-1 uk-width-auto@l uk-flex-wrap-top">
 						<button
 							class="wallet-option"
 							(click)="setPasswordInit()"
@@ -92,46 +92,48 @@
 							<h2>New<br />Wallet</h2>
 							<p>Generate seed<br />and mnemonic</p>
 						</button>
-						<button
-							class="wallet-option"
-							(click)="setPanel(panels.import); selectedImportOption = 'ledger'"
-						>
-							<div class="icon">
-								<svg
-									width="120"
-									height="120"
-									version="1.1"
-									viewBox="0 0 160 160"
-									xmlns="http://www.w3.org/2000/svg"
-								>
-									<g>
-										<path
-											d="m42.088 127.05-9.6353 7.2071c-1.3309 0.99548-3.2037 0.72546-4.1992-0.60542l-20.857-27.884c-0.99548-1.3309-0.72546-3.2037 0.60543-4.1992l105.07-78.588c1.3309-0.99548 3.2037-0.72546 4.1992 0.60543l20.857 27.884c0.99548 1.3309 0.72546 3.2037-0.60543 4.1992l-41.858 31.309"
+						@if (isSupported) {
+							<button
+								class="wallet-option"
+								(click)="setPanel(panels.import); selectedImportOption = 'ledger'"
+							>
+								<div class="icon">
+									<svg
+										width="120"
+										height="120"
+										version="1.1"
+										viewBox="0 0 160 160"
+										xmlns="http://www.w3.org/2000/svg"
+									>
+										<g>
+											<path
+												d="m42.088 127.05-9.6353 7.2071c-1.3309 0.99548-3.2037 0.72546-4.1992-0.60542l-20.857-27.884c-0.99548-1.3309-0.72546-3.2037 0.60543-4.1992l105.07-78.588c1.3309-0.99548 3.2037-0.72546 4.1992 0.60543l20.857 27.884c0.99548 1.3309 0.72546 3.2037-0.60543 4.1992l-41.858 31.309"
+												fill="none"
+												stroke="#000"
+												stroke-linejoin="round"
+												stroke-width="2"
+											/>
+										</g>
+										<g
 											fill="none"
 											stroke="#000"
-											stroke-linejoin="round"
 											stroke-width="2"
-										/>
-									</g>
-									<g
-										fill="none"
-										stroke="#000"
-										stroke-width="2"
-									>
-										<circle
-											cx="35.53"
-											cy="106.97"
-											r="10.756"
-										/>
-										<path
-											d="m153.08 86.935h-118.68s-19.277-0.014-19.277 20.789c0 19.291 19.655 19.655 19.655 19.655h118.31z"
-										/>
-									</g>
-								</svg>
-							</div>
-							<h2>Use<br />Ledger</h2>
-							<p>Nano S / Nano X</p>
-						</button>
+										>
+											<circle
+												cx="35.53"
+												cy="106.97"
+												r="10.756"
+											/>
+											<path
+												d="m153.08 86.935h-118.68s-19.277-0.014-19.277 20.789c0 19.291 19.655 19.655 19.655 19.655h118.31z"
+											/>
+										</g>
+									</svg>
+								</div>
+								<h2>Use<br />Ledger</h2>
+								<p>Nano S / Nano X</p>
+							</button>
+						}
 					</div>
 					<div class="uk-width-expand">
 						<button
