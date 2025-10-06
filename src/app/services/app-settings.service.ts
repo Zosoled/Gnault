@@ -1,6 +1,5 @@
 import { Injectable, WritableSignal, inject, signal } from '@angular/core'
 import { TranslocoService, getBrowserCultureLang, getBrowserLang } from '@jsverse/transloco'
-import { NotificationsService } from './notification.service'
 
 export type WalletStore = 'localStorage' | 'none'
 export type LedgerConnectionType = 'usb' | 'bluetooth'
@@ -36,7 +35,6 @@ interface AppSettings {
 
 @Injectable({ providedIn: 'root' })
 export class AppSettingsService {
-	private svcNotifications = inject(NotificationsService)
 	private svcTransloco = inject(TranslocoService)
 
 	readonly storeKey: 'Gnault-AppSettings' = 'Gnault-AppSettings'
@@ -180,7 +178,7 @@ export class AppSettingsService {
 	}
 
 	saveAppSettings () {
-		this.storage?.setItem(this.storeKey, JSON.stringify(this.settings()))
+		this.storage?.setItem(this.storeKey, JSON.stringify(this.settings(), (_, v) => typeof v === 'bigint' ? v.toString() : v))
 	}
 
 	getAppSetting (key) {
