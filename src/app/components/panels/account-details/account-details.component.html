@@ -1564,7 +1564,7 @@
 									routerLink="/send"
 									[queryParams]="{
 										to: mobileTransactionData.account,
-										amount: svcUtil.nano.rawToMnano(mobileTransactionData.amount),
+										amount: mobileTransactionData.amount,
 									}"
 									(click)="mobileTransactionMenuModal.hide()"
 								>
