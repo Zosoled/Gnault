@@ -387,7 +387,7 @@
 	"wallets": {
 		"delete": {
 			"error": "Nicht löschen Brieftasche. \n{{ error }}",
-			"success": "Gelöschte Brieftasche \"{{ id }}\"",
+			"success": "Brieftasche gelöscht.",
 			"warning": "Sie löschen Ihre Brieftasche \"{{ name }}\".\n\nEs wird ohne die ursprüngliche Mnemonik oder Samen nicht wiederversichtlich sein.\n\n\nDiese Aktion ist irreversibel! \nBist du sicher?"
 		},
 		"delete-wallet": "Brieftasche löschen",

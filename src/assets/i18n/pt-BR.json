@@ -390,7 +390,7 @@
 	"wallets": {
 		"delete": {
 			"error": "Falha ao excluir a carteira. \n{{ error }}",
-			"success": "Carteira excluída \"{{ id }}\"",
+			"success": "Carteira excluída.",
 			"warning": "Você está prestes a excluir sua carteira \"{{ name }}\".\n\nSerá irrecuperável sem o mnemônico ou semente original.\n\n\nEsta ação é irreversível! \nTem certeza?"
 		},
 		"delete-wallet": "Excluir carteira",

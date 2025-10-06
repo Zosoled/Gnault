@@ -32,6 +32,7 @@ export class WalletsComponent implements OnInit {
 	// Repopulate accounts when changing wallets (debounce by 5 seconds)
 	walletChanged$ = new Subject<string>()
 	reloadAccountsWarning$ = this.walletChanged$.pipe(debounce(() => timer(5000)))
+	walletIdToDelete = null
 
 	wallets = computed(() => {
 		const wallets = this.svcWallet.wallets()
@@ -60,40 +61,23 @@ export class WalletsComponent implements OnInit {
 	}
 
 	confirmDeleteWallet (id: string) {
-		// const text = `${translate('wallets.delete.warning.1')}\n
-		// 	${translate('wallets.delete.warning.2')}`
-		// const buttons = {
-		// 	i18n: {
-		// 		ok: translate('wallets.delete.confirm'),
-		// 		cancel: translate('general.cancel'),
-		// 	},
-		// }
-		// this.UIkit.modal.confirm(text, buttons).catch().then(async () => {
-		// 	try {
-		// 		await this.svcWallet.deleteWallet(id)
-		// 		this.svcNotifications.sendSuccess(translate('wallets.delete.success', { id }))
-		// 		this.walletChanged$.next(id)
-		// 	} catch (err) {
-		// 		this.svcNotifications.sendError(translate('wallets.delete.error', { error: err?.message ?? err }))
-		// 	}
-		// })
 		try {
+			this.walletIdToDelete = id
 			const modal = this.UIkit.modal('#wallet-delete-warning')
 			console.log(modal)
 			modal.show()
 			this.UIkit.util.on('#wallet-delete-warning', 'hide', async (event) => {
-				console.log(modal)
-				console.log(modal.$el)
+				this.walletIdToDelete = null
 			})
 		} catch (err) {
 			this.svcNotifications.sendError(translate('wallets.delete.error', { error: err?.message ?? err }))
 		}
 	}
 
-	async deleteWallet (id: string) {
-		await this.svcWallet.deleteWallet(id)
-		this.svcNotifications.sendSuccess(translate('wallets.delete.success', { id }))
-		this.walletChanged$.next(id)
+	async deleteWallet () {
+		await this.svcWallet.deleteWallet(this.walletIdToDelete)
+		this.svcNotifications.sendSuccess(translate('wallets.delete.success'))
+		this.walletChanged$.next(this.walletIdToDelete)
 	}
 
 	async editWalletName (id: string) {

@@ -397,7 +397,7 @@
 		"delete": {
 			"confirm": "Yes, I'm sure",
 			"error": "Failed to delete wallet. \n{{ error }}",
-			"success": "Deleted wallet \"{{ id }}\"",
+			"success": "Wallet deleted.",
 			"warning": {
 				"1": "You are about to delete a wallet. It will be unrecoverable without the original mnemonic or seed.",
 				"2": "This action is irreversible! Are you sure?"

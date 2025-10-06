@@ -195,9 +195,10 @@
 								{{ t('general.cancel') }}
 							</button>
 							<button
-								class="uk-button uk-button-danger"
+								class="uk-button uk-button-danger uk-modal-close"
 								type="button"
 								value="ok"
+								(click)="deleteWallet()"
 							>
 								{{ t('wallets.delete.confirm') }}
 							</button>

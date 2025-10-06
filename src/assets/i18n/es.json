@@ -390,7 +390,7 @@
 	"wallets": {
 		"delete": {
 			"error": "No se pudo eliminar la billetera. \n{{ error }}",
-			"success": "Billetera eliminada \"{{ id }}\"",
+			"success": "Billetera eliminada.",
 			"warning": "Estás a punto de eliminar tu billetera \"{{ name }}\".\n\nSerá irracional sin el mnemónico o semilla original.\n\n\n¡Esta acción es irreversible! \n¿Está seguro?"
 		},
 		"delete-wallet": "Eliminar la billetera",
