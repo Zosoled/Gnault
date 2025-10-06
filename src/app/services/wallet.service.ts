@@ -326,13 +326,21 @@ export class WalletService {
 	 */
 	async loadWallets (): Promise<void> {
 		this.resetWallet()
-		this.wallets.set(await Wallet.restore())
+		try {
+			this.wallets.set(await Wallet.restore())
+		} catch (err) {
+			console.error(err)
+		}
 		const walletData = this.svcAppSettings.storage?.getItem(this.storeKey)
 
 		if (walletData) {
 			const walletJson = JSON.parse(walletData)
-			this.selectedWallet.set(await Wallet.restore(walletJson.selectedWalletId))
-			if (this.selectedWallet().type === 'Ledger') {
+			if (this.wallets().find((w) => w.id === walletJson.selectedWalletId)) {
+				this.selectedWallet.set(await Wallet.restore(walletJson.selectedWalletId))
+			} else {
+				this.selectedWallet.set(this.wallets()[0] ?? null)
+			}
+			if (this.selectedWallet()?.type === 'Ledger') {
 				try {
 					await this.selectedWallet().unlock()
 				} catch { }

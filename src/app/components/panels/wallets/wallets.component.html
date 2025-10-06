@@ -109,7 +109,7 @@
 										<li>
 											<a
 												class="icon-delete-wallet uk-text-danger"
-												(click)="deleteWallet(wallet.id)"
+												(click)="confirmDeleteWallet(wallet.id)"
 												uk-tooltip
 												[title]="t('wallets.delete-wallet')"
 												aria-label="Delete Wallet"
@@ -195,7 +195,7 @@
 								{{ t('general.cancel') }}
 							</button>
 							<button
-								class="uk-button uk-button-danger uk-modal-close"
+								class="uk-button uk-button-danger"
 								type="button"
 								value="ok"
 							>

@@ -59,24 +59,41 @@ export class WalletsComponent implements OnInit {
 		}
 	}
 
-	deleteWallet (id: string) {
-		const text = `${translate('wallets.delete.warning.1')}\n
-			${translate('wallets.delete.warning.2')}`
-		const buttons = {
-			i18n: {
-				ok: translate('wallets.delete.confirm'),
-				cancel: translate('general.cancel'),
-			},
+	confirmDeleteWallet (id: string) {
+		// const text = `${translate('wallets.delete.warning.1')}\n
+		// 	${translate('wallets.delete.warning.2')}`
+		// const buttons = {
+		// 	i18n: {
+		// 		ok: translate('wallets.delete.confirm'),
+		// 		cancel: translate('general.cancel'),
+		// 	},
+		// }
+		// this.UIkit.modal.confirm(text, buttons).catch().then(async () => {
+		// 	try {
+		// 		await this.svcWallet.deleteWallet(id)
+		// 		this.svcNotifications.sendSuccess(translate('wallets.delete.success', { id }))
+		// 		this.walletChanged$.next(id)
+		// 	} catch (err) {
+		// 		this.svcNotifications.sendError(translate('wallets.delete.error', { error: err?.message ?? err }))
+		// 	}
+		// })
+		try {
+			const modal = this.UIkit.modal('#wallet-delete-warning')
+			console.log(modal)
+			modal.show()
+			this.UIkit.util.on('#wallet-delete-warning', 'hide', async (event) => {
+				console.log(modal)
+				console.log(modal.$el)
+			})
+		} catch (err) {
+			this.svcNotifications.sendError(translate('wallets.delete.error', { error: err?.message ?? err }))
 		}
-		this.UIkit.modal.confirm(text, buttons).catch().then(async () => {
-			try {
-				await this.svcWallet.deleteWallet(id)
-				this.svcNotifications.sendSuccess(translate('wallets.delete.success', { id }))
-				this.walletChanged$.next(id)
-			} catch (err) {
-				this.svcNotifications.sendError(translate('wallets.delete.error', { error: err?.message ?? err }))
-			}
-		})
+	}
+
+	async deleteWallet (id: string) {
+		await this.svcWallet.deleteWallet(id)
+		this.svcNotifications.sendSuccess(translate('wallets.delete.success', { id }))
+		this.walletChanged$.next(id)
 	}
 
 	async editWalletName (id: string) {
