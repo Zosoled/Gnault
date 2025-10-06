@@ -135,15 +135,8 @@ export class WalletService {
 				return
 			}
 			console.log('New Transaction', transaction)
-			let shouldNotify = false
-			if (this.settings.minimumReceive) {
-				const minAmount = this.svcUtil.nano.mnanoToRaw(this.settings.minimumReceive)
-				if (BigInt(transaction.amount) > BigInt(minAmount)) {
-					shouldNotify = true
-				}
-			} else {
-				shouldNotify = true
-			}
+			const min = Tools.convert(this.settings.minimumReceive, this.settings.denomination, 'raw', 'bigint')
+			let shouldNotify = min > 0n && BigInt(transaction.amount) > min
 
 			const walletAddresses = this.accounts.map((a) => a.address)
 
