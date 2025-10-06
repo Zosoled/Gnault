@@ -63,7 +63,12 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 
 	zeroHash = '0000000000000000000000000000000000000000000000000000000000000000'
 
-	accountHistory: any[] = []
+	accountHistory: (Awaited<ReturnType<typeof this.svcApi.accountHistoryRaw>>['history'][number] & {
+		local_date_string: string
+		local_time_string: string
+		link_as_account?: string
+		addressBookName?: string
+	})[] = []
 	receivableBlocks: {
 		account: any
 		amount: any
@@ -109,7 +114,7 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 	representativeResults$ = new BehaviorSubject([])
 	showRepresentatives = false
 	representativeListMatch = ''
-	isNaN = isNaN
+	BigInt = BigInt
 
 	qrCodeImage = null
 
@@ -645,9 +650,7 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 		}
 
 		// Currently not supporting non-state rep change or state epoch blocks
-		this.accountHistory = this.accountHistory.filter((h) => {
-			return h.type !== 'change' && h.subtype !== 'epoch'
-		})
+		this.accountHistory = this.accountHistory.filter((h) => h.type !== 'change' && h.subtype !== 'epoch')
 
 		if (additionalBlocksInfo.length) {
 			const blocksInfo = await this.svcApi.blocksInfo(additionalBlocksInfo.map((b) => b.link))

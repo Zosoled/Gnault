@@ -443,11 +443,11 @@
 							</div>
 						</div>
 					}
-					@for (transaction of accountHistory; let transactionIdx = $index; track transactionIdx) {
+					@for (transaction of accountHistory; track $index) {
 						<ng-container>
 							@if (
-								accountHistory[transactionIdx - 1] == null ||
-								transaction.local_date_string !== accountHistory[transactionIdx - 1].local_date_string
+								accountHistory[$index - 1] == null ||
+								transaction.local_date_string !== accountHistory[$index - 1].local_date_string
 							) {
 								<div class="date-header text-half-muted">
 									{{
@@ -789,29 +789,7 @@
 										'rep-change': history.type == 'change' || history.subtype == 'change',
 									}"
 								>
-									@if (isNaN(history.amount)) {
-										<span>
-											<span
-												class="uk-text-small"
-												[class.text-half-muted]="history.confirmed === false"
-												[title]="
-													history.confirmed === false
-														? t('account-details.this-change-has-not-yet-been-confirmed-by-the-network')
-														: ''
-												"
-												uk-tooltip
-											>
-												{{ t('general.blockactions.rep-change') }}
-												@if (history.confirmed === false) {
-													<span
-														class="icon-unconfirmed"
-														uk-icon="icon: clock;"
-													></span>
-												}
-											</span>
-										</span>
-									}
-									@if (!isNaN(history.amount)) {
+									@if (BigInt(history.amount ?? 0) > 0) {
 										<span>
 											@if (history.type == 'receive' || history.subtype == 'receive' || history.type == 'open') {
 												<span
@@ -859,6 +837,27 @@
 											<div class="compact-actions-date text-half-muted">
 												<ng-template [ngTemplateOutlet]="transactionDateOrActions"></ng-template>
 											</div>
+										</span>
+									} @else {
+										<span>
+											<span
+												class="uk-text-small"
+												[class.text-half-muted]="history.confirmed === false"
+												[title]="
+													history.confirmed === false
+														? t('account-details.this-change-has-not-yet-been-confirmed-by-the-network')
+														: ''
+												"
+												uk-tooltip
+											>
+												{{ t('general.blockactions.rep-change') }}
+												@if (history.confirmed === false) {
+													<span
+														class="icon-unconfirmed"
+														uk-icon="icon: clock;"
+													></span>
+												}
+											</span>
 										</span>
 									}
 								</td>
@@ -1555,7 +1554,7 @@
 						@if (mobileTransactionData.isReceivable !== true) {
 							@if (
 								walletAccount() &&
-								!isNaN(mobileTransactionData.amount) &&
+								BigInt(mobileTransactionData.amount ?? 0) > 0 &&
 								(mobileTransactionData.type === 'receive' ||
 									mobileTransactionData.subtype === 'receive' ||
 									mobileTransactionData.type === 'open')
@@ -1608,10 +1607,7 @@
 										uk-icon="icon: user; ratio: 0.6;"
 									></span>
 								</span>
-								@if (isNaN(mobileTransactionData.amount)) {
-									<span>{{ t('account-details.copy-representatives-address') }}</span>
-								}
-								@if (!isNaN(mobileTransactionData.amount)) {
+								@if (BigInt(mobileTransactionData.amount ?? 0) > 0) {
 									@if (
 										mobileTransactionData.type === 'receive' ||
 										mobileTransactionData.subtype === 'receive' ||
@@ -1622,6 +1618,8 @@
 									@if (mobileTransactionData.type === 'send' || mobileTransactionData.subtype === 'send') {
 										<span>{{ t('account-details.copy-recipients-address') }}</span>
 									}
+								} @else {
+									<span>{{ t('account-details.copy-representatives-address') }}</span>
 								}
 							</div>
 						}
