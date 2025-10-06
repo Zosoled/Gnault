@@ -18,6 +18,7 @@ import {
 	WebsocketService,
 	WorkPoolService,
 } from 'app/services'
+import { Tools } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
 
 @Component({
@@ -381,7 +382,7 @@ export class ConfigureAppComponent implements OnInit {
 	minimumReceive = signal(this.settings.minimumReceive ?? 0.000001)
 	minimumReceiveChanged = effect(() => {
 		const minimumReceive = this.minimumReceive()
-		this.settings.minimumReceive = minimumReceive
+		this.settings.minimumReceive = Tools.convert(minimumReceive, this.settings.denomination, 'nano', 'number')
 		this.svcAppSettings.saveAppSettings()
 		this.svcWallet.reloadBalances()
 	})
