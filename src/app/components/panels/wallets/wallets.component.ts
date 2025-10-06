@@ -63,10 +63,8 @@ export class WalletsComponent implements OnInit {
 	confirmDeleteWallet (id: string) {
 		try {
 			this.walletIdToDelete = id
-			const modal = this.UIkit.modal('#wallet-delete-warning')
-			console.log(modal)
-			modal.show()
-			this.UIkit.util.on('#wallet-delete-warning', 'hide', async (event) => {
+			this.UIkit.modal('#wallet-delete-warning').show()
+			this.UIkit.util.on('#wallet-delete-warning', 'hide', () => {
 				this.walletIdToDelete = null
 			})
 		} catch (err) {
