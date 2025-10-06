@@ -257,9 +257,8 @@ export class ManageWalletComponent implements OnInit {
 		const history = await this.api.accountHistory(
 			this.csvAccount,
 			transactionCount,
-			false,
 			transactionOffset,
-			this.selectedOrder
+			this.selectedOrder,
 		)
 		this.exportingCsv = false // reset it here in case the file download fails (don't want spinning button forever)
 
