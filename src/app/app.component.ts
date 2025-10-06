@@ -58,14 +58,14 @@ export class AppComponent implements AfterViewInit {
 	private svcWebsocket = inject(WebsocketService)
 	private svcWorkPool = inject(WorkPoolService)
 
-	stage = environment.production ? '' : 'BETA'
-
 	svcAppSettings = inject(AppSettingsService)
 	svcNode = inject(NodeService)
 	svcPrice = inject(PriceService)
 
 	nanoPrice = this.svcPrice.lastPrice
 	node = this.svcNode.node
+	stage = environment.production ? '' : 'BETA'
+	UIkit = (window as any).UIkit
 
 	inactiveSeconds = 0
 	isWalletRefreshed = false
@@ -136,6 +136,7 @@ export class AppComponent implements AfterViewInit {
 	}
 
 	async ngAfterViewInit () {
+		this.UIkit.modal.alert('Gnault is in active development and unstable. DO NOT use it for critical transactions at this time. By continuing, you acknowledge that you have read this warning, that you understand its message, and that you take full responsibility for the results of your use of this tool.')
 		this.svcAppSettings.loadAppSettings()
 		this.svcTransloco.setActiveLang(this.settings.language)
 
