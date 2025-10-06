@@ -198,27 +198,14 @@ export class NanoBlockService {
 	async generateSend (wallet: Wallet, walletAccount, toAddress: string, rawAmount, ledger = false) {
 		const account = Account.load(walletAccount.address)
 		const accountInfo = await this.svcApi.accountInfo(account.address)
-		if (!accountInfo) throw new Error(`Unable to get account information for ${account.address}`)
+		if (!accountInfo) {
+			throw new Error(`Unable to get account information for ${account.address}`)
+		}
 		const frontier = await this.svcApi.blockInfo(accountInfo.frontier)
 		const recipient = Account.load(toAddress)
-		const remaining = BigInt(accountInfo.balance) - rawAmount
-		const remainingDecimal = remaining.toString(10)
 
-		const representative = accountInfo.representative || (this.settings.defaultRepresentative || this.getRandomRepresentative())
-		const blockData = {
-			type: 'state',
-			account: walletAccount.address,
-			previous: accountInfo.frontier,
-			representative: representative,
-			balance: remainingDecimal,
-			link: Account.load(toAddress).publicKey,
-			work: null,
-			signature: null,
-		}
 		const block = new Block(walletAccount.address, accountInfo.balance, accountInfo.frontier, accountInfo.representative)
 			.send(recipient, rawAmount)
-		await block.pow()
-
 		if (ledger) {
 			const { contents } = frontier
 			const ledgerBlock = new Block(contents.account, contents.balance, contents.previous, contents.representative)
@@ -226,135 +213,68 @@ export class NanoBlockService {
 				.sign(contents.signature)
 			try {
 				this.sendLedgerNotification()
-				try {
-					await wallet.sign(walletAccount.index, block, ledgerBlock)
-					this.clearLedgerNotification()
-					console.log(block.signature)
-					const hash = await block.process(this.svcApi.rpc())
-					console.log(hash)
-					return hash
-				} catch (err) {
-					console.error(err)
-				}
+				await wallet.sign(walletAccount.index, block, ledgerBlock)
 			} catch (err) {
-				this.clearLedgerNotification()
 				this.sendLedgerDeniedNotification(err)
 				return
+			} finally {
+				this.clearLedgerNotification()
 			}
 		} else {
 			await block.sign(wallet, walletAccount.index)
+		}
+
+		try {
+			await block.pow()
 			const hash = await block.process(this.svcApi.rpc())
-			console.log(hash)
+			walletAccount.frontier = hash
+			this.svcWorkPool.addWorkToCache(hash, 1) // Add new hash into the work pool, high PoW threshold for send block
+			this.svcWorkPool.removeFromCache(accountInfo.frontier)
 			return hash
+		} catch (err) {
+			this.svcNotifications.sendError(err?.message ?? err)
 		}
-
-		if (!this.svcWorkPool.workExists(accountInfo.frontier)) {
-			this.svcNotifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
-		}
-
-		blockData.work = await this.svcWorkPool.getWork(accountInfo.frontier, 1)
-		this.svcNotifications.removeNotification('pow')
-
-		const processResponse = await this.svcApi.process(blockData, TxType.send)
-		if (!processResponse || !processResponse.hash) throw new Error(processResponse.error || `Node returned an error`)
-
-		walletAccount.frontier = processResponse.hash
-		this.svcWorkPool.addWorkToCache(processResponse.hash, 1) // Add new hash into the work pool, high PoW threshold for send block
-		this.svcWorkPool.removeFromCache(accountInfo.frontier)
-
-		return processResponse.hash
 	}
 
 	async generateReceive (wallet: Wallet, account: Account, sourceBlock, ledger = false) {
 		await account.refresh(this.svcApi.rpc())
-
-		let workBlock = null
-
+		const frontier = account.frontier ? await this.svcApi.blockInfo(account.frontier) : undefined
 		const openEquiv = !account?.frontier
-
-		const previousBlock = account.frontier ?? this.zeroHash
-		console.log(previousBlock)
-		const representative = account.representative ?? this.settings.defaultRepresentative ?? this.getRandomRepresentative()
-
 		const srcBlockInfo = await this.svcApi.blocksInfo([sourceBlock])
 		const srcAmount = BigInt(srcBlockInfo.blocks[sourceBlock].amount)
-		const newBalance = openEquiv
-			? srcAmount
-			: BigInt(account.balance) + srcAmount
-		const newBalanceDecimal = newBalance.toString(10)
-		let newBalancePadded = newBalance.toString(16)
-		while (newBalancePadded.length < 32) newBalancePadded = '0' + newBalancePadded // Left pad with 0's
-		const blockData = {
-			type: 'state',
-			account: account.address,
-			previous: previousBlock,
-			representative: representative,
-			balance: newBalanceDecimal,
-			link: sourceBlock,
-			signature: null,
-			work: null
-		}
 		const block = new Block(account).receive(sourceBlock, srcAmount)
 
 		// We have everything we need, we need to obtain a signature
 		if (ledger) {
-			const ledgerBlock: any = {
-				representative: representative,
-				balance: newBalanceDecimal,
-				sourceBlock: sourceBlock,
-			}
-			if (!openEquiv) {
-				ledgerBlock.previousBlock = account.frontier
-			}
+			const ledgerBlock = frontier
+				? new Block(frontier.contents.account, frontier.contents.balance, frontier.contents.previous, frontier.contents.representative)
+					.send(frontier.contents.link, 0)
+					.sign(frontier.contents.signature)
+				: undefined
 			try {
 				this.sendLedgerNotification()
-				const signature = await wallet.sign(account.index, ledgerBlock as unknown as Block, ledgerBlock.previousBlock)
-				this.clearLedgerNotification()
-				blockData.signature = signature
+				await wallet.sign(account.index, block, ledgerBlock)
 			} catch (err) {
-				this.clearLedgerNotification()
-				this.svcNotifications.sendWarning(err.message || `Transaction denied on Ledger device`)
+				this.sendLedgerDeniedNotification(err)
 				return
+			} finally {
+				this.clearLedgerNotification()
 			}
 		} else {
-			await block.pow()
 			await block.sign(wallet, account.index)
-			console.log(block.toJSON())
+		}
+
+		try {
+			await block.pow()
 			const hash = await block.process(this.svcApi.rpc())
-			console.log(hash)
-			return hash
-		}
-
-		workBlock = openEquiv
-			? Account.load(account.address).publicKey
-			: previousBlock
-		if (!this.svcWorkPool.workExists(workBlock)) {
-			this.svcNotifications.sendInfo(`Generating Proof of Work...`, { identifier: 'pow', length: 0 })
-		}
-
-		console.log('Get work for receive block')
-		blockData.work = await this.svcWorkPool.getWork(workBlock, 1 / 64) // low PoW threshold since receive block
-		this.svcNotifications.removeNotification('pow')
-		const processResponse = await this.svcApi.process(
-			blockData,
-			openEquiv
-				? TxType.open
-				: TxType.receive
-		)
-		if (processResponse && processResponse.hash) {
-			account.frontier = processResponse.hash
-			// Add new hash into the work pool, high PoW threshold since we don't know what the next one will be
-			// Skip adding new work cache directly, let reloadBalances() check for receivable and decide instead
-			// this.workPool.addWorkToCache(processResponse.hash, 1)
-			this.svcWorkPool.removeFromCache(workBlock)
-
+			account.frontier = hash
 			// update the rep view via subscription
 			if (openEquiv) {
 				this.informNewRep()
 			}
-			return processResponse.hash
-		} else {
-			return null
+			return hash
+		} catch (err) {
+			this.svcNotifications.sendError(err?.message ?? err)
 		}
 	}
 
