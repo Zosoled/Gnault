@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common'
 import { Component, Input, OnChanges, OnInit } from '@angular/core'
 import { TranslocoDirective } from '@jsverse/transloco'
+import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components'
 import { AmountSplitPipe, RaiPipe } from 'app/pipes'
-import { NanoAccountIdComponent } from '../nano-account-id/nano-account-id.component'
-import { NanoIdenticonComponent } from '../nano-identicon/nano-identicon.component'
 
 @Component({
 	selector: 'app-nano-transaction-mobile',
@@ -18,18 +17,17 @@ import { NanoIdenticonComponent } from '../nano-identicon/nano-identicon.compone
 		TranslocoDirective
 	]
 })
-
 export class NanoTransactionMobileComponent implements OnInit, OnChanges {
-	@Input() transaction: any
 	@Input() isInteractable = true
 	@Input() isHidden: boolean
 	@Input() settingIdenticonsStyle: string
+	@Input() transaction: any
 
 	isNaN = isNaN
 	isReceivableTransaction = false
+	isReceiveTransaction = false
 	isRepresentativeChange = false
 	isSendTransaction = false
-	isReceiveTransaction = false
 
 	ngOnInit (): void {
 		this.updateType()
@@ -42,31 +40,20 @@ export class NanoTransactionMobileComponent implements OnInit, OnChanges {
 	updateType () {
 		if (this.transaction.isReceivable === true) {
 			this.isReceivableTransaction = true
-			this.isRepresentativeChange = false
-			this.isSendTransaction = false
-			this.isReceiveTransaction = false
+			this.isReceiveTransaction = this.isRepresentativeChange = this.isSendTransaction = false
 			return
 		}
 
+		const { subtype, type } = this.transaction
 		if (isNaN(this.transaction.amount)) {
-			this.isReceivableTransaction = false
 			this.isRepresentativeChange = true
-			this.isSendTransaction = false
-			this.isReceiveTransaction = false
-		} else if (this.transaction.type === 'send' || this.transaction.subtype === 'send') {
-			this.isReceivableTransaction = false
-			this.isRepresentativeChange = false
+			this.isReceivableTransaction = this.isReceiveTransaction = this.isSendTransaction = false
+		} else if (type === 'send' || subtype === 'send') {
 			this.isSendTransaction = true
-			this.isReceiveTransaction = false
-		} else if (this.transaction.type === 'receive'
-			|| this.transaction.subtype === 'receive'
-			|| this.transaction.type === 'open'
-		) {
-			this.isReceivableTransaction = false
-			this.isRepresentativeChange = false
-			this.isSendTransaction = false
+			this.isReceivableTransaction = this.isReceiveTransaction = this.isRepresentativeChange = false
+		} else if (type === 'receive' || subtype === 'receive' || type === 'open') {
 			this.isReceiveTransaction = true
+			this.isReceivableTransaction = this.isRepresentativeChange = this.isSendTransaction = false
 		}
 	}
-
 }
