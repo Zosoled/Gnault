@@ -343,12 +343,25 @@ export class ApiService {
 	 * @param account
 	 * @see https://docs.nano.org/commands/rpc-protocol/#account_info
 	 */
-	async accountInfo (account: string): Promise<any> {
-		return await this.request(
-			'account_info',
-			{ account, receivable: true, representative: true, weight: true },
-			false
-		)
+	async accountInfo (account: string): Promise<{
+		error?: any
+		frontier: string
+		open_block: string
+		representative_block: string
+		balance: string
+		modified_timestamp: number
+		block_count: number
+		account_version: number
+		confirmation_height: number
+		confirmation_height_frontier: string
+		representative: string
+		weight: string
+		pending: string
+		receivable: string
+	}
+	> {
+		const data = { account, receivable: true, representative: true, weight: true }
+		return await this.request('account_info', data, false)
 	}
 
 	async receivable (account, count, threshold = 0, sorting = false): Promise<{

@@ -487,7 +487,7 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 		}
 
 		// If there is a receivable balance, or the account is not opened yet, load receivable transactions
-		if (accountInfo.receivable > 0 || accountInfo.error) {
+		if (BigInt(accountInfo.receivable) > 0n || accountInfo.error) {
 			// Take minimum receive into account
 			let receivableBalance = '0'
 			let receivable

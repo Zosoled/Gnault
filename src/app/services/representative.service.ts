@@ -320,14 +320,15 @@ export class RepresentativeService {
 	 */
 	async getRepresentativesDetails (representatives: RepresentativeOverview[]): Promise<RepresentativeApiOverview[]> {
 		const repInfos = await Promise.all(
-			representatives.map((rep) =>
-				this.svcApi.accountInfo(rep.address).then((res: RepresentativeApiOverview) => {
+			representatives.map((rep) => {
+				const accountInfo = this.svcApi.accountInfo(rep.address) as unknown as Promise<RepresentativeApiOverview>
+				return accountInfo.then((res: RepresentativeApiOverview) => {
 					res.address = rep.address
 					res.delegatedWeight = rep.weight
 					res.accounts = rep.accounts
 					return res
 				})
-			)
+			})
 		)
 		return repInfos
 	}

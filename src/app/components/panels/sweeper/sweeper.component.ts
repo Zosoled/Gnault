@@ -402,7 +402,7 @@ export class SweeperComponent implements OnInit {
 		this.pubKey = account.publicKey
 
 		// get account info required to build the block
-		let balance = 0 // balance will be 0 if open block
+		let balance = 0n // balance will be 0 if open block
 		this.adjustedBalance = balance.toString()
 		let previous = null // previous is null if we create open block
 		this.representative = this.settings.defaultRepresentative || this.nanoBlock.getRandomRepresentative()
@@ -414,7 +414,7 @@ export class SweeperComponent implements OnInit {
 		// if frontier is returned it means the account has been opened and we create a receive block
 		if (accountInfo.frontier) {
 			validResponse = true
-			balance = accountInfo.balance
+			balance = BigInt(accountInfo.balance)
 			this.adjustedBalance = balance.toString()
 			previous = accountInfo.frontier
 			this.representative = accountInfo.representative

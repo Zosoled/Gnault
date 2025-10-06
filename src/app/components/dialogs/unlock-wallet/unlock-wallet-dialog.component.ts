@@ -31,7 +31,7 @@ export class UnlockWalletDialogComponent implements AfterViewInit {
 			this.onModalHidden()
 		})
 		this.walletService.isUnlockRequested$.subscribe(async (isRequested) => {
-			if (isRequested) {
+			if (isRequested && !this.walletService.isLedger()) {
 				this.modal ? this.showModal() : (this.isPending = true)
 			}
 		})

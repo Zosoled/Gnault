@@ -45,11 +45,11 @@ export interface ReceivableBlockUpdate {
 }
 
 export interface BaseApiAccount {
-	account_version: string
+	account_version: number
 	balance: string
-	block_count: string
+	block_count: number
 	frontier: string
-	modified_timestamp: string
+	modified_timestamp: number
 	open_block: string
 	receivable: string
 	representative: string
