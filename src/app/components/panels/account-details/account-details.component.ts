@@ -1,5 +1,5 @@
 import { CommonModule, DecimalPipe, formatDate } from '@angular/common'
-import { Component, computed, inject, OnDestroy, OnInit, signal, Signal, WritableSignal } from '@angular/core'
+import { AfterViewInit, Component, computed, inject, OnDestroy, signal, Signal, WritableSignal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, ChildActivationEnd, NavigationEnd, Router, RouterLink } from '@angular/router'
 import { translate, TranslocoDirective } from '@jsverse/transloco'
@@ -43,7 +43,7 @@ import { BehaviorSubject } from 'rxjs'
 		TranslocoDirective,
 	],
 })
-export class AccountDetailsComponent implements OnInit, OnDestroy {
+export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 	private activatedRoute = inject(ActivatedRoute)
 	private router = inject(Router)
 	private svcAddressBook = inject(AddressBookService)
@@ -178,7 +178,7 @@ export class AccountDetailsComponent implements OnInit, OnDestroy {
 		})
 	}
 
-	async ngOnInit () {
+	async ngAfterViewInit () {
 		const params = this.activatedRoute.snapshot.queryParams
 		if ('sign' in params) {
 			this.remoteVisible = params.sign === '1'
