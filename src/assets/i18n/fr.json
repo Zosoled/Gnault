@@ -373,7 +373,7 @@
 		"incoming-transactions": "Transactions entrantes",
 		"minimum-receive-is-set-to": {
 			"1": "Le montant minimum de réception est fixé à",
-			"2": ", les transactions en dessous de ce montant seront masquées."
+			"2": ". \nLes transactions inférieures à ce montant seront cachées."
 		},
 		"nano-received": "Nano reçu",
 		"receive-nano": "Recevoir du Nano",

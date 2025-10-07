@@ -374,7 +374,7 @@
 		"incoming-transactions": "传入交易",
 		"minimum-receive-is-set-to": {
 			"1": "最小接收金额设置为",
-			"2": "，低于此金额的交易将被隐藏。"
+			"2": "。\n低于此金额的交易将被隐藏。"
 		},
 		"nano-received": "已接收Nano",
 		"receive-nano": "接收Nano",

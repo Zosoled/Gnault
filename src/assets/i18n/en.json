@@ -378,7 +378,7 @@
 		"incoming-transactions": "Incoming Transactions",
 		"minimum-receive-is-set-to": {
 			"1": "Minimum Receive is set to",
-			"2": ", transactions below this amount will be hidden."
+			"2": ". Transactions below this amount will be hidden."
 		},
 		"nano-received": "Nano Received",
 		"receive-nano": "Receive Nano",

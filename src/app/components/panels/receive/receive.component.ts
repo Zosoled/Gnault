@@ -108,7 +108,8 @@ export class ReceiveComponent implements AfterViewInit, OnDestroy {
 		return this.svcAppSettings.settings().identiconsStyle
 	}
 	get minimumReceive () {
-		return this.svcAppSettings.settings().minimumReceive
+		const min = this.svcAppSettings.settings().minimumReceive ?? 0
+		return Tools.convert(min, 'nano', 'raw', 'string')
 	}
 	get selectedAccount () {
 		return this.svcWallet.selectedAccount()

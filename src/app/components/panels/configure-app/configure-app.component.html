@@ -340,9 +340,12 @@
 													class="uk-input"
 													style="padding-left: 52px !important"
 													id="form-horizontal-text4"
-													type="text"
+													type="number"
+													inputmode="numeric"
+													pattern="\d*\.?\d*"
 													[placeholder]="t('configure-app.leave-blank-to-accept-transactions-of-any-amount')"
-													(input)="onNumberInput(minimumReceive, $event)"
+													[formControl]="minimumReceiveField"
+													(blur)="onStringInput(minimumReceive, $event)"
 												/>
 											</div>
 										</div>

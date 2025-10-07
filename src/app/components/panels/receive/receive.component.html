@@ -535,14 +535,14 @@
 									>
 										<span uk-icon="icon: info"></span>
 										{{ t('receive.minimum-receive-is-set-to.1') }}
-										@if (svcUtil.nano.mnanoToRaw(this.minimumReceive).length > 24) {
+										@if (this.minimumReceive.toString().length > 24) {
 											<a
 												class="hint-action"
 												routerLink="/configure-app"
 												routerLinkActive="active"
 											>
-												{{ svcUtil.nano.mnanoToRaw(this.minimumReceive) | rai: 'nano,true' | amountsplit: 0
-												}}{{ svcUtil.nano.mnanoToRaw(this.minimumReceive) | rai: 'nano,false' | amountsplit: 1 }}
+												{{ this.minimumReceive | rai: 'nano,true' | amountsplit: 0
+												}}{{ this.minimumReceive | rai: 'nano,false' | amountsplit: 1 }}
 											</a>
 										} @else {
 											<a
@@ -550,7 +550,7 @@
 												routerLink="/configure-app"
 												routerLinkActive="active"
 											>
-												{{ this.minimumReceive | rai: 'raw,false' }}
+												{{ this.minimumReceive }}
 											</a>
 										}
 										{{ t('receive.minimum-receive-is-set-to.2') }}

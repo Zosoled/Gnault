@@ -370,7 +370,7 @@
 		"incoming-transactions": "Eingehende Transaktionen",
 		"minimum-receive-is-set-to": {
 			"1": "Mindestempfangsbetrag ist auf",
-			"2": "gesetzt, Transaktionen unter diesem Betrag werden ausgeblendet."
+			"2": ". \nTransaktionen unter diesem Betrag werden versteckt."
 		},
 		"nano-received": "Nano empfangen",
 		"receive-nano": "Nano empfangen",

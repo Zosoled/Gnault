@@ -277,29 +277,19 @@ export class WalletService {
 			if (!walletAccount) {
 				return
 			}
-
-			const txAmount = BigInt(transaction.amount)
-			let aboveMinimumReceive = true
-
-			if (this.settings.minimumReceive) {
-				const minAmount = this.svcUtil.nano.mnanoToRaw(this.settings.minimumReceive)
-				aboveMinimumReceive = txAmount > BigInt(minAmount)
-			}
-
-			if (aboveMinimumReceive === true) {
-				const isNewBlock = this.addReceivableBlock(
+			const amount = BigInt(transaction.amount)
+			if (!this.settings.minimumReceive || amount > BigInt(this.settings.minimumReceive)) {
+				const isNewBlock: boolean = this.addReceivableBlock(
 					walletAccount.address,
 					transaction.hash,
-					txAmount,
+					amount,
 					transaction.account
 				)
-
-				if (isNewBlock === true) {
-					this.receivable += txAmount
+				if (isNewBlock) {
+					this.receivable += amount
 					this.hasReceivable = true
 				}
 			}
-
 			await this.processReceivableBlocks()
 		} else {
 			// Not a send to us, which means it was a block posted by us.  We shouldnt need to do anything...
@@ -941,12 +931,12 @@ export class WalletService {
 	async generateWalletExport () {
 		const wallet = this.selectedWallet()
 		const backup = await Wallet.backup()
-		const walletData = backup.find((v) => v.id === wallet.id)
+		const walletData = backup.find((v) => v.id === wallet?.id)
 		const walletNames = this.walletNames()
 		const data: any = {
 			...walletData,
 			names: JSON.stringify([...walletNames.entries()]),
-			selectedWalletId: wallet.id,
+			selectedWalletId: wallet?.id,
 			accounts: this.accounts.map((a) => a.toJSON()),
 			selectedAccountAddress: this.selectedAccount()?.address,
 			locked: true,

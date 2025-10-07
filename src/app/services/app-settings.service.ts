@@ -22,7 +22,7 @@ interface AppSettings {
 	inactivityPeriod: number
 	identiconsStyle: string
 	language: string
-	minimumReceive: number | null
+	minimumReceive: bigint
 	powSource: 'client' | 'custom' | 'server'
 	receivableOption: string
 	server: string
@@ -47,7 +47,7 @@ export class AppSettingsService {
 		identiconsStyle: 'nanoidenticons',
 		inactivityPeriod: 300,
 		language: null,
-		minimumReceive: 0.000001,
+		minimumReceive: 10n ** 24n,
 		powSource: 'server',
 		receivableOption: 'amount',
 		server: 'random',
@@ -127,7 +127,10 @@ export class AppSettingsService {
 
 	loadAppSettings () {
 		const item = this.storage?.getItem(this.storeKey) ?? '{}'
-		const settings = JSON.parse(item, (_, v) => !isNaN(v) && typeof v === 'string' && v.trim() !== '' ? Number(v) : v)
+		const settings = JSON.parse(item)
+		settings.inactivityPeriod = Number(settings.inactivityPeriod)
+		settings.minimumReceive = BigInt(settings.minimumReceive)
+		settings.walletVersion = Number(settings.walletVersion)
 		if (settings.language == null) {
 			const browserCultureLang = getBrowserCultureLang()
 			const browserLang = getBrowserLang()
@@ -208,7 +211,7 @@ export class AppSettingsService {
 			inactivityPeriod: 300,
 			identiconsStyle: 'nanoidenticons',
 			language: 'en',
-			minimumReceive: 0.000001,
+			minimumReceive: 10n ** 24n,
 			powSource: 'server',
 			receivableOption: 'amount',
 			server: 'random',
