@@ -321,6 +321,7 @@
 		"date": "Datum",
 		"default": "Standard",
 		"edit": "Bearbeiten",
+		"finish": "Beenden",
 		"loading": "Laden...",
 		"name": "Name",
 		"network": "Netzwerk",

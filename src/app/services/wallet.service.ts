@@ -518,7 +518,9 @@ export class WalletService {
 		try {
 			this.resetWallet()
 			const wallet = await this.requestChangePassword(async (password) => {
-				return await Wallet.create('BLAKE2b', password)
+				const wallet = await Wallet.create('BLAKE2b', password)
+				await wallet.unlock(password)
+				return wallet
 			})
 			this.selectedWallet.set(wallet)
 			await this.saveWalletExport()

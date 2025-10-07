@@ -8,9 +8,10 @@
 					uk-grid
 				>
 					<div class="uk-width-1-1 uk-width-auto@l uk-flex-wrap-top">
+						<!-- New Wallet button -->
 						<button
 							class="wallet-option"
-							(click)="setPasswordInit()"
+							(click)="initCreate()"
 						>
 							<div class="icon">
 								<svg
@@ -92,6 +93,7 @@
 							<h2>New<br />Wallet</h2>
 							<p>Generate seed<br />and mnemonic</p>
 						</button>
+						<!-- Use Ledger button -->
 						@if (isSupported) {
 							<button
 								class="wallet-option"
@@ -136,6 +138,7 @@
 						}
 					</div>
 					<div class="uk-width-expand">
+						<!-- Import Mnemonic button -->
 						<button
 							class="wallet-option"
 							(click)="setPanel(panels.mnemonicTypeSelection)"
@@ -163,6 +166,7 @@
 							<h2>Import<br />Mnemonic</h2>
 							<p>12, 15, 18, 21<br />or 24 words</p>
 						</button>
+						<!-- Import Seed button -->
 						<button
 							class="wallet-option"
 							(click)="setPanel(panels.import); selectedImportOption = 'seed'"
@@ -398,7 +402,7 @@
 								<input
 									type="text"
 									class="uk-input"
-									(keyup.enter)="setPasswordInit()"
+									(keyup.enter)="initImport()"
 									[(ngModel)]="importSeedModel"
 									placeholder="64 hex character secret recovery seed"
 								/>
@@ -492,7 +496,7 @@
 										<input
 											type="text"
 											class="uk-input uk-margin-small-bottom {{ validIndex ? '' : 'uk-form-danger' }}"
-											(keyup.enter)="setPasswordInit()"
+											(keyup.enter)="initImport()"
 											[(ngModel)]="importSeedBip39MnemonicIndexModel"
 											(ngModelChange)="accountIndexChange(importSeedBip39MnemonicIndexModel)"
 											maxLength="10"
@@ -519,7 +523,7 @@
 										<input
 											type="password"
 											class="uk-input"
-											(keyup.enter)="setPasswordInit()"
+											(keyup.enter)="initImport()"
 											[(ngModel)]="importSeedBip39MnemonicPasswordModel"
 											placeholder="Optional"
 											autocomplete="off"
@@ -651,7 +655,7 @@
 								<input
 									type="text"
 									class="uk-input"
-									(keyup.enter)="setPasswordInit()"
+									(keyup.enter)="initImport()"
 									[(ngModel)]="importPrivateKeyModel"
 									placeholder="64 hex character Nano Private Key"
 								/>
@@ -681,7 +685,7 @@
 								<input
 									type="text"
 									class="uk-input"
-									(keyup.enter)="setPasswordInit()"
+									(keyup.enter)="initImport()"
 									[(ngModel)]="importExpandedKeyModel"
 									placeholder="64 or 128 hex character Nano Expanded Private Key"
 								/>
@@ -715,7 +719,7 @@
 				@if (selectedImportOption === 'mnemonic') {
 					<button
 						class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
-						(click)="setPasswordInit()"
+						(click)="initImport()"
 					>
 						Import From Mnemonic
 					</button>
@@ -724,7 +728,7 @@
 					<button
 						class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
 						[disabled]="!validIndex"
-						(click)="setPasswordInit()"
+						(click)="initImport()"
 					>
 						Import From Mnemonic
 					</button>
@@ -732,7 +736,7 @@
 				@if (selectedImportOption === 'seed') {
 					<button
 						class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
-						(click)="setPasswordInit()"
+						(click)="initImport()"
 					>
 						Import From Seed
 					</button>
@@ -758,7 +762,7 @@
 				@if (selectedImportOption === 'privateKey') {
 					<button
 						class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
-						(click)="setPasswordInit()"
+						(click)="initImport()"
 					>
 						Import From Private Key
 					</button>
@@ -766,7 +770,7 @@
 				@if (selectedImportOption === 'expandedKey') {
 					<button
 						class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
-						(click)="setPasswordInit()"
+						(click)="initImport()"
 					>
 						Import From Expanded Private Key
 					</button>
@@ -940,7 +944,7 @@
 					[disabled]="!hasConfirmedBackup"
 					(click)="confirmNewSeed()"
 				>
-					{{ t('configure-wallet.new-wallet.create-wallet') }}
+					{{ t('general.finish') }}
 				</button>
 			</div>
 		</div>

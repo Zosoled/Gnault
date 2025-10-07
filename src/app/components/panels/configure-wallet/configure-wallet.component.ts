@@ -164,7 +164,78 @@ export class ConfigureWalletComponent {
 		}
 	}
 
-	async setPasswordInit () {
+	initCreate () {
+		this.isNewWallet = true
+		this.activePanel = panels.password
+	}
+
+	async initImport () {
+		if (this.selectedImportOption === 'mnemonic' || this.selectedImportOption === 'seed') {
+			if (this.selectedImportOption === 'seed') {
+				const existingSeed = this.importSeedModel.trim()
+				if (existingSeed.length !== 64 || !this.svcUtil.nano.isValidSeed(existingSeed))
+					return this.svcNotifications.sendError(`Seed is invalid, double check it!`)
+				this.importSeed = existingSeed
+			} else if (this.selectedImportOption === 'mnemonic') {
+				// Clean the value by trimming it and removing newlines
+				const mnemonic = this.importSeedMnemonicModel.toLowerCase().replace(/\n/g, '').trim()
+				const words = mnemonic.split(' ')
+				if (words.length < 20) return this.svcNotifications.sendError(`Mnemonic is too short, double check it!`)
+
+				// Try and decode the mnemonic
+				try {
+					await this.svcWallet.loadImportedWallet('BLAKE2b', '', mnemonic, 0, [0], 'seed')
+				} catch (err) {
+					return this.svcNotifications.sendError(err?.message ?? err)
+				}
+			} else {
+				return this.svcNotifications.sendError(`Invalid import option`)
+			}
+		} else if (this.selectedImportOption === 'privateKey' || this.selectedImportOption === 'expandedKey') {
+			if (this.selectedImportOption === 'privateKey') {
+				this.isExpanded = false
+			} else if (this.selectedImportOption === 'expandedKey') {
+				this.isExpanded = true
+			} else {
+				return this.svcNotifications.sendError(`Invalid import option`)
+			}
+
+			this.keyString = this.isExpanded ? this.importExpandedKeyModel : this.importPrivateKeyModel
+			this.keyString = this.keyString.trim()
+			if (this.isExpanded && this.keyString.length === 128) {
+				// includes deterministic R value material which we ignore
+				this.keyString = this.keyString.substring(0, 64)
+				if (!this.svcUtil.nano.isValidSeed(this.keyString)) {
+					return this.svcNotifications.sendError(`Private key is invalid, double check it!`)
+				}
+			} else if (this.keyString.length !== 64 || !this.svcUtil.nano.isValidSeed(this.keyString)) {
+				return this.svcNotifications.sendError(`Private key is invalid, double check it!`)
+			}
+		} else if (this.selectedImportOption === 'bip39-mnemonic') {
+			// If bip39, import wallet as a single private key
+			let bipWallet
+			try {
+				bipWallet = await Wallet.load('BIP-44', '', this.importSeedBip39MnemonicModel)
+				await bipWallet.unlock('')
+			} catch (err) {
+				return this.svcNotifications.sendError(err.message)
+			}
+			if (!this.validIndex) {
+				return this.svcNotifications.sendError(`The account index is invalid, double check it!`)
+			}
+
+			// derive private key from bip39 seed using the account index provided
+			const accounts = await bipWallet.accounts(
+				Number(this.importSeedBip39MnemonicIndexModel),
+				Number(this.importSeedBip39MnemonicIndexModel)
+			)
+			this.keyString = accounts[0].privateKey
+			this.isExpanded = false
+		}
+		this.activePanel = panels.password
+	}
+
+	async saveWalletPassword () {
 		if (this.isNewWallet) {
 			const { mnemonic, seed } = await this.svcWallet.createNewWallet()
 			this.newWalletMnemonic = mnemonic
@@ -180,78 +251,12 @@ export class ConfigureWalletComponent {
 				words.slice(20, 24),
 			]
 			this.newWalletMnemonicLines = lines
-			this.activePanel = panels.password
+			this.activePanel = panels.backup
 		} else {
-			if (this.selectedImportOption === 'mnemonic' || this.selectedImportOption === 'seed') {
-				if (this.selectedImportOption === 'seed') {
-					const existingSeed = this.importSeedModel.trim()
-					if (existingSeed.length !== 64 || !this.svcUtil.nano.isValidSeed(existingSeed))
-						return this.svcNotifications.sendError(`Seed is invalid, double check it!`)
-					this.importSeed = existingSeed
-				} else if (this.selectedImportOption === 'mnemonic') {
-					// Clean the value by trimming it and removing newlines
-					const mnemonic = this.importSeedMnemonicModel.toLowerCase().replace(/\n/g, '').trim()
-					const words = mnemonic.split(' ')
-					if (words.length < 20) return this.svcNotifications.sendError(`Mnemonic is too short, double check it!`)
-
-					// Try and decode the mnemonic
-					try {
-						await this.svcWallet.loadImportedWallet('BLAKE2b', '', mnemonic, 0, [0], 'seed')
-					} catch (err) {
-						return this.svcNotifications.sendError(err?.message ?? err)
-					}
-				} else {
-					return this.svcNotifications.sendError(`Invalid import option`)
-				}
-			} else if (this.selectedImportOption === 'privateKey' || this.selectedImportOption === 'expandedKey') {
-				if (this.selectedImportOption === 'privateKey') {
-					this.isExpanded = false
-				} else if (this.selectedImportOption === 'expandedKey') {
-					this.isExpanded = true
-				} else {
-					return this.svcNotifications.sendError(`Invalid import option`)
-				}
-
-				this.keyString = this.isExpanded ? this.importExpandedKeyModel : this.importPrivateKeyModel
-				this.keyString = this.keyString.trim()
-				if (this.isExpanded && this.keyString.length === 128) {
-					// includes deterministic R value material which we ignore
-					this.keyString = this.keyString.substring(0, 64)
-					if (!this.svcUtil.nano.isValidSeed(this.keyString)) {
-						return this.svcNotifications.sendError(`Private key is invalid, double check it!`)
-					}
-				} else if (this.keyString.length !== 64 || !this.svcUtil.nano.isValidSeed(this.keyString)) {
-					return this.svcNotifications.sendError(`Private key is invalid, double check it!`)
-				}
-			} else if (this.selectedImportOption === 'bip39-mnemonic') {
-				// If bip39, import wallet as a single private key
-				let bipWallet
-				try {
-					bipWallet = await Wallet.load('BIP-44', '', this.importSeedBip39MnemonicModel)
-					await bipWallet.unlock('')
-				} catch (err) {
-					return this.svcNotifications.sendError(err.message)
-				}
-				if (!this.validIndex) {
-					return this.svcNotifications.sendError(`The account index is invalid, double check it!`)
-				}
-
-				// derive private key from bip39 seed using the account index provided
-				const accounts = await bipWallet.accounts(
-					Number(this.importSeedBip39MnemonicIndexModel),
-					Number(this.importSeedBip39MnemonicIndexModel)
-				)
-				this.keyString = accounts[0].privateKey
-				this.isExpanded = false
+			const isUpdated = await this.svcWallet.requestChangePassword()
+			if (isUpdated) {
+				this.activePanel = panels.final
 			}
-			this.activePanel = panels.password
-		}
-	}
-
-	async saveWalletPassword () {
-		const isUpdated = await this.svcWallet.requestChangePassword()
-		if (isUpdated) {
-			this.activePanel = this.isNewWallet ? panels.backup : panels.final
 		}
 	}
 
@@ -270,7 +275,6 @@ export class ConfigureWalletComponent {
 	saveNewWallet () {
 		this.svcWallet.saveWalletExport()
 		this.svcWallet.publishNewWallet()
-
 		this.svcNotifications.sendSuccess(`Successfully created new wallet! Do not lose the secret recovery seed/mnemonic!`)
 	}
 
