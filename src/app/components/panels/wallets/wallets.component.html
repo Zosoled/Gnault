@@ -35,25 +35,38 @@
 					<tr>
 						<th
 							scope="col"
-							class="wallet-column uk-width-3-5@m uk-width-1-2"
+							class="wallet-active-column uk-table-shrink"
+						>
+							Active
+						</th>
+						<th
+							scope="col"
+							class="wallet-names-column uk-table-expand"
 						>
 							{{ t('general.wallet') }}
 						</th>
 						<th
 							scope="col"
-							class="wallet-types-column uk-width-1-5@m uk-width-1-4"
+							class="wallet-types-column"
 						>
 							{{ t('general.type') }}
 						</th>
 						<th
 							scope="col"
-							class="wallet-actions-column table-header-delete-wallet uk-width-1-5@m uk-width-1-4 uk-text-right"
-						></th>
+							class="wallet-actions-column uk-table-shrink uk-text-right"
+						>
+							Actions
+						</th>
 					</tr>
 				</thead>
 				<tbody>
 					@for (wallet of wallets(); track wallet.id) {
 						<tr class="uk-visible-toggle">
+							<td class="wallet-active-column uk-text-center">
+								@if (wallet.id === svcWallet.selectedWallet()?.id) {
+									<span uk-icon="play"></span>
+								}
+							</td>
 							<td class="wallet-column uk-visible-toggle uk-text-truncate">
 								<div uk-grid>
 									<a

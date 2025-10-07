@@ -1021,6 +1021,7 @@ export class WalletService {
 			names.delete(id)
 			return names
 		})
+		this.setActiveWallet(this.wallets()[0].id)
 	}
 
 	async setActiveWallet (id: string) {

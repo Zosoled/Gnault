@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { Component, computed, inject, OnInit } from '@angular/core'
+import { Component, computed, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
 import { translate, TranslocoDirective } from '@jsverse/transloco'
@@ -8,8 +8,6 @@ import {
 	WalletService
 } from 'app/services'
 import { ClipboardModule } from 'ngx-clipboard'
-import { Subject, timer } from 'rxjs'
-import { debounce } from 'rxjs/operators'
 
 @Component({
 	selector: 'app-wallets',
@@ -23,30 +21,25 @@ import { debounce } from 'rxjs/operators'
 		TranslocoDirective,
 	],
 })
-export class WalletsComponent implements OnInit {
+export class WalletsComponent {
 	private router = inject(Router)
 	private svcNotifications = inject(NotificationsService)
-	private svcWallet = inject(WalletService)
+
+	svcWallet = inject(WalletService)
+
 	UIkit = (window as any).UIkit
-
-	// Repopulate accounts when changing wallets (debounce by 5 seconds)
-	walletChanged$ = new Subject<string>()
-	reloadAccountsWarning$ = this.walletChanged$.pipe(debounce(() => timer(5000)))
 	walletIdToDelete = null
-
 	wallets = computed(() => {
 		const wallets = this.svcWallet.wallets()
 		const names = this.svcWallet.walletNames()
 		return wallets
-			.map(wallet => ({ id: wallet.id, name: names.get(wallet.id) ?? wallet.id, type: wallet.type }))
+			.map(wallet => ({
+				id: wallet.id,
+				name: names.get(wallet.id) ?? wallet.id,
+				type: wallet.type
+			}))
 			.sort((a, b) => a.name.localeCompare(b.name))
 	})
-
-	async ngOnInit () {
-		this.reloadAccountsWarning$.subscribe((a) => {
-			this.svcWallet.scanAccounts()
-		})
-	}
 
 	confirmDeleteWallet (id: string) {
 		try {
@@ -63,7 +56,6 @@ export class WalletsComponent implements OnInit {
 	async deleteWallet () {
 		await this.svcWallet.deleteWallet(this.walletIdToDelete)
 		this.svcNotifications.sendSuccess(translate('wallets.delete.success'))
-		this.walletChanged$.next(this.walletIdToDelete)
 	}
 
 	async editWalletName (id: string) {
