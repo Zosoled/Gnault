@@ -778,7 +778,7 @@ export class WalletService {
 			while (this.accounts.find((a) => a.index === index)) {
 				index++
 			}
-			const newAccount: Account = this.isLedger
+			const newAccount: Account = this.isLedger()
 				? await this.createLedgerAccount(index)
 				: await this.selectedWallet().account(index)
 			if (this.accounts.some(a => a.index === index)) {
