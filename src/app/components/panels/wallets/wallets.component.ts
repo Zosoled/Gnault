@@ -48,18 +48,6 @@ export class WalletsComponent implements OnInit {
 		})
 	}
 
-	selectWallet (id: string) {
-		try {
-			if (id == null) {
-				throw new Error('No wallet ID provided.')
-			}
-			this.svcWallet.setActiveWallet(id)
-			this.router.navigate(['accounts'], { queryParams: { compact: 1 } })
-		} catch (err) {
-			this.svcNotifications.sendError('Failed to select wallet.', { error: err?.message ?? err })
-		}
-	}
-
 	confirmDeleteWallet (id: string) {
 		try {
 			this.walletIdToDelete = id
@@ -90,5 +78,17 @@ export class WalletsComponent implements OnInit {
 			})
 		}
 		await this.svcWallet.saveWalletExport()
+	}
+
+	selectWallet (id: string) {
+		try {
+			if (id == null) {
+				throw new Error('No wallet ID provided.')
+			}
+			this.svcWallet.setActiveWallet(id)
+			this.router.navigate(['accounts'], { queryParams: { compact: 1 } })
+		} catch (err) {
+			this.svcNotifications.sendError('Failed to select wallet.', { error: err?.message ?? err })
+		}
 	}
 }
