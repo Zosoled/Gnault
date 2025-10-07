@@ -14,22 +14,10 @@ export class WalletWidgetComponent implements OnInit {
 	private svcNotifications = inject(NotificationsService)
 	private svcPow = inject(PowService)
 	private svcTransloco = inject(TranslocoService)
-	private svcWallet = inject(WalletService)
+
+	svcWallet = inject(WalletService)
 
 	powAlert = signal(false)
-
-	get isConfigured () {
-		return this.svcWallet.isConfigured()
-	}
-	get isLedger () {
-		return this.svcWallet.isLedger()
-	}
-	get isLocked () {
-		return this.svcWallet.isLocked()
-	}
-	get ledgerStatus () {
-		return this.svcWallet.ledgerStatus
-	}
 
 	ngOnInit () {
 		// Detect if a PoW is taking too long and alert
@@ -57,7 +45,7 @@ export class WalletWidgetComponent implements OnInit {
 			await this.svcWallet.selectedWallet().config({ connection: 'hid' })
 			await this.svcWallet.selectedWallet().unlock()
 			this.svcNotifications.removeNotification('ledger-status')
-			if (this.isLocked) {
+			if (this.svcWallet.isLocked()) {
 				this.svcNotifications.sendError(`Ledger device locked. Unlock and try again.`)
 			} else {
 				this.svcNotifications.sendSuccess(`Successfully connected to Ledger device`)

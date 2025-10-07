@@ -106,12 +106,8 @@ export class WalletService {
 	successfulBlocks = []
 	trackedHashes = []
 
-	get ledgerStatus () {
-		return this.svcLedger.status()
-	}
-	get settings () {
-		return this.svcAppSettings.settings()
-	}
+	ledgerStatus = computed(() => this.svcLedger.status())
+	settings = computed(() => this.svcAppSettings.settings())
 
 	constructor () {
 		effect((onCleanup) => {
@@ -135,7 +131,7 @@ export class WalletService {
 				return
 			}
 			console.log('New Transaction', transaction)
-			const min = Tools.convert(this.settings.minimumReceive, this.settings.denomination, 'raw', 'bigint')
+			const min = Tools.convert(this.settings().minimumReceive, this.settings().denomination, 'raw', 'bigint')
 			let shouldNotify = min > 0n && BigInt(transaction.amount) > min
 
 			const walletAddresses = this.accounts.map((a) => a.address)
@@ -157,12 +153,12 @@ export class WalletService {
 
 			if (isConfirmedIncomingTransactionForOwnWalletAccount === true) {
 				if (shouldNotify === true) {
-					if (this.isLocked() && this.settings.receivableOption !== 'manual') {
+					if (this.isLocked() && this.settings().receivableOption !== 'manual') {
 						this.svcNotifications.sendWarning(`New incoming transaction - Unlock the wallet to receive`, {
 							length: 10000,
 							identifier: 'receivable-locked',
 						})
-					} else if (this.settings.receivableOption === 'manual') {
+					} else if (this.settings().receivableOption === 'manual') {
 						this.svcNotifications.sendWarning(`New incoming transaction - Set to be received manually`, {
 							length: 10000,
 							identifier: 'receivable-locked',
@@ -172,7 +168,7 @@ export class WalletService {
 					console.log(
 						`Found new incoming block that was below minimum receive amount: `,
 						transaction.amount,
-						this.settings.minimumReceive
+						this.settings().minimumReceive
 					)
 				}
 				await this.processStateBlock(transaction)
@@ -243,7 +239,7 @@ export class WalletService {
 					console.log(
 						`Found new transaction on watch-only account that was below minimum receive amount: `,
 						transaction.amount,
-						this.settings.minimumReceive
+						this.settings().minimumReceive
 					)
 				}
 			}
@@ -278,7 +274,7 @@ export class WalletService {
 				return
 			}
 			const amount = BigInt(transaction.amount)
-			if (!this.settings.minimumReceive || amount > BigInt(this.settings.minimumReceive)) {
+			if (!this.settings().minimumReceive || amount > BigInt(this.settings().minimumReceive)) {
 				const isNewBlock: boolean = this.addReceivableBlock(
 					walletAccount.address,
 					transaction.hash,
@@ -650,7 +646,7 @@ export class WalletService {
 		}
 
 		if (walletReceivableInclUnconfirmed > 0n) {
-			const min = this.svcUtil.nano.nanoToRaw(this.settings.minimumReceive ?? 0)
+			const min = this.svcUtil.nano.nanoToRaw(this.settings().minimumReceive ?? 0)
 			const receivable = min === '0'
 				? await this.svcApi.accountsReceivableSorted(this.accounts.map((a) => a.address))
 				: await this.svcApi.accountsReceivableLimitSorted(this.accounts.map((a) => a.address), min)
@@ -764,7 +760,7 @@ export class WalletService {
 				? await this.createLedgerAccount(index)
 				: await this.selectedWallet().account(index)
 			if (this.accounts.some(a => a.index === index)) {
-				await this.selectedWallet().refresh(this.settings.serverAPI, index)
+				await this.selectedWallet().refresh(this.settings().serverAPI, index)
 			} else {
 				this.accounts.push(newAccount)
 			}
@@ -845,12 +841,12 @@ export class WalletService {
 			this.isProcessingReceivable ||
 			this.isLocked() ||
 			!this.receivableBlocks.length ||
-			this.settings.receivableOption === 'manual'
+			this.settings().receivableOption === 'manual'
 		)
 			return
 
 		// Sort receivable by amount
-		if (this.settings.receivableOption === 'amount') {
+		if (this.settings().receivableOption === 'amount') {
 			this.receivableBlocks.sort(this.sortByAmount)
 		}
 
