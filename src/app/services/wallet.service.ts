@@ -12,7 +12,7 @@ import {
 	WorkPoolService,
 } from 'app/services'
 import { Account, Tools, Wallet } from 'libnemo'
-import { BehaviorSubject } from 'rxjs'
+import { BehaviorSubject, Subject } from 'rxjs'
 
 export type WalletKeyType = 'seed' | 'ledger' | 'privateKey' | 'expandedKey'
 
@@ -94,9 +94,9 @@ export class WalletService {
 	selectedAccount: WritableSignal<Account> = signal(null)
 	selectedAccount$: BehaviorSubject<Account> = new BehaviorSubject(null)
 	isLocked = signal(true)
-	passwordUpdated$ = new BehaviorSubject(false)
+	passwordUpdated$ = new BehaviorSubject<Wallet>(null)
 	isUnlockRequested$ = new BehaviorSubject(false)
-	isChangePasswordRequested$ = new BehaviorSubject(false)
+	isChangePasswordRequested$ = new Subject<(password: string) => Promise<Wallet>>()
 	receivableBlocks = []
 	isReceivableBlocksUpdated$ = new BehaviorSubject(null)
 	newWallet$ = new BehaviorSubject(false)
@@ -476,20 +476,6 @@ export class WalletService {
 		}
 	}
 
-	async setPassword (password: string) {
-		try {
-			await this.selectedWallet().update(password)
-			this.passwordUpdated$.next(true)
-			// Save so a refresh also gives you your unlocked wallet?
-			await this.saveWalletExport()
-			return true
-		} catch (err) {
-			console.warn(err)
-			this.passwordUpdated$.next(false)
-			return false
-		}
-	}
-
 	async setWallet (password: string, wallet: Wallet) {
 		this.resetWallet()
 		this.selectedWallet.set(wallet)
@@ -531,9 +517,11 @@ export class WalletService {
 	async createNewWallet () {
 		try {
 			this.resetWallet()
-			const wallet = await Wallet.create('BLAKE2b', '')
-			await wallet.unlock('')
+			const wallet = await this.requestChangePassword(async (password) => {
+				return await Wallet.create('BLAKE2b', password)
+			})
 			this.selectedWallet.set(wallet)
+			await this.saveWalletExport()
 			this.wallets.update((prev) => [...prev, wallet])
 		} catch (err) {
 			this.svcNotifications.sendError(err?.message ?? err)
@@ -1020,20 +1008,20 @@ export class WalletService {
 		})
 	}
 
-	requestChangePassword (): Promise<boolean> {
-		this.isChangePasswordRequested$.next(true)
+	requestChangePassword (fnWallet?: (password: string) => Promise<Wallet>): Promise<Wallet> {
+		this.isChangePasswordRequested$.next(fnWallet ?? (() => Promise.resolve(this.selectedWallet())))
 		return new Promise((resolve) => {
 			let subUpdate, subCancel
 			subUpdate = this.passwordUpdated$.subscribe(async (isUpdated) => {
 				if (isUpdated) {
 					subUpdate?.unsubscribe()
-					resolve(true)
+					resolve(isUpdated)
 				}
 			})
 			subCancel = this.isChangePasswordRequested$.subscribe(async (isVisible) => {
 				if (!isVisible) {
 					subCancel?.unsubscribe()
-					resolve(false)
+					resolve(null)
 				}
 			})
 		})

@@ -2,6 +2,7 @@ import { AfterViewInit, Component, ElementRef, ViewChild, inject } from '@angula
 import { FormsModule } from '@angular/forms'
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import { NotificationsService, WalletService } from 'app/services'
+import { Wallet } from 'libnemo'
 
 @Component({
 	selector: 'app-set-password-dialog',
@@ -14,13 +15,16 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 	private svcTransloco = inject(TranslocoService)
 	private svcWallet = inject(WalletService)
 
+	newPassword: string = ''
 	confirmPassword: string = ''
+
 	isFocused: boolean = false
 	isNotMatch: boolean = false
 	isPending: boolean = false
 	isTooShort: boolean = false
+
+	fnWallet: (password: string) => Promise<Wallet>
 	modal: any
-	newPassword: string = ''
 	UIkit = (window as any).UIkit
 
 	@ViewChild('dialog') dialog: ElementRef
@@ -32,8 +36,9 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 		this.UIkit.util.on(this.dialog.nativeElement, 'hidden', () => {
 			this.onModalHidden()
 		})
-		this.svcWallet.isChangePasswordRequested$.subscribe(async (isRequested) => {
-			if (isRequested) {
+		this.svcWallet.isChangePasswordRequested$.subscribe(async (fn: (password: string) => Promise<Wallet>) => {
+			if (fn) {
+				this.fnWallet = fn
 				this.modal ? this.showModal() : (this.isPending = true)
 			}
 		})
@@ -59,7 +64,8 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 		this.isNotMatch = false
 		this.isPending = false
 		this.isTooShort = false
-		this.svcWallet.isChangePasswordRequested$.next(false)
+		this.svcWallet.isChangePasswordRequested$.next(null)
+		this.fnWallet = null
 	}
 
 	async update () {
@@ -69,14 +75,14 @@ export class SetPasswordDialogComponent implements AfterViewInit {
 			this.isNotMatch = true
 		} else {
 			try {
-				const updated = await this.svcWallet.setPassword(this.newPassword)
-				if (!updated) {
-					throw new Error('Failed to update password')
-				}
+				const wallet = await this.fnWallet(this.newPassword)
 				this.modal.hide()
 				this.svcNotifications.sendSuccess(this.svcTransloco.translate('configure-wallet.set-wallet-password.success'))
+				this.svcWallet.passwordUpdated$.next(wallet)
 			} catch (err) {
+				console.warn(err)
 				this.svcNotifications.sendError(this.svcTransloco.translate('configure-wallet.set-wallet-password.error'))
+				this.svcWallet.passwordUpdated$.next(null)
 			} finally {
 				this.newPassword = this.confirmPassword = ''
 			}
