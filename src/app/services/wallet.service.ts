@@ -476,29 +476,21 @@ export class WalletService {
 		}
 	}
 
-	async setWallet (password: string, wallet: Wallet) {
-		this.resetWallet()
-		this.selectedWallet.set(wallet)
-		await this.selectedWallet().unlock(password)
-		password = ''
-		await this.scanAccounts()
-	}
-
 	async scanAccounts () {
 		const accounts = await this.selectedWallet().accounts(0, 20)
 		const addresses: string[] = []
 		for (const [_, account] of accounts) {
 			addresses.push(account.address)
 		}
-		const usedIndexes = []
+		const usedIndexes: number[] = []
 		if (addresses.length > 0) {
 			const { frontiers } = await this.svcApi.accountsFrontiers(addresses)
 			if (frontiers) {
 				for (const address of Object.keys(frontiers)) {
 					const hash = frontiers[address]
-					const index = [...accounts.values()].find(a => a.address === address)
+					const account = [...accounts.values()].find(a => a.address === address)
 					if (this.svcUtil.nano.isValidHash(hash)) {
-						usedIndexes.push(index)
+						usedIndexes.push(account.index)
 					}
 				}
 			}
@@ -1041,12 +1033,17 @@ export class WalletService {
 	}
 
 	async setActiveWallet (id: string) {
+		this.resetWallet()
 		const walletToActivate = this.wallets().find((w) => w.id === id)
 		this.selectedWallet.set(walletToActivate)
-		this.isLocked.set(walletToActivate.isLocked)
-		this.resetWallet()
-		await this.scanAccounts()
-		await this.reloadBalances()
+		this.isLocked.set(walletToActivate?.isLocked ?? true)
+		if (this.isLocked()) {
+			await this.requestUnlock()
+		}
+		if (!this.isLocked()) {
+			await this.scanAccounts()
+			await this.reloadBalances()
+		}
 		await this.saveWalletExport()
 	}
 }
