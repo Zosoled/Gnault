@@ -87,13 +87,13 @@ export class ManageWalletComponent implements OnInit {
 				return
 			}
 		}
-		const isChanged = await this.svcWallet.requestChangePassword()
+		const result = await this.svcWallet.requestChangePassword()
 		await this.svcWallet.saveWalletExport()
 		this.newPassword = ''
 		this.confirmPassword = ''
-		isChanged
-			? this.notifications.sendSuccess('Wallet password changed.')
-			: this.notifications.sendError('Failed to change wallet password.')
+		result.isLocked
+			? this.notifications.sendError('Failed to change wallet password.')
+			: this.notifications.sendSuccess('Wallet password changed.')
 		this.showQRExport = false
 	}
 

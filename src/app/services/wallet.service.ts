@@ -1003,7 +1003,12 @@ export class WalletService {
 	}
 
 	requestChangePassword (fnWallet?: (password: string) => Promise<Wallet>): Promise<Wallet> {
-		this.isChangePasswordRequested$.next(fnWallet ?? (() => Promise.resolve(this.selectedWallet())))
+		fnWallet ??= async (password: string) => {
+			const wallet = this.selectedWallet()
+			await wallet.update(password)
+			return wallet
+		}
+		this.isChangePasswordRequested$.next(fnWallet)
 		return new Promise((resolve) => {
 			let subUpdate, subCancel
 			subUpdate = this.passwordUpdated$.subscribe(async (isUpdated) => {
