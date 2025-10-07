@@ -326,6 +326,9 @@
 										uk-tooltip
 										[title]="t('configure-app.minimum-nano-amount-to-receive-transactions-below-this')"
 									></span>
+									<span class="uk-margin-left half-muted">
+										({{ minimumReceiveConverted() }} {{ settings.denomination }})
+									</span>
 								</label>
 								<div class="uk-form-controls">
 									<div uk-grid>
@@ -342,15 +345,16 @@
 													id="form-horizontal-text4"
 													type="number"
 													inputmode="numeric"
-													pattern="\d*\.?\d*"
+													pattern="\d+"
 													[placeholder]="t('configure-app.leave-blank-to-accept-transactions-of-any-amount')"
-													[formControl]="minimumReceiveField"
+													[value]="minimumReceive()"
 													(blur)="onStringInput(minimumReceive, $event)"
 												/>
 											</div>
 										</div>
 									</div>
 								</div>
+								<div class="uk-width-1-1"></div>
 							</div>
 						</div>
 					</div>

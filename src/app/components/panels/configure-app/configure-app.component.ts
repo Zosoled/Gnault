@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common'
 import { Component, computed, effect, inject, OnInit, Renderer2, Signal, signal, untracked, WritableSignal } from '@angular/core'
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { translate, translateSignal, TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import {
 	AddressBookService,
@@ -382,15 +382,15 @@ export class ConfigureAppComponent implements OnInit {
 	})
 
 	minimumReceive = signal<string>(this.settings.minimumReceive.toString() ?? (10n ** 24n).toString())
-	minimumReceiveField = new FormControl<number>(Tools.convert(this.minimumReceive(), 'raw', this.selectedDenomination() ?? 'nano', 'number'))
+	minimumReceiveConverted = computed<number>(() => {
+		const min = this.minimumReceive()
+		const d = this.selectedDenomination()
+		return Tools.convert(min, 'raw', d ?? 'nano', 'number')
+	})
 	minimumReceiveChanged = effect(() => {
-		console.log('min changed')
-		const denomination = this.selectedDenomination()
-		const minimum = this.minimumReceive()
-		this.settings.minimumReceive = Tools.convert(minimum, denomination, 'raw', 'bigint')
+		this.settings.minimumReceive = BigInt(this.minimumReceive())
 		this.svcAppSettings.saveAppSettings()
 		this.svcWallet.reloadBalances()
-		this.minimumReceiveField.reset(Number(minimum))
 	})
 
 	servers = computed(() => {
