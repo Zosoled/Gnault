@@ -1043,6 +1043,10 @@ export class WalletService {
 	async setActiveWallet (id: string) {
 		const walletToActivate = this.wallets().find((w) => w.id === id)
 		this.selectedWallet.set(walletToActivate)
+		this.isLocked.set(walletToActivate.isLocked)
+		this.resetWallet()
+		await this.scanAccounts()
+		await this.reloadBalances()
 		await this.saveWalletExport()
 	}
 }
