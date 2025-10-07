@@ -9,7 +9,6 @@ import {
 	WalletService
 } from 'app/services'
 import { environment } from 'environments/environment'
-import { Wallet } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
 
 enum panels {
@@ -212,25 +211,15 @@ export class ConfigureWalletComponent {
 				return this.svcNotifications.sendError(`Private key is invalid, double check it!`)
 			}
 		} else if (this.selectedImportOption === 'bip39-mnemonic') {
-			// If bip39, import wallet as a single private key
-			let bipWallet
 			try {
-				bipWallet = await Wallet.load('BIP-44', '', this.importSeedBip39MnemonicModel)
-				await bipWallet.unlock('')
+				const index = Number(this.importSeedBip39MnemonicIndexModel)
+				await this.svcWallet.loadImportedWallet('BIP-44', '', this.importSeedBip39MnemonicModel, index, [index], 'seed')
 			} catch (err) {
 				return this.svcNotifications.sendError(err.message)
 			}
 			if (!this.validIndex) {
 				return this.svcNotifications.sendError(`The account index is invalid, double check it!`)
 			}
-
-			// derive private key from bip39 seed using the account index provided
-			const accounts = await bipWallet.accounts(
-				Number(this.importSeedBip39MnemonicIndexModel),
-				Number(this.importSeedBip39MnemonicIndexModel)
-			)
-			this.keyString = accounts[0].privateKey
-			this.isExpanded = false
 		}
 		this.activePanel = panels.password
 	}
