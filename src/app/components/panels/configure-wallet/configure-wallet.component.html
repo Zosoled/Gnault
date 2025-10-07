@@ -596,7 +596,8 @@
 													<div uk-icon="icon: warning; ratio: 2;"></div>
 												</div>
 												<p>
-													<b>Device Locked</b><br />Unlock your Ledger device, then press the button below to retry.
+													<b>Device Locked</b><br />
+													Unlock your Ledger device, then press the button below to retry.
 												</p>
 											</div>
 										</div>
@@ -743,20 +744,28 @@
 				}
 				@if (selectedImportOption === 'ledger') {
 					<button
-						[disabled]="!isHidSupported && !isUsbSupported"
+						[disabled]="(!isHidSupported && !isUsbSupported) || (svcWallet.isLedger() && svcWallet.isLocked())"
 						class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
 						(click)="connectLedgerByUsb()"
 					>
-						Connect via USB
+						@if (svcWallet.isLocked()) {
+							Connect via USB
+						} @else {
+							<span uk-spinner></span>
+						}
 					</button>
 				}
 				@if (selectedImportOption === 'ledger') {
 					<button
-						[disabled]="!isBluetoothSupported"
+						[disabled]="!isBluetoothSupported || (svcWallet.isLedger() && svcWallet.isLocked())"
 						class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
 						(click)="connectLedgerByBluetooth()"
 					>
-						Connect via Bluetooth
+						@if (svcWallet.isLocked()) {
+							Connect via Bluetooth
+						} @else {
+							<span uk-spinner></span>
+						}
 					</button>
 				}
 				@if (selectedImportOption === 'privateKey') {

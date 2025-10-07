@@ -1,5 +1,5 @@
 <div *transloco="let t">
-	@if (svcWallet.isLedger()) {
+	@if (svcWallet.selectedWallet() && svcWallet.isLedger()) {
 		<div>
 			@if (svcWallet.ledgerStatus() === 'DISCONNECTED') {
 				<div class="nav-status-row">

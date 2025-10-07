@@ -35,7 +35,8 @@ export class ConfigureWalletComponent {
 	private svcQrModal = inject(QrModalService)
 	private svcTransloco = inject(TranslocoService)
 	private svcUtil = inject(UtilService)
-	private svcWallet = inject(WalletService)
+
+	svcWallet = inject(WalletService)
 
 	readonly isDesktop = environment.desktop
 	readonly isBluetoothSupported = this.isDesktop || typeof navigator?.bluetooth?.getDevices === 'function'
@@ -146,10 +147,9 @@ export class ConfigureWalletComponent {
 	async importLedgerWallet (bluetooth: boolean) {
 		this.svcNotifications.sendInfo('Checking for Ledger device...', { identifier: 'ledger-status', length: 0 })
 		try {
-			// Create new ledger wallet
 			await this.svcWallet.createLedgerWallet(bluetooth)
-			// We skip the password panel
-			this.router.navigate(['accounts']) // load accounts and watch them update in real-time
+			// skip the password panel, load accounts, and update in real-time
+			this.router.navigate(['/accounts'])
 			this.svcWallet.publishNewWallet()
 			this.svcNotifications.sendSuccess('Successfully connected to Ledger device')
 		} catch (err) {
