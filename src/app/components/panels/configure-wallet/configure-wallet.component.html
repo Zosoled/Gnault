@@ -576,7 +576,7 @@
 							}
 							@if (isHidSupported || isUsbSupported) {
 								<div>
-									@if (!isLedger) {
+									@if (!isLedger()) {
 										<div>
 											<div class="uk-alert uk-alert-warning nlt-inline-alert">
 												<div class="icon-column">
@@ -589,7 +589,7 @@
 											</div>
 										</div>
 									}
-									@if (isLedger && isLocked) {
+									@if (isLedger() && isLocked()) {
 										<div>
 											<div class="uk-alert uk-alert-warning nlt-inline-alert">
 												<div class="icon-column">
@@ -602,7 +602,7 @@
 											</div>
 										</div>
 									}
-									@if (isLedger && !isLocked) {
+									@if (isLedger() && !isLocked()) {
 										<div>
 											<div class="uk-alert uk-alert-success nlt-inline-alert">
 												<div class="icon-column">
@@ -614,7 +614,7 @@
 									}
 								</div>
 							}
-							@if (isDesktop && !isBluetoothSupported && isLocked) {
+							@if (isDesktop && !isBluetoothSupported && isLocked()) {
 								<div>
 									<div class="uk-alert uk-alert-danger nlt-inline-alert">
 										<div class="icon-column">
@@ -976,7 +976,7 @@
 			</div>
 		</div>
 	}
-	@if (activePanel === panels.final && !isLedger) {
+	@if (activePanel === panels.final && !isLedger()) {
 		<div
 			class="uk-alert-primary"
 			uk-alert
@@ -987,7 +987,7 @@
 			</p>
 		</div>
 	}
-	@if (activePanel === panels.final && isLedger) {
+	@if (activePanel === panels.final && isLedger()) {
 		<div
 			class="uk-alert-primary"
 			uk-alert
