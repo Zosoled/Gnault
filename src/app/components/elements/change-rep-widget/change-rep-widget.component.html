@@ -1,7 +1,7 @@
 <div *transloco="let t">
-	@if (displayedRepresentatives.length > 0) {
+	@if (displayedRepresentatives().length > 0) {
 		<div class="nav-representative-info">
-			@for (rep of displayedRepresentatives; track $index) {
+			@for (rep of displayedRepresentatives(); track $index) {
 				<div
 					class="representative"
 					(mouseover)="showRepHelp = rep.address"

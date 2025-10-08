@@ -1,4 +1,4 @@
-import { Component, OnInit, effect, inject } from '@angular/core'
+import { AfterViewInit, Component, effect, inject, signal } from '@angular/core'
 import { Router } from '@angular/router'
 import { TranslocoDirective } from '@jsverse/transloco'
 import { FullRepresentativeOverview, NanoBlockService, RepresentativeService, WalletService } from 'app/services'
@@ -9,14 +9,14 @@ import { FullRepresentativeOverview, NanoBlockService, RepresentativeService, Wa
 	styleUrls: ['./change-rep-widget.component.css'],
 	imports: [TranslocoDirective],
 })
-export class ChangeRepWidgetComponent implements OnInit {
+export class ChangeRepWidgetComponent implements AfterViewInit {
 	private router = inject(Router)
 	private svcNanoBlock = inject(NanoBlockService)
 	private svcRepresentative = inject(RepresentativeService)
 	private svcWallet = inject(WalletService)
 
 	changeableRepresentatives = this.svcRepresentative.changeableReps
-	displayedRepresentatives: FullRepresentativeOverview[] = []
+	displayedRepresentatives = signal<FullRepresentativeOverview[]>([])
 	representatives: FullRepresentativeOverview[] = []
 	showRepChangeRequired = false
 	showRepHelp = null
@@ -30,7 +30,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 		})
 	}
 
-	async ngOnInit () {
+	async ngAfterViewInit () {
 		this.svcRepresentative.walletReps$.subscribe(async (reps) => {
 			if (reps[0] === null) {
 				// initial state from new BehaviorSubject([null])
@@ -115,7 +115,7 @@ export class ChangeRepWidgetComponent implements OnInit {
 
 	updateDisplayedRepresentatives () {
 		this.updateSelectedAccountHasRep()
-		this.displayedRepresentatives = this.getDisplayedRepresentatives(this.representatives)
+		this.displayedRepresentatives.set(this.getDisplayedRepresentatives(this.representatives))
 	}
 
 	includeRepRequiringChange (displayedReps: any[]) {

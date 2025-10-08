@@ -332,7 +332,8 @@ export class WalletService {
 			}
 			if (this.selectedWallet()?.type === 'Ledger') {
 				try {
-					await this.selectedWallet().unlock()
+					// Do not relinquish control yet, but get Ledger primed and ready
+					this.selectedWallet().unlock()
 				} catch { }
 			}
 
@@ -947,8 +948,8 @@ export class WalletService {
 	}
 
 	// Run an accountInfo call for each account in the wallet to get their representatives
-	async getAccountsDetails (): Promise<WalletApiAccount[]> {
-		return await Promise.all(
+	getAccountsDetails (): Promise<WalletApiAccount[]> {
+		return Promise.all(
 			this.accounts.map((account) =>
 				this.svcApi.accountInfo(account.address).then((res) => {
 					try {
