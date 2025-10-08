@@ -266,7 +266,6 @@
 	},
 	"configure-wallet": {
 		"new-wallet": {
-			"configure-new-wallet": "Configure uma nova carteira",
 			"copy-secret-recovery-mnemonic": "Copiar Mnemônico de Recuperação Secreta",
 			"copy-secret-recovery-seed": "Copiar Semente de Recuperação Secreta",
 			"create-wallet": "Criar Carteira",
@@ -390,6 +389,9 @@
 	},
 	"representative-search": {
 		"representative-list-results": "Resultados da Lista de Representantes"
+	},
+	"wallet": {
+		"configure": "Configurar carteira"
 	},
 	"wallets": {
 		"delete": {

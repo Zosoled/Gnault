@@ -269,7 +269,6 @@
 	},
 	"configure-wallet": {
 		"new-wallet": {
-			"configure-new-wallet": "Configure New Wallet",
 			"copy-secret-recovery-mnemonic": "Copy Secret Recovery Mnemonic",
 			"copy-secret-recovery-seed": "Copy Secret Recovery Seed",
 			"create-wallet": "Create Wallet",
@@ -396,8 +395,9 @@
 	"representative-search": {
 		"representative-list-results": "Representative List Results"
 	},
-	"wallets": {
+	"wallet": {
 		"add-new-wallet": "Add New Wallet",
+		"configure": "Configure Wallet",
 		"delete": {
 			"confirm": "Yes, I'm sure",
 			"error": "Failed to delete wallet. \n{{ error }}",

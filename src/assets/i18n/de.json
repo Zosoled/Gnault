@@ -263,7 +263,6 @@
 	},
 	"configure-wallet": {
 		"new-wallet": {
-			"configure-new-wallet": "Neue Brieftasche konfigurieren",
 			"copy-secret-recovery-mnemonic": "Geheime Wiederherstellungs-Mnemonik kopieren",
 			"copy-secret-recovery-seed": "Geheimen Wiederherstellungs-Seed kopieren",
 			"create-wallet": "Wallet erstellen",
@@ -387,6 +386,9 @@
 	},
 	"representative-search": {
 		"representative-list-results": "Ergebnisse der Vertreterliste"
+	},
+	"wallet": {
+		"configure": "Wallet konfigurieren"
 	},
 	"wallets": {
 		"delete": {
