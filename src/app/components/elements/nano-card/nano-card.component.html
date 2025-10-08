@@ -1,5 +1,5 @@
 <div *transloco="let t">
-	<div [class]="['nano-card', selectedAccount === null ? 'is-wallet' : 'is-card']">
+	<div [class]="['nano-card', selectedAccount() === null ? 'is-wallet' : 'is-card']">
 		<div
 			class="logo"
 			[style.--selectedAccountColor.deg]="selectedAccountColor()"
@@ -7,44 +7,46 @@
 		<div class="card-contents">
 			<div class="account-name-container">
 				<a
-					[routerLink]="`/accounts/${selectedAccount?.address ?? ''}`"
+					[routerLink]="`/accounts/${selectedAccount()?.address ?? ''}`"
 					[queryParams]="{ compact: '1' }"
 					class="name"
 				>
 					{{
-						selectedAccount == null
+						selectedAccount() == null
 							? 'Total Balance'
-							: (selectedAccount.addressBookName ?? t('general.account') + ' #' + selectedAccount.index)
+							: `${selectedAccount().addressBookName ?? t('general.account')} #${selectedAccount().index}`
 					}}
 				</a>
 			</div>
 			<div class="account-balances">
-				@if ((node.status && isBalanceInitialized) || !isConfigured) {
+				@if ((node.status && svcWallet.isBalanceInitialized) || !svcWallet.isConfigured()) {
 					<ng-container>
 						<div class="balance-container primary">
 							<div class="amount-container">
 								<div class="amount-integer">
-									&#xe001;{{ selectedAccount?.balance ?? balance ?? '0' | rai: 'nano,true' | amountsplit: 0 }}
+									&#xe001;{{
+										selectedAccount()?.balance ?? svcWallet.balance ?? '0' | rai: 'nano,true' | amountsplit: 0
+									}}
 								</div>
 								<div class="amount-fractional">
-									{{ selectedAccount?.balance ?? balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }}
+									{{ selectedAccount()?.balance ?? svcWallet.balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }}
 								</div>
-								@if (isBalanceUpdating && isConfigured) {
+								@if (svcWallet.isBalanceUpdating && svcWallet.isConfigured()) {
 									<div class="amount-updating">
 										<div uk-spinner="ratio: 0.5;"></div>
 									</div>
 								}
 							</div>
 						</div>
-						@if (settings.displayCurrency) {
+						@if (settings().displayCurrency) {
 							<div class="balance-container converted">
 								<div class="amount-container">
 									<span class="estimate-symbol">~</span>
 									<div class="amount-integer">
-										{{ selectedAccount?.balance ?? balance ?? 0 | fiat | amountsplit: 0 }}
+										{{ selectedAccount()?.balance ?? svcWallet.balance ?? 0 | fiat | amountsplit: 0 }}
 									</div>
 									<div class="amount-fractional">
-										{{ selectedAccount?.balance ?? balance ?? 0 | fiat | amountsplit: 1 }}
+										{{ selectedAccount()?.balance ?? svcWallet.balance ?? 0 | fiat | amountsplit: 1 }}
 									</div>
 								</div>
 							</div>
