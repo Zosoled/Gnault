@@ -103,6 +103,9 @@
 			"3": "。"
 		}
 	},
+	"app": {
+		"will-update-on-reload": "更新已在后台安装，并将在下次启动时应用。"
+	},
 	"change-rep-widget": {
 		"acceptable-representative": "可接受的代表",
 		"bad-representative": "不良代表",

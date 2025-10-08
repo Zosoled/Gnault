@@ -103,6 +103,9 @@
 			"3": "."
 		}
 	},
+	"app": {
+		"will-update-on-reload": "Im Hintergrund wurde ein Update installiert, das beim nächsten Start angewendet wird."
+	},
 	"change-rep-widget": {
 		"acceptable-representative": "Akzeptabler Vertreter",
 		"bad-representative": "Schlechter Vertreter",

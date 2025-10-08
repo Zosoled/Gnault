@@ -103,6 +103,9 @@
 			"3": "."
 		}
 	},
+	"app": {
+		"will-update-on-reload": "Uma atualização foi instalada em segundo plano e será aplicada na próxima inicialização."
+	},
 	"change-rep-widget": {
 		"acceptable-representative": "Representante Aceitável",
 		"bad-representative": "Representante Ruim",

@@ -138,10 +138,6 @@ export class NavigationComponent {
 		})
 	}
 
-	applySwUpdate () {
-		this.updates.activateUpdate()
-	}
-
 	toggleNav () {
 		this.isExpanded = !this.isExpanded
 		this.onNavExpandedChange()

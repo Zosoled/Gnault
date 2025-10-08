@@ -1,8 +1,8 @@
-import { AfterViewInit, Component, ElementRef, Renderer2, ViewChild, inject } from '@angular/core'
+import { AfterViewInit, Component, ElementRef, inject, Renderer2, ViewChild } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterOutlet } from '@angular/router'
 import { SwUpdate } from '@angular/service-worker'
-import { TranslocoService } from '@jsverse/transloco'
+import { translate, TranslocoService } from '@jsverse/transloco'
 import {
 	NavigationComponent,
 	NotificationsComponent,
@@ -246,10 +246,7 @@ export class AppComponent implements AfterViewInit {
 		this.updates.versionUpdates.subscribe((event) => {
 			if (event.type === 'VERSION_READY') {
 				console.log(`SW update available. Current: ${event.currentVersion.hash}. New: ${event.latestVersion.hash}`)
-				this.svcNotification.sendInfo(
-					'An update was installed in the background and will be applied on next launch. <a href="#" (click)="applySwUpdate()">Apply immediately</a>',
-					{ length: 10000 }
-				)
+				this.svcNotification.sendInfo(translate('app.will-update-on-reload'), { length: 10000 })
 			}
 		})
 
@@ -277,10 +274,6 @@ export class AppComponent implements AfterViewInit {
 			}
 		}, 1000)
 		*/
-	}
-
-	applySwUpdate () {
-		this.updates.activateUpdate()
 	}
 
 	toggleNav () {
