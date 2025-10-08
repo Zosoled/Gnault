@@ -1,4 +1,4 @@
-import { Injectable, WritableSignal, computed, effect, inject, signal } from '@angular/core'
+import { Injectable, Signal, WritableSignal, computed, effect, inject, signal } from '@angular/core'
 import {
 	AddressBookService,
 	ApiService,
@@ -82,6 +82,11 @@ export class WalletService {
 	readonly storeKey: 'Gnault-Wallet' = `Gnault-Wallet`
 
 	selectedWallet: WritableSignal<Wallet> = signal(null)
+	selectedWalletName: Signal<string> = computed(() => {
+		const wallet = this.selectedWallet()
+		const names = this.walletNames()
+		return names.get(wallet?.id) ?? wallet?.id ?? ''
+	})
 	wallets: WritableSignal<Wallet[]> = signal<Wallet[]>([])
 	walletNames = signal<Map<string, string>>(new Map())
 	balance = 0n
