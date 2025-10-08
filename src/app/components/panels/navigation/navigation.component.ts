@@ -1,33 +1,11 @@
-import {
-	Component,
-	EventEmitter,
-	Output,
-	Renderer2,
-	Signal,
-	computed,
-	effect,
-	inject
-} from '@angular/core'
+import { Component, EventEmitter, Output, Renderer2, Signal, computed, effect, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
-import { SwUpdate } from '@angular/service-worker'
 import { TranslocoDirective } from '@jsverse/transloco'
-import {
-	ChangeRepWidgetComponent,
-	GnaultLogoElementComponent,
-	InstallWidgetComponent,
-	WalletWidgetComponent
-} from 'app/components'
+import { ChangeRepWidgetComponent, GnaultLogoElementComponent, InstallWidgetComponent, WalletWidgetComponent } from 'app/components'
 import { NanoCardComponent } from 'app/components/elements/nano-card/nano-card.component'
 import { AmountSplitPipe, CurrencySymbolPipe, FiatPipe, RaiPipe } from 'app/pipes'
-import {
-	AppSettingsService,
-	NodeService,
-	NotificationsService,
-	PriceService,
-	UtilService,
-	WalletService
-} from 'app/services'
+import { AppSettingsService, NodeService, NotificationsService, PriceService, UtilService, WalletService } from 'app/services'
 import { environment } from 'environments/environment'
 import { Wallet } from 'libnemo'
 
@@ -53,7 +31,6 @@ import { Wallet } from 'libnemo'
 export class NavigationComponent {
 	private renderer = inject(Renderer2)
 	private router = inject(Router)
-	private updates = inject(SwUpdate)
 
 	private svcAppSettings = inject(AppSettingsService)
 	private svcNotification = inject(NotificationsService)
