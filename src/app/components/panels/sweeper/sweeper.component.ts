@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core'
+import { Component, ElementRef, OnInit, ViewChild, computed, effect, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
 import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
@@ -72,9 +72,7 @@ export class SweeperComponent implements OnInit {
 	validMaxIncoming = true
 	selAccountInit = false
 
-	get settings () {
-		return this.svcAppSettings.settings()
-	}
+	settings = computed(() => this.svcAppSettings.settings())
 
 	@ViewChild('outputarea') logArea: ElementRef
 
@@ -87,22 +85,21 @@ export class SweeperComponent implements OnInit {
 
 	async ngOnInit () {
 		// Update selected account if changed in the sidebar
-		this.walletService.selectedAccount$.subscribe(async (acc) => {
+		effect(() => {
+			const account = this.walletService.selectedAccount()
 			if (this.selAccountInit) {
-				this.myAccountModel = acc?.id ?? this.accounts[0]?.id ?? '0'
+				this.myAccountModel = account?.address ?? this.accounts[0]?.address ?? '0'
 			}
 			this.selAccountInit = true
 		})
 
 		// Set the account selected in the sidebar as default
-		if (this.walletService.selectedAccount() !== null) {
+		if (this.walletService.selectedAccount() != null) {
 			this.myAccountModel = this.walletService.selectedAccount().address
 		}
 	}
 
-	sleep (ms) {
-		return new Promise((resolve) => setTimeout(resolve, ms))
-	}
+	sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 	setDestination (account) {
 		if (account !== '0') {
@@ -336,21 +333,22 @@ export class SweeperComponent implements OnInit {
 
 	// Create receivable blocks based on current balance and previous block (or start with an open block)
 	async createReceivableBlocks (privKey, address, balance, previous, subType, callback, accountCallback) {
+		const settings = this.settings()
 		this.privKey = privKey
 		this.previous = previous
 		this.subType = subType
 		this.pendingCallback = callback
 		// check for receivable first
 		let data = null
-		if (this.settings.minimumReceive) {
-			const minAmount = Tools.convert(this.settings.minimumReceive, 'mnano', 'raw')
-			if (this.settings.receivableOption === 'amount') {
+		if (settings.minimumReceive) {
+			const minAmount = Tools.convert(settings.minimumReceive, 'mnano', 'raw')
+			if (settings.receivableOption === 'amount') {
 				data = await this.api.receivableLimitSorted(address, this.maxIncoming, minAmount)
 			} else {
 				data = await this.api.receivableLimit(address, this.maxIncoming, minAmount)
 			}
 		} else {
-			if (this.settings.receivableOption === 'amount') {
+			if (settings.receivableOption === 'amount') {
 				data = await this.api.receivableSorted(address, this.maxIncoming)
 			} else {
 				data = await this.api.receivable(address, this.maxIncoming)
@@ -405,7 +403,7 @@ export class SweeperComponent implements OnInit {
 		let balance = 0n // balance will be 0 if open block
 		this.adjustedBalance = balance.toString()
 		let previous = null // previous is null if we create open block
-		this.representative = this.settings.defaultRepresentative || this.nanoBlock.getRandomRepresentative()
+		this.representative = this.settings().defaultRepresentative || this.nanoBlock.getRandomRepresentative()
 		let subType = 'open'
 
 		// retrive from RPC

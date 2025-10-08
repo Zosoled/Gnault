@@ -1,5 +1,5 @@
 import { formatDate } from '@angular/common'
-import { Component, OnInit, inject } from '@angular/core'
+import { Component, OnInit, effect, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
@@ -65,15 +65,18 @@ export class ManageWalletComponent implements OnInit {
 		return this.svcAppSettings.settings()
 	}
 
-	async ngOnInit () {
+	constructor () {
 		// Update selected account if changed in the sidebar
-		this.svcWallet.selectedAccount$.subscribe(async (acc) => {
+		effect(() => {
+			const account = this.svcWallet.selectedAccount()
 			if (this.selAccountInit) {
-				this.csvAccount = acc?.id ?? this.accounts[0]?.id ?? '0'
+				this.csvAccount = account?.address ?? this.accounts[0]?.address ?? '0'
 			}
 			this.selAccountInit = true
 		})
+	}
 
+	async ngOnInit () {
 		// Set the account selected in the sidebar as default
 		if (this.svcWallet.selectedAccount() !== null) {
 			this.csvAccount = this.svcWallet.selectedAccount().address

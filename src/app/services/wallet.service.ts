@@ -97,7 +97,6 @@ export class WalletService {
 
 	accounts: Account[] = []
 	selectedAccount: WritableSignal<Account> = signal(null)
-	selectedAccount$: BehaviorSubject<Account> = new BehaviorSubject(null)
 	isLocked = signal(true)
 	passwordUpdated$ = new BehaviorSubject<Wallet>(null)
 	isUnlockRequested$ = new BehaviorSubject(false)
@@ -579,7 +578,6 @@ export class WalletService {
 		this.receivable = 0n
 		this.hasReceivable = false
 		this.selectedAccount.set(null)
-		this.selectedAccount$.next(null)
 		this.receivableBlocks = []
 	}
 

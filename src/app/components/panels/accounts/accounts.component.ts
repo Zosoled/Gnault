@@ -136,15 +136,11 @@ export class AccountsComponent implements OnInit {
 		if (account == null) {
 			this.svcNotifications.sendError('Failed to navigate to account')
 			this.router.navigate(['accounts/'])
-		}
-
-		// why only small screen sizes?
-		if (window.innerWidth < 940) {
+		} else {
 			this.svcWallet.selectedAccount.set(account)
-			this.svcWallet.selectedAccount$.next(account)
 			this.svcWallet.saveWalletExport()
+			this.router.navigate([`accounts/${account.address}`], { queryParams: { compact: 1 } })
 		}
-		this.router.navigate([`accounts/${account.address}`], { queryParams: { compact: 1 } })
 	}
 
 	copied () {

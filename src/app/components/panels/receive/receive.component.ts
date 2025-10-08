@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { AfterViewInit, Component, OnDestroy, inject } from '@angular/core'
+import { AfterViewInit, Component, OnDestroy, effect, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ChildActivationEnd, Router, RouterLink } from '@angular/router'
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
@@ -115,6 +115,18 @@ export class ReceiveComponent implements AfterViewInit, OnDestroy {
 		return this.svcWallet.selectedAccount()
 	}
 
+	constructor () {
+		// Update selected account if changed in the sidebar
+		effect(() => {
+			const account = this.svcWallet.selectedAccount()
+			if (this.selAccountInit) {
+				this.receivableAccountModel = account?.address ?? '0'
+				this.onSelectedAccountChange(this.receivableAccountModel)
+			}
+			this.selAccountInit = true
+		})
+	}
+
 	async ngAfterViewInit () {
 		this.mobileTransactionMenuModal = this.UIkit.modal('#mobile-transaction-menu-modal')
 		this.merchantModeModal = this.UIkit.modal('#merchant-mode-modal')
@@ -124,15 +136,6 @@ export class ReceiveComponent implements AfterViewInit, OnDestroy {
 				this.mobileTransactionMenuModal.hide()
 				this.merchantModeModal.hide()
 			}
-		})
-
-		// Update selected account if changed in the sidebar
-		this.svcWallet.selectedAccount$.subscribe(async acc => {
-			if (this.selAccountInit) {
-				this.receivableAccountModel = acc?.address ?? '0'
-				this.onSelectedAccountChange(this.receivableAccountModel)
-			}
-			this.selAccountInit = true
 		})
 
 		this.svcWallet.isReceivableBlocksUpdated$.subscribe(async receivableBlockUpdate => {

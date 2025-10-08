@@ -1,8 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core'
+import { Component, OnInit, effect, inject } from '@angular/core'
 import { Router } from '@angular/router'
 import { TranslocoDirective } from '@jsverse/transloco'
 import { FullRepresentativeOverview, NanoBlockService, RepresentativeService, WalletService } from 'app/services'
-import { Account } from 'libnemo'
 
 @Component({
 	selector: 'app-change-rep-widget',
@@ -21,9 +20,15 @@ export class ChangeRepWidgetComponent implements OnInit {
 	representatives: FullRepresentativeOverview[] = []
 	showRepChangeRequired = false
 	showRepHelp = null
-	selectedAccount = null
 	selectedAccountHasRepresentative = false
 	initialLoadComplete = false
+
+	constructor () {
+		effect(() => {
+			const account = this.svcWallet.selectedAccount()
+			this.updateDisplayedRepresentatives()
+		})
+	}
 
 	async ngOnInit () {
 		this.svcRepresentative.walletReps$.subscribe(async (reps) => {
@@ -62,11 +67,6 @@ export class ChangeRepWidgetComponent implements OnInit {
 			this.initialLoadComplete = true
 		})
 
-		this.svcWallet.selectedAccount$.subscribe((account: Account) => {
-			this.selectedAccount = account
-			this.updateDisplayedRepresentatives()
-		})
-
 		// Detect if a wallet is reset
 		this.svcWallet.newWallet$.subscribe((shouldReload) => {
 			if (shouldReload) {
@@ -92,7 +92,6 @@ export class ChangeRepWidgetComponent implements OnInit {
 			this.updateDisplayedRepresentatives()
 		})
 
-		this.selectedAccount = this.svcWallet.selectedAccount()
 		this.updateSelectedAccountHasRep()
 		// calls walletReps$.next
 		await this.svcRepresentative.getRepresentativesOverview()
@@ -101,7 +100,6 @@ export class ChangeRepWidgetComponent implements OnInit {
 	async resetRepresentatives () {
 		console.log('Reloading representatives..')
 		this.initialLoadComplete = false
-		this.selectedAccount = null
 		this.representatives = []
 		this.changeableRepresentatives = []
 		this.showRepChangeRequired = false
@@ -135,11 +133,12 @@ export class ChangeRepWidgetComponent implements OnInit {
 	}
 
 	updateSelectedAccountHasRep () {
-		if (this.selectedAccount == null) {
+		const account = this.svcWallet.selectedAccount()
+		if (account == null) {
 			const accounts = this.svcWallet.accounts
 			this.selectedAccountHasRepresentative = accounts.some((a) => a.frontier)
 		} else {
-			this.selectedAccountHasRepresentative = this.selectedAccount.frontier != null
+			this.selectedAccountHasRepresentative = account.frontier != null
 		}
 	}
 
@@ -147,10 +146,10 @@ export class ChangeRepWidgetComponent implements OnInit {
 		if (this.representatives?.length === 0) {
 			return []
 		}
-
-		if (this.selectedAccount !== null) {
+		const account = this.svcWallet.selectedAccount()
+		if (account !== null) {
 			const selectedAccountRep = this.representatives.filter((rep) =>
-				rep.accounts.some((a) => a.address === this.selectedAccount.address)
+				rep.accounts.some((a) => a.address === account.address)
 			)[0]
 
 			if (selectedAccountRep == null) {
@@ -167,16 +166,15 @@ export class ChangeRepWidgetComponent implements OnInit {
 		return this.includeRepRequiringChange(displayedReps)
 	}
 
-	sleep (ms) {
-		return new Promise((resolve) => setTimeout(resolve, ms))
-	}
+	sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 	showRepSelectionForSpecificRep (clickedRep) {
+		const account = this.svcWallet.selectedAccount()
 		this.showRepHelp = false
 		const selectedAccountMatchesClickedRep =
-			this.selectedAccount !== null && clickedRep.accounts.some((a) => a.address === this.selectedAccount.address)
+			account !== null && clickedRep.accounts.some((a) => a.address === account.address)
 		const accountsToChangeRepFor = selectedAccountMatchesClickedRep
-			? this.selectedAccount.address
+			? account.address
 			: // all accounts that delegate to this rep
 			this.representatives
 				.filter((rep) => rep.address === clickedRep.address)
