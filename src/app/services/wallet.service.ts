@@ -337,10 +337,6 @@ export class WalletService {
 				} catch { }
 			}
 
-			if (walletJson.accounts?.length > 0) {
-				walletJson.accounts.forEach((a) => this.loadWalletAccount(a))
-			}
-
 			const walletNames = JSON.parse(walletJson.names)
 			if (Array.isArray(walletNames)) {
 				const names = new Map(this.walletNames())
@@ -348,6 +344,12 @@ export class WalletService {
 					names.set(k, v)
 				}
 				this.walletNames.set(names)
+			}
+
+			if (walletJson.accounts?.length > 0) {
+				walletJson.accounts.forEach((a) => this.loadWalletAccount(a))
+				const { selectedAccountAddress } = walletJson
+				this.setActiveAccount(this.accounts.find((a) => a.address === selectedAccountAddress))
 			}
 		}
 	}
@@ -600,7 +602,10 @@ export class WalletService {
 		this.hasReceivable = false
 	}
 
-	async reloadBalances () {
+	/**
+	 * Fetches the latest fiat price
+	 */
+	async reloadBalances (): Promise<void> {
 		// to block two reloads to happen at the same time (websocket)
 		if (this.isBalanceUpdating) return
 
@@ -1044,5 +1049,23 @@ export class WalletService {
 			await this.reloadBalances()
 		}
 		await this.saveWalletExport()
+	}
+
+	/**
+	 * Sets an account as active for the purposes of other actions like
+	 * transactions, refreshes its info from the network, and saves the data to
+	 * browser storage if allowed by the user settings.
+	 * @param account Account to set as active
+	 */
+	async setActiveAccount (account: Account): Promise<void> {
+		if (account) {
+			this.selectedAccount.set(account)
+			try {
+				await this.selectedAccount().refresh(this.svcApi.rpc())
+			} catch (err) {
+				this.svcNotifications.sendError(err?.message ?? err)
+			}
+			this.saveWalletExport()
+		}
 	}
 }

@@ -132,15 +132,13 @@ export class AccountsComponent implements OnInit {
 		// this.notificationService.sendSuccess(`Successfully sorted accounts by index!`)
 	}
 
-	navigateToAccount (account: Account) {
+	async navigateToAccount (account: Account): Promise<void> {
 		if (account == null) {
 			this.svcNotifications.sendError('Failed to navigate to account')
-			this.router.navigate(['accounts/'])
 		} else {
-			this.svcWallet.selectedAccount.set(account)
-			this.svcWallet.saveWalletExport()
-			this.router.navigate([`accounts/${account.address}`], { queryParams: { compact: 1 } })
+			await this.svcWallet.setActiveAccount(account)
 		}
+		this.router.navigate([`accounts/${account?.address ?? ''}`], { queryParams: { compact: 1 } })
 	}
 
 	copied () {

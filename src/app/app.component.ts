@@ -153,10 +153,8 @@ export class AppComponent implements AfterViewInit {
 		}
 
 		// Navigate to accounts page if there is wallet, but only if coming from home. On desktop app the path ends with index.html
-		if (
-			this.isConfigured &&
-			(window.location.pathname === '/' || window.location.pathname.endsWith('index.html'))
-		) {
+		const { pathname } = window.location
+		if (this.isConfigured && (pathname === '/' || pathname.endsWith('index.html'))) {
 			if (this.svcWallet.selectedAccount()?.address) {
 				this.router.navigate([`accounts/${this.svcWallet.selectedAccount().address}`], {
 					queryParams: { compact: 1 },
