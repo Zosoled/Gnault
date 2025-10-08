@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core'
+import { Component, computed, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
@@ -49,15 +49,9 @@ export class ConfigureWalletComponent {
 	get isConfigured () {
 		return this.svcWallet.isConfigured()
 	}
-	get isLedger () {
-		return this.svcWallet.isLedger()
-	}
-	get isLocked () {
-		return this.svcWallet.isLocked()
-	}
-	get wallet () {
-		return this.svcWallet.selectedWallet()
-	}
+	isLedger = computed(() => this.svcWallet.isLedger())
+	isLocked = computed(() => this.svcWallet.isLocked())
+	wallet = computed(() => this.svcWallet.selectedWallet())
 
 	isNewWallet = true
 	hasConfirmedBackup = false
@@ -147,7 +141,7 @@ export class ConfigureWalletComponent {
 	async importLedgerWallet (bluetooth: boolean) {
 		this.svcNotifications.sendInfo('Checking for Ledger device...', { identifier: 'ledger-status', length: 0 })
 		try {
-			await this.svcWallet.createLedgerWallet(bluetooth)
+			await this.svcWallet.connectLedgerWallet(bluetooth)
 			// skip the password panel, load accounts, and update in real-time
 			this.router.navigate(['/accounts'])
 			this.svcWallet.publishNewWallet()
@@ -222,6 +216,12 @@ export class ConfigureWalletComponent {
 			}
 		}
 		this.activePanel = panels.password
+	}
+
+	async initLedger () {
+		await this.svcWallet.createLedgerWallet()
+		this.selectedImportOption = 'ledger'
+		this.activePanel = panels.import
 	}
 
 	async saveWalletPassword () {

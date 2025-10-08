@@ -97,7 +97,7 @@
 						@if (isSupported) {
 							<button
 								class="wallet-option"
-								(click)="setPanel(panels.import); selectedImportOption = 'ledger'"
+								(click)="initLedger()"
 							>
 								<div class="icon">
 									<svg
@@ -744,28 +744,20 @@
 				}
 				@if (selectedImportOption === 'ledger') {
 					<button
-						[disabled]="(!isHidSupported && !isUsbSupported) || (svcWallet.isLedger() && svcWallet.isLocked())"
+						[disabled]="!(svcWallet.isLedger() && (isHidSupported || isUsbSupported))"
 						class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
 						(click)="connectLedgerByUsb()"
 					>
-						@if (svcWallet.isLocked()) {
-							Connect via USB
-						} @else {
-							<span uk-spinner></span>
-						}
+						Connect via USB
 					</button>
 				}
 				@if (selectedImportOption === 'ledger') {
 					<button
-						[disabled]="!isBluetoothSupported || (svcWallet.isLedger() && svcWallet.isLocked())"
+						[disabled]="!(svcWallet.isLedger() && isBluetoothSupported)"
 						class="uk-button uk-button-primary uk-width-auto@s uk-width-1-1"
 						(click)="connectLedgerByBluetooth()"
 					>
-						@if (svcWallet.isLocked()) {
-							Connect via Bluetooth
-						} @else {
-							<span uk-spinner></span>
-						}
+						Connect via Bluetooth
 					</button>
 				}
 				@if (selectedImportOption === 'privateKey') {

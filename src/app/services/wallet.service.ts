@@ -512,10 +512,13 @@ export class WalletService {
 		return { mnemonic, seed }
 	}
 
-	async createLedgerWallet (bluetooth: boolean) {
+	async createLedgerWallet () {
 		const wallet = await Wallet.create('Ledger')
 		this.selectedWallet.set(wallet)
 		this.wallets.update((prev) => [...prev, wallet])
+	}
+
+	async connectLedgerWallet (bluetooth: boolean) {
 		if (bluetooth) {
 			await this.selectedWallet().config({ connection: 'ble' })
 		}

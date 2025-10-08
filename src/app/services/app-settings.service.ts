@@ -128,9 +128,9 @@ export class AppSettingsService {
 	loadAppSettings () {
 		const item = this.storage?.getItem(this.storeKey) ?? '{}'
 		const settings = JSON.parse(item)
-		settings.inactivityPeriod = Number(settings.inactivityPeriod)
-		settings.minimumReceive = BigInt(settings.minimumReceive)
-		settings.walletVersion = Number(settings.walletVersion)
+		settings.inactivityPeriod = Number(settings.inactivityPeriod ?? this.settings().inactivityPeriod)
+		settings.minimumReceive = BigInt(settings.minimumReceive ?? this.settings().minimumReceive)
+		settings.walletVersion = Number(settings.walletVersion ?? this.settings().walletVersion)
 		if (settings.language == null) {
 			const browserCultureLang = getBrowserCultureLang()
 			const browserLang = getBrowserLang()
