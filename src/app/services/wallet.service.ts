@@ -1025,15 +1025,17 @@ export class WalletService {
 	}
 
 	async deleteWallet (id: string) {
-		const walletToDelete = this.wallets().find((w) => w.id === id)
-		await walletToDelete.destroy()
-		this.wallets.update((v) => v.filter((w) => w.id !== id))
-		this.walletNames.update((v) => {
-			const names = new Map(v)
-			names.delete(id)
-			return names
-		})
-		this.setActiveWallet(this.wallets()[0].id)
+		if (id) {
+			const walletToDelete = this.wallets().find((w) => w.id === id)
+			await walletToDelete.destroy()
+			this.wallets.update((v) => v.filter((w) => w.id !== id))
+			this.walletNames.update((v) => {
+				const names = new Map(v)
+				names.delete(id)
+				return names
+			})
+			this.setActiveWallet(this.wallets()[0]?.id)
+		}
 	}
 
 	async setActiveWallet (id: string) {
@@ -1041,12 +1043,14 @@ export class WalletService {
 		const walletToActivate = this.wallets().find((w) => w.id === id)
 		this.selectedWallet.set(walletToActivate)
 		this.isLocked.set(walletToActivate?.isLocked ?? true)
-		if (this.isLocked()) {
-			await this.requestUnlock()
-		}
-		if (!this.isLocked()) {
-			await this.scanAccounts()
-			await this.reloadBalances()
+		if (walletToActivate) {
+			if (this.isLocked()) {
+				await this.requestUnlock()
+			}
+			if (!this.isLocked()) {
+				await this.scanAccounts()
+				await this.reloadBalances()
+			}
 		}
 		await this.saveWalletExport()
 	}
