@@ -15,6 +15,7 @@ export type NanoServers = {
 }
 
 interface AppSettings {
+	color: string
 	customWorkServer: string
 	defaultRepresentative: string | null
 	denomination: string
@@ -40,6 +41,7 @@ export class AppSettingsService {
 	readonly storeKey: 'Gnault-AppSettings' = 'Gnault-AppSettings'
 
 	settings: WritableSignal<AppSettings> = signal({
+		color: '255, 153, 0',
 		customWorkServer: '',
 		defaultRepresentative: null,
 		denomination: 'nano',
@@ -198,6 +200,7 @@ export class AppSettingsService {
 	clearAppSettings () {
 		localStorage.removeItem(this.storeKey)
 		this.settings.set({
+			color: '255, 153, 0',
 			customWorkServer: '',
 			defaultRepresentative: null,
 			denomination: 'nano',

@@ -104,6 +104,9 @@
 		}
 	},
 	"app": {
+		"configure": {
+			"color": "Cor"
+		},
 		"will-update-on-reload": "Uma atualização foi instalada em segundo plano e será aplicada na próxima inicialização."
 	},
 	"change-rep-widget": {

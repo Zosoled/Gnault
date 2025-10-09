@@ -104,6 +104,9 @@
 		}
 	},
 	"app": {
+		"configure": {
+			"color": "颜色"
+		},
 		"will-update-on-reload": "更新已在后台安装，并将在下次启动时应用。"
 	},
 	"change-rep-widget": {

@@ -230,6 +230,18 @@ export class ConfigureAppComponent implements OnInit {
 		this.svcAppSettings.saveAppSettings()
 	})
 
+	selectedColor = signal<string>(this.settings.color ?? '#ff9900')
+	selectedColorChanged = effect(() => {
+		const r = Number(`0x${this.selectedColor().slice(1, 3)}`)
+		const g = Number(`0x${this.selectedColor().slice(3, 5)}`)
+		const b = Number(`0x${this.selectedColor().slice(5, 7)}`)
+		const color = `${r}, ${g}, ${b}`
+		console.log('color', color)
+		document.documentElement.style.setProperty('--color', `${r}, ${g}, ${b}`)
+		this.settings.color = color
+		this.svcAppSettings.saveAppSettings()
+	})
+
 	/**
 	 * Distinguishes accounts with visually engaging icons.
 	 */

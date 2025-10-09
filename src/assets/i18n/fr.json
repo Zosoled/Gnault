@@ -104,6 +104,9 @@
 		}
 	},
 	"app": {
+		"configure": {
+			"color": "Couleur"
+		},
 		"will-update-on-reload": "Une mise à jour a été installée en arrière-plan et sera appliquée au prochain lancement."
 	},
 	"change-rep-widget": {

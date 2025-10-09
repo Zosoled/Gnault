@@ -104,6 +104,9 @@
 		}
 	},
 	"app": {
+		"configure": {
+			"color": "Farbe"
+		},
 		"will-update-on-reload": "Im Hintergrund wurde ein Update installiert, das beim nächsten Start angewendet wird."
 	},
 	"change-rep-widget": {

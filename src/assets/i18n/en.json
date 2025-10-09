@@ -104,6 +104,9 @@
 		}
 	},
 	"app": {
+		"configure": {
+			"color": "Color"
+		},
 		"will-update-on-reload": "An update was installed in the background and will be applied on next launch."
 	},
 	"change-rep-widget": {

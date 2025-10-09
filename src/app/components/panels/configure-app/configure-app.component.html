@@ -139,6 +139,27 @@
 							<div class="uk-margin">
 								<label
 									class="uk-form-label"
+									for="form-horizontal-select-theme"
+								>
+									{{ t('app.configure.color') }}
+								</label>
+								<div class="uk-form-controls">
+									<input
+										id="form-horizontal-select-color"
+										class="uk-input"
+										type="color"
+										[value]="selectedColor()"
+										(change)="onStringInput(selectedColor, $event)"
+									/>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="uk-width-1-1">
+						<div class="uk-form-horizontal">
+							<div class="uk-margin">
+								<label
+									class="uk-form-label"
 									for="form-horizontal-select-identicon"
 								>
 									{{ t('configure-app.identicons') }}
