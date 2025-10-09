@@ -273,7 +273,6 @@ export class RepresentativeService {
 	 * @returns {RepresentativeOverview[]}
 	 */
 	getUniqueRepresentatives (accounts: WalletApiAccount[]): RepresentativeOverview[] {
-		debugger
 		const representatives: RepresentativeOverview[] = []
 		for (const account of accounts) {
 			if (!account || !account.representative) continue // Account doesn't exist yet
@@ -300,17 +299,8 @@ export class RepresentativeService {
 	 * @returns {Promise<string[]>}
 	 */
 	async getOnlineRepresentatives (): Promise<string[]> {
-		const representatives: string[] = []
 		const reps = await this.svcApi.representativesOnline()
-		if (!reps) return representatives
-		for (const representative in Object.keys(reps.representatives)) {
-			if (!reps.representatives.hasOwnProperty(representative)) {
-				continue
-			}
-			representatives.push(representative)
-		}
-
-		return representatives
+		return Object.keys(reps?.representatives ?? {})
 	}
 
 	/**
