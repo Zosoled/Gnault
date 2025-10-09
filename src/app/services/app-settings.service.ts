@@ -59,17 +59,17 @@ export class AppSettingsService {
 	})
 
 	servers: NanoServers = {
-		rainstorm: {
-			name: 'Rainstorm City',
-			shouldRandom: true,
-			api: 'https://rainstorm.city/api',
-			ws: 'wss://rainstorm.city/websocket',
-		},
 		nanoslo: {
 			name: 'NanOslo',
 			shouldRandom: true,
 			api: 'https://nanoslo.0x.no/proxy',
 			ws: 'wss://nanoslo.0x.no/websocket',
+		},
+		rainstorm: {
+			name: 'Rainstorm City',
+			shouldRandom: true,
+			api: 'https://rainstorm.city/api',
+			ws: 'wss://rainstorm.city/websocket',
 		},
 		somenano: {
 			name: 'SomeNano',
@@ -77,15 +77,9 @@ export class AppSettingsService {
 			api: 'https://node.somenano.com/proxy',
 			ws: 'wss://node.somenano.com/websocket',
 		},
-		spynano: {
-			name: 'SpyNano (New Node - Use with caution)',
-			shouldRandom: false,
-			api: 'https://node.spynano.org/proxy',
-			ws: 'wss://node.spynano.org/websocket',
-		},
 		xnopay: {
-			name: 'XNOPay (New Node - Use with caution)',
-			shouldRandom: false,
+			name: 'XNOPay',
+			shouldRandom: true,
 			api: 'https://uk1.public.xnopay.com/proxy',
 			ws: 'wss://uk1.public.xnopay.com/ws',
 		},
