@@ -349,6 +349,7 @@
 													[placeholder]="t('configure-app.leave-blank-to-accept-transactions-of-any-amount')"
 													[value]="minimumReceive()"
 													(blur)="onStringInput(minimumReceive, $event)"
+													[disabled]="selectedReceivable() === 'manual'"
 												/>
 											</div>
 										</div>
