@@ -67,13 +67,13 @@ export class AppSettingsService {
 		},
 		rainstorm: {
 			name: 'Rainstorm City',
-			shouldRandom: true,
+			shouldRandom: false,
 			api: 'https://rainstorm.city/api',
 			ws: 'wss://rainstorm.city/websocket',
 		},
 		somenano: {
 			name: 'SomeNano',
-			shouldRandom: true,
+			shouldRandom: false,
 			api: 'https://node.somenano.com/proxy',
 			ws: 'wss://node.somenano.com/websocket',
 		},
