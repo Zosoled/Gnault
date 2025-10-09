@@ -658,10 +658,10 @@ export class WalletService {
 		}
 
 		if (walletReceivableInclUnconfirmed > 0n) {
-			const min = this.svcUtil.nano.nanoToRaw(this.settings().minimumReceive ?? 0)
-			const receivable = min === '0'
-				? await this.svcApi.accountsReceivableSorted(this.accounts.map((a) => a.address))
-				: await this.svcApi.accountsReceivableLimitSorted(this.accounts.map((a) => a.address), min)
+			const min = this.settings().minimumReceive ?? 0n
+			const receivable = min > 0n
+				? await this.svcApi.accountsReceivableLimitSorted(this.accounts.map((a) => a.address), min.toString())
+				: await this.svcApi.accountsReceivableSorted(this.accounts.map((a) => a.address))
 
 			if (receivable && receivable.blocks) {
 				for (const block in receivable.blocks) {
