@@ -140,6 +140,9 @@ export class ApiService {
 		return await this.request('delegators_count', { account }, false)
 	}
 
+	/**
+	 * Returns a list of online representative accounts that have voted recently.
+	 */
 	async representativesOnline (): Promise<{ representatives: { [address: string]: { weight: string } } }> {
 		return await this.request('representatives_online', { weight: true }, false)
 	}
