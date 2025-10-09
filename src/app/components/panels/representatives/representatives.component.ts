@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms'
 import { ActivatedRoute } from '@angular/router'
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import { NanoAddressComponent } from 'app/components/elements'
-import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
+import { AmountSplitPipe, RaiPipe } from 'app/pipes'
 import {
 	AppSettingsService,
 	FullRepresentativeOverview,
@@ -30,7 +30,6 @@ import { BehaviorSubject } from 'rxjs'
 		FormsModule,
 		NanoAddressComponent,
 		RaiPipe,
-		SqueezePipe,
 		TranslocoDirective,
 	],
 })

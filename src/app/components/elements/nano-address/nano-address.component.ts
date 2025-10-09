@@ -6,14 +6,14 @@ import { Component, InputSignal, computed, input, signal } from '@angular/core'
 	styleUrls: ['./nano-address.component.css'],
 })
 export class NanoAddressComponent {
-	address: InputSignal<string> = input('')
-	v = computed(() => this.address()?.replace('nano_', ''))
+	value: InputSignal<string> = input('')
 
 	isTruncated = signal(true)
+	address = computed(() => this.value()?.replace('nano_', ''))
 	prefix = 'nano_'
-	first = computed(() => this.v()?.slice(0, 5))
-	middle = computed(() => this.isTruncated() ? '…' : this.v()?.slice(5, -5))
-	last = computed(() => this.v()?.slice(-5))
+	first = computed(() => this.address()?.slice(0, 5))
+	middle = computed(() => this.isTruncated() ? '…' : this.address()?.slice(5, -5))
+	last = computed(() => this.address()?.slice(-5))
 
 	toggle () {
 		this.isTruncated.set(!this.isTruncated())

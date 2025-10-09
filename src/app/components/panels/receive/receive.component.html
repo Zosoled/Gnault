@@ -206,7 +206,7 @@
 								@if (receivableAccountModel !== '0') {
 									<div class="uk-flex uk-flex-center uk-flex-middle uk-text-center qr-address">
 										<app-nano-address
-											[address]="receivableAccountModel"
+											[value]="receivableAccountModel"
 											class="uk-width-auto"
 											style="max-width: 90%"
 										></app-nano-address>
@@ -358,7 +358,7 @@
 														}
 													</div>
 													<div class="nano-address-clickable nano-address-monospace uk-text-truncate">
-														<app-nano-address [address]="receivable.account"></app-nano-address>
+														<app-nano-address [value]="receivable.account"></app-nano-address>
 													</div>
 												</a>
 											</div>
@@ -421,7 +421,7 @@
 															}
 														</div>
 														<div class="nano-address-clickable nano-address-monospace uk-text-truncate">
-															<app-nano-address [address]="receivable.destination"></app-nano-address>
+															<app-nano-address [value]="receivable.destination"></app-nano-address>
 														</div>
 													</a>
 												</div>
@@ -683,7 +683,7 @@
 						<div class="account-label uk-text-truncate">{{ selectedAccountAddressBookName }}</div>
 					</div>
 					<app-nano-address
-						[address]="receivableAccountModel"
+						[value]="receivableAccountModel"
 						class="uk-width-auto"
 					></app-nano-address>
 					<button
@@ -793,7 +793,7 @@
 						to
 					</p>
 					<app-nano-address
-						[address]="receivableAccountModel"
+						[value]="receivableAccountModel"
 						class="uk-width-auto"
 						style="display: inline-block; max-width: 325px"
 					></app-nano-address>
