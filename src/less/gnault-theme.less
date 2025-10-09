@@ -77,8 +77,9 @@ html {
 		--global-xlarge-box-shadow: 0 0 0 rgba(0, 0, 0, 0.08);
 }
 
+/* Custom font for nano currency symbol. Use &#xE001; or \uE001 in text. */
 .xno {
-	// Use &#xe001; in text
+	font-family: 'xno-symbol';
 	font-style: normal;
 	font-weight: normal;
 	// Reset parent styles that can break glyph codes
@@ -86,6 +87,19 @@ html {
 	text-transform: none;
 	// Fix button height for Twitter bootstrap
 	line-height: 1em;
+	/* Non-selectable since a copy-paste will not work for this custom font */
+	/* iOS Safari */
+	-webkit-touch-callout: none;
+	/* Safari */
+	-webkit-user-select: none;
+	/* Konqueror HTML */
+	-khtml-user-select: none;
+	/* Firefox */
+	-moz-user-select: none;
+	/* Internet Explorer/Edge */
+	-ms-user-select: none;
+	/* Non-prefixed version, currently supported by Chrome and Opera */
+	user-select: none;
 }
 
 @nlt-intro-margin: 40px;
