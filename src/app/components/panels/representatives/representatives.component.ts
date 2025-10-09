@@ -30,7 +30,7 @@ import { BehaviorSubject } from 'rxjs'
 		FormsModule,
 		NanoAddressComponent,
 		RaiPipe,
-		TranslocoDirective,
+		TranslocoDirective
 	],
 })
 export class RepresentativesComponent implements OnInit {
