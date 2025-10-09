@@ -220,35 +220,38 @@
 							<p class="uk-text-lead uk-text-center">Change your representatives</p>
 							<div class="change-representative-form uk-form-horizontal">
 								<div class="uk-margin">
-									<label
-										class="uk-form-label"
-										for="form-horizontal-select-accounts-to-change-representative"
-										>Accounts to Change</label
-									>
 									<div class="uk-form-controls">
-										<select
-											class="uk-select"
-											[(ngModel)]="changeAccountID"
-											(change)="appendAccountToRedelegate($event)"
-											id="form-horizontal-select-accounts-to-change-representative"
+										<!-- A button toggling a dropdown -->
+										<button
+											class="uk-button uk-button-default uk-width-1-1"
+											type="button"
 										>
-											<option
-												[value]="null"
-												disabled
-												selected
-											>
-												Select Accounts to Change
-											</option>
-											<option value="all">All Current Accounts</option>
-											@for (account of svcWallet.accounts; track account.address) {
-												<option [value]="account.address">
-													{{ account.addressBookName ? `${account.addressBookName} - ` : `# ${account.index} - ` }}
-													{{ account.address | squeeze }} (&#xE001;{{
-														account.balance ?? 0 | rai: 'nano,true' | amountsplit: 0
-													}}{{ account.balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }})
-												</option>
-											}
-										</select>
+											Select Accounts to Change
+										</button>
+										<div uk-dropdown="mode: click">
+											<ul class="uk-nav uk-dropdown-nav">
+												<li>
+													<a (click)="appendAccountToRedelegate('all')">
+														<span>All Current Accounts</span>
+													</a>
+												</li>
+												@for (account of svcWallet.accounts; track account.address) {
+													<li>
+														<a (click)="appendAccountToRedelegate(account.address)">
+															<span>
+																{{
+																	account.addressBookName ? `${account.addressBookName} - ` : `# ${account.index} - `
+																}}
+																<app-nano-address [value]="account.address"></app-nano-address>
+																(<span class="xno">&#xE001;</span
+																>{{ account.balance ?? 0 | rai: 'nano,true' | amountsplit: 0
+																}}{{ account.balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }})
+															</span>
+														</a>
+													</li>
+												}
+											</ul>
+										</div>
 										<ul class="uk-list uk-list-striped">
 											@for (account of accountsToRedelegate; track account.address) {
 												<li>
@@ -260,6 +263,11 @@
 																<div class="uk-margin-small-right account-label blue">
 																	{{ getAccountLabel(account) }}
 																</div>
+																<span class="uk-text-muted">
+																	<span class="xno">&#xE001;</span
+																	>{{ account.balance ?? 0 | rai: 'nano,true' | amountsplit: 0
+																	}}{{ account.balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }}
+																</span>
 																<div class="uk-text-truncate">
 																	<app-nano-address [value]="account.address"></app-nano-address>
 																</div>
