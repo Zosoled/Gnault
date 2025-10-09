@@ -487,20 +487,19 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 		}
 
 		// If there is a receivable balance, or the account is not opened yet, load receivable transactions
-		if (BigInt(accountInfo.receivable) > 0n || accountInfo.error) {
+		if (BigInt(accountInfo?.receivable ?? 0) > 0n || accountInfo.error) {
 			// Take minimum receive into account
 			let receivableBalance = '0'
-			let receivable
 
 			this.receivableBlocks = []
 			this.loadingIncomingTxList = true
 
-			if (this.settings.minimumReceive) {
-				const minAmount = await Tools.convert(this.settings.minimumReceive, 'nano', 'raw')
-				receivable = await this.svcApi.receivableLimitSorted(address, 50, minAmount)
-			} else {
-				receivable = await this.svcApi.receivableSorted(address, 50)
-			}
+			const min = this.settings.minimumReceive ?? 0n
+
+			const receivable = min > 0n
+				? await this.svcApi.receivableLimitSorted(address, 50, min.toString())
+				: await this.svcApi.receivableSorted(address, 50)
+
 
 			if (address !== this.address) {
 				// Navigated to a different account while incoming tx were loading
@@ -510,32 +509,34 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 
 			this.loadingIncomingTxList = false
 
-			if (receivable?.blocks) {
-				for (const block in receivable.blocks) {
-					if (!receivable.blocks.hasOwnProperty(block)) continue
-					const transaction = receivable.blocks[block]
+			for (const block in receivable?.blocks ?? []) {
+				if (!receivable.blocks.hasOwnProperty(block)) continue
+				const transaction = receivable.blocks[block]
 
-					this.receivableBlocks.push({
-						account: transaction.source,
-						amount: transaction.amount,
-						local_timestamp: transaction.local_timestamp,
-						local_date_string: transaction.local_timestamp
-							? formatDate(transaction.local_timestamp * 1000, 'MMM d, y', 'en-US')
-							: 'N/A',
-						local_time_string: transaction.local_timestamp
-							? formatDate(transaction.local_timestamp * 1000, 'HH:mm:ss', 'en-US')
-							: '',
-						addressBookName:
-							this.svcAddressBook.getAccountName(transaction.source) || this.getAccountLabel(transaction.source, null),
-						hash: block,
-						loading: false,
-						received: false,
-						isReceivable: true,
-					})
+				this.receivableBlocks.push({
+					account: transaction.source,
+					amount: transaction.amount,
+					local_timestamp: null,
+					local_date_string: null,
+					local_time_string: null,
+					// local_timestamp: transaction.local_timestamp,
+					// local_date_string: transaction.local_timestamp
+					// 	? formatDate(transaction.local_timestamp * 1000, 'MMM d, y', 'en-US')
+					// 	: 'N/A',
+					// local_time_string: transaction.local_timestamp
+					// 	? formatDate(transaction.local_timestamp * 1000, 'HH:mm:ss', 'en-US')
+					// 	: '',
+					addressBookName:
+						this.svcAddressBook.getAccountName(transaction.source) || this.getAccountLabel(transaction.source, null),
+					hash: block,
+					loading: false,
+					received: false,
+					isReceivable: true,
+				})
 
-					receivableBalance = (BigInt(receivableBalance) + BigInt(transaction.amount)).toString()
-				}
+				receivableBalance = (BigInt(receivableBalance) + BigInt(transaction.amount)).toString()
 			}
+
 
 			this.account().receivable = receivableBalance
 		} else {

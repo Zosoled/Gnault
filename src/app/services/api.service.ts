@@ -67,6 +67,7 @@ export class ApiService {
 				console.warn('Node response failed validation.', err.reason, err.res)
 			} else {
 				console.error('Node responded with error', err)
+				console.error('Data sent to node', data)
 			}
 			if (this.settings.server === 'random') {
 				// choose a new backend and do the request again

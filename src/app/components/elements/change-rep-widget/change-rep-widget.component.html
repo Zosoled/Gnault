@@ -28,26 +28,26 @@
 							<div class="weight-total">{{ rep.percent.toFixed(2) }}%</div>
 						}
 					</div>
-					@switch (true) {
-						@case (rep.statusText == 'trusted') {
+					@switch (rep.statusText) {
+						@case ('trusted') {
 							<div class="representative-health-row health-green">
 								<div class="health-icon"></div>
 								<div class="label">{{ t('change-rep-widget.good-representative') }}</div>
 							</div>
 						}
-						@case (rep.statusText == 'ok') {
+						@case ('ok') {
 							<div class="representative-health-row health-green">
 								<div class="health-icon"></div>
 								<div class="label">{{ t('change-rep-widget.good-representative') }}</div>
 							</div>
 						}
-						@case (rep.statusText == 'warn') {
+						@case ('warn') {
 							<div class="representative-health-row health-yellow">
 								<div class="health-icon"></div>
 								<div class="label">{{ t('change-rep-widget.acceptable-representative') }}</div>
 							</div>
 						}
-						@case (rep.statusText == 'alert') {
+						@case ('alert') {
 							<div class="representative-health-row health-red">
 								<div class="health-icon"></div>
 								<div class="label">{{ t('change-rep-widget.bad-representative') }}</div>
@@ -170,20 +170,18 @@
 			</div>
 		</div>
 	} @else {
-		<ng-template #selectedAccountHasNoRep>
-			<div class="nav-representative-info">
-				<div class="representative">
-					<h2>{{ t('general.representative') }}</h2>
-					<div class="representative-name-row">
-						<div class="name no-interact">{{ t('change-rep-widget.representative-none') }}</div>
-					</div>
-					<div class="representative-health-row health-unknown">
-						<div class="health-icon"></div>
-						<div class="label">{{ t('change-rep-widget.receive-a-transaction-to-configure') }}</div>
-					</div>
+		<div class="nav-representative-info">
+			<div class="representative">
+				<h2>{{ t('general.representative') }}</h2>
+				<div class="representative-name-row">
+					<div class="name no-interact">{{ t('change-rep-widget.representative-none') }}</div>
+				</div>
+				<div class="representative-health-row health-unknown">
+					<div class="health-icon"></div>
+					<div class="label">{{ t('change-rep-widget.receive-a-transaction-to-configure') }}</div>
 				</div>
 			</div>
-		</ng-template>
+		</div>
 	}
 	@if (showRepChangeRequired) {
 		<div

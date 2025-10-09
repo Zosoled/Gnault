@@ -113,8 +113,8 @@
 												class="icon-edit-wallet-id"
 												(click)="editWalletName(wallet.id)"
 												uk-tooltip
-												[title]="t('wallets.edit-wallet-name')"
-												[aria-label]="t('wallets.edit-wallet-name')"
+												[title]="t('wallet.edit-wallet-name')"
+												[aria-label]="t('wallet.edit-wallet-name')"
 											>
 												<span uk-icon="file-edit"></span>
 											</a>
@@ -124,7 +124,7 @@
 												class="icon-delete-wallet uk-text-danger"
 												(click)="confirmDeleteWallet(wallet.id)"
 												uk-tooltip
-												[title]="t('wallets.delete-wallet')"
+												[title]="t('wallet.delete-wallet')"
 												aria-label="Delete Wallet"
 											>
 												<span uk-icon="close"></span>
@@ -141,9 +141,9 @@
 								colspan="4"
 								style="text-align: center"
 							>
-								{{ t('wallets.you-dont-have-any-wallets-yet.1') }}
-								<a [routerLink]="'/configure-wallet'">{{ t('wallets.you-dont-have-any-wallets-yet.2-link') }}</a>
-								{{ t('wallets.you-dont-have-any-wallets-yet.3') }}
+								{{ t('wallet.you-dont-have-any-wallets-yet.1') }}
+								<a [routerLink]="'/configure-wallet'">{{ t('wallet.you-dont-have-any-wallets-yet.2-link') }}</a>
+								{{ t('wallet.you-dont-have-any-wallets-yet.3') }}
 							</td>
 						</tr>
 					}
@@ -157,13 +157,13 @@
 							style="text-align: center"
 						>
 							<span uk-icon="icon: info"></span>
-							{{ t('wallets.missing-wallets.1') }}
+							{{ t('wallet.missing-wallets.1') }}
 							<a
 								class="hint-action"
 								[routerLink]="'/configure-wallet'"
-								>{{ t('wallets.missing-wallets.2-link') }}</a
+								>{{ t('wallet.missing-wallets.2-link') }}</a
 							>
-							{{ t('wallets.missing-wallets.3') }}
+							{{ t('wallet.missing-wallets.3') }}
 						</td>
 					</tr>
 				</thead>
@@ -190,10 +190,10 @@
 					</div>
 					<div>
 						<p>
-							{{ t('wallets.delete.warning.1') }}
+							{{ t('wallet.delete.warning.1') }}
 						</p>
 						<p>
-							<b>{{ t('wallets.delete.warning.2') }}</b>
+							<b>{{ t('wallet.delete.warning.2') }}</b>
 						</p>
 					</div>
 				</div>
@@ -213,7 +213,7 @@
 								value="ok"
 								(click)="deleteWallet()"
 							>
-								{{ t('wallets.delete.confirm') }}
+								{{ t('wallet.delete.confirm') }}
 							</button>
 						</p>
 					</form>

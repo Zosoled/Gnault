@@ -273,6 +273,7 @@ export class RepresentativeService {
 	 * @returns {RepresentativeOverview[]}
 	 */
 	getUniqueRepresentatives (accounts: WalletApiAccount[]): RepresentativeOverview[] {
+		debugger
 		const representatives: RepresentativeOverview[] = []
 		for (const account of accounts) {
 			if (!account || !account.representative) continue // Account doesn't exist yet

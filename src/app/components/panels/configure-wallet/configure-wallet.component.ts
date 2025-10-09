@@ -98,38 +98,6 @@ export class ConfigureWalletComponent {
 		}
 	}
 
-	async importExistingWallet () {
-		this.importSeed = ''
-		this.newPassword = ''
-
-		await this.svcWallet.resetWallet()
-
-		// load accounts and watch them update in real-time
-		this.router.navigate(['accounts'])
-
-		this.svcNotifications.sendInfo(`Starting to scan the first 20 accounts and importing them if they have been used...`, {
-			length: 7000,
-		})
-		await this.svcWallet.scanAccounts()
-
-		this.svcNotifications.sendSuccess(`Successfully imported wallet!`, { length: 10000 })
-
-		// this is now called from change-rep-widget.component when new wallet
-		// this.repService.detectChangeableReps()
-
-		this.svcWallet.publishNewWallet()
-	}
-
-	async importSingleKeyWallet () {
-		this.svcWallet.createWalletFromSingleKey(this.keyString, this.isExpanded)
-		this.newPassword = ''
-		this.router.navigate(['accounts']) // load accounts and watch them update in real-time
-		this.keyString = ''
-
-		this.svcNotifications.sendSuccess(`Successfully imported wallet from a private key!`)
-		this.svcWallet.publishNewWallet()
-	}
-
 	async connectLedgerByBluetooth () {
 		await this.importLedgerWallet(true)
 	}
@@ -257,14 +225,10 @@ export class ConfigureWalletComponent {
 		this.newWalletSeed = ''
 		this.newWalletMnemonic = ''
 		this.newWalletMnemonicLines = []
-		this.saveNewWallet()
-		this.activePanel = panels.final
-	}
-
-	saveNewWallet () {
 		this.svcWallet.saveWalletExport()
 		this.svcWallet.publishNewWallet()
 		this.svcNotifications.sendSuccess(`Successfully created new wallet! Do not lose the secret recovery seed/mnemonic!`)
+		this.activePanel = panels.final
 	}
 
 	setPanel (panel) {

@@ -25,8 +25,13 @@ export class ChangeRepWidgetComponent implements AfterViewInit {
 
 	constructor () {
 		effect(() => {
-			const account = this.svcWallet.selectedAccount()
+			this.svcWallet.selectedAccount()
 			this.updateDisplayedRepresentatives()
+		})
+
+		effect(() => {
+			this.svcWallet.wallets()
+			this.resetRepresentatives()
 		})
 	}
 
@@ -65,13 +70,6 @@ export class ChangeRepWidgetComponent implements AfterViewInit {
 			await this.updateChangeableRepresentatives()
 			this.updateDisplayedRepresentatives()
 			this.initialLoadComplete = true
-		})
-
-		// Detect if a wallet is reset
-		this.svcWallet.newWallet$.subscribe((shouldReload) => {
-			if (shouldReload) {
-				this.resetRepresentatives()
-			}
 		})
 
 		// Detect if a new open block is received

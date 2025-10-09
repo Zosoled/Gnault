@@ -12,7 +12,7 @@ import {
 	WalletService,
 	WorkPoolService,
 } from 'app/services'
-import { Account, Block, Tools, Wallet } from 'libnemo'
+import { Account, Block, Wallet } from 'libnemo'
 
 // seed index
 const INDEX_MAX = 4294967295
@@ -341,7 +341,7 @@ export class SweeperComponent implements OnInit {
 		// check for receivable first
 		let data = null
 		if (settings.minimumReceive) {
-			const minAmount = Tools.convert(settings.minimumReceive, 'mnano', 'raw')
+			const minAmount = settings.minimumReceive.toString()
 			if (settings.receivableOption === 'amount') {
 				data = await this.api.receivableLimitSorted(address, this.maxIncoming, minAmount)
 			} else {

@@ -49,19 +49,19 @@ export class WalletsComponent {
 				this.walletIdToDelete = null
 			})
 		} catch (err) {
-			this.svcNotifications.sendError(translate('wallets.delete.error', { error: err?.message ?? err }))
+			this.svcNotifications.sendError(translate('wallet.delete.error', { error: err?.message ?? err }))
 		}
 	}
 
 	async deleteWallet () {
 		await this.svcWallet.deleteWallet(this.walletIdToDelete)
-		this.svcNotifications.sendSuccess(translate('wallets.delete.success'))
+		this.svcNotifications.sendSuccess(translate('wallet.delete.success'))
 	}
 
 	async editWalletName (id: string) {
 		const match = this.wallets().find((w) => w.id === id)
 		const name = match?.name ?? id
-		const response = await this.UIkit.modal.prompt(translate('wallets.edit-wallet-name'), name)
+		const response = await this.UIkit.modal.prompt(translate('wallet.edit-wallet-name'), name)
 		if (response) {
 			this.svcWallet.walletNames.update((names) => {
 				const updated = new Map(names)
