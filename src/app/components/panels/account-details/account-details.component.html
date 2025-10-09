@@ -177,7 +177,7 @@
 											class="nano-address-monospace uk-width-auto uk-text-small uk-text-truncate"
 											style="max-width: calc(100% - 60px)"
 										>
-											<app-nano-account-id [address]="address"></app-nano-account-id>
+											<app-nano-address [address]="address"></app-nano-address>
 										</div>
 										<div
 											class="nano-address-actions uk-width-auto"
@@ -266,10 +266,7 @@
 													class="nano-address-monospace"
 													[title]="account().representative"
 												>
-													<app-nano-account-id
-														[address]="account().representative.address"
-														middle="off"
-													></app-nano-account-id>
+													<app-nano-address [address]="account().representative.address"></app-nano-address>
 												</div>
 											</div>
 										} @else {
@@ -565,10 +562,7 @@
 													}
 												</div>
 												<div class="nano-address-clickable nano-address-monospace uk-text-truncate">
-													<app-nano-account-id
-														[address]="receivable.account"
-														middle="auto"
-													></app-nano-account-id>
+													<app-nano-address [address]="receivable.account"></app-nano-address>
 												</div>
 											</a>
 										</div>
@@ -728,10 +722,7 @@
 													}
 												</div>
 												<div class="nano-address-clickable nano-address-monospace uk-text-truncate">
-													<app-nano-account-id
-														[address]="history.link_as_account || history.account"
-														middle="auto"
-													></app-nano-account-id>
+													<app-nano-address [address]="history.link_as_account || history.account"></app-nano-address>
 												</div>
 											</a>
 										</div>
@@ -1416,10 +1407,7 @@
 							class="uk-flex uk-flex-center"
 						>
 							<span class="nano-address-monospace uk-width-auto">
-								<app-nano-account-id
-									[address]="address"
-									middle="off"
-								></app-nano-account-id>
+								<app-nano-address [address]="address"></app-nano-address>
 							</span>
 							<span
 								class="nano-address-actions uk-width-auto"

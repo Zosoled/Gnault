@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common'
-import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
+import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
-import { ClipboardModule } from 'ngx-clipboard'
-import { NanoAccountIdComponent } from 'app/components/elements'
+import { NanoAddressComponent } from 'app/components/elements'
 import {
 	MusigService,
 	NotificationsService,
@@ -11,6 +10,7 @@ import {
 	RemoteSignService,
 	UtilService
 } from 'app/services'
+import { ClipboardModule } from 'ngx-clipboard'
 
 @Component({
 	selector: 'app-multisig',
@@ -20,7 +20,7 @@ import {
 		ClipboardModule,
 		CommonModule,
 		FormsModule,
-		NanoAccountIdComponent
+		NanoAddressComponent
 	]
 })
 

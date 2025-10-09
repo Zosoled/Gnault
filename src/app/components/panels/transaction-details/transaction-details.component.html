@@ -148,7 +148,7 @@
 												}
 											</div>
 											<div class="nano-address-clickable nano-address-monospace uk-text-truncate">
-												<app-nano-account-id [address]="fromAccountID"></app-nano-account-id>
+												<app-nano-address [address]="fromAccountID"></app-nano-address>
 											</div>
 										</a>
 										<div class="snippet-address-actions uk-width-auto uk-flex uk-flex-bottom">
@@ -205,7 +205,7 @@
 												}
 											</div>
 											<div class="nano-address-clickable nano-address-monospace uk-text-truncate">
-												<app-nano-account-id [address]="toAccountID"></app-nano-account-id>
+												<app-nano-address [address]="toAccountID"></app-nano-address>
 											</div>
 										</a>
 										<div class="snippet-address-actions uk-width-auto uk-flex uk-flex-bottom">
@@ -340,7 +340,7 @@
 										class="nano-address-clickable nano-address-monospace uk-text-truncate"
 										style="max-width: calc(100% - 35px)"
 									>
-										<app-nano-account-id [address]="transaction?.contents?.representative"></app-nano-account-id>
+										<app-nano-address [address]="transaction?.contents?.representative"></app-nano-address>
 									</span>
 								</a>
 							</div>
@@ -471,7 +471,7 @@
 										class="nano-address-clickable nano-address-monospace uk-text-truncate"
 										style="max-width: calc(100% - 35px)"
 									>
-										<app-nano-account-id [address]="transaction?.contents?.link_as_account"></app-nano-account-id>
+										<app-nano-address [address]="transaction?.contents?.link_as_account"></app-nano-address>
 									</span>
 								</a>
 							</div>

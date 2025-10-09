@@ -144,10 +144,7 @@
 				@default {
 					<div class="account uk-text-truncate">
 						<div class="nano-address-monospace">
-							<app-nano-account-id
-								[address]="transaction.link_as_account || transaction.account"
-								middle="off"
-							></app-nano-account-id>
+							<app-nano-address [address]="transaction.link_as_account || transaction.account"></app-nano-address>
 						</div>
 					</div>
 				}

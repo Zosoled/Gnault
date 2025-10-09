@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms'
 import { ChildActivationEnd, Router, RouterLink } from '@angular/router'
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import {
-	NanoAccountIdComponent,
+	NanoAddressComponent,
 	NanoIdenticonComponent,
 	NanoTransactionMobileComponent
 } from 'app/components/elements'
@@ -38,7 +38,7 @@ import * as QRCode from 'qrcode'
 		CommonModule,
 		CurrencySymbolPipe,
 		FormsModule,
-		NanoAccountIdComponent,
+		NanoAddressComponent,
 		NanoIdenticonComponent,
 		NanoTransactionMobileComponent,
 		RaiPipe,

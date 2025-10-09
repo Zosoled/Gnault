@@ -3,7 +3,7 @@ import { Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
-import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/elements'
+import { NanoAddressComponent, NanoIdenticonComponent } from 'app/components/elements'
 import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AppSettingsService,
@@ -26,7 +26,7 @@ import { debounce } from 'rxjs/operators'
 		CommonModule,
 		FiatPipe,
 		FormsModule,
-		NanoAccountIdComponent,
+		NanoAddressComponent,
 		NanoIdenticonComponent,
 		RaiPipe,
 		RouterLink,

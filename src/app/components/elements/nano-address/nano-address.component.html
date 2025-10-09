@@ -1,0 +1,14 @@
+<span class="nano-address-start"
+	><span class="nano-address-prefix">{{ prefix }}</span
+	>{{ first() }}</span
+>
+<span
+	[class]="{
+		'nano-address-middle': true,
+		'uk-text-break': true,
+		truncated: isTruncated(),
+	}"
+	(click)="toggle()"
+	>{{ middle() }}</span
+>
+<span class="nano-address-end">{{ last() }}</span>

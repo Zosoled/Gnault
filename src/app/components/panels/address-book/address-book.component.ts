@@ -3,7 +3,7 @@ import { AfterViewInit, Component, OnDestroy, OnInit, inject } from '@angular/co
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
-import { NanoAccountIdComponent } from 'app/components/elements'
+import { NanoAddressComponent } from 'app/components/elements'
 import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AddressBookService,
@@ -35,7 +35,7 @@ export interface BalanceAccount {
 		CommonModule,
 		FiatPipe,
 		FormsModule,
-		NanoAccountIdComponent,
+		NanoAddressComponent,
 		RaiPipe,
 		RouterLink,
 		TranslocoDirective,

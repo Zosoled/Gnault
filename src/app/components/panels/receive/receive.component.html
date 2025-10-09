@@ -205,12 +205,11 @@
 							<div>
 								@if (receivableAccountModel !== '0') {
 									<div class="uk-flex uk-flex-center uk-flex-middle uk-text-center qr-address">
-										<app-nano-account-id
+										<app-nano-address
 											[address]="receivableAccountModel"
-											middle="break"
-											class="nano-address-monospace uk-width-auto"
+											class="uk-width-auto"
 											style="max-width: 90%"
-										></app-nano-account-id>
+										></app-nano-address>
 									</div>
 								}
 								<div class="uk-margin-medium-top uk-hidden@s nlt-button-group uk-flex uk-flex-column uk-flex-middle">
@@ -359,10 +358,7 @@
 														}
 													</div>
 													<div class="nano-address-clickable nano-address-monospace uk-text-truncate">
-														<app-nano-account-id
-															[address]="receivable.account"
-															middle="auto"
-														></app-nano-account-id>
+														<app-nano-address [address]="receivable.account"></app-nano-address>
 													</div>
 												</a>
 											</div>
@@ -425,10 +421,7 @@
 															}
 														</div>
 														<div class="nano-address-clickable nano-address-monospace uk-text-truncate">
-															<app-nano-account-id
-																[address]="receivable.destination"
-																middle="auto"
-															></app-nano-account-id>
+															<app-nano-address [address]="receivable.destination"></app-nano-address>
 														</div>
 													</a>
 												</div>
@@ -689,11 +682,10 @@
 						}
 						<div class="account-label uk-text-truncate">{{ selectedAccountAddressBookName }}</div>
 					</div>
-					<app-nano-account-id
+					<app-nano-address
 						[address]="receivableAccountModel"
-						middle="off"
-						class="nano-address-monospace uk-width-auto"
-					></app-nano-account-id>
+						class="uk-width-auto"
+					></app-nano-address>
 					<button
 						class="uk-width-auto uk-button uk-button-secondary uk-text-center nlt-icon-button uk-margin-small-top"
 						type="button"
@@ -800,12 +792,11 @@
 					>
 						to
 					</p>
-					<app-nano-account-id
+					<app-nano-address
 						[address]="receivableAccountModel"
-						middle="break"
-						class="nano-address-monospace uk-width-auto"
+						class="uk-width-auto"
 						style="display: inline-block; max-width: 325px"
-					></app-nano-account-id>
+					></app-nano-address>
 					<div
 						class="uk-width-1-1 uk-flex uk-flex-center uk-margin-top"
 						style="margin-bottom: 40px"

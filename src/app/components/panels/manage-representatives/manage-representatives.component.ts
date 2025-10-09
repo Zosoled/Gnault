@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common'
 import { AfterViewInit, Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
-import { NanoAccountIdComponent } from 'app/components/elements'
+import { NanoAddressComponent } from 'app/components/elements'
 import {
 	ApiService,
 	NotificationsService,
@@ -21,7 +21,7 @@ import { map } from 'rxjs/operators'
 		ClipboardModule,
 		CommonModule,
 		FormsModule,
-		NanoAccountIdComponent,
+		NanoAddressComponent,
 		RouterModule
 	]
 })

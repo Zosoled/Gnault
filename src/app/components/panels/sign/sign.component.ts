@@ -1,7 +1,7 @@
 import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, Router, RouterLink } from '@angular/router'
-import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/elements'
+import { NanoAddressComponent, NanoIdenticonComponent } from 'app/components/elements'
 import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
 	AddressBookService,
@@ -41,7 +41,7 @@ enum navSource {
 		ClipboardModule,
 		FiatPipe,
 		FormsModule,
-		NanoAccountIdComponent,
+		NanoAddressComponent,
 		NanoIdenticonComponent,
 		RaiPipe,
 		RouterLink,

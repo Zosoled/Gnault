@@ -2,7 +2,7 @@ import { CommonModule, DatePipe, DecimalPipe } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { ActivatedRoute, ChildActivationEnd, Router, RouterLink } from '@angular/router'
 import { TranslocoService } from '@jsverse/transloco'
-import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/elements'
+import { NanoAddressComponent, NanoIdenticonComponent } from 'app/components/elements'
 import { AmountSplitPipe, RaiPipe } from 'app/pipes'
 import { AddressBookService, ApiService, AppSettingsService, NotificationsService, WalletService } from 'app/services'
 import { ClipboardModule } from 'ngx-clipboard'
@@ -17,7 +17,7 @@ import { ClipboardModule } from 'ngx-clipboard'
 		CommonModule,
 		DatePipe,
 		DecimalPipe,
-		NanoAccountIdComponent,
+		NanoAddressComponent,
 		NanoIdenticonComponent,
 		RaiPipe,
 		RouterLink,

@@ -117,11 +117,7 @@
 													</div>
 												</div>
 												<div class="representative-address uk-text-small uk-text-truncate">
-													<app-nano-account-id
-														[address]="rep.address"
-														middle="auto"
-														class="nano-address-monospace"
-													></app-nano-account-id>
+													<app-nano-address [address]="rep.address"></app-nano-address>
 												</div>
 												<div class="representative-health-compact only-on-small-viewports uk-margin-small-top">
 													<ng-template [ngTemplateOutlet]="representativeHealth"></ng-template>
@@ -154,11 +150,7 @@
 																<div class="account-label">{{ getAccountLabel(delegatingAccount) }}</div>
 															</div>
 															<div class="descendant-address uk-text-truncate">
-																<app-nano-account-id
-																	[address]="delegatingAccount.address"
-																	middle="auto"
-																	class="nano-address-monospace"
-																></app-nano-account-id>
+																<app-nano-address [address]="delegatingAccount.address"></app-nano-address>
 															</div>
 														</div>
 													</div>
@@ -269,11 +261,7 @@
 																	{{ getAccountLabel(account) }}
 																</div>
 																<div class="uk-text-truncate">
-																	<app-nano-account-id
-																		[address]="account.address"
-																		middle="auto"
-																		class="nano-address-monospace"
-																	></app-nano-account-id>
+																	<app-nano-address [address]="account.address"></app-nano-address>
 																</div>
 															}
 														</div>

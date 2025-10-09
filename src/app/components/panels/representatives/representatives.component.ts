@@ -3,7 +3,7 @@ import { Component, OnInit, ViewChild, computed, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ActivatedRoute } from '@angular/router'
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
-import { NanoAccountIdComponent } from 'app/components/elements'
+import { NanoAddressComponent } from 'app/components/elements'
 import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
 import {
 	AppSettingsService,
@@ -28,7 +28,7 @@ import { BehaviorSubject } from 'rxjs'
 		AmountSplitPipe,
 		CommonModule,
 		FormsModule,
-		NanoAccountIdComponent,
+		NanoAddressComponent,
 		RaiPipe,
 		SqueezePipe,
 		TranslocoDirective,

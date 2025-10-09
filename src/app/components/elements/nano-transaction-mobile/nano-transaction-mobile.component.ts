@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common'
 import { Component, Input, OnChanges, OnInit } from '@angular/core'
 import { TranslocoDirective } from '@jsverse/transloco'
-import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components'
+import { NanoAddressComponent, NanoIdenticonComponent } from 'app/components'
 import { AmountSplitPipe, RaiPipe } from 'app/pipes'
 
 @Component({
@@ -11,7 +11,7 @@ import { AmountSplitPipe, RaiPipe } from 'app/pipes'
 	imports: [
 		AmountSplitPipe,
 		CommonModule,
-		NanoAccountIdComponent,
+		NanoAddressComponent,
 		NanoIdenticonComponent,
 		RaiPipe,
 		TranslocoDirective

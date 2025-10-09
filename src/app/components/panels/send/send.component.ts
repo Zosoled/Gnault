@@ -3,7 +3,7 @@ import { AfterViewInit, Component, effect, inject } from '@angular/core'
 import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms'
 import { ActivatedRoute, RouterLink } from '@angular/router'
 import { TranslocoService } from '@jsverse/transloco'
-import { NanoAccountIdComponent, NanoIdenticonComponent } from 'app/components/elements'
+import { NanoAddressComponent, NanoIdenticonComponent } from 'app/components/elements'
 import { AmountSplitPipe, CurrencySymbolPipe, FiatPipe, RaiPipe, SqueezePipe } from 'app/pipes'
 import {
 	AddressBookService,
@@ -33,7 +33,7 @@ import { BehaviorSubject } from 'rxjs'
 		CurrencySymbolPipe,
 		FiatPipe,
 		FormsModule,
-		NanoAccountIdComponent,
+		NanoAddressComponent,
 		NanoIdenticonComponent,
 		RaiPipe,
 		ReactiveFormsModule,

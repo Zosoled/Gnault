@@ -1,0 +1,27 @@
+:host {
+	text-wrap: auto;
+}
+
+.nano-address-prefix {
+	color: var(--tertiary);
+}
+
+.nano-address-start {
+	color: var(--primary);
+}
+
+.nano-address-middle {
+	line-break: anywhere;
+	margin-left: 1px;
+	min-width: 1.4em;
+
+	&.truncated {
+		margin-left: 3px;
+		margin-right: 4px;
+	}
+}
+
+.nano-address-end {
+	color: var(--secondary);
+	margin-left: -1px;
+}

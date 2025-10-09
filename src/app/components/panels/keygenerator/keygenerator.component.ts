@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core'
 import { TranslocoDirective } from '@jsverse/transloco'
-import { NanoAccountIdComponent } from 'app/components/elements'
+import { NanoAddressComponent } from 'app/components/elements'
 import { NotificationsService } from 'app/services'
 import { Wallet } from 'libnemo'
 import { ClipboardModule } from 'ngx-clipboard'
@@ -9,7 +9,7 @@ import { ClipboardModule } from 'ngx-clipboard'
 	selector: 'app-keygenerator',
 	templateUrl: './keygenerator.component.html',
 	styleUrls: ['./keygenerator.component.css'],
-	imports: [ClipboardModule, NanoAccountIdComponent, TranslocoDirective],
+	imports: [ClipboardModule, NanoAddressComponent, TranslocoDirective],
 })
 export class KeygeneratorComponent implements OnInit {
 	private notificationService = inject(NotificationsService)
