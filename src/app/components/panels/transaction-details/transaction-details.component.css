@@ -1,5 +1,5 @@
 .block-amount-primary {
-	font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
+	font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 	line-height: 1;
 }
 
@@ -41,7 +41,7 @@
 .block-balance .balance-amount-primary .amount-integer,
 .block-balance .balance-amount-primary .amount-fractional,
 .block-balance .balance-amount-primary .currency-name {
-	font-family: 'xno-symbol', 'Montserrat', Arial, Helvetica, sans-serif;
+	font-family: 'Montserrat', Arial, Helvetica, sans-serif;
 	font-size: 16px;
 }
 
