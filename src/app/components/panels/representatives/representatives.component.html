@@ -111,7 +111,7 @@
 														{{ rep.label ?? t('change-rep-widget.unknown-rep') }}
 													</div>
 													<div class="representative-weight-percentage uk-width-auto uk-flex-inline uk-flex-middle">
-														@if (!rep.percent.isZero()) {
+														@if (rep.percent > 0) {
 															<div class="value uk-text-small text-half-muted">{{ rep.percent.toFixed(2) }}%</div>
 														}
 													</div>
@@ -180,7 +180,7 @@
 								}
 								@if (!loadingRepresentatives && (!representativeOverview || !representativeOverview.length)) {
 									<tr class="uk-text-center">
-										@if (settings.serverAPI) {
+										@if (settings().serverAPI) {
 											<td
 												colspan="3"
 												style="text-align: center"
@@ -189,7 +189,7 @@
 												change your representative!
 											</td>
 										}
-										@if (!settings.serverAPI) {
+										@if (!settings().serverAPI) {
 											<td
 												colspan="3"
 												style="text-align: center"
@@ -237,28 +237,34 @@
 										<select
 											class="uk-select"
 											[(ngModel)]="changeAccountID"
-											(change)="newAccountID($event.target)"
+											(change)="appendAccountToRedelegate($event)"
 											id="form-horizontal-select-accounts-to-change-representative"
 										>
-											<option [value]="null">Select Accounts to Change</option>
-											<option [value]="'all'">All Current Accounts</option>
-											@for (account of svcWallet.accounts; track account) {
+											<option
+												[value]="null"
+												disabled
+												selected
+											>
+												Select Accounts to Change
+											</option>
+											<option value="all">All Current Accounts</option>
+											@for (account of svcWallet.accounts; track account.address) {
 												<option [value]="account.address">
-													{{ account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
-													{{ account.address | squeeze }} ({{ account.balance | rai: 'nano,true' | amountsplit: 0
-													}}{{ account.balance | rai: 'nano,true' | amountsplit: 1 }} XNO)
+													{{ account.addressBookName ? `${account.addressBookName} - ` : `# ${account.index} - ` }}
+													{{ account.address | squeeze }} (&#xE001;{{
+														account.balance ?? 0 | rai: 'nano,true' | amountsplit: 0
+													}}{{ account.balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }})
 												</option>
 											}
 										</select>
 										<ul class="uk-list uk-list-striped">
-											@for (account of selectedAccounts; track account) {
+											@for (account of accountsToRedelegate; track account.address) {
 												<li>
 													<div uk-grid>
 														<div class="uk-width-5-6 uk-text-truncate">
-															@if (account.address === 'All Current Accounts') {
-																<div>{{ account.address }}</div>
-															}
-															@if (account.address !== 'All Current Accounts') {
+															@if (changeAccountID === 'All Current Accounts') {
+																<div>All Current Accounts</div>
+															} @else {
 																<div class="uk-margin-small-right account-label blue">
 																	{{ getAccountLabel(account) }}
 																</div>

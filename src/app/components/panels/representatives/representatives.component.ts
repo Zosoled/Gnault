@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { Component, OnInit, ViewChild, inject } from '@angular/core'
+import { Component, OnInit, ViewChild, computed, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ActivatedRoute } from '@angular/router'
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
@@ -14,27 +14,36 @@ import {
 	QrModalService,
 	RepresentativeService,
 	UtilService,
+	WalletApiAccount,
 	WalletService
 } from 'app/services'
-import { Tools } from 'libnemo'
+import { Account, Tools } from 'libnemo'
 import { BehaviorSubject } from 'rxjs'
 
 @Component({
 	selector: 'app-representatives',
 	templateUrl: './representatives.component.html',
 	styleUrls: ['./representatives.component.css'],
-	imports: [AmountSplitPipe, CommonModule, FormsModule, NanoAccountIdComponent, RaiPipe, SqueezePipe, TranslocoDirective],
+	imports: [
+		AmountSplitPipe,
+		CommonModule,
+		FormsModule,
+		NanoAccountIdComponent,
+		RaiPipe,
+		SqueezePipe,
+		TranslocoDirective,
+	],
 })
 export class RepresentativesComponent implements OnInit {
 	private router = inject(ActivatedRoute)
 	private svcAppSettings = inject(AppSettingsService)
-	private notifications = inject(NotificationsService)
-	private nanoBlock = inject(NanoBlockService)
-	private util = inject(UtilService)
-	private representativeService = inject(RepresentativeService)
-	private ninja = inject(NinjaService)
-	private qrModalService = inject(QrModalService)
-	private translocoService = inject(TranslocoService)
+	private svcNanoBlock = inject(NanoBlockService)
+	private svcNinja = inject(NinjaService)
+	private svcNotifications = inject(NotificationsService)
+	private svcQrModal = inject(QrModalService)
+	private svcRepresentative = inject(RepresentativeService)
+	private svcTransloco = inject(TranslocoService)
+	private svcUtil = inject(UtilService)
 
 	svcWallet = inject(WalletService)
 
@@ -50,8 +59,8 @@ export class RepresentativesComponent implements OnInit {
 	representativeOverview = []
 	changingRepresentatives = false
 
-	selectedAccounts = []
-	fullAccounts = []
+	accountsToRedelegate: Account[] = []
+	repConstituentAccounts: WalletApiAccount[] = []
 
 	recommendedReps = []
 	recommendedRepsPaginated = []
@@ -67,12 +76,10 @@ export class RepresentativesComponent implements OnInit {
 
 	representativeList = []
 
-	get settings () {
-		return this.svcAppSettings.settings()
-	}
+	settings = computed(() => this.svcAppSettings.settings())
 
 	async ngOnInit () {
-		this.representativeService.loadRepresentativeList()
+		this.svcRepresentative.loadRepresentativeList()
 
 		// Listen for query parameters that set defaults
 		this.router.queryParams.subscribe((params) => {
@@ -80,10 +87,10 @@ export class RepresentativesComponent implements OnInit {
 			this.showRecommendedReps = params && params.showRecommended
 
 			if (params && params.accounts) {
-				this.selectedAccounts = [] // Reset the preselected accounts
+				this.accountsToRedelegate = [] // Reset the preselected accounts
 				const accounts = params.accounts.split(',')
 				for (const account of accounts) {
-					this.newAccountID(account)
+					this.appendAccountToRedelegate(account)
 				}
 			}
 			if (params && params.representative) {
@@ -92,13 +99,13 @@ export class RepresentativesComponent implements OnInit {
 		})
 
 		this.loadingRepresentatives = true
-		let repOverview = await this.representativeService.getRepresentativesOverview()
+		let repOverview = await this.svcRepresentative.getRepresentativesOverview()
 		// Sort by weight delegated
 		repOverview = repOverview.sort((a: FullRepresentativeOverview, b: FullRepresentativeOverview) => {
 			return a.delegatedWeight < b.delegatedWeight ? -1 : 1
 		})
 		this.representativeOverview = repOverview
-		repOverview.forEach((o) => this.fullAccounts.push(...o.accounts))
+		repOverview.forEach((o) => this.repConstituentAccounts.push(...o.accounts))
 		this.loadingRepresentatives = false
 
 		this.populateRepresentativeList()
@@ -108,11 +115,11 @@ export class RepresentativesComponent implements OnInit {
 
 	async populateRepresentativeList () {
 		// add trusted/regular local reps to the list
-		const localReps = this.representativeService.getSortedRepresentatives()
+		const localReps = this.svcRepresentative.getSortedRepresentatives()
 		this.representativeList.push(...localReps.filter((rep) => !rep.warn))
 
-		if (this.settings.serverAPI) {
-			const verifiedReps = await this.ninja.recommendedRandomized()
+		if (this.settings().serverAPI) {
+			const verifiedReps = await this.svcNinja.recommendedRandomized()
 
 			// add random recommended reps to the list
 			for (const representative of verifiedReps) {
@@ -131,65 +138,50 @@ export class RepresentativesComponent implements OnInit {
 
 	getAccountLabel (account) {
 		const addressBookName = account.addressBookName
-
 		if (addressBookName != null) {
 			return addressBookName
 		}
-
 		const walletAccount = this.svcWallet.accounts.find((a) => a.address === account.address)
-
 		if (walletAccount == null) {
-			return this.translocoService.translate('general.account')
+			return this.svcTransloco.translate('general.account')
 		}
-
-		return this.translocoService.translate('general.account') + ' #' + walletAccount.index
+		return this.svcTransloco.translate('general.account') + ' #' + walletAccount.index
 	}
 
 	addSelectedAccounts (accounts) {
 		for (const account of accounts) {
-			this.newAccountID(account.address)
+			this.appendAccountToRedelegate(account.address)
 		}
-
 		// Scroll to the representative input
 		setTimeout(() => this.repInput.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
 	}
 
-	newAccountID (accountID) {
-		if (accountID instanceof HTMLSelectElement) {
-			accountID = accountID.value
+	appendAccountToRedelegate (address: string | Event) {
+		if (address instanceof Event) {
+			address = (address.target as HTMLSelectElement).value
 		}
-		const newAccount = accountID || this.changeAccountID
-		if (!newAccount) {
-			return // Didn't select anything
+		if (address === 'all' || this.changeAccountID === 'all') {
+			this.accountsToRedelegate = [...this.svcWallet.accounts]
+			return
 		}
 
-		const existingAccount = this.selectedAccounts.find((a) => a.address === newAccount)
+		const existingAccount = this.accountsToRedelegate.find((a) => a.address === address)
 		if (existingAccount) {
 			return // Already selected
 		}
 
-		const allExists = this.selectedAccounts.find((a) => a.address === 'All Current Accounts')
-		if (newAccount === 'all' && !allExists) {
-			this.selectedAccounts = [] // Reset the list before adding all
-		}
-		if (newAccount !== 'all' && allExists) {
-			this.selectedAccounts.splice(this.selectedAccounts.indexOf(allExists), 1) // Remove all from the list
-		}
-
-		if (newAccount === 'all') {
-			if (this.selectedAccounts.length === 0) {
-				this.selectedAccounts.push({ id: 'All Current Accounts' })
-			}
-		} else {
-			const walletAccount = this.svcWallet.getWalletAccount(newAccount)
-			this.selectedAccounts.push(walletAccount)
-		}
+		const walletAccount = this.svcWallet.getWalletAccount(address)
+		this.accountsToRedelegate.push(walletAccount)
 
 		setTimeout(() => (this.changeAccountID = null), 10)
 	}
 
+	/**
+	 * Remove account from selection of accounts changing reps.
+	 * @param account
+	 */
 	removeSelectedAccount (account) {
-		this.selectedAccounts.splice(this.selectedAccounts.indexOf(account), 1) // Remove all from the list
+		this.accountsToRedelegate.splice(this.accountsToRedelegate.indexOf(account), 1)
 	}
 
 	searchRepresentatives () {
@@ -199,7 +191,7 @@ export class RepresentativesComponent implements OnInit {
 		const matches = this.representativeList
 			.filter((a) => a.name.toLowerCase().indexOf(search.toLowerCase()) !== -1)
 			// remove duplicate accounts
-			.filter((item, pos, self) => this.util.array.findWithAttr(self, 'id', item.id) === pos)
+			.filter((item, pos, self) => this.svcUtil.array.findWithAttr(self, 'id', item.id) === pos)
 			.slice(0, 5)
 
 		this.representativeResults$.next(matches)
@@ -221,8 +213,8 @@ export class RepresentativesComponent implements OnInit {
 			return
 		}
 
-		const rep = this.representativeService.getRepresentative(this.toRepresentativeID)
-		const ninjaRep = await this.ninja.getAccount(this.toRepresentativeID)
+		const rep = this.svcRepresentative.getRepresentative(this.toRepresentativeID)
+		const ninjaRep = await this.svcNinja.getAccount(this.toRepresentativeID)
 
 		if (rep) {
 			this.representativeListMatch = rep.name
@@ -236,7 +228,7 @@ export class RepresentativesComponent implements OnInit {
 	async loadRecommendedReps () {
 		this.recommendedRepsLoading = true
 		try {
-			const scores = (await this.ninja.recommended()) as any[]
+			const scores = (await this.svcNinja.recommended()) as any[]
 			const totalSupply = 133248289
 
 			const reps = scores.map((rep) => {
@@ -244,7 +236,7 @@ export class RepresentativesComponent implements OnInit {
 				const percent = (nanoWeight / totalSupply) * 100
 
 				// rep.weight = nanoWeight.toString(10)
-				rep.weight = this.util.nano.mnanoToRaw(nanoWeight)
+				rep.weight = this.svcUtil.nano.mnanoToRaw(nanoWeight)
 				rep.percent = percent.toFixed(3)
 
 				return rep
@@ -288,12 +280,13 @@ export class RepresentativesComponent implements OnInit {
 		this.representativeListMatch = rep.alias // We will save if they use this, so this is a nice little helper
 	}
 
-	async changeRepresentatives () {
-		const accounts = this.selectedAccounts
-		const newRep = this.toRepresentativeID
-
+	/**
+	 * Process a change block for each account selected for redelegation.
+	 */
+	async changeRepresentatives (): Promise<void> {
+		// Already running
 		if (this.changingRepresentatives) {
-			return // Already running
+			return
 		}
 		if (this.svcWallet.isLocked()) {
 			await this.svcWallet.requestUnlock()
@@ -301,57 +294,41 @@ export class RepresentativesComponent implements OnInit {
 				return
 			}
 		}
-		if (!accounts || !accounts.length) {
-			return this.notifications.sendWarning(`You must select at least one account to change`)
+		if (!this.accountsToRedelegate.length) {
+			return this.svcNotifications.sendWarning('Select at least one account to change.')
 		}
-
 		this.changingRepresentatives = true
 
-		const valid = this.util.account.isValidAccount(newRep)
+		const wallet = this.svcWallet.selectedWallet()
+		const newRep = this.toRepresentativeID
+
+		const valid = this.svcUtil.account.isValidAccount(newRep)
 		if (!valid) {
 			this.changingRepresentatives = false
-			return this.notifications.sendWarning(`Representative is not a valid account`)
+			return this.svcNotifications.sendWarning('Invalid representative.')
 		}
 
-		const accountsToChange = accounts.find((a) => a.address === 'All Current Accounts')
+		const accountsToChange = this.changeAccountID === 'all'
 			? this.svcWallet.accounts
-			: accounts
+			: this.accountsToRedelegate
 
-		// Remove any that don't need their represetatives to be changed
-		const accountsNeedingChange = accountsToChange.filter((account) => {
-			const accountInfo = this.fullAccounts.find((a) => a.address === account.iaddressd)
-			if (!accountInfo || accountInfo.error) {
-				return false // Cant find info, update the account
-			}
-
-			if (accountInfo.representative.toLowerCase() === newRep.toLowerCase()) {
-				return false // This account already has this representative, reject it
-			}
-
-			return true
-		})
-
+		// Remove account if info not found or already delegating to this rep
+		const accountsNeedingChange = accountsToChange
+			.filter((account) => this.repConstituentAccounts
+				.find(({ address, error, representative }) => address === account.address && !error && representative.toLowerCase() !== newRep.toLowerCase()))
 		if (!accountsNeedingChange.length) {
 			this.changingRepresentatives = false
-			return this.notifications.sendInfo(`None of the accounts selected need to be updated`)
+			return this.svcNotifications.sendInfo(`None of the accounts selected need to be updated`)
 		}
 
-		const wallet = this.svcWallet.selectedWallet()
-
-		// Now loop and change them
 		for (const account of accountsNeedingChange) {
-			const walletAccount = this.svcWallet.getWalletAccount(account.address)
-			if (!walletAccount) {
-				continue // Unable to find account in the wallet? wat?
-			}
-
 			try {
-				const changed = await this.nanoBlock.generateChange(wallet, walletAccount, newRep, this.svcWallet.isLedger())
+				const changed = await this.svcNanoBlock.generateChange(wallet, account, newRep, this.svcWallet.isLedger())
 				if (!changed) {
-					this.notifications.sendError(`Error changing representative for ${account.address}, please try again`)
+					this.svcNotifications.sendError(`Error changing representative for ${account.address}, please try again`)
 				}
 			} catch (err) {
-				this.notifications.sendError('Error changing representative: ' + err.message)
+				this.svcNotifications.sendError(`Error changing representative for ${account.address}. ${err?.message ?? err}`)
 			}
 		}
 
@@ -361,35 +338,32 @@ export class RepresentativesComponent implements OnInit {
 			this.selectedRecommendedRep.account &&
 			this.selectedRecommendedRep.account === newRep
 		) {
-			this.representativeService.saveRepresentative(newRep, this.selectedRecommendedRep.alias, false, false)
+			this.svcRepresentative.saveRepresentative(newRep, this.selectedRecommendedRep.alias, false, false)
 		}
 
 		// Good to go!
-		this.selectedAccounts = []
+		this.accountsToRedelegate = []
 		this.toRepresentativeID = ''
 		this.representativeListMatch = ''
 		this.changingRepresentatives = false
 		this.selectedRecommendedRep = null
 
-		this.notifications.sendSuccess(`Successfully updated representatives!`)
-
-		let useCachedReps = false
+		this.svcNotifications.sendSuccess('Representative updated successfully.')
 
 		// If the overview panel is displayed, reload its data now
 		if (!this.hideOverview) {
 			this.loadingRepresentatives = true
-			this.representativeOverview = await this.representativeService.getRepresentativesOverview()
+			this.representativeOverview = await this.svcRepresentative.getRepresentativesOverview()
 			this.loadingRepresentatives = false
-			useCachedReps = true
 		}
 
 		// Detect if any new reps should be changed
-		await this.representativeService.detectChangeableReps(useCachedReps ? this.representativeOverview : null)
+		await this.svcRepresentative.detectChangeableReps(this.hideOverview ? null : this.representativeOverview)
 	}
 
 	// open qr reader modal
 	openQR (reference, type) {
-		const qrResult = this.qrModalService.openQR(reference, type)
+		const qrResult = this.svcQrModal.openQR(reference, type)
 		qrResult.then(
 			(data) => {
 				switch (data.reference) {
