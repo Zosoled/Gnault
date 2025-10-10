@@ -88,8 +88,9 @@
 													{{ t('general.new') }}
 												</div>
 												<div class="text-full">
-													+{{ account?.receivable ?? 0 | rai: 'nano,true' | amountsplit: 0
-													}}{{ account?.receivable ?? 0 | rai: 'nano,true' | amountsplit: 1 }} XNO
+													+<span class="xno">&#xE001;</span
+													>{{ account?.receivable ?? 0 | rai: 'nano,true' | amountsplit: 0
+													}}{{ account?.receivable ?? 0 | rai: 'nano,true' | amountsplit: 1 }}
 												</div>
 											</div>
 										}
@@ -97,13 +98,13 @@
 											class="amounts"
 											[title]="account?.balance > 0 ? `+${account.balance.toString()} raw` : ''"
 										>
-											<span class="amount-integer">{{
-												account?.balance ?? 0 | rai: 'nano,true' | amountsplit: 0
-											}}</span>
+											<span class="amount-integer"
+												><span class="xno">&#xE001;</span
+												>{{ account?.balance ?? 0 | rai: 'nano,true' | amountsplit: 0 }}</span
+											>
 											<span class="amount-fractional">{{
 												account?.balance ?? 0 | rai: 'nano,true' | amountsplit: 1
 											}}</span>
-											<span class="currency-name">XNO</span>
 										</span>
 									</div>
 									<div class="account-amounts-converted uk-width-1-1 text-half-muted">

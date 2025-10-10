@@ -398,13 +398,13 @@
 												</div>
 												<span class="block-balance">
 													<span class="balance-amount-primary">
-														<span class="amount-integer">{{
-															fromAccount.balance || 0 | rai: 'nano,true' | amountsplit: 0
-														}}</span>
+														<span class="amount-integer"
+															><span class="xno">&#xE001;</span
+															>{{ fromAccount.balance || 0 | rai: 'nano,true' | amountsplit: 0 }}</span
+														>
 														<span class="amount-fractional">{{
 															fromAccount.balance || 0 | rai: 'nano,true' | amountsplit: 1
 														}}</span>
-														<span class="currency-name">XNO</span>
 													</span>
 												</span>
 											</div>
@@ -415,9 +415,10 @@
 												></div>
 												<span class="block-balance">
 													<span class="balance-amount-primary uk-text-danger">
-														<span class="currency-name">XNO</span>
 														<span class="amount-sign">-</span>
-														<span class="amount-integer">{{ amount | rai: 'nano,true' | amountsplit: 0 }}</span>
+														<span class="amount-integer"
+															><span class="xno">&#xE001;</span>{{ amount | rai: 'nano,true' | amountsplit: 0 }}</span
+														>
 														<span class="amount-fractional">{{ amount | rai: 'nano,true' | amountsplit: 1 }}</span>
 													</span>
 												</span>
@@ -487,13 +488,13 @@
 												</div>
 												<span class="block-balance">
 													<span class="balance-amount-primary">
-														<span class="amount-integer">{{
-															toAccount.balance || 0 | rai: 'nano,true' | amountsplit: 0
-														}}</span>
+														<span class="amount-integer"
+															><span class="xno">&#xE001;</span
+															>{{ toAccount.balance || 0 | rai: 'nano,true' | amountsplit: 0 }}</span
+														>
 														<span class="amount-fractional">{{
 															toAccount.balance || 0 | rai: 'nano,true' | amountsplit: 1
 														}}</span>
-														<span class="currency-name">XNO</span>
 													</span>
 												</span>
 											</div>
@@ -504,9 +505,10 @@
 												></div>
 												<span class="block-balance">
 													<span class="balance-amount-primary uk-text-success">
-														<span class="currency-name">XNO</span>
 														<span class="amount-sign">+</span>
-														<span class="amount-integer">{{ amount | rai: 'nano,true' | amountsplit: 0 }}</span>
+														<span class="amount-integer"
+															><span class="xno">&#xE001;</span>{{ amount | rai: 'nano,true' | amountsplit: 0 }}</span
+														>
 														<span class="amount-fractional">{{ amount | rai: 'nano,true' | amountsplit: 1 }}</span>
 													</span>
 												</span>

@@ -53,16 +53,17 @@
 					@if (showAdvancedOptions) {
 						<div class="advanced-options">
 							<span [title]="totalTrackedBalanceRaw > 0 ? '+' + totalTrackedBalanceRaw.toString() + ' raw' : ''">
-								<span class="amount-integer">{{ totalTrackedBalance | rai: 'nano,true' | amountsplit: 0 }}</span>
+								<span class="amount-integer"
+									><span class="xno">&#xE001;</span>{{ totalTrackedBalance | rai: 'nano,true' | amountsplit: 0 }}</span
+								>
 								<span class="amount-fractional">{{ totalTrackedBalance | rai: 'nano,true' | amountsplit: 1 }}</span>
-								<span class="currency-name">XNO</span>
 							</span>
 							@if (totalTrackedReceivable > 0) {
 								<div class="incoming-label">
 									<div class="text-snippet">{{ t('general.new') }}</div>
 									<div class="text-full">
-										+{{ totalTrackedReceivable | rai: 'nano,true' | amountsplit: 0
-										}}{{ totalTrackedReceivable | rai: 'nano,true' | amountsplit: 1 }} XNO
+										+<span class="xno">&#xE001;</span>{{ totalTrackedReceivable | rai: 'nano,true' | amountsplit: 0
+										}}{{ totalTrackedReceivable | rai: 'nano,true' | amountsplit: 1 }}
 									</div>
 								</div>
 							}
@@ -195,23 +196,25 @@
 																			: ''
 																	"
 																>
-																	<span class="amount-integer">{{
-																		accounts[addressBook.account]?.balance | rai: 'nano,true' | amountsplit: 0
-																	}}</span>
+																	<span class="amount-integer"
+																		><span class="xno">&#xE001;</span
+																		>{{
+																			accounts[addressBook.account]?.balance | rai: 'nano,true' | amountsplit: 0
+																		}}</span
+																	>
 																	<span class="amount-fractional">{{
 																		accounts[addressBook.account]?.balance | rai: 'nano,true' | amountsplit: 1
 																	}}</span>
-																	<span class="currency-name">XNO</span>
 																</span>
 																@if (accounts[addressBook.account]?.receivable > 0) {
 																	<div class="incoming-label">
 																		<div class="text-snippet">New</div>
 																		<div class="text-full">
-																			+{{ accounts[addressBook.account]?.receivable | rai: 'nano,true' | amountsplit: 0
+																			+<span class="xno">&#xE001;</span
+																			>{{ accounts[addressBook.account]?.receivable | rai: 'nano,true' | amountsplit: 0
 																			}}{{
 																				accounts[addressBook.account]?.receivable | rai: 'nano,true' | amountsplit: 1
 																			}}
-																			XNO
 																		</div>
 																	</div>
 																}

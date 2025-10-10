@@ -641,9 +641,10 @@
 								>
 									<span class="uk-text-small">{{ t('general.blockactions.ready-to-receive') }}</span
 									><br />
-									<span class="amount-integer">{{ receivable.amount | rai: 'nano,true' | amountsplit: 0 }}</span>
+									<span class="amount-integer"
+										><span class="xno">&#xE001;</span>{{ receivable.amount | rai: 'nano,true' | amountsplit: 0 }}</span
+									>
 									<span class="amount-fractional">{{ receivable.amount | rai: 'nano,true' | amountsplit: 1 }}</span>
-									<span class="currency-name">XNO</span>
 									<div class="compact-actions-date">
 										<ng-template [ngTemplateOutlet]="transactionActionsOrDate"></ng-template>
 									</div>
@@ -823,9 +824,10 @@
 													}</span
 												><br />
 											}
-											<span class="amount-integer">{{ history.amount | rai: 'nano,true' | amountsplit: 0 }}</span>
+											<span class="amount-integer"
+												><span class="xno">&#xE001;</span>{{ history.amount | rai: 'nano,true' | amountsplit: 0 }}</span
+											>
 											<span class="amount-fractional">{{ history.amount | rai: 'nano,true' | amountsplit: 1 }}</span>
-											<span class="currency-name">XNO</span>
 											<div class="compact-actions-date text-half-muted">
 												<ng-template [ngTemplateOutlet]="transactionDateOrActions"></ng-template>
 											</div>

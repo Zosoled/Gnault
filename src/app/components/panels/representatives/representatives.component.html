@@ -126,13 +126,13 @@
 											<td class="voting-weight-column uk-width-1-4">
 												<div class="uk-text-small text-half-muted">Total</div>
 												<div class="amounts">
-													<span class="amount-integer">{{
-														rep.delegatedWeight | rai: 'nano,true' | amountsplit: 0
-													}}</span>
+													<span class="amount-integer"
+														><span class="xno">&#xE001;</span
+														>{{ rep.delegatedWeight | rai: 'nano,true' | amountsplit: 0 }}</span
+													>
 													<span class="amount-fractional">{{
 														rep.delegatedWeight | rai: 'nano,true' | amountsplit: 1
 													}}</span>
-													<span class="currency-name">XNO</span>
 												</div>
 											</td>
 										</tr>
@@ -157,13 +157,13 @@
 												</td>
 												<td class="voting-weight-column uk-width-1-4">
 													<div class="amounts">
-														<span class="amount-integer">{{
-															delegatingAccount.balance | rai: 'nano,true' | amountsplit: 0
-														}}</span>
+														<span class="amount-integer"
+															><span class="xno">&#xE001;</span
+															>{{ delegatingAccount.balance | rai: 'nano,true' | amountsplit: 0 }}</span
+														>
 														<span class="amount-fractional">{{
 															delegatingAccount.balance | rai: 'nano,true' | amountsplit: 1
 														}}</span>
-														<span class="currency-name">XNO</span>
 													</div>
 												</td>
 											</tr>
