@@ -29,7 +29,7 @@ import { Account, Wallet } from 'libnemo'
 @Component({
 	selector: 'app',
 	templateUrl: './app.component.html',
-	styleUrls: ['./app.component.less', './app.component.css'],
+	styleUrls: ['./app.component.less'],
 	imports: [
 		FormsModule,
 		NavigationComponent,

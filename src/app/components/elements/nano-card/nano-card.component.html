@@ -23,8 +23,8 @@
 					<ng-container>
 						<div class="balance-container primary">
 							<div class="amount-container">
-								<span class="xno">&#xE001;</span>
 								<div class="amount-integer">
+									<span class="xno">&#xE001;</span>
 									{{ selectedAccount()?.balance ?? svcWallet.balance ?? '0' | rai: 'nano,true' | amountsplit: 0 }}
 								</div>
 								<div class="amount-fractional">
