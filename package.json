@@ -34,12 +34,12 @@
 		"@angular/router": "^20.3.0",
 		"@angular/service-worker": "^20.3.0",
 		"@jsverse/transloco": "^7.6.1",
-		"@ledgerhq/hw-transport": "^6.31.10",
+		"@ledgerhq/hw-transport": "^6.31.12",
 		"@ledgerhq/hw-transport-node-ble": "^6.28.5",
-		"@ledgerhq/hw-transport-node-hid": "^6.29.11",
-		"@ledgerhq/hw-transport-web-ble": "^6.29.10",
-		"@ledgerhq/hw-transport-webhid": "^6.30.6",
-		"@ledgerhq/hw-transport-webusb": "^6.29.10",
+		"@ledgerhq/hw-transport-node-hid": "^6.29.13",
+		"@ledgerhq/hw-transport-web-ble": "^6.29.12",
+		"@ledgerhq/hw-transport-webhid": "^6.30.8",
+		"@ledgerhq/hw-transport-webusb": "^6.29.12",
 		"@ng-bootstrap/ng-bootstrap": "^19.0.1",
 		"@zxing/browser": "^0.1.5",
 		"@zxing/library": "^0.21.3",
@@ -48,8 +48,8 @@
 		"electron-settings": "^4.0.4",
 		"electron-updater": "^6.6.8",
 		"hermes-channel": "^2.1.2",
-		"libnemo": "^0.10.2",
-		"nano-pow": "^5.1.6",
+		"libnemo": "^0.10.3",
+		"nano-pow": "^5.1.8",
 		"ngx-clipboard": "^16.0.0",
 		"qrcode": "^1.5.4",
 		"rxjs": "^7.8.2",
@@ -99,6 +99,9 @@
 		},
 		"electron-winstaller": {
 			"@electron/asar": "4.0.1"
+		},
+		"prebuild-install": {
+			"tar-fs": "2.1.4"
 		},
 		"app-builder-lib": {
 			"@electron/asar": "4.0.1",
