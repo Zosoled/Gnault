@@ -364,8 +364,10 @@ export class SendComponent implements AfterViewInit {
 			)
 			if (newHash) {
 				this.svcNotifications.removeNotification('success-send')
-				this.svcNotifications.sendSuccess(`Successfully sent \uE001${this.amounts.nano.value}!`, {
-					identifier: 'success-send',
+				const denomination = this.svcAppSettings.settings().denomination
+				const amount = Tools.convert(this.amount, 'raw', denomination, 'number')
+				this.svcNotifications.sendSuccess(`Successfully sent ${amount} ${denomination}!`, {
+					identifier: 'success-send'
 				})
 				this.activePanel = 'send'
 				this.amounts.fiat.setValue(0)

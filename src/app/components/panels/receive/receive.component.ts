@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { AfterViewInit, Component, OnDestroy, effect, inject } from '@angular/core'
+import { AfterViewInit, Component, OnDestroy, computed, effect, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ChildActivationEnd, Router, RouterLink } from '@angular/router'
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
@@ -61,6 +61,7 @@ export class ReceiveComponent implements AfterViewInit, OnDestroy {
 	svcPrice = inject(PriceService)
 	svcUtil = inject(UtilService)
 
+	BigInt = BigInt
 	UIkit = (window as any).UIkit
 	nano = 1000000000000000000000000
 	accounts = this.svcWallet.accounts
@@ -99,6 +100,9 @@ export class ReceiveComponent implements AfterViewInit, OnDestroy {
 	merchantModePrompts = []
 	merchantModeTransactionHashes = []
 
+	minimumReceive = computed(() => {
+		return this.svcAppSettings.settings().minimumReceive ?? 0n
+	})
 	routerSub = null
 
 	get displayCurrency () {
@@ -106,10 +110,6 @@ export class ReceiveComponent implements AfterViewInit, OnDestroy {
 	}
 	get identiconsStyle () {
 		return this.svcAppSettings.settings().identiconsStyle
-	}
-	get minimumReceive () {
-		const min = this.svcAppSettings.settings().minimumReceive ?? 0
-		return Tools.convert(min, 'nano', 'raw', 'string')
 	}
 	get selectedAccount () {
 		return this.svcWallet.selectedAccount()

@@ -237,7 +237,13 @@ export class NanoBlockService {
 	}
 
 	async generateReceive (wallet: Wallet, account: Account, sourceBlock, ledger = false) {
-		await account.refresh(this.svcApi.rpc())
+		try {
+			await account.refresh(this.svcApi.rpc())
+		} catch (err) {
+			if (err.message !== 'Account not found') {
+				this.svcNotifications.sendError(err?.message ?? err)
+			}
+		}
 		const frontier = account.frontier ? await this.svcApi.blockInfo(account.frontier) : undefined
 		const openEquiv = !account?.frontier
 		const srcBlockInfo = await this.svcApi.blocksInfo([sourceBlock])

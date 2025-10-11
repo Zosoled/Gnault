@@ -21,3 +21,7 @@
 .notification-container .uk-alert {
 	pointer-events: all;
 }
+
+.notification-container p {
+	font-family: 'xno-symbol', Montserrat;
+}

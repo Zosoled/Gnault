@@ -948,7 +948,7 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 			receivableBlock.received = true
 			this.mobileTransactionMenuModal.hide()
 			this.svcNotifications.removeNotification('success-receive')
-			this.svcNotifications.sendSuccess(`Successfully received nano!`, { identifier: 'success-receive' })
+			this.svcNotifications.sendSuccess(`Successfully received!`, { identifier: 'success-receive' })
 			// clear receivables list before subsequent balance reload
 			this.svcWallet.clearReceivableBlocks()
 		} else {

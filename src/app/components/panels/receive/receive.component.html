@@ -85,8 +85,8 @@
 										@for (account of accounts; track account) {
 											<option [value]="account.address">
 												{{ account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
-												{{ account.address | squeeze }} ({{ account.balance | rai: 'nano,true' | amountsplit: 0
-												}}{{ account.balance | rai: 'nano,true' | amountsplit: 1 }} XNO)
+												{{ account.address | squeeze }} ({{ account.balance ?? 0 | rai: 'nano,true' | amountsplit: 0
+												}}{{ account.balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }} XNO)
 											</option>
 										}
 									</select>
@@ -521,7 +521,7 @@
 							}
 						</tbody>
 					</table>
-					@if (minimumReceive) {
+					@if (minimumReceive() > 0) {
 						<table class="uk-table uk-table-striped uk-table-small">
 							<thead>
 								<tr class="uk-alert uk-alert-primary missing-accounts-hint">
@@ -531,7 +531,7 @@
 									>
 										<span uk-icon="icon: info"></span>
 										{{ t('receive.minimum-receive-is-set-to.1') }}
-										@if (this.minimumReceive.toString().length > 24) {
+										@if (this.minimumReceive() > BigInt(10) ** BigInt(24)) {
 											<a
 												class="hint-action"
 												routerLink="/configure-app"
@@ -546,7 +546,7 @@
 												routerLink="/configure-app"
 												routerLinkActive="active"
 											>
-												{{ this.minimumReceive }}
+												{{ this.minimumReceive() }}
 											</a>
 										}
 										{{ t('receive.minimum-receive-is-set-to.2') }}

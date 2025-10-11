@@ -135,7 +135,7 @@ export class WalletService {
 				return
 			}
 			console.log('New Transaction', transaction)
-			const min = Tools.convert(this.settings().minimumReceive, this.settings().denomination, 'raw', 'bigint')
+			const min = this.settings().minimumReceive
 			let shouldNotify = min > 0n && BigInt(transaction.amount) > min
 
 			const walletAddresses = this.accounts.map((a) => a.address)
@@ -878,10 +878,10 @@ export class WalletService {
 		if (newHash) {
 			if (this.successfulBlocks.length >= 15) this.successfulBlocks.shift()
 			this.successfulBlocks.push(nextBlock.hash)
-
-			const receiveAmount = parseFloat(Tools.convert(nextBlock.amount, 'raw', 'mnano'))
+			const denomination = this.settings().denomination
+			const receiveAmount = Tools.convert(nextBlock.amount, 'raw', denomination, 'number')
 			this.svcNotifications.removeNotification('success-receive')
-			this.svcNotifications.sendSuccess(`Successfully received ${receiveAmount.toFixed(6).toString()} XNO!`, {
+			this.svcNotifications.sendSuccess(`Successfully received ${receiveAmount} ${denomination}!`, {
 				identifier: 'success-receive',
 			})
 
