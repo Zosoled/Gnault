@@ -90,9 +90,6 @@ export class NavigationComponent {
 	get selectedWallet () {
 		return this.svcWallet.selectedWallet()
 	}
-	get selectedWalletName () {
-		return this.svcWallet.walletNames().get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
-	}
 	get settings () {
 		return this.svcAppSettings.settings()
 	}

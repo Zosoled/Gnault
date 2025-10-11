@@ -111,9 +111,6 @@ export class AppComponent implements AfterViewInit {
 	get selectedWallet (): Wallet {
 		return this.svcWallet.selectedWallet()
 	}
-	get selectedWalletName (): string {
-		return this.walletNames.get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
-	}
 	get settings () {
 		return this.svcAppSettings.settings()
 	}

@@ -85,7 +85,7 @@ export class WalletService {
 	selectedWalletName: Signal<string> = computed(() => {
 		const wallet = this.selectedWallet()
 		const names = this.walletNames()
-		return names.get(wallet?.id) ?? wallet?.id ?? ''
+		return names.get(wallet?.id) ?? ''
 	})
 	wallets: WritableSignal<Wallet[]> = signal<Wallet[]>([])
 	walletNames = signal<Map<string, string>>(new Map())
@@ -94,10 +94,10 @@ export class WalletService {
 	hasReceivable = false
 	isBalanceUpdating = false
 	isBalanceInitialized = false
+	isLocked = signal(true)
 
 	accounts: Account[] = []
 	selectedAccount: WritableSignal<Account> = signal(null)
-	isLocked = signal(true)
 	passwordUpdated$ = new BehaviorSubject<Wallet>(null)
 	isUnlockRequested$ = new BehaviorSubject(false)
 	isChangePasswordRequested$ = new Subject<(password: string) => Promise<Wallet>>()

@@ -1,7 +1,7 @@
 import { formatDate } from '@angular/common'
-import { Component, OnInit, effect, inject } from '@angular/core'
+import { Component, OnInit, computed, effect, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
+import { TranslocoDirective } from '@jsverse/transloco'
 import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
 import { ApiService, AppSettingsService, NotificationsService, UtilService, WalletService } from 'app/services'
 import { ClipboardModule } from 'ngx-clipboard'
@@ -14,13 +14,12 @@ import * as QRCode from 'qrcode'
 	imports: [AmountSplitPipe, ClipboardModule, FormsModule, RaiPipe, SqueezePipe, TranslocoDirective],
 })
 export class ManageWalletComponent implements OnInit {
-	private api = inject(ApiService)
+	private svcApi = inject(ApiService)
 	private svcAppSettings = inject(AppSettingsService)
-	private translocoService = inject(TranslocoService)
-	private util = inject(UtilService)
-	private svcWallet = inject(WalletService)
+	private svcUtil = inject(UtilService)
 
-	notifications = inject(NotificationsService)
+	svcNotifications = inject(NotificationsService)
+	svcWallet = inject(WalletService)
 
 	accounts = this.svcWallet.accounts
 	newPassword = ''
@@ -49,21 +48,7 @@ export class ManageWalletComponent implements OnInit {
 	selectedOrder = this.orderOptions[0].value
 	exportEnabled = true
 
-	get isLedger () {
-		return this.svcWallet.isLedger()
-	}
-	get isLocked () {
-		return this.svcWallet.isLocked()
-	}
-	get selectedWallet () {
-		return this.svcWallet.selectedWallet()
-	}
-	get selectedWalletName () {
-		return this.svcWallet.walletNames().get(this.selectedWallet?.id) ?? this.selectedWallet?.id ?? ''
-	}
-	get settings () {
-		return this.svcAppSettings.settings()
-	}
+	settings = computed(() => this.svcAppSettings.settings())
 
 	constructor () {
 		// Update selected account if changed in the sidebar
@@ -95,8 +80,8 @@ export class ManageWalletComponent implements OnInit {
 		this.newPassword = ''
 		this.confirmPassword = ''
 		result.isLocked
-			? this.notifications.sendError('Failed to change wallet password.')
-			: this.notifications.sendSuccess('Wallet password changed.')
+			? this.svcNotifications.sendError('Failed to change wallet password.')
+			: this.svcNotifications.sendSuccess('Wallet password changed.')
 		this.showQRExport = false
 	}
 
@@ -114,8 +99,8 @@ export class ManageWalletComponent implements OnInit {
 	}
 
 	copied () {
-		this.notifications.removeNotification('success-copied')
-		this.notifications.sendSuccess(`Wallet seed copied to clipboard!`, { identifier: 'success-copied' })
+		this.svcNotifications.removeNotification('success-copied')
+		this.svcNotifications.sendSuccess(`Wallet seed copied to clipboard!`, { identifier: 'success-copied' })
 	}
 
 	seedMnemonic () {
@@ -193,14 +178,14 @@ export class ManageWalletComponent implements OnInit {
 		const fileName = `Gnault-Wallet.json`
 		const exportData = this.svcWallet.generateExportData()
 		this.triggerFileDownload(fileName, exportData, 'json')
-		this.notifications.sendSuccess(`Wallet export downloaded!`)
+		this.svcNotifications.sendSuccess(`Wallet export downloaded!`)
 	}
 
 	csvCountChange (count) {
-		if ((this.util.string.isNumeric(count) && count % 1 === 0) || count === '') {
+		if ((this.svcUtil.string.isNumeric(count) && count % 1 === 0) || count === '') {
 			// only allow beyond limit if using a custom server
 			if (
-				this.settings.server !== 'custom' &&
+				this.settings().server !== 'custom' &&
 				(parseInt(count, 10) > this.transactionHistoryLimit || count === '' || count === '0')
 			) {
 				this.invalidCsvCount = true
@@ -220,7 +205,7 @@ export class ManageWalletComponent implements OnInit {
 	}
 
 	csvOffsetChange (offset) {
-		if ((this.util.string.isNumeric(offset) && offset % 1 === 0) || offset === '') {
+		if ((this.svcUtil.string.isNumeric(offset) && offset % 1 === 0) || offset === '') {
 			if (parseInt(offset, 10) < 0) {
 				this.invalidCsvOffset = true
 			} else {
@@ -243,21 +228,21 @@ export class ManageWalletComponent implements OnInit {
 
 		if (this.invalidCsvCount) {
 			if (this.beyondCsvLimit) {
-				return this.notifications.sendWarning(
+				return this.svcNotifications.sendWarning(
 					`To export transactions above the limit, please use a custom Gnault server`
 				)
 			} else {
-				return this.notifications.sendWarning(`Invalid limit`)
+				return this.svcNotifications.sendWarning(`Invalid limit`)
 			}
 		}
 		if (this.invalidCsvOffset) {
-			return this.notifications.sendWarning(`Invalid offset`)
+			return this.svcNotifications.sendWarning(`Invalid offset`)
 		}
 
 		this.exportingCsv = true
 		const transactionCount = parseInt(this.csvCount, 10) || 0
 		const transactionOffset = parseInt(this.csvOffset, 10) || 0
-		const history = await this.api.accountHistory(
+		const history = await this.svcApi.accountHistory(
 			this.csvAccount,
 			transactionCount,
 			transactionOffset,
@@ -272,7 +257,7 @@ export class ManageWalletComponent implements OnInit {
 				csvData.push({
 					account: a.account,
 					type: a.type,
-					amount: this.util.nano.rawToMnano(a.amount),
+					amount: this.svcUtil.nano.rawToMnano(a.amount),
 					hash: a.hash,
 					height: a.height,
 					time: formatDate(a.local_timestamp * 1000, 'y-MM-d HH:mm:ss', 'en-US'),
@@ -281,13 +266,13 @@ export class ManageWalletComponent implements OnInit {
 		}
 
 		if (csvData.length === 0) {
-			return this.notifications.sendWarning(`No transaction history found or bad server response!`)
+			return this.svcNotifications.sendWarning(`No transaction history found or bad server response!`)
 		}
 
 		// download file
 		const order = this.selectedOrder ? '_oldestFirst' : '_newestFirst'
 		const fileName = `${this.csvAccount}_offset=${this.csvOffset || 0}${order}.csv`
 		this.triggerFileDownload(fileName, csvData, 'csv')
-		this.notifications.sendSuccess(`Transaction history downloaded!`)
+		this.svcNotifications.sendSuccess(`Transaction history downloaded!`)
 	}
 }
