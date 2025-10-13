@@ -103,7 +103,7 @@ export class AppSettingsService {
 		const match = document.cookie.match(/storage=([^;]+)/)?.[1]
 		if (match == null) {
 			document.cookie = `storage=localStorage; max-age=31536000; path=/`
-			return this.storage
+			return localStorage
 		}
 		if (match === 'sessionStorage') return sessionStorage
 		if (match === 'localStorage') return localStorage

@@ -1,10 +1,14 @@
-import { app, BrowserWindow, shell, Menu, screen, dialog, ipcMain } from 'electron'
-import { autoUpdater } from 'electron-updater'
-import * as url from 'url'
-import * as path from 'path'
-import { initialize } from './lib/ledger'
+import { app, BrowserWindow, dialog, ipcMain, Menu, screen, shell } from 'electron'
+import { default as log } from 'electron-log'
 import * as settings from 'electron-settings'
-const log = require('electron-log')
+import { default as updater } from 'electron-updater'
+import * as path from 'path'
+import * as url from 'url'
+import { initialize } from './lib/ledger.js'
+
+const __filename = url.fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const { autoUpdater } = updater
 // Don't want errors to display when checking for update
 // Too annoying if there would be long-term problems with the source
 // Error would pop up on every launch
@@ -190,7 +194,7 @@ function createWindow () {
 
 	// mainWindow.loadURL('http://localhost:4200/'); // Only use this for development
 	mainWindow.loadURL(url.format({
-		pathname: path.join(__dirname, '../../dist/index.html'),
+		pathname: path.join(__dirname, '../../dist/browser/index.html'),
 		protocol: 'file:',
 		slashes: true
 	}))
