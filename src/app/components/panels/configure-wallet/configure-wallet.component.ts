@@ -112,7 +112,6 @@ export class ConfigureWalletComponent {
 			await this.svcWallet.connectLedgerWallet(bluetooth)
 			// skip the password panel, load accounts, and update in real-time
 			this.router.navigate(['/accounts'])
-			this.svcWallet.publishNewWallet()
 			this.svcNotifications.sendSuccess('Successfully connected to Ledger device')
 		} catch (err) {
 			return this.svcNotifications.sendWarning(
@@ -226,7 +225,6 @@ export class ConfigureWalletComponent {
 		this.newWalletMnemonic = ''
 		this.newWalletMnemonicLines = []
 		this.svcWallet.saveWalletExport()
-		this.svcWallet.publishNewWallet()
 		this.svcNotifications.sendSuccess(`Successfully created new wallet! Do not lose the secret recovery seed/mnemonic!`)
 		this.activePanel = panels.final
 	}

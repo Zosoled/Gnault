@@ -1,15 +1,14 @@
-import { Injectable, Signal, WritableSignal, computed, effect, inject, signal } from '@angular/core'
+import { computed, effect, inject, Injectable, Signal, signal, WritableSignal } from '@angular/core'
 import {
 	AddressBookService,
 	ApiService,
 	AppSettingsService,
-	LedgerService,
 	NanoBlockService,
 	NotificationsService,
 	PriceService,
 	UtilService,
 	WebsocketService,
-	WorkPoolService,
+	WorkPoolService
 } from 'app/services'
 import { Account, Tools, Wallet } from 'libnemo'
 import { BehaviorSubject, Subject } from 'rxjs'
@@ -71,7 +70,6 @@ export class WalletService {
 	private svcAddressBook = inject(AddressBookService)
 	private svcApi = inject(ApiService)
 	private svcAppSettings = inject(AppSettingsService)
-	private svcLedger = inject(LedgerService)
 	private svcNanoBlock = inject(NanoBlockService)
 	private svcNotifications = inject(NotificationsService)
 	private svcPrice = inject(PriceService)
@@ -81,185 +79,178 @@ export class WalletService {
 
 	readonly storeKey: 'Gnault-Wallet' = `Gnault-Wallet`
 
+	accounts: Account[] = []
+	balance = 0n
+	hasReceivable = false
+	isBalanceUpdating = false
+	isBalanceInitialized = false
+	isChangePasswordRequested$ = new Subject<(password: string) => Promise<Wallet>>()
+	isLocked: WritableSignal<boolean> = signal(true)
+	isProcessingReceivable = false
+	isReceivableBlocksUpdated$ = new BehaviorSubject(null)
+	isRefreshed: WritableSignal<boolean> = signal(false)
+	isUnlockRequested$ = new BehaviorSubject(false)
+	passwordUpdated$ = new BehaviorSubject<Wallet>(null)
+	receivable = 0n
+	receivableBlocks = []
+	selectedAccount: WritableSignal<Account> = signal(null)
 	selectedWallet: WritableSignal<Wallet> = signal(null)
 	selectedWalletName: Signal<string> = computed(() => {
 		const wallet = this.selectedWallet()
 		const names = this.walletNames()
 		return names.get(wallet?.id) ?? ''
 	})
-	wallets: WritableSignal<Wallet[]> = signal<Wallet[]>([])
-	walletNames = signal<Map<string, string>>(new Map())
-	balance = 0n
-	receivable = 0n
-	hasReceivable = false
-	isBalanceUpdating = false
-	isBalanceInitialized = false
-	isLocked = signal(true)
-
-	accounts: Account[] = []
-	selectedAccount: WritableSignal<Account> = signal(null)
-	passwordUpdated$ = new BehaviorSubject<Wallet>(null)
-	isUnlockRequested$ = new BehaviorSubject(false)
-	isChangePasswordRequested$ = new Subject<(password: string) => Promise<Wallet>>()
-	receivableBlocks = []
-	isReceivableBlocksUpdated$ = new BehaviorSubject(null)
-	newWallet$ = new BehaviorSubject(false)
-	refresh$ = new BehaviorSubject(false)
-
-	isProcessingReceivable = false
+	settings = computed(() => this.svcAppSettings.settings())
 	successfulBlocks = []
 	trackedHashes = []
-
-	ledgerStatus = computed(() => this.svcLedger.status())
-	settings = computed(() => this.svcAppSettings.settings())
+	wallets: WritableSignal<Wallet[]> = signal<Wallet[]>([])
+	walletNames: WritableSignal<Map<string, string>> = signal<Map<string, string>>(new Map())
 
 	constructor () {
+		// Listen for wallet lock and unlock events
 		effect((onCleanup) => {
 			const selectedWallet = this.selectedWallet()
-			if (!selectedWallet) {
-				return
+			if (selectedWallet) {
+				const setLocked = () => this.isLocked.set(true)
+				const setUnlocked = () => this.isLocked.set(false)
+				selectedWallet.addEventListener('locked', setLocked)
+				selectedWallet.addEventListener('unlocked', setUnlocked)
+				onCleanup(() => {
+					selectedWallet.removeEventListener('locked', setLocked)
+					selectedWallet.removeEventListener('unlocked', setUnlocked)
+				})
 			}
-			const setLocked = () => this.isLocked.set(true)
-			const setUnlocked = () => this.isLocked.set(false)
-			selectedWallet.addEventListener('locked', setLocked)
-			selectedWallet.addEventListener('unlocked', setUnlocked)
-			onCleanup(() => {
-				selectedWallet.removeEventListener('locked', setLocked)
-				selectedWallet.removeEventListener('unlocked', setUnlocked)
-			})
 		})
 
 		this.svcWebsocket.newTransactions$.subscribe(async (transaction) => {
-			// Not really a new transaction
-			if (!transaction) {
-				return
-			}
-			console.log('New Transaction', transaction)
-			const min = this.settings().minimumReceive
-			let shouldNotify = min > 0n && BigInt(transaction.amount) > min
+			if (transaction) {
+				console.log('New Transaction', transaction)
+				const min = this.settings().minimumReceive
+				let shouldNotify = min > 0n && BigInt(transaction.amount) > min
 
-			const walletAddresses = this.accounts.map((a) => a.address)
+				const walletAddresses = this.accounts.map((a) => a.address)
 
-			const isConfirmedIncomingTransactionForOwnWalletAccount =
-				transaction.block.type === 'state' &&
-				transaction.block.subtype === 'send' &&
-				walletAddresses.includes(transaction.block.link_as_account)
-
-			const isConfirmedSendTransactionFromOwnWalletAccount =
-				transaction.block.type === 'state' &&
-				transaction.block.subtype === 'send' &&
-				walletAddresses.includes(transaction.block.account)
-
-			const isConfirmedReceiveTransactionFromOwnWalletAccount =
-				transaction.block.type === 'state' &&
-				transaction.block.subtype === 'receive' &&
-				walletAddresses.includes(transaction.block.account)
-
-			if (isConfirmedIncomingTransactionForOwnWalletAccount === true) {
-				if (shouldNotify === true) {
-					if (this.isLocked() && this.settings().receivableOption !== 'manual') {
-						this.svcNotifications.sendWarning(`New incoming transaction - Unlock the wallet to receive`, {
-							length: 10000,
-							identifier: 'receivable-locked',
-						})
-					} else if (this.settings().receivableOption === 'manual') {
-						this.svcNotifications.sendWarning(`New incoming transaction - Set to be received manually`, {
-							length: 10000,
-							identifier: 'receivable-locked',
-						})
-					}
-				} else {
-					console.log(
-						`Found new incoming block that was below minimum receive amount: `,
-						transaction.amount,
-						this.settings().minimumReceive
-					)
-				}
-				await this.processStateBlock(transaction)
-			} else if (isConfirmedSendTransactionFromOwnWalletAccount === true) {
-				shouldNotify = true
-				await this.processStateBlock(transaction)
-			} else if (isConfirmedReceiveTransactionFromOwnWalletAccount === true) {
-				shouldNotify = true
-			}
-
-			// Find if the source or destination is a tracked address in the address book
-			// This is a send transaction (to tracked account or from tracked account)
-			if (
-				(walletAddresses.indexOf(transaction.block.link_as_account) === -1 &&
+				const isConfirmedIncomingTransactionForOwnWalletAccount =
 					transaction.block.type === 'state' &&
-					(transaction.block.subtype === 'send' || transaction.block.subtype === 'receive')) ||
-				(transaction.block.subtype === 'change' &&
-					(this.svcAddressBook.getTransactionTrackingById(transaction.block.link_as_account) ||
-						this.svcAddressBook.getTransactionTrackingById(transaction.block.account)))
-			) {
-				if (shouldNotify || transaction.block.subtype === 'change') {
-					const trackedAmount = this.svcUtil.nano.rawToMnano(transaction.amount)
-					// Save hash so we can ignore duplicate messages if subscribing to both send and receive
-					if (this.trackedHashes.indexOf(transaction.hash) !== -1) return // Already notified this block
-					this.trackedHashes.push(transaction.hash)
-					const addressLink = transaction.block.link_as_account
-					const address = transaction.block.account
-					const rep = transaction.block.representative
-					const accountHrefLink = `<a href="/accounts/${addressLink}">${this.svcAddressBook.getAccountName(addressLink)}</a>`
-					const accountHref = `<a href="/accounts/${address}">${this.svcAddressBook.getAccountName(address)}</a>`
+					transaction.block.subtype === 'send' &&
+					walletAddresses.includes(transaction.block.link_as_account)
 
-					if (transaction.block.subtype === 'send') {
-						// Incoming transaction
-						if (this.svcAddressBook.getTransactionTrackingById(addressLink)) {
-							this.svcNotifications.sendInfo(
-								`Tracked address ${accountHrefLink} can now receive ${trackedAmount} XNO`,
-								{ length: 10000 }
-							)
-							console.log(`Tracked incoming block to: ${address} - Ӿ${trackedAmount}`)
+				const isConfirmedSendTransactionFromOwnWalletAccount =
+					transaction.block.type === 'state' &&
+					transaction.block.subtype === 'send' &&
+					walletAddresses.includes(transaction.block.account)
+
+				const isConfirmedReceiveTransactionFromOwnWalletAccount =
+					transaction.block.type === 'state' &&
+					transaction.block.subtype === 'receive' &&
+					walletAddresses.includes(transaction.block.account)
+
+				if (isConfirmedIncomingTransactionForOwnWalletAccount === true) {
+					if (shouldNotify === true) {
+						if (this.isLocked() && this.settings().receivableOption !== 'manual') {
+							this.svcNotifications.sendWarning(`New incoming transaction - Unlock the wallet to receive`, {
+								length: 10000,
+								identifier: 'receivable-locked',
+							})
+						} else if (this.settings().receivableOption === 'manual') {
+							this.svcNotifications.sendWarning(`New incoming transaction - Set to be received manually`, {
+								length: 10000,
+								identifier: 'receivable-locked',
+							})
 						}
-						// Outgoing transaction
-						if (this.svcAddressBook.getTransactionTrackingById(address)) {
-							this.svcNotifications.sendInfo(`Tracked address ${accountHref} sent ${trackedAmount} XNO`, {
+					} else {
+						console.log(
+							`Found new incoming block that was below minimum receive amount: `,
+							transaction.amount,
+							this.settings().minimumReceive
+						)
+					}
+					await this.processStateBlock(transaction)
+				} else if (isConfirmedSendTransactionFromOwnWalletAccount === true) {
+					shouldNotify = true
+					await this.processStateBlock(transaction)
+				} else if (isConfirmedReceiveTransactionFromOwnWalletAccount === true) {
+					shouldNotify = true
+				}
+
+				// Find if the source or destination is a tracked address in the address book
+				// This is a send transaction (to tracked account or from tracked account)
+				if (
+					(walletAddresses.indexOf(transaction.block.link_as_account) === -1 &&
+						transaction.block.type === 'state' &&
+						(transaction.block.subtype === 'send' || transaction.block.subtype === 'receive')) ||
+					(transaction.block.subtype === 'change' &&
+						(this.svcAddressBook.getTransactionTrackingById(transaction.block.link_as_account) ||
+							this.svcAddressBook.getTransactionTrackingById(transaction.block.account)))
+				) {
+					if (shouldNotify || transaction.block.subtype === 'change') {
+						const trackedAmount = this.svcUtil.nano.rawToMnano(transaction.amount)
+						// Save hash so we can ignore duplicate messages if subscribing to both send and receive
+						if (this.trackedHashes.indexOf(transaction.hash) !== -1) return // Already notified this block
+						this.trackedHashes.push(transaction.hash)
+						const addressLink = transaction.block.link_as_account
+						const address = transaction.block.account
+						const rep = transaction.block.representative
+						const accountHrefLink = `<a href="/accounts/${addressLink}">${this.svcAddressBook.getAccountName(addressLink)}</a>`
+						const accountHref = `<a href="/accounts/${address}">${this.svcAddressBook.getAccountName(address)}</a>`
+
+						if (transaction.block.subtype === 'send') {
+							// Incoming transaction
+							if (this.svcAddressBook.getTransactionTrackingById(addressLink)) {
+								this.svcNotifications.sendInfo(
+									`Tracked address ${accountHrefLink} can now receive ${trackedAmount} XNO`,
+									{ length: 10000 }
+								)
+								console.log(`Tracked incoming block to: ${address} - Ӿ${trackedAmount}`)
+							}
+							// Outgoing transaction
+							if (this.svcAddressBook.getTransactionTrackingById(address)) {
+								this.svcNotifications.sendInfo(`Tracked address ${accountHref} sent ${trackedAmount} XNO`, {
+									length: 10000,
+								})
+								console.log(`Tracked send block from: ${address} - Ӿ${trackedAmount}`)
+							}
+						} else if (
+							transaction.block.subtype === 'receive' &&
+							this.svcAddressBook.getTransactionTrackingById(address)
+						) {
+							// Receive transaction
+							this.svcNotifications.sendInfo(`Tracked address ${accountHref} received incoming ${trackedAmount} XNO`, {
 								length: 10000,
 							})
-							console.log(`Tracked send block from: ${address} - Ӿ${trackedAmount}`)
+							console.log(`Tracked receive block to: ${address} - Ӿ${trackedAmount}`)
+						} else if (
+							transaction.block.subtype === 'change' &&
+							this.svcAddressBook.getTransactionTrackingById(address)
+						) {
+							// Change transaction
+							this.svcNotifications.sendInfo(`Tracked address ${accountHref} changed its representative to ${rep}`, {
+								length: 10000,
+							})
+							console.log(`Tracked change block of: ${address} - Rep: ${rep}`)
 						}
-					} else if (
-						transaction.block.subtype === 'receive' &&
-						this.svcAddressBook.getTransactionTrackingById(address)
-					) {
-						// Receive transaction
-						this.svcNotifications.sendInfo(`Tracked address ${accountHref} received incoming ${trackedAmount} XNO`, {
-							length: 10000,
-						})
-						console.log(`Tracked receive block to: ${address} - Ӿ${trackedAmount}`)
-					} else if (
-						transaction.block.subtype === 'change' &&
-						this.svcAddressBook.getTransactionTrackingById(address)
-					) {
-						// Change transaction
-						this.svcNotifications.sendInfo(`Tracked address ${accountHref} changed its representative to ${rep}`, {
-							length: 10000,
-						})
-						console.log(`Tracked change block of: ${address} - Rep: ${rep}`)
+					} else {
+						console.log(
+							`Found new transaction on watch-only account that was below minimum receive amount: `,
+							transaction.amount,
+							this.settings().minimumReceive
+						)
 					}
-				} else {
-					console.log(
-						`Found new transaction on watch-only account that was below minimum receive amount: `,
-						transaction.amount,
-						this.settings().minimumReceive
-					)
 				}
-			}
 
-			// TODO: We don't really need to call to update balances, we should be able to balance on our own from here
-			// I'm not sure about that because what happens if the websocket is disconnected and misses a transaction?
-			// won't the balance be incorrect if relying only on the websocket? / Json
+				// TODO: We don't really need to call to update balances, we should be able to balance on our own from here
+				// I'm not sure about that because what happens if the websocket is disconnected and misses a transaction?
+				// won't the balance be incorrect if relying only on the websocket? / Json
 
-			const shouldReloadBalances =
-				shouldNotify &&
-				(isConfirmedIncomingTransactionForOwnWalletAccount ||
-					isConfirmedSendTransactionFromOwnWalletAccount ||
-					isConfirmedReceiveTransactionFromOwnWalletAccount)
+				const shouldReloadBalances =
+					shouldNotify &&
+					(isConfirmedIncomingTransactionForOwnWalletAccount ||
+						isConfirmedSendTransactionFromOwnWalletAccount ||
+						isConfirmedReceiveTransactionFromOwnWalletAccount)
 
-			if (shouldReloadBalances) {
-				await this.reloadBalances()
+				if (shouldReloadBalances) {
+					await this.reloadBalances()
+				}
 			}
 		})
 
@@ -584,7 +575,7 @@ export class WalletService {
 		this.receivableBlocks = []
 	}
 
-	isConfigured = computed(() => this.selectedWallet() != null)
+	isConfigured = computed(() => this.selectedWallet() instanceof Wallet)
 	isLedger = computed(() => this.selectedWallet()?.type === 'Ledger')
 
 	hasReceivableTransactions () {
@@ -748,7 +739,8 @@ export class WalletService {
 		if (this.receivableBlocks.length) {
 			await this.processReceivableBlocks()
 		}
-		this.publishBalanceRefresh()
+		this.isRefreshed.set(true)
+		this.isRefreshed.set(false)
 	}
 
 	async loadWalletAccount (a: any): Promise<Account> {
@@ -970,18 +962,6 @@ export class WalletService {
 				})
 			)
 		)
-	}
-
-	// Subscribable event when a new wallet is created
-	publishNewWallet () {
-		this.newWallet$.next(true)
-		this.newWallet$.next(false)
-	}
-
-	// Subscribable event when balances has been refreshed
-	publishBalanceRefresh () {
-		this.refresh$.next(true)
-		this.refresh$.next(false)
 	}
 
 	async requestUnlock (): Promise<void> {

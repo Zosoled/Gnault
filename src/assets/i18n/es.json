@@ -407,7 +407,6 @@
 		"edit-wallet-name": "Editar nombre de billetera"
 	},
 	"welcome": {
-		"a-secure-open-source-wallet-for-nano": "Una billetera segura y de código abierto para nano",
 		"advanced-security-features": {
 			"1": "Soporte para billeteras hardware Ledger Nano S / Nano X",
 			"2": "Capacidad para crear direcciones multi-firma donde se requieren múltiples claves privadas para acceder y transferir los fondos",
@@ -457,6 +456,7 @@
 			"2": "Gnault verificará automáticamente el estado de tus representantes y proporcionará recomendaciones para garantizar la seguridad y la resistencia a la censura para todos los participantes de la red.",
 			"title": "Asegura la red Nano"
 		},
+		"tagline": "Una billetera segura de código abierto para Nano",
 		"view-my-accounts": "Ver mis cuentas",
 		"welcome-back-it-looks-like-your-wallet-is-already-configured": "¡Bienvenido de vuelta! Parece que tu billetera ya está configurada.",
 		"your-keys-your-coins": {

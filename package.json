@@ -48,7 +48,7 @@
 		"electron-settings": "^4.0.4",
 		"electron-updater": "^6.6.8",
 		"hermes-channel": "^2.1.2",
-		"libnemo": "^0.10.3",
+		"libnemo": "^0.10.4",
 		"nano-pow": "^5.1.8",
 		"ngx-clipboard": "^16.0.0",
 		"qrcode": "^1.5.4",

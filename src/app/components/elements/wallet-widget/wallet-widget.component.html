@@ -1,7 +1,7 @@
 <div *transloco="let t">
 	@if (svcWallet.selectedWallet() && svcWallet.isLedger()) {
 		<div>
-			@if (svcWallet.ledgerStatus() === 'DISCONNECTED') {
+			@if (svcLedger.status() === 'DISCONNECTED') {
 				<div class="nav-status-row">
 					<div class="status-icon">
 						<span
@@ -23,7 +23,7 @@
 					</div>
 				</div>
 			}
-			@if (svcWallet.ledgerStatus() === 'BUSY') {
+			@if (svcLedger.status() === 'BUSY') {
 				<div class="nav-status-row">
 					<div class="status-icon">
 						<span
@@ -37,7 +37,7 @@
 					</div>
 				</div>
 			}
-			@if (svcWallet.ledgerStatus() === 'LOCKED') {
+			@if (svcLedger.status() === 'LOCKED') {
 				<div class="nav-status-row">
 					<div class="status-icon">
 						<span
@@ -53,7 +53,7 @@
 					</div>
 				</div>
 			}
-			@if (svcWallet.ledgerStatus() === 'CONNECTED') {
+			@if (svcLedger.status() === 'CONNECTED') {
 				<div
 					class="nav-status-row interactable"
 					(click)="reloadLedger()"

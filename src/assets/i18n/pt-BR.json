@@ -407,7 +407,6 @@
 		"edit-wallet-name": "Edite o nome da carteira"
 	},
 	"welcome": {
-		"a-secure-open-source-wallet-for-nano": "Uma carteira segura de código aberto para nano",
 		"advanced-security-features": {
 			"1": "Suporte para carteiras de hardware Ledger Nano S / Nano X",
 			"2": "Capacidade de criar endereços multi-assinatura onde várias chaves privadas são necessárias para acessar e transferir os fundos",
@@ -457,6 +456,7 @@
 			"2": "O Gnault verificará automaticamente o status de seus representantes e fornecerá recomendações para garantir a segurança e a resistência à censura para todos os participantes da rede.",
 			"title": "Proteja a Rede Nano"
 		},
+		"tagline": "Uma carteira segura de código aberto para Nano",
 		"view-my-accounts": "Ver Minhas Contas",
 		"welcome-back-it-looks-like-your-wallet-is-already-configured": "Bem-vindo de volta! Parece que sua carteira já está configurada.",
 		"your-keys-your-coins": {

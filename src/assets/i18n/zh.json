@@ -408,7 +408,6 @@
 		"edit-wallet-name": "编辑钱包名称"
 	},
 	"welcome": {
-		"a-secure-open-source-wallet-for-nano": "一个安全的开源Nano钱包",
 		"advanced-security-features": {
 			"1": "支持Ledger Nano S / Nano X硬件钱包",
 			"2": "能够创建多重签名地址，其中需要多个私钥来访问和转移资金",
@@ -458,6 +457,7 @@
 			"2": "Gnault将自动检查您的代表状态并提供建议，以确保所有网络参与者的安全和抗审查能力。",
 			"title": "保护Nano网络"
 		},
+		"tagline": "Nano 的安全开源钱包",
 		"view-my-accounts": "查看我的账户",
 		"welcome-back-it-looks-like-your-wallet-is-already-configured": "欢迎回来！看起来您的钱包已经配置好了。",
 		"your-keys-your-coins": {

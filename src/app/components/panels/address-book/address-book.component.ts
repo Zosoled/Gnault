@@ -1,5 +1,5 @@
 import { CommonModule, UpperCasePipe } from '@angular/common'
-import { AfterViewInit, Component, OnDestroy, OnInit, inject } from '@angular/core'
+import { AfterViewInit, Component, OnDestroy, OnInit, effect, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
@@ -90,29 +90,28 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	async ngOnInit () {
 		this.addressBookService.loadAddressBook()
 		// Detect if local wallet balance is refreshed
-		this.refreshSub = this.walletService.refresh$.subscribe((shouldRefresh) => {
-			if (shouldRefresh) {
+		effect(() => {
+			if (this.walletService.isRefreshed()) {
 				this.loadingBalances = true
 				// Check if we have a local wallet account tracked and update the balances
 				for (const entry of this.addressBookService.addressBook) {
-					if (!entry.trackBalance || !this.accounts[entry.account]) {
-						continue
-					}
-					// If the account exist in the wallet, take the info from there to save on RPC calls
-					const walletAccount = this.walletService.accounts.find((a) => a.address === entry.account)
-					if (walletAccount) {
-						// Subtract first so we can add back any updated amounts
-						this.totalTrackedBalance -= this.accounts[entry.account].balance
-						this.totalTrackedBalanceFiat -= this.accounts[entry.account].balanceFiat
-						this.totalTrackedReceivable -= this.accounts[entry.account].receivable
+					if (entry.trackBalance && this.accounts[entry.account]) {
+						// If the account exist in the wallet, take the info from there to save on RPC calls
+						const walletAccount = this.walletService.accounts.find((a) => a.address === entry.account)
+						if (walletAccount) {
+							// Subtract first so we can add back any updated amounts
+							this.totalTrackedBalance -= this.accounts[entry.account].balance
+							this.totalTrackedBalanceFiat -= this.accounts[entry.account].balanceFiat
+							this.totalTrackedReceivable -= this.accounts[entry.account].receivable
 
-						this.accounts[entry.account].balance = walletAccount.balance
-						this.accounts[entry.account].balanceFiat = walletAccount.balanceFiat
-						this.accounts[entry.account].receivable = walletAccount.receivableNano
+							this.accounts[entry.account].balance = walletAccount.balance
+							this.accounts[entry.account].balanceFiat = walletAccount.balanceFiat
+							this.accounts[entry.account].receivable = walletAccount.receivableNano
 
-						this.totalTrackedBalance += walletAccount.balance
-						this.totalTrackedBalanceFiat += walletAccount.balanceFiat
-						this.totalTrackedReceivable += this.accounts[entry.account].receivable
+							this.totalTrackedBalance += walletAccount.balance
+							this.totalTrackedBalanceFiat += walletAccount.balanceFiat
+							this.totalTrackedReceivable += this.accounts[entry.account].receivable
+						}
 					}
 				}
 				this.loadingBalances = false

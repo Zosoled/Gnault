@@ -404,7 +404,6 @@
 		"edit-wallet-name": "Brieftaschenname bearbeiten"
 	},
 	"welcome": {
-		"a-secure-open-source-wallet-for-nano": "Eine sichere Open-Source-Wallet für Nano",
 		"advanced-security-features": {
 			"1": "Unterstützung für Ledger Nano S / Nano X Hardware-Wallets",
 			"2": "Möglichkeit, Multi-Signatur-Adressen zu erstellen, bei denen mehrere private Schlüssel erforderlich sind, um auf die Gelder zuzugreifen und sie zu überweisen",
@@ -454,6 +453,7 @@
 			"2": "Gnault überprüft automatisch den Status Ihrer Vertreter und gibt Empfehlungen, um die Sicherheit und Zensurresistenz für alle Netzwerkteilnehmer zu gewährleisten.",
 			"title": "Sichern Sie das Nano-Netzwerk"
 		},
+		"tagline": "Eine sichere Open-Source-Wallet für Nano",
 		"view-my-accounts": "Meine Konten anzeigen",
 		"welcome-back-it-looks-like-your-wallet-is-already-configured": "Willkommen zurück! Es sieht so aus, als wäre Ihre Wallet bereits konfiguriert.",
 		"your-keys-your-coins": {

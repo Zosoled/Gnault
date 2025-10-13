@@ -68,7 +68,6 @@ export class AppComponent implements AfterViewInit {
 	UIkit = (window as any).UIkit
 
 	inactiveSeconds = 0
-	isWalletRefreshed = false
 	navExpanded = false
 	navAnimating = false
 	isWalletsDropdownVisible = false
@@ -92,12 +91,6 @@ export class AppComponent implements AfterViewInit {
 	}
 	get isBalanceUpdating (): boolean {
 		return this.svcWallet.isBalanceUpdating
-	}
-	get isConfigured (): boolean {
-		return this.svcWallet.isConfigured()
-	}
-	get isLocked (): boolean {
-		return this.svcWallet.isLocked()
 	}
 	get isProcessingReceivable (): boolean {
 		return this.svcWallet.isProcessingReceivable
@@ -125,11 +118,6 @@ export class AppComponent implements AfterViewInit {
 		this.router.events.subscribe(() => {
 			this.closeNav()
 		})
-		this.svcWallet.refresh$.subscribe((isRefreshed) => {
-			if (isRefreshed) {
-				this.isWalletRefreshed = true
-			}
-		})
 	}
 
 	async ngAfterViewInit () {
@@ -150,16 +138,18 @@ export class AppComponent implements AfterViewInit {
 		}
 
 		// Navigate to accounts page if there is wallet, but only if coming from home. On desktop app the path ends with index.html
-		const { pathname } = window.location
-		if (this.isConfigured && (pathname === '/' || pathname.endsWith('index.html'))) {
-			if (this.svcWallet.selectedAccount()?.address) {
-				this.router.navigate([`accounts/${this.svcWallet.selectedAccount().address}`], {
-					queryParams: { compact: 1 },
-					replaceUrl: true,
-				})
-			} else {
-				this.router.navigate(['accounts'], { replaceUrl: true })
-			}
+		const { hash, pathname } = window.location
+		console.log('hash', hash)
+		if (this.svcWallet.isConfigured() && (pathname === '/' || pathname.endsWith('index.html'))) {
+			const address = this.svcWallet.selectedAccount()?.address ?? ''
+			this.router.navigate(['accounts', address], {
+				queryParams: { compact: 1 },
+				replaceUrl: true,
+			})
+		} else if (this.svcWallet.wallets().length > 0) {
+			this.router.navigate(['wallets'], { replaceUrl: true })
+		} else {
+			this.router.navigateByUrl('/')
 		}
 
 		// update selected account object with the latest balance, receivable, etc
