@@ -59,7 +59,7 @@
 											(change)="resetAmount()"
 											id="form-select-from-account"
 										>
-											@for (account of accounts; track account.address) {
+											@for (account of svcWallet.accounts(); track account.address) {
 												<option [value]="account.address">
 													{{ account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
 													{{ account.address | squeeze }} (&#xe001;{{
@@ -155,7 +155,7 @@
 												>
 													Account to transfer to
 												</option>
-												@for (account of accounts; track account.address) {
+												@for (account of svcWallet.accounts(); track account.address) {
 													@if (account.address !== fromAddress) {
 														<option [value]="account.address">
 															{{

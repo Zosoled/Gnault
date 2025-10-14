@@ -140,7 +140,8 @@ export class RepresentativesComponent implements OnInit {
 		if (addressBookName != null) {
 			return addressBookName
 		}
-		const walletAccount = this.svcWallet.accounts.find((a) => a.address === account.address)
+		const accounts = this.svcWallet.accounts()
+		const walletAccount = accounts.find((a) => a.address === account.address)
 		if (walletAccount == null) {
 			return this.svcTransloco.translate('general.account')
 		}
@@ -156,11 +157,12 @@ export class RepresentativesComponent implements OnInit {
 	}
 
 	appendAccountToRedelegate (address: string | Event) {
+		const accounts = this.svcWallet.accounts()
 		if (address instanceof Event) {
 			address = (address.target as HTMLSelectElement).value
 		}
 		if (address === 'all' || this.changeAccountID === 'all') {
-			this.accountsToRedelegate = [...this.svcWallet.accounts]
+			this.accountsToRedelegate = [...accounts]
 			return
 		}
 
@@ -308,7 +310,7 @@ export class RepresentativesComponent implements OnInit {
 		}
 
 		const accountsToChange = this.changeAccountID === 'all'
-			? this.svcWallet.accounts
+			? this.svcWallet.accounts()
 			: this.accountsToRedelegate
 
 		// Remove account if info not found or already delegating to this rep

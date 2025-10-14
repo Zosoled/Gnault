@@ -565,14 +565,12 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 		this.onAccountDetailsLoadDone()
 	}
 
-	getAccountLabel (accountID, defaultLabel) {
-		const walletAccount = this.svcWallet.accounts.find((a) => a.address === accountID)
-
+	getAccountLabel (address, defaultLabel) {
+		const walletAccount = this.svcWallet.accounts().find((a) => a.address === address)
 		if (walletAccount == null) {
 			return defaultLabel
 		}
-
-		return translate('general.account') + ' #' + walletAccount.index
+		return `${translate('general.account')} #${walletAccount.index}`
 	}
 
 	ngOnDestroy () {

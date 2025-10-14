@@ -52,8 +52,9 @@ export class SendComponent implements AfterViewInit {
 	private svcQrModal = inject(QrModalService)
 	private svcTransloco = inject(TranslocoService)
 	private svcUtil = inject(UtilService)
-	private svcWallet = inject(WalletService)
 	private svcWorkPool = inject(WorkPoolService)
+
+	svcWallet = inject(WalletService)
 
 	activePanel = 'send'
 	addressBookMatch = ''
@@ -66,9 +67,6 @@ export class SendComponent implements AfterViewInit {
 	sendDestinationType = 'external-address'
 	showAddressBook = false
 
-	get accounts () {
-		return this.svcWallet.accounts
-	}
 	get amount () {
 		return this.amounts.raw.value
 	}
@@ -111,7 +109,8 @@ export class SendComponent implements AfterViewInit {
 		this.svcAddressBook.loadAddressBook()
 
 		// Set default From account
-		this.fromAddress = this.accounts[0]?.address ?? ''
+		const accounts = this.svcWallet.accounts()
+		this.fromAddress = accounts[0]?.address ?? ''
 
 
 		// Update the account if query params changes. For example donation button while active on this page
@@ -142,13 +141,14 @@ export class SendComponent implements AfterViewInit {
 	}
 
 	async findFirstAccount () {
+		const accounts = this.svcWallet.accounts()
 		// Load balances before we try to find the right account
 		if (this.svcWallet.balance === 0n) {
 			await this.svcWallet.reloadBalances()
 		}
 
 		// Look for the first account that has a balance
-		const addressWithBalance = this.accounts.reduce((previous, current) => {
+		const addressWithBalance = accounts.reduce((previous, current) => {
 			if (previous) return previous
 			if (current.balance > 0n) return current.id
 			return null
@@ -263,7 +263,8 @@ export class SendComponent implements AfterViewInit {
 	}
 
 	getAccountLabel (address, defaultLabel) {
-		const walletAccount = this.svcWallet.accounts.find((a) => a.address === address)
+		const accounts = this.svcWallet.accounts()
+		const walletAccount = accounts.find((a) => a.address === address)
 		if (walletAccount == null) {
 			return defaultLabel
 		}
@@ -275,7 +276,8 @@ export class SendComponent implements AfterViewInit {
 			return this.toAddress
 		}
 		// 'own-address'
-		const walletAccount = this.svcWallet.accounts.find((a) => a.address === this.toOwnAddress)
+		const accounts = this.svcWallet.accounts()
+		const walletAccount = accounts.find((a) => a.address === this.toOwnAddress)
 		if (!walletAccount) {
 			// Unable to find receiving account in wallet
 			return ''
@@ -338,7 +340,8 @@ export class SendComponent implements AfterViewInit {
 
 	async confirmTransaction () {
 		const wallet = this.svcWallet.selectedWallet()
-		const walletAccount = this.svcWallet.accounts.find((a) => a.address === this.fromAddress)
+		const accounts = this.svcWallet.accounts()
+		const walletAccount = accounts.find((a) => a.address === this.fromAddress)
 		if (!walletAccount) {
 			throw new Error(`Unable to find sending account in wallet`)
 		}
@@ -389,7 +392,8 @@ export class SendComponent implements AfterViewInit {
 	}
 
 	async setMaxAmount () {
-		const walletAccount = this.svcWallet.accounts.find((a) => a.address === this.fromAddress)
+		const accounts = this.svcWallet.accounts()
+		const walletAccount = accounts.find((a) => a.address === this.fromAddress)
 		if (walletAccount) {
 			this.amounts.raw.setValue(walletAccount.balance)
 			this.syncTo('raw')

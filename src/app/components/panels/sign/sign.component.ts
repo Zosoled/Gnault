@@ -71,7 +71,6 @@ export class SignComponent implements OnInit {
 	shouldSign: boolean = null
 	blockProcessed: boolean = false
 
-	accounts = this.walletService.accounts
 	addressBookResults$ = new BehaviorSubject([])
 	showAddressBook = false
 	addressBookMatch = ''
@@ -469,7 +468,8 @@ export class SignComponent implements OnInit {
 		switch (this.signTypeSelected) {
 			// wallet
 			case this.signTypes[0]:
-				this.walletAccount = this.accounts.find((a) => a.address.replace('xrb_', 'nano_') === this.signatureAccount)
+				const accounts = this.walletService.accounts()
+				this.walletAccount = accounts.find((a) => a.address.replace('xrb_', 'nano_') === this.signatureAccount)
 				if (!this.walletAccount) {
 					this.signatureMessage =
 						"Could not find a matching wallet account to sign with. Make sure it's added under your accounts"

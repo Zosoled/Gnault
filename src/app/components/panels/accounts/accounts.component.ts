@@ -40,9 +40,9 @@ export class AccountsComponent implements OnInit {
 	private svcNotifications = inject(NotificationsService)
 	private svcRepresentative = inject(RepresentativeService)
 	private svcTransloco = inject(TranslocoService)
-	private svcWallet = inject(WalletService)
 
-	accounts = this.svcWallet.accounts
+	svcWallet = inject(WalletService)
+
 	viewAdvanced = false
 	newAccountIndex = null
 	// When we change the accounts, redetect changable reps (Debounce by 5 seconds)
@@ -93,7 +93,7 @@ export class AccountsComponent implements OnInit {
 					this.svcTransloco.translate('accounts.invalid-account-index-must-be-positive-number')
 				)
 			}
-			const existingAccount = this.svcWallet.accounts.find((a) => a.index === index)
+			const existingAccount = this.svcWallet.accounts().find((a) => a.index === index)
 			if (existingAccount) {
 				return this.svcNotifications.sendWarning(
 					this.svcTransloco.translate('accounts.the-account-at-this-index-is-already-loaded')
@@ -125,7 +125,7 @@ export class AccountsComponent implements OnInit {
 		if (this.svcWallet.isLocked() || !this.svcWallet.isConfigured() || this.svcWallet.accounts.length <= 1) {
 			return
 		}
-		this.svcWallet.accounts = this.svcWallet.accounts.sort((a, b) => a.index - b.index)
+		this.svcWallet.accounts.update((v) => [...v].sort((a, b) => a.index - b.index))
 		// this.accounts = this.walletService.accounts
 		// Save new sorted accounts list
 		this.svcWallet.saveWalletExport()

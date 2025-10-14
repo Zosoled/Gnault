@@ -133,7 +133,7 @@ export class ChangeRepWidgetComponent implements AfterViewInit {
 	updateSelectedAccountHasRep () {
 		const account = this.svcWallet.selectedAccount()
 		if (account == null) {
-			const accounts = this.svcWallet.accounts
+			const accounts = this.svcWallet.accounts()
 			this.selectedAccountHasRepresentative = accounts.some((a) => a.frontier)
 		} else {
 			this.selectedAccountHasRepresentative = account.frontier != null

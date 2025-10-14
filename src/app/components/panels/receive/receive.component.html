@@ -82,7 +82,7 @@
 										(change)="onSelectedAccountChange(receivableAccountModel)"
 									>
 										<option [value]="0">{{ t('receive.all-accounts') }}</option>
-										@for (account of accounts; track account) {
+										@for (account of svcWallet.accounts(); track account.address) {
 											<option [value]="account.address">
 												{{ account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
 												{{ account.address | squeeze }} ({{ account.balance ?? 0 | rai: 'nano,true' | amountsplit: 0
@@ -662,7 +662,7 @@
 								(change)="onSelectedAccountChange(receivableAccountModel)"
 							>
 								<option [value]="0">–</option>
-								@for (account of accounts; track account) {
+								@for (account of svcWallet.accounts(); track account.address) {
 									<option [value]="account.address">
 										{{ account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
 										{{ account.address | squeeze }}

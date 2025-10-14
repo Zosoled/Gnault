@@ -77,7 +77,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					@for (account of accounts; track account.address) {
+					@for (account of svcWallet.accounts(); track account.address) {
 						<tr class="uk-visible-toggle">
 							<ng-template #accountAmounts>
 								@if (!isBalanceUpdating) {
@@ -236,7 +236,7 @@
 							</td>
 						</tr>
 					}
-					@if (!accounts.length) {
+					@if (!svcWallet.accounts().length) {
 						<tr>
 							<td
 								colspan="4"

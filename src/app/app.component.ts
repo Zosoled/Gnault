@@ -137,6 +137,8 @@ export class AppComponent implements AfterViewInit {
 			}
 		}
 
+		const accounts = this.svcWallet.accounts()
+		const selectedAccount = this.svcWallet.selectedAccount()
 		// Navigate to accounts page if there is wallet, but only if coming from home. On desktop app the path ends with index.html
 		const { hash, pathname } = window.location
 		console.log('hash', hash)
@@ -153,8 +155,8 @@ export class AppComponent implements AfterViewInit {
 		}
 
 		// update selected account object with the latest balance, receivable, etc
-		if (this.svcWallet.selectedAccount()?.address) {
-			const currentUpdatedAccount = this.svcWallet.accounts.find((a) => a.address === this.svcWallet.selectedAccount().address)
+		if (selectedAccount) {
+			const currentUpdatedAccount = accounts.find((a) => a.address === selectedAccount.address)
 			this.svcWallet.selectedAccount.set(currentUpdatedAccount)
 		}
 

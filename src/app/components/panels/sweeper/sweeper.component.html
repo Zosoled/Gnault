@@ -77,11 +77,11 @@
 										[(ngModel)]="myAccountModel"
 										(change)="setDestination(myAccountModel)"
 									>
-										@for (account of accounts; track account) {
+										@for (account of accounts(); track account.address) {
 											<option [value]="account.address">
 												{{ account.addressBookName ? account.addressBookName + ' - ' : '#' + account.index + ' - ' }}
-												{{ account.address | squeeze }} ({{ account.balance | rai: 'nano,true' | amountsplit: 0
-												}}{{ account.balance | rai: 'nano,true' | amountsplit: 1 }} XNO)
+												{{ account.address | squeeze }} ({{ account.balance ?? 0 | rai: 'nano,true' | amountsplit: 0
+												}}{{ account.balance ?? 0 | rai: 'nano,true' | amountsplit: 1 }} XNO)
 											</option>
 										}
 										<option [value]="0">Custom Destination</option>

@@ -79,7 +79,7 @@ export class WalletService {
 
 	readonly storeKey: 'Gnault-Wallet' = `Gnault-Wallet`
 
-	accounts: Account[] = []
+	accounts: WritableSignal<Account[]> = signal<Account[]>([])
 	balance = 0n
 	hasReceivable = false
 	isBalanceUpdating = false
@@ -128,7 +128,7 @@ export class WalletService {
 				const min = this.settings().minimumReceive
 				let shouldNotify = min > 0n && BigInt(transaction.amount) > min
 
-				const walletAddresses = this.accounts.map((a) => a.address)
+				const walletAddresses = this.accounts().map((a) => a.address)
 
 				const isConfirmedIncomingTransactionForOwnWalletAccount =
 					transaction.block.type === 'state' &&
@@ -263,7 +263,7 @@ export class WalletService {
 		// If we have a minimum receive, once we know the account... add the amount to wallet receivable and set receivable to true
 		if (transaction.block.subtype === 'send' && transaction.block.link_as_account) {
 			// This is an incoming send block, we want to perform a receive
-			const walletAccount = this.accounts.find((a) => a.address === transaction.block.link_as_account)
+			const walletAccount = this.accounts().find((a) => a.address === transaction.block.link_as_account)
 			// Not for our wallet?
 			if (!walletAccount) {
 				return
@@ -284,19 +284,19 @@ export class WalletService {
 			await this.processReceivableBlocks()
 		} else {
 			// Not a send to us, which means it was a block posted by us.  We shouldnt need to do anything...
-			const walletAccount = this.accounts.find((a) => a.address === transaction.block.link_as_account)
+			const walletAccount = this.accounts().find((a) => a.address === transaction.block.link_as_account)
 			if (!walletAccount) return // Not for our wallet?
 		}
 	}
 
 	reloadAddressBook () {
-		this.accounts.forEach((account) => {
+		this.accounts().forEach((account) => {
 			account.addressBookName = this.svcAddressBook.getAccountName(account.address)
 		})
 	}
 
 	getWalletAccount (address) {
-		return this.accounts.find((a) => a.address === address)
+		return this.accounts().find((a) => a.address === address)
 	}
 
 	/**
@@ -340,7 +340,7 @@ export class WalletService {
 			if (walletJson.accounts?.length > 0) {
 				walletJson.accounts.forEach((a) => this.loadWalletAccount(a))
 				const { selectedAccountAddress } = walletJson
-				this.setActiveAccount(this.accounts.find((a) => a.address === selectedAccountAddress))
+				this.setActiveAccount(this.accounts().find((a) => a.address === selectedAccountAddress))
 			}
 		}
 	}
@@ -375,11 +375,15 @@ export class WalletService {
 							await this.addWalletAccount(i)
 						})
 					)
-				} else return false
+				} else {
+					return false
+				}
 			} else if (walletType === 'expandedKey') {
-				this.accounts.push(await Account.load({ privateKey: seed.slice(64, 128) }, 'private'))
+				const account = await Account.load({ privateKey: seed.slice(64, 128) }, 'private')
+				this.accounts.update((v) => [...v, account])
 			} else if (walletType === 'privateKey') {
-				this.accounts.push(await Account.load({ privateKey: seed.slice(0, 64) }, 'private'))
+				const account = await Account.load({ privateKey: seed.slice(0, 64) }, 'private')
+				this.accounts.update((v) => [...v, account])
 			} else {
 				// invalid wallet type
 				return false
@@ -387,8 +391,8 @@ export class WalletService {
 
 			await this.reloadBalances()
 
-			if (this.accounts.length) {
-				this.svcWebsocket.subscribeAccounts(this.accounts.map((a) => a.address))
+			if (this.accounts().length) {
+				this.svcWebsocket.subscribeAccounts(this.accounts().map((a) => a.address))
 			}
 
 			return true
@@ -397,7 +401,7 @@ export class WalletService {
 
 	async generateExportData () {
 		const exportData: any = {
-			indexes: this.accounts.map((a) => a.index),
+			indexes: this.accounts().map((a) => a.index),
 		}
 		const backup = await Wallet.backup()
 		const secret = backup.find((wallet) => wallet.id === this.selectedWallet().id) as {
@@ -427,7 +431,7 @@ export class WalletService {
 			this.selectedWallet().lock()
 
 			// Remove secrets from accounts
-			this.accounts.forEach((a) => {
+			this.accounts().forEach((a) => {
 				a.keyPair = null
 				a.secret = null
 			})
@@ -440,7 +444,7 @@ export class WalletService {
 	async unlockWallet (password: string): Promise<boolean> {
 		try {
 			await this.selectedWallet().unlock(password)
-			this.accounts.forEach(async (a) => {
+			this.accounts().forEach(async (a) => {
 				a = await this.selectedWallet().account(a.index)
 			})
 
@@ -528,10 +532,9 @@ export class WalletService {
 
 	async createWalletFromSingleKey (key: string, expanded: boolean) {
 		this.resetWallet()
-
 		const keyData = expanded ? key.slice(64, 128) : key.slice(0, 64)
 		const account = await Account.load({ privateKey: keyData }, 'private')
-		this.accounts.push(account)
+		this.accounts.update((v) => [...v, account])
 		await this.reloadBalances()
 		await this.saveWalletExport()
 	}
@@ -565,9 +568,9 @@ export class WalletService {
 	resetWallet () {
 		if (this.accounts?.length) {
 			// Unsubscribe from old accounts
-			this.svcWebsocket.unsubscribeAccounts(this.accounts.map((a) => a.address))
+			this.svcWebsocket.unsubscribeAccounts(this.accounts().map((a) => a.address))
 		}
-		this.accounts = []
+		this.accounts.set([])
 		this.balance = 0n
 		this.receivable = 0n
 		this.hasReceivable = false
@@ -603,7 +606,7 @@ export class WalletService {
 		this.isBalanceUpdating = true
 		const fiatPrice = this.svcPrice.lastPrice()
 
-		const addresses = await this.accounts.map((a) => a.address)
+		const addresses = await this.accounts().map((a) => a.address)
 		const accounts = await this.svcApi.accountsBalances(addresses)
 		const frontiers = await this.svcApi.accountsFrontiers(addresses)
 		// const allFrontiers = []
@@ -630,7 +633,7 @@ export class WalletService {
 				continue
 			}
 
-			const walletAccount = this.accounts.find((a) => a.address === address)
+			const walletAccount = this.accounts().find((a) => a.address === address)
 
 			if (!walletAccount) {
 				continue
@@ -651,8 +654,8 @@ export class WalletService {
 		if (walletReceivableInclUnconfirmed > 0n) {
 			const min = this.settings().minimumReceive ?? 0n
 			const receivable = min > 0n
-				? await this.svcApi.accountsReceivableLimitSorted(this.accounts.map((a) => a.address), min.toString())
-				: await this.svcApi.accountsReceivableSorted(this.accounts.map((a) => a.address))
+				? await this.svcApi.accountsReceivableLimitSorted(this.accounts().map((a) => a.address), min.toString())
+				: await this.svcApi.accountsReceivableSorted(this.accounts().map((a) => a.address))
 
 			if (receivable && receivable.blocks) {
 				for (const block in receivable.blocks) {
@@ -660,7 +663,7 @@ export class WalletService {
 						continue
 					}
 
-					const walletAccount = this.accounts.find((a) => a.address === block)
+					const walletAccount = this.accounts().find((a) => a.address === block)
 
 					if (receivable.blocks[block]) {
 						let accountReceivable = 0n
@@ -712,7 +715,7 @@ export class WalletService {
 			// Not clearing those values to zero earlier to avoid zero values while blocks are being loaded
 			for (const address in accounts.balances) {
 				if (!accounts.balances.hasOwnProperty(address)) continue
-				const walletAccount = this.accounts.find((a) => a.address === address)
+				const walletAccount = this.accounts().find((a) => a.address === address)
 				if (!walletAccount) continue
 				walletAccount.receivable = 0n
 				walletAccount.receivePow = false
@@ -721,7 +724,7 @@ export class WalletService {
 
 		// Make sure any frontiers are in the work pool
 		// If they have no frontier, we want to use their pub key?
-		const hashes = this.accounts
+		const hashes = this.accounts()
 			.filter((account) => account.receivePow === false)
 			.map((account) => account.frontier || account.publicKey)
 		console.log('Adding non-receivable frontiers to work cache')
@@ -748,7 +751,7 @@ export class WalletService {
 		const account = Account.load({ index: a.index, publicKey: a.publicKey })
 		delete a.address
 		Object.assign(a, account)
-		this.accounts.push(account)
+		this.accounts.update((v) => [...v, account])
 		this.svcWebsocket.subscribeAccounts([account.address])
 		return account
 	}
@@ -757,16 +760,16 @@ export class WalletService {
 	// If index is not provided, increment from greatest index currently saved
 	async addWalletAccount (index: number = 0) {
 		try {
-			while (this.accounts.find((a) => a.index === index)) {
+			while (this.accounts().find((a) => a.index === index)) {
 				index++
 			}
 			const newAccount: Account = this.isLedger()
 				? await this.createLedgerAccount(index)
 				: await this.selectedWallet().account(index)
-			if (this.accounts.some(a => a.index === index)) {
+			if (this.accounts().some(a => a.index === index)) {
 				await this.selectedWallet().refresh(this.settings().serverAPI, index)
 			} else {
-				this.accounts.push(newAccount)
+				this.accounts.update((v) => [...v, newAccount])
 			}
 			this.svcWebsocket.subscribeAccounts([newAccount.address])
 			await this.saveWalletExport()
@@ -781,10 +784,10 @@ export class WalletService {
 		const walletAccount = this.getWalletAccount(address)
 		if (!walletAccount) throw new Error(`Account is not in wallet`)
 
-		const walletAccountIndex = this.accounts.findIndex((a) => a.address === address)
+		const walletAccountIndex = this.accounts().findIndex((a) => a.address === address)
 		if (walletAccountIndex === -1) throw new Error(`Account is not in wallet`)
 
-		this.accounts.splice(walletAccountIndex, 1)
+		this.accounts.update((v) => [...v].splice(walletAccountIndex, 1))
 
 		this.svcWebsocket.unsubscribeAccounts([address])
 
@@ -937,7 +940,7 @@ export class WalletService {
 			...walletData,
 			names: JSON.stringify([...walletNames.entries()]),
 			selectedWalletId: wallet?.id,
-			accounts: this.accounts.map((a) => a.toJSON()),
+			accounts: this.accounts().map((a) => a.toJSON()),
 			selectedAccountAddress: this.selectedAccount()?.address,
 			locked: true,
 		}
@@ -947,7 +950,7 @@ export class WalletService {
 	// Run an accountInfo call for each account in the wallet to get their representatives
 	getAccountsDetails (): Promise<WalletApiAccount[]> {
 		return Promise.all(
-			this.accounts.map((account) =>
+			this.accounts().map((account) =>
 				this.svcApi.accountInfo(account.address).then((res) => {
 					try {
 						const ret = {

@@ -1,5 +1,5 @@
 import { formatDate } from '@angular/common'
-import { Component, OnInit, computed, effect, inject } from '@angular/core'
+import { Component, Signal, computed, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { TranslocoDirective } from '@jsverse/transloco'
 import { AmountSplitPipe, RaiPipe, SqueezePipe } from 'app/pipes'
@@ -13,7 +13,7 @@ import * as QRCode from 'qrcode'
 	styleUrls: ['./manage-wallet.component.css'],
 	imports: [AmountSplitPipe, ClipboardModule, FormsModule, RaiPipe, SqueezePipe, TranslocoDirective],
 })
-export class ManageWalletComponent implements OnInit {
+export class ManageWalletComponent {
 	private svcApi = inject(ApiService)
 	private svcAppSettings = inject(AppSettingsService)
 	private svcUtil = inject(UtilService)
@@ -21,7 +21,6 @@ export class ManageWalletComponent implements OnInit {
 	svcNotifications = inject(NotificationsService)
 	svcWallet = inject(WalletService)
 
-	accounts = this.svcWallet.accounts
 	newPassword = ''
 	confirmPassword = ''
 	validateNewPassword = false
@@ -36,7 +35,11 @@ export class ManageWalletComponent implements OnInit {
 	selAccountInit = false
 	invalidCsvCount = false
 	invalidCsvOffset = false
-	csvAccount = this.accounts[0]?.id ?? '0'
+	csvAccount: Signal<string> = computed<string>(() => {
+		const accounts = this.svcWallet.accounts()
+		const selectedAccount = this.svcWallet.selectedAccount()
+		return (selectedAccount ?? accounts[0])?.address ?? '0'
+	})
 	csvCount = this.transactionHistoryLimit.toString()
 	csvOffset = ''
 	beyondCsvLimit = false
@@ -49,24 +52,6 @@ export class ManageWalletComponent implements OnInit {
 	exportEnabled = true
 
 	settings = computed(() => this.svcAppSettings.settings())
-
-	constructor () {
-		// Update selected account if changed in the sidebar
-		effect(() => {
-			const account = this.svcWallet.selectedAccount()
-			if (this.selAccountInit) {
-				this.csvAccount = account?.address ?? this.accounts[0]?.address ?? '0'
-			}
-			this.selAccountInit = true
-		})
-	}
-
-	async ngOnInit () {
-		// Set the account selected in the sidebar as default
-		if (this.svcWallet.selectedAccount() !== null) {
-			this.csvAccount = this.svcWallet.selectedAccount().address
-		}
-	}
 
 	async changePassword () {
 		if (this.svcWallet.isLocked()) {

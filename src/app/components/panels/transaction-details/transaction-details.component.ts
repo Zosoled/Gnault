@@ -172,7 +172,8 @@ export class TransactionDetailsComponent implements OnInit {
 	}
 
 	getAccountLabel (accountID, defaultLabel) {
-		const walletAccount = this.walletService.accounts.find((a) => a.address === accountID)
+		const accounts = this.walletService.accounts()
+		const walletAccount = accounts.find((a) => a.address === accountID)
 		if (walletAccount == null) {
 			return defaultLabel
 		}

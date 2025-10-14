@@ -97,7 +97,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 				for (const entry of this.addressBookService.addressBook) {
 					if (entry.trackBalance && this.accounts[entry.account]) {
 						// If the account exist in the wallet, take the info from there to save on RPC calls
-						const walletAccount = this.walletService.accounts.find((a) => a.address === entry.account)
+						const walletAccount = this.walletService.accounts().find((a) => a.address === entry.account)
 						if (walletAccount) {
 							// Subtract first so we can add back any updated amounts
 							this.totalTrackedBalance -= this.accounts[entry.account].balance
@@ -173,7 +173,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.totalTrackedReceivable = 0n
 
 		// Get account balances for all account in address book not in wallet (which has tracking active)
-		const accountIDsWallet = this.walletService.accounts.map((a) => a.address)
+		const accountIDsWallet = this.walletService.accounts().map((a) => a.address)
 		const accountIDs = this.addressBookService.addressBook
 			.filter((a) => !accountIDsWallet.includes(a.account) && a.trackBalance)
 			.map((a) => a.account)
@@ -198,7 +198,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 				receivable: 0n,
 			}
 			// If the account exist in the wallet, take the info from there to save on RPC calls
-			const walletAccount = this.walletService.accounts.find((a) => a.address === entry.account)
+			const walletAccount = this.walletService.accounts().find((a) => a.address === entry.account)
 			if (walletAccount) {
 				balanceAccount.balance = walletAccount.balance
 				balanceAccount.balanceFiat = walletAccount.balanceFiat
@@ -327,7 +327,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 				this.translocoService.translate('address-book.address-book-entry-saved-successfully')
 			)
 			// If this is one of our accounts, set its name and let it propagate through the app
-			const walletAccount = this.walletService.accounts.find((a) => a.address === this.newAddressAccount)
+			const walletAccount = this.walletService.accounts().find((a) => a.address === this.newAddressAccount)
 			if (walletAccount) {
 				walletAccount.addressBookName = this.newAddressName
 			}

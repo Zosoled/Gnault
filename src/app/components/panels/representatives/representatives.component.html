@@ -235,7 +235,7 @@
 														<span>All Current Accounts</span>
 													</a>
 												</li>
-												@for (account of svcWallet.accounts; track account.address) {
+												@for (account of svcWallet.accounts(); track account.address) {
 													<li>
 														<a (click)="appendAccountToRedelegate(account.address)">
 															<span>

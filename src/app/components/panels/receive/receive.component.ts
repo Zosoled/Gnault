@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common'
-import { AfterViewInit, Component, OnDestroy, computed, effect, inject } from '@angular/core'
+import { AfterViewInit, Component, computed, effect, inject, OnDestroy } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { ChildActivationEnd, Router, RouterLink } from '@angular/router'
-import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
+import { translate, TranslocoDirective, TranslocoService } from '@jsverse/transloco'
 import {
 	NanoAddressComponent,
 	NanoIdenticonComponent,
@@ -54,17 +54,16 @@ export class ReceiveComponent implements AfterViewInit, OnDestroy {
 	private svcNanoBlock = inject(NanoBlockService)
 	private svcNotifications = inject(NotificationsService)
 	private svcTransloco = inject(TranslocoService)
-	private svcWallet = inject(WalletService)
 	private svcWebsocket = inject(WebsocketService)
 
 	svcAppSettings = inject(AppSettingsService)
 	svcPrice = inject(PriceService)
 	svcUtil = inject(UtilService)
+	svcWallet = inject(WalletService)
 
 	BigInt = BigInt
 	UIkit = (window as any).UIkit
 	nano = 1000000000000000000000000
-	accounts = this.svcWallet.accounts
 	timeoutIdClearingRecentlyCopiedState: any = null
 	mobileTransactionMenuModal: any = null
 	merchantModeModal: any = null
@@ -147,13 +146,14 @@ export class ReceiveComponent implements AfterViewInit, OnDestroy {
 
 		await this.updateReceivableBlocks()
 
+		const accounts = this.svcWallet.accounts()
 		if (this.selectedAccount !== null) {
 			// Set the account selected in the sidebar as default
 			this.receivableAccountModel = this.selectedAccount.address
 			this.onSelectedAccountChange(this.receivableAccountModel)
-		} else if (this.accounts.length === 1) {
+		} else if (accounts.length === 1) {
 			// Auto-select account if it is the only account in the wallet
-			this.receivableAccountModel = this.accounts[0].address
+			this.receivableAccountModel = accounts[0].address
 			this.onSelectedAccountChange(this.receivableAccountModel)
 		}
 
@@ -226,12 +226,13 @@ export class ReceiveComponent implements AfterViewInit, OnDestroy {
 		this.mobileTransactionMenuModal.show()
 	}
 
-	getAccountLabel (accountID, defaultLabel) {
-		const walletAccount = this.svcWallet.accounts.find(a => a.address === accountID)
+	getAccountLabel (address, defaultLabel) {
+		const accounts = this.svcWallet.accounts()
+		const walletAccount = accounts.find((a) => a.address === address)
 		if (walletAccount == null) {
 			return defaultLabel
 		}
-		return (this.svcTransloco.translate('general.account') + ' #' + walletAccount.index)
+		return (`${translate('general.account')} #${walletAccount.index}`)
 	}
 
 	async getReceivable () {
@@ -303,7 +304,8 @@ export class ReceiveComponent implements AfterViewInit, OnDestroy {
 	}
 
 	async changeQRAccount (account) {
-		this.walletAccount = this.svcWallet.accounts.find(a => a.address === account) || null
+		const accounts = this.svcWallet.accounts()
+		this.walletAccount = accounts.find(a => a.address === account) || null
 		this.qrAccount = ''
 		let qrCode = null
 		if (account.length > 1) {
@@ -356,13 +358,12 @@ export class ReceiveComponent implements AfterViewInit, OnDestroy {
 	}
 
 	async receiveReceivableBlock (receivableBlock) {
+		const accounts = this.svcWallet.accounts()
 		const sourceBlock = receivableBlock.hash
-
-		const walletAccount = this.svcWallet.accounts.find(a => a.address === receivableBlock.destination)
+		const walletAccount = accounts.find(a => a.address === receivableBlock.destination)
 		if (!walletAccount) {
 			throw new Error(this.svcTransloco.translate('receive.unable-to-find-receiving-account'))
 		}
-
 		if (this.svcWallet.isLocked()) {
 			await this.svcWallet.requestUnlock()
 			if (this.svcWallet.isLocked()) {
