@@ -99,7 +99,7 @@
 													style="margin-top: -1px"
 												>
 													<li>
-														@if (loadingBalances || walletService.isBalanceUpdating) {
+														@if (loadingBalances || svcWallet.isBalanceUpdating) {
 															<div
 																uk-spinner="ratio: 0.5;"
 																class="icon-transactions-refresh spinner"
@@ -187,7 +187,7 @@
 												</ul>
 												@if (addressBook.trackBalance) {
 													<div class="uk-width-expand amount-container">
-														@if (walletService.isBalanceUpdating === false) {
+														@if (svcWallet.isBalanceUpdating === false) {
 															<div class="account-amounts-primary uk-width-1-1">
 																<span
 																	[title]="
@@ -471,7 +471,7 @@
 											<button
 												ngxClipboard
 												[cbContent]="addressBookQRExportUrl"
-												(cbOnSuccess)="notificationService.sendSuccess('Address book export copied to clipboard!')"
+												(cbOnSuccess)="svcNotifications.sendSuccess('Address book export copied to clipboard!')"
 												class="uk-button uk-button-secondary uk-width-1-1@s uk-width-auto@m uk-margin-small-top"
 												style="margin-left: 0"
 											>

@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, ViewChild, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
+import { TranslocoDirective, translate } from '@jsverse/transloco'
 import { NotificationsService, WalletService } from 'app/services'
 
 @Component({
@@ -10,10 +10,9 @@ import { NotificationsService, WalletService } from 'app/services'
 	imports: [FormsModule, TranslocoDirective],
 })
 export class UnlockWalletDialogComponent implements AfterViewInit {
-	private notificationService = inject(NotificationsService)
-	private translocoService = inject(TranslocoService)
+	private svcNotifications = inject(NotificationsService)
 
-	walletService = inject(WalletService)
+	svcWallet = inject(WalletService)
 
 	isFocused: boolean = false
 	isIncorrect: boolean = false
@@ -30,8 +29,8 @@ export class UnlockWalletDialogComponent implements AfterViewInit {
 		this.UIkit.util.on(this.dialog.nativeElement, 'hidden', () => {
 			this.onModalHidden()
 		})
-		this.walletService.isUnlockRequested$.subscribe(async (isRequested) => {
-			if (isRequested && !this.walletService.isLedger()) {
+		this.svcWallet.isUnlockRequested$.subscribe(async (isRequested) => {
+			if (isRequested && !this.svcWallet.isLedger()) {
 				this.modal ? this.showModal() : (this.isPending = true)
 			}
 		})
@@ -51,19 +50,19 @@ export class UnlockWalletDialogComponent implements AfterViewInit {
 		this.password = ''
 		this.isFocused = false
 		this.isIncorrect = false
-		this.walletService.isUnlockRequested$.next(false)
+		this.svcWallet.isUnlockRequested$.next(false)
 	}
 
 	async unlock () {
-		const unlocked = await this.walletService.unlockWallet(this.password)
+		const unlocked = await this.svcWallet.unlockWallet(this.password)
 		this.password = ''
 		if (unlocked) {
 			this.isIncorrect = false
 			this.modal.hide()
-			this.notificationService.sendSuccess(this.translocoService.translate('accounts.wallet-unlocked'))
+			this.svcNotifications.sendSuccess(translate('accounts.wallet-unlocked'))
 		} else {
 			this.isIncorrect = true
-			this.notificationService.sendError(this.translocoService.translate('accounts.wrong-password'))
+			this.svcNotifications.sendError(translate('accounts.wrong-password'))
 		}
 	}
 }

@@ -40,10 +40,10 @@
 								@if (qrCodeImageBlock && shouldSign) {
 									<div>You have signed a block to {{ txTypeMessage }}</div>
 								}
-								@if (!blockProcessed && !shouldSign) {
+								@if (!isBlockProcessed && !shouldSign) {
 									<div>You are about to {{ txTypeMessage }}</div>
 								}
-								@if (blockProcessed && !shouldSign) {
+								@if (isBlockProcessed && !shouldSign) {
 									<div>You have processed a block to {{ txTypeMessage }}</div>
 								}
 							</div>

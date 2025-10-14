@@ -848,7 +848,7 @@ export class AccountDetailsComponent implements AfterViewInit, OnDestroy {
 		this.addressBookMatch =
 			this.svcAddressBook.getAccountName(this.toAccountID) || this.getAccountLabel(this.toAccountID, null)
 
-		// const accountInfo = await this.walletService.walletApi.accountInfo(this.toAccountID)
+		// const accountInfo = await this.svcApi.accountInfo(this.toAccountID)
 		this.toAccountStatus = null
 		if (this.svcUtil.account.isValidAccount(this.toAccountID)) {
 			const accountInfo = await this.svcApi.accountInfo(this.toAccountID)

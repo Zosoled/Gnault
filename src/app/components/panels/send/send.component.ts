@@ -247,7 +247,7 @@ export class SendComponent implements AfterViewInit {
 			this.addressBookMatch = 'Gnault Donations'
 		}
 
-		// const accountInfo = await this.walletService.walletApi.accountInfo(this.toAddress)
+		// const accountInfo = await this.svcApi.accountInfo(this.toAddress)
 		this.toAccountStatus = null
 		if (this.svcUtil.account.isValidAccount(this.toAddress)) {
 			const accountInfo = await this.svcApi.accountInfo(this.toAddress)

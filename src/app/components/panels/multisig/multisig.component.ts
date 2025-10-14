@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core'
+import { Component, ElementRef, inject, ViewChild } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
 import { NanoAddressComponent } from 'app/components/elements'
@@ -24,15 +24,15 @@ import { ClipboardModule } from 'ngx-clipboard'
 	]
 })
 
-export class MultisigComponent implements OnInit {
-	@ViewChild('accountAddFocus') _el: ElementRef
-
-	private util = inject(UtilService)
+export class MultisigComponent {
 	private router = inject(Router)
-	private notificationService = inject(NotificationsService)
-	private remoteSignService = inject(RemoteSignService)
-	private qrModalService = inject(QrModalService)
-	private musigService = inject(MusigService)
+	private svcMusig = inject(MusigService)
+	private svcNotifications = inject(NotificationsService)
+	private svcQrModal = inject(QrModalService)
+	private svcRemoteSign = inject(RemoteSignService)
+	private svcUtil = inject(UtilService)
+
+	@ViewChild('accountAddFocus') _el: ElementRef
 
 	accountAdd = ''
 	showAddBox = false
@@ -48,11 +48,9 @@ export class MultisigComponent implements OnInit {
 	// if displaying more info
 	showAdvancedOptions = false
 
-	async ngOnInit () { }
-
 	copied () {
-		this.notificationService.removeNotification('success-copied')
-		this.notificationService.sendSuccess(`Successfully copied to clipboard!`, { identifier: 'success-copied' })
+		this.svcNotifications.removeNotification('success-copied')
+		this.svcNotifications.sendSuccess(`Successfully copied to clipboard!`, { identifier: 'success-copied' })
 	}
 
 	setFocus () {
@@ -63,13 +61,13 @@ export class MultisigComponent implements OnInit {
 
 	addAccount () {
 		if (this.accountAddStatus !== 1) {
-			this.notificationService.removeNotification('account-invalid')
-			this.notificationService.sendWarning('Invalid nano address!', { identifier: 'account-invalid' })
+			this.svcNotifications.removeNotification('account-invalid')
+			this.svcNotifications.sendWarning('Invalid nano address!', { identifier: 'account-invalid' })
 			return
 		}
 		if (this.storedAccounts.includes(this.accountAdd.replace('xrb_', 'nano_').toLocaleLowerCase())) {
-			this.notificationService.removeNotification('account-added')
-			this.notificationService.sendWarning('Account already added!', { identifier: 'account-added' })
+			this.svcNotifications.removeNotification('account-added')
+			this.svcNotifications.sendWarning('Account already added!', { identifier: 'account-added' })
 			return
 		}
 		this.storedAccounts.push(this.accountAdd.replace('xrb_', 'nano_').toLocaleLowerCase())
@@ -87,7 +85,7 @@ export class MultisigComponent implements OnInit {
 	}
 
 	async generateMultisig () {
-		const aggregate = await this.musigService.runAggregate(this.storedAccounts, null)
+		const aggregate = await this.svcMusig.runAggregate(this.storedAccounts, null)
 		this.createdMultisig = aggregate?.multisig
 	}
 
@@ -104,7 +102,7 @@ export class MultisigComponent implements OnInit {
 			this.accountAddStatus = null
 			return false
 		}
-		if (this.util.account.isValidAccount(this.accountAdd)) {
+		if (this.svcUtil.account.isValidAccount(this.accountAdd)) {
 			this.accountAddStatus = 1
 			this.addAccount()
 			return true
@@ -119,7 +117,7 @@ export class MultisigComponent implements OnInit {
 			this.multisigAccountStatus = null
 			return false
 		}
-		if (this.util.account.isValidAccount(this.multisigAccount)) {
+		if (this.svcUtil.account.isValidAccount(this.multisigAccount)) {
 			this.multisigAccountStatus = 1
 			return true
 		} else {
@@ -137,7 +135,7 @@ export class MultisigComponent implements OnInit {
 		if (string.startsWith('nanosign:')) {
 			url = new URL(string)
 		}
-		if (url && this.remoteSignService.checkSignBlock(url.pathname)) {
+		if (url && this.svcRemoteSign.checkSignBlock(url.pathname)) {
 			this.unsignedStatus = 1
 		} else {
 			this.unsignedStatus = 0
@@ -148,7 +146,7 @@ export class MultisigComponent implements OnInit {
 		if (this.validateMultisig()) {
 			this.router.navigate(['account', this.multisigAccount], { queryParams: { sign: 1 } })
 		} else {
-			this.notificationService.sendWarning('Invalid nano account!')
+			this.svcNotifications.sendWarning('Invalid nano account!')
 		}
 	}
 
@@ -158,9 +156,9 @@ export class MultisigComponent implements OnInit {
 		if (block.startsWith('nanosign:') || block.startsWith('nanoprocess:')) {
 			const url = new URL(block)
 			if (url.protocol === 'nanosign:') {
-				this.remoteSignService.navigateSignBlock(url)
+				this.svcRemoteSign.navigateSignBlock(url)
 			} else if (url.protocol === 'nanoprocess:') {
-				this.remoteSignService.navigateProcessBlock(url)
+				this.svcRemoteSign.navigateProcessBlock(url)
 			} else {
 				badScheme = true
 			}
@@ -168,13 +166,13 @@ export class MultisigComponent implements OnInit {
 			badScheme = true
 		}
 		if (badScheme) {
-			this.notificationService.sendWarning('Not a recognized block format!', { length: 5000 })
+			this.svcNotifications.sendWarning('Not a recognized block format!', { length: 5000 })
 		}
 	}
 
 	// open qr reader modal
 	openQR (reference, type) {
-		const qrResult = this.qrModalService.openQR(reference, type)
+		const qrResult = this.svcQrModal.openQR(reference, type)
 		qrResult.then((data) => {
 			switch (data.reference) {
 				case 'accountAdd':

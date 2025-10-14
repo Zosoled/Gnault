@@ -117,16 +117,10 @@ export class AccountsComponent implements OnInit {
 	}
 
 	sortAccounts () {
-		// if (this.walletService.isLocked()) return this.notificationService.sendError(`Wallet is locked.`)
-		// if (!this.walletService.isConfigured()) return this.notificationService.sendError(`Wallet is not configured`)
-		// if (this.walletService.accounts.length <= 1) {
-		// return this.notificationService.sendWarning(`You need at least 2 accounts to sort them`)
-		// }
 		if (this.svcWallet.isLocked() || !this.svcWallet.isConfigured() || this.svcWallet.accounts.length <= 1) {
 			return
 		}
 		this.svcWallet.accounts.update((v) => [...v].sort((a, b) => a.index - b.index))
-		// this.accounts = this.walletService.accounts
 		// Save new sorted accounts list
 		this.svcWallet.saveWalletExport()
 		// this.notificationService.sendSuccess(`Successfully sorted accounts by index!`)

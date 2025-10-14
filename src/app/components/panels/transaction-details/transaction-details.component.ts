@@ -1,7 +1,7 @@
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common'
-import { Component, OnInit, inject } from '@angular/core'
+import { Component, inject, OnInit } from '@angular/core'
 import { ActivatedRoute, ChildActivationEnd, Router, RouterLink } from '@angular/router'
-import { TranslocoService } from '@jsverse/transloco'
+import { translate } from '@jsverse/transloco'
 import { NanoAddressComponent, NanoIdenticonComponent } from 'app/components/elements'
 import { AmountSplitPipe, RaiPipe } from 'app/pipes'
 import { AddressBookService, ApiService, AppSettingsService, NotificationsService, WalletService } from 'app/services'
@@ -24,14 +24,13 @@ import { ClipboardModule } from 'ngx-clipboard'
 	],
 })
 export class TransactionDetailsComponent implements OnInit {
-	private svcAppSettings = inject(AppSettingsService)
-	private walletService = inject(WalletService)
 	private route = inject(ActivatedRoute)
 	private router = inject(Router)
-	private addressBook = inject(AddressBookService)
-	private api = inject(ApiService)
-	private notifications = inject(NotificationsService)
-	private translocoService = inject(TranslocoService)
+	private svcAddressBook = inject(AddressBookService)
+	private svcApi = inject(ApiService)
+	private svcAppSettings = inject(AppSettingsService)
+	private svcNotifications = inject(NotificationsService)
+	private svcWallet = inject(WalletService)
 
 	routerSub = null
 	transaction: any = {}
@@ -86,7 +85,7 @@ export class TransactionDetailsComponent implements OnInit {
 		this.hashID = hash
 
 		this.loadingBlock = true
-		const blockData = await this.api.blockInfo(hash)
+		const blockData = await this.svcApi.blockInfo(hash)
 
 		if (blockData == null || blockData.error != null) {
 			this.loadingBlock = false
@@ -111,7 +110,7 @@ export class TransactionDetailsComponent implements OnInit {
 			if (isOpen) {
 				this.blockType = 'open'
 			} else {
-				const prevRes = await this.api.blocksInfo([contents.previous])
+				const prevRes = await this.svcApi.blocksInfo([contents.previous])
 				const prevData = prevRes.blocks[previous]
 				if (!prevData.contents.balance) {
 					// Previous block is not a state block.
@@ -166,18 +165,18 @@ export class TransactionDetailsComponent implements OnInit {
 		}
 		this.toAccountID = toAccount
 		this.fromAccountID = fromAccount
-		this.fromAddressBook = this.addressBook.getAccountName(fromAccount) || this.getAccountLabel(fromAccount, null)
-		this.toAddressBook = this.addressBook.getAccountName(toAccount) || this.getAccountLabel(toAccount, null)
+		this.fromAddressBook = this.svcAddressBook.getAccountName(fromAccount) || this.getAccountLabel(fromAccount, null)
+		this.toAddressBook = this.svcAddressBook.getAccountName(toAccount) || this.getAccountLabel(toAccount, null)
 		this.loadingBlock = false
 	}
 
 	getAccountLabel (accountID, defaultLabel) {
-		const accounts = this.walletService.accounts()
+		const accounts = this.svcWallet.accounts()
 		const walletAccount = accounts.find((a) => a.address === accountID)
 		if (walletAccount == null) {
 			return defaultLabel
 		}
-		return this.translocoService.translate('general.account') + ' #' + walletAccount.index
+		return `${translate('general.account')} #${walletAccount.index}`
 	}
 
 	getBalanceFromHex (balance) {
@@ -189,7 +188,7 @@ export class TransactionDetailsComponent implements OnInit {
 	}
 
 	copied () {
-		this.notifications.removeNotification('success-copied')
-		this.notifications.sendSuccess(`Successfully copied to clipboard!`, { identifier: 'success-copied' })
+		this.svcNotifications.removeNotification('success-copied')
+		this.svcNotifications.sendSuccess(`Successfully copied to clipboard!`, { identifier: 'success-copied' })
 	}
 }

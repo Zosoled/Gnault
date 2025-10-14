@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject } from '@angular/core'
+import { Component, Input, inject } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 import { BarcodeFormat } from '@zxing/library'
 import { ZXingScannerModule } from '@zxing/ngx-scanner'
@@ -14,14 +14,14 @@ export type QRType = 'account' | 'hash' | 'mnemonic' | 'generic'
 	styleUrls: ['./qr-modal.component.css'],
 	imports: [ZXingScannerModule],
 })
-export class QrModalComponent implements OnInit {
+export class QrModalComponent {
 	@Input() title = 'QR Scanner'
 	@Input() reference: string
 	@Input() type: QRType
 
 	activeModal = inject(NgbActiveModal)
-	private notifcationService = inject(NotificationsService)
-	private util = inject(UtilService)
+	private svcNotifcations = inject(NotificationsService)
+	private svcUtil = inject(UtilService)
 
 	availableDevices: MediaDeviceInfo[]
 	currentDevice: MediaDeviceInfo = null
@@ -39,18 +39,16 @@ export class QrModalComponent implements OnInit {
 	torchAvailable$ = new BehaviorSubject<boolean>(false)
 	tryHarder = false
 
-	ngOnInit(): void {}
-
-	onCamerasFound(devices: MediaDeviceInfo[]): void {
+	onCamerasFound (devices: MediaDeviceInfo[]): void {
 		this.availableDevices = devices
 		this.hasDevices = Boolean(devices && devices.length)
 	}
 
-	async onCodeResult(resultString: string) {
+	async onCodeResult (resultString: string) {
 		let type: QRType = null
 		let content = ''
 		// account
-		if (this.util.account.isValidAccount(resultString)) {
+		if (this.svcUtil.account.isValidAccount(resultString)) {
 			type = 'account'
 			content = resultString
 		} else if (/ /.test(resultString)) {
@@ -58,15 +56,15 @@ export class QrModalComponent implements OnInit {
 				await Wallet.load('BLAKE2b', '', resultString)
 				type = 'mnemonic'
 				content = resultString
-			} catch (err) {}
+			} catch (err) { }
 		} else if (resultString.length === 128) {
 			// includes deterministic R value material which we ignore
 			resultString = resultString.substring(0, 64)
-			if (this.util.nano.isValidHash(resultString)) {
+			if (this.svcUtil.nano.isValidHash(resultString)) {
 				type = 'hash'
 				content = resultString
 			}
-		} else if (this.util.nano.isValidHash(resultString)) {
+		} else if (this.svcUtil.nano.isValidHash(resultString)) {
 			type = 'hash'
 			content = resultString
 		} else if (this.nano_scheme.test(resultString)) {
@@ -74,9 +72,9 @@ export class QrModalComponent implements OnInit {
 			const url = new URL(resultString)
 			content = url.pathname
 
-			if (['nano:', 'nanorep:', 'xrb:'].includes(url.protocol) && this.util.account.isValidAccount(url.pathname)) {
+			if (['nano:', 'nanorep:', 'xrb:'].includes(url.protocol) && this.svcUtil.account.isValidAccount(url.pathname)) {
 				type = 'account'
-			} else if (['nanoseed:', 'nanokey:'].includes(url.protocol) && this.util.nano.isValidHash(url.pathname)) {
+			} else if (['nanoseed:', 'nanokey:'].includes(url.protocol) && this.svcUtil.nano.isValidHash(url.pathname)) {
 				type = 'hash'
 			}
 		} else {
@@ -88,7 +86,7 @@ export class QrModalComponent implements OnInit {
 		if ((type != null && type === this.type) || this.type === 'generic') {
 			this.activeModal.close({ reference: this.reference, content: content })
 		} else {
-			this.notifcationService.sendWarning('This QR code is not recognized.', {
+			this.svcNotifcations.sendWarning('This QR code is not recognized.', {
 				length: 5000,
 				identifier: 'qr-not-recognized',
 			})
@@ -96,25 +94,25 @@ export class QrModalComponent implements OnInit {
 		}
 	}
 
-	onDeviceSelectChange(target: EventTarget) {
+	onDeviceSelectChange (target: EventTarget) {
 		const { value } = target as HTMLSelectElement
 		const device = this.availableDevices.find((x) => x.deviceId === value)
 		this.currentDevice = device || null
 	}
 
-	onHasPermission(has: boolean) {
+	onHasPermission (has: boolean) {
 		this.hasPermission = has
 	}
 
-	onTorchCompatible(isCompatible: boolean): void {
+	onTorchCompatible (isCompatible: boolean): void {
 		this.torchAvailable$.next(isCompatible || false)
 	}
 
-	toggleTorch(): void {
+	toggleTorch (): void {
 		this.torchEnabled = !this.torchEnabled
 	}
 
-	toggleTryHarder(): void {
+	toggleTryHarder (): void {
 		this.tryHarder = !this.tryHarder
 	}
 }

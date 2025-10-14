@@ -8,13 +8,13 @@ import { NotificationsService } from 'app/services'
 })
 
 export class NotificationsComponent implements OnInit {
-	private notificationService = inject(NotificationsService)
+	private svcNotifications = inject(NotificationsService)
 
 	notificationLength = 5000
 	notifications: any[] = []
 
 	ngOnInit () {
-		this.notificationService.notifications$.subscribe(notification => {
+		this.svcNotifications.notifications$.subscribe(notification => {
 			if (notification) {
 				// Check the options
 				const length = notification.options?.length ?? this.notificationLength
@@ -43,7 +43,7 @@ export class NotificationsComponent implements OnInit {
 			}
 		})
 
-		this.notificationService.removeNotification$.subscribe(identifier => {
+		this.svcNotifications.removeNotification$.subscribe(identifier => {
 			if (identifier) {
 				const existingNotification = this.notifications.find(n => n.identifier === identifier)
 				if (existingNotification) {

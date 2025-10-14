@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core'
+import { Component, inject } from '@angular/core'
 import { TranslocoDirective } from '@jsverse/transloco'
 import { NanoAddressComponent } from 'app/components/elements'
 import { NotificationsService } from 'app/services'
@@ -11,16 +11,14 @@ import { ClipboardModule } from 'ngx-clipboard'
 	styleUrls: ['./keygenerator.component.css'],
 	imports: [ClipboardModule, NanoAddressComponent, TranslocoDirective],
 })
-export class KeygeneratorComponent implements OnInit {
-	private notificationService = inject(NotificationsService)
+export class KeygeneratorComponent {
+	private svcNotifications = inject(NotificationsService)
 
 	seed = ''
 	mnemonic = ''
 	privateKey = ''
 	account = ''
 	newWalletMnemonicLines = []
-
-	ngOnInit (): void { }
 
 	async generate () {
 		// generate random bytes and create seed/mnemonic
@@ -47,7 +45,7 @@ export class KeygeneratorComponent implements OnInit {
 	}
 
 	copied () {
-		this.notificationService.removeNotification('success-copied')
-		this.notificationService.sendSuccess(`Successfully copied to clipboard!`, { identifier: 'success-copied' })
+		this.svcNotifications.removeNotification('success-copied')
+		this.svcNotifications.sendSuccess(`Successfully copied to clipboard!`, { identifier: 'success-copied' })
 	}
 }

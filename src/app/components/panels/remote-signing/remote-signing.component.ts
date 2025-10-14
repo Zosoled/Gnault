@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
-import { BehaviorSubject } from 'rxjs'
 import {
 	AddressBookService,
 	NotificationsService,
@@ -10,6 +9,7 @@ import {
 	RemoteSignService,
 	UtilService
 } from 'app/services'
+import { BehaviorSubject } from 'rxjs'
 
 @Component({
 	selector: 'app-send',
@@ -20,14 +20,13 @@ import {
 		FormsModule
 	]
 })
-
 export class RemoteSigningComponent implements OnInit {
-	private util = inject(UtilService)
 	private router = inject(Router)
-	private notificationService = inject(NotificationsService)
-	private remoteSignService = inject(RemoteSignService)
-	private qrModalService = inject(QrModalService)
-	private addressBookService = inject(AddressBookService)
+	private svcAddressBook = inject(AddressBookService)
+	private svcNotifications = inject(NotificationsService)
+	private svcQrModal = inject(QrModalService)
+	private svcRemoteSign = inject(RemoteSignService)
+	private svcUtil = inject(UtilService)
 
 	toAccountID = ''
 	toAccountStatus: number = null
@@ -40,7 +39,7 @@ export class RemoteSigningComponent implements OnInit {
 	addressBookMatch = ''
 
 	async ngOnInit () {
-		this.addressBookService.loadAddressBook()
+		this.svcAddressBook.loadAddressBook()
 	}
 
 	validateDestination () {
@@ -51,7 +50,7 @@ export class RemoteSigningComponent implements OnInit {
 			this.toAccountStatus = null
 			return false
 		}
-		if (this.util.account.isValidAccount(this.toAccountID)) {
+		if (this.svcUtil.account.isValidAccount(this.toAccountID)) {
 			this.toAccountStatus = 1
 			return true
 		} else {
@@ -63,7 +62,7 @@ export class RemoteSigningComponent implements OnInit {
 	searchAddressBook () {
 		this.showAddressBook = true
 		const search = this.toAccountID || ''
-		const addressBook = this.addressBookService.addressBook
+		const addressBook = this.svcAddressBook.addressBook
 
 		const matches = addressBook
 			.filter(a => a.name.toLowerCase().indexOf(search.toLowerCase()) !== -1)
@@ -88,7 +87,7 @@ export class RemoteSigningComponent implements OnInit {
 		if (string.startsWith('nanosign:')) {
 			url = new URL(string)
 		}
-		if (url && this.remoteSignService.checkSignBlock(url.pathname)) {
+		if (url && this.svcRemoteSign.checkSignBlock(url.pathname)) {
 			this.unsignedStatus = 1
 		} else {
 			this.unsignedStatus = 0
@@ -104,7 +103,7 @@ export class RemoteSigningComponent implements OnInit {
 		if (string.startsWith('nanoprocess:')) {
 			url = new URL(string)
 		}
-		if (url && this.remoteSignService.checkSignBlock(url.pathname) && this.remoteSignService.checkProcessBlock(url.pathname)) {
+		if (url && this.svcRemoteSign.checkSignBlock(url.pathname) && this.svcRemoteSign.checkProcessBlock(url.pathname)) {
 			this.signedStatus = 1
 		} else {
 			this.signedStatus = 0
@@ -115,7 +114,7 @@ export class RemoteSigningComponent implements OnInit {
 		if (this.validateDestination()) {
 			this.router.navigate(['account', this.toAccountID], { queryParams: { sign: 1 } })
 		} else {
-			this.notificationService.sendWarning('Invalid nano account!')
+			this.svcNotifications.sendWarning('Invalid nano account!')
 		}
 	}
 
@@ -125,9 +124,9 @@ export class RemoteSigningComponent implements OnInit {
 		if (block.startsWith('nanosign:') || block.startsWith('nanoprocess:')) {
 			const url = new URL(block)
 			if (url.protocol === 'nanosign:') {
-				this.remoteSignService.navigateSignBlock(url)
+				this.svcRemoteSign.navigateSignBlock(url)
 			} else if (url.protocol === 'nanoprocess:') {
-				this.remoteSignService.navigateProcessBlock(url)
+				this.svcRemoteSign.navigateProcessBlock(url)
 			} else {
 				badScheme = true
 			}
@@ -135,13 +134,13 @@ export class RemoteSigningComponent implements OnInit {
 			badScheme = true
 		}
 		if (badScheme) {
-			this.notificationService.sendWarning('Not a recognized block format!', { length: 5000 })
+			this.svcNotifications.sendWarning('Not a recognized block format!', { length: 5000 })
 		}
 	}
 
 	// open qr reader modal
 	async openQR (reference, type): Promise<void> {
-		const data = await this.qrModalService.openQR(reference, type)
+		const data = await this.svcQrModal.openQR(reference, type)
 		if (data.reference === 'account1') {
 			this.toAccountID = data.content
 		}

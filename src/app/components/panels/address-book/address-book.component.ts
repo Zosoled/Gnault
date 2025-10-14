@@ -2,7 +2,7 @@ import { CommonModule, UpperCasePipe } from '@angular/common'
 import { AfterViewInit, Component, OnDestroy, OnInit, effect, inject } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { Router, RouterLink } from '@angular/router'
-import { TranslocoDirective, TranslocoService } from '@jsverse/transloco'
+import { TranslocoDirective, TranslocoService, translate } from '@jsverse/transloco'
 import { NanoAddressComponent } from 'app/components/elements'
 import { AmountSplitPipe, FiatPipe, RaiPipe } from 'app/pipes'
 import {
@@ -39,25 +39,24 @@ export interface BalanceAccount {
 		RaiPipe,
 		RouterLink,
 		TranslocoDirective,
-		TranslocoDirective,
 		UpperCasePipe,
 	],
 })
 export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
-	private addressBookService = inject(AddressBookService)
-	private util = inject(UtilService)
-	private qrModalService = inject(QrModalService)
 	private router = inject(Router)
-	private api = inject(ApiService)
+	private svcAddressBook = inject(AddressBookService)
+	private svcApi = inject(ApiService)
 	private svcPrice = inject(PriceService)
-	private translocoService = inject(TranslocoService)
+	private svcQrModal = inject(QrModalService)
+	private svcTransloco = inject(TranslocoService)
+	private svcUtil = inject(UtilService)
 
 	svcAppSettings = inject(AppSettingsService)
-	notificationService = inject(NotificationsService)
-	walletService = inject(WalletService)
+	svcNotifications = inject(NotificationsService)
+	svcWallet = inject(WalletService)
 
 	activePanel = 0
-	addressBook$ = this.addressBookService.addressBook$
+	addressBook$ = this.svcAddressBook.addressBook$
 	creatingNewEntry = false
 	previousAddressName = ''
 	newAddressAccount = ''
@@ -88,16 +87,16 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	async ngOnInit () {
-		this.addressBookService.loadAddressBook()
+		this.svcAddressBook.loadAddressBook()
 		// Detect if local wallet balance is refreshed
 		effect(() => {
-			if (this.walletService.isRefreshed()) {
+			if (this.svcWallet.isRefreshed()) {
 				this.loadingBalances = true
 				// Check if we have a local wallet account tracked and update the balances
-				for (const entry of this.addressBookService.addressBook) {
+				for (const entry of this.svcAddressBook.addressBook) {
 					if (entry.trackBalance && this.accounts[entry.account]) {
 						// If the account exist in the wallet, take the info from there to save on RPC calls
-						const walletAccount = this.walletService.accounts().find((a) => a.address === entry.account)
+						const walletAccount = this.svcWallet.accounts().find((a) => a.address === entry.account)
 						if (walletAccount) {
 							// Subtract first so we can add back any updated amounts
 							this.totalTrackedBalance -= this.accounts[entry.account].balance
@@ -139,8 +138,8 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 			const result = [].slice.call(elements)
 			const datas = result.map((el) => el.dataset.account)
 
-			this.addressBookService.setAddressBookOrder(datas)
-			this.notificationService.sendSuccess(this.translocoService.translate('address-book.updated-address-book-order'))
+			this.svcAddressBook.setAddressBookOrder(datas)
+			this.svcNotifications.sendSuccess(translate('address-book.updated-address-book-order'))
 		})
 	}
 
@@ -159,7 +158,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 
 		// Inform html that at least one entry is tracked
 		this.numberOfTrackedBalance = 0
-		for (const entry of this.addressBookService.addressBook) {
+		for (const entry of this.svcAddressBook.addressBook) {
 			if (entry.trackBalance) {
 				this.numberOfTrackedBalance++
 			}
@@ -173,23 +172,23 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.totalTrackedReceivable = 0n
 
 		// Get account balances for all account in address book not in wallet (which has tracking active)
-		const accountIDsWallet = this.walletService.accounts().map((a) => a.address)
-		const accountIDs = this.addressBookService.addressBook
+		const accountIDsWallet = this.svcWallet.accounts().map((a) => a.address)
+		const accountIDs = this.svcAddressBook.addressBook
 			.filter((a) => !accountIDsWallet.includes(a.account) && a.trackBalance)
 			.map((a) => a.account)
-		const apiAccounts = await this.api.accountsBalances(accountIDs)
+		const apiAccounts = await this.svcApi.accountsBalances(accountIDs)
 
 		// Fetch receivable of all tracked accounts
 		let receivable
 		if (this.settings.minimumReceive) {
-			const minAmount = this.util.nano.mnanoToRaw(this.settings.minimumReceive)
-			receivable = await this.api.accountsReceivableLimitSorted(accountIDs, minAmount)
+			const minAmount = this.svcUtil.nano.mnanoToRaw(this.settings.minimumReceive)
+			receivable = await this.svcApi.accountsReceivableLimitSorted(accountIDs, minAmount)
 		} else {
-			receivable = await this.api.accountsReceivableSorted(accountIDs)
+			receivable = await this.svcApi.accountsReceivableSorted(accountIDs)
 		}
 
 		// Save balances
-		for (const entry of this.addressBookService.addressBook) {
+		for (const entry of this.svcAddressBook.addressBook) {
 			if (!entry.trackBalance) continue
 
 			const balanceAccount: BalanceAccount = {
@@ -198,7 +197,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 				receivable: 0n,
 			}
 			// If the account exist in the wallet, take the info from there to save on RPC calls
-			const walletAccount = this.walletService.accounts().find((a) => a.address === entry.account)
+			const walletAccount = this.svcWallet.accounts().find((a) => a.address === entry.account)
 			if (walletAccount) {
 				balanceAccount.balance = walletAccount.balance
 				balanceAccount.balanceFiat = walletAccount.balanceFiat
@@ -240,12 +239,12 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		}
 
 		// If not already updating balances, update to get latest values from internal wallet
-		if (this.walletService.isBalanceUpdating) {
-			while (this.walletService.isBalanceUpdating) {
+		if (this.svcWallet.isBalanceUpdating) {
+			while (this.svcWallet.isBalanceUpdating) {
 				await this.sleep(100) // Wait until update is finished
 			}
 		} else {
-			await this.walletService.reloadBalances()
+			await this.svcWallet.reloadBalances()
 		}
 
 		this.loadingBalances = false
@@ -274,24 +273,24 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	async saveNewAddress () {
 		if (!this.newAddressAccount || !this.newAddressName) {
-			return this.notificationService.sendError(
-				this.translocoService.translate('address-book.account-and-name-are-required')
+			return this.svcNotifications.sendError(
+				translate('address-book.account-and-name-are-required')
 			)
 		}
 
 		if (this.newTrackBalance && this.numberOfTrackedBalance >= 20) {
-			return this.notificationService.sendError(
-				this.translocoService.translate('address-book.you-can-only-track-the-balance-of-maximum-20-addresses')
+			return this.svcNotifications.sendError(
+				translate('address-book.you-can-only-track-the-balance-of-maximum-20-addresses')
 			)
 		}
 
 		// Trim and remove duplicate spaces
 		this.newAddressName = this.newAddressName.trim().replace(/ +/g, ' ')
 
-		const regexp = new RegExp('^(Account|' + this.translocoService.translate('general.account') + ') #\\d+$', 'g')
+		const regexp = new RegExp('^(Account|' + translate('general.account') + ') #\\d+$', 'g')
 		if (regexp.test(this.newAddressName) === true) {
-			return this.notificationService.sendError(
-				this.translocoService.translate('address-book.this-name-is-reserved-for-wallet-accounts-without-a-label')
+			return this.svcNotifications.sendError(
+				translate('address-book.this-name-is-reserved-for-wallet-accounts-without-a-label')
 			)
 		}
 
@@ -299,51 +298,51 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 		this.newAddressAccount = this.newAddressAccount.replace(/ /g, '').replace('xrb_', 'nano_')
 
 		// If the name has been changed, make sure no other entries are using that name
-		if (this.newAddressName !== this.previousAddressName && this.addressBookService.nameExists(this.newAddressName)) {
-			return this.notificationService.sendError(
-				this.translocoService.translate('address-book.this-name-is-already-in-use-please-use-a-unique-name')
+		if (this.newAddressName !== this.previousAddressName && this.svcAddressBook.nameExists(this.newAddressName)) {
+			return this.svcNotifications.sendError(
+				translate('address-book.this-name-is-already-in-use-please-use-a-unique-name')
 			)
 		}
 
 		// Make sure the address is valid
-		const valid = this.util.account.isValidAccount(this.newAddressAccount)
+		const valid = this.svcUtil.account.isValidAccount(this.newAddressAccount)
 		if (!valid) {
-			return this.notificationService.sendWarning(
-				this.translocoService.translate('address-book.account-id-is-not-a-valid-account')
+			return this.svcNotifications.sendWarning(
+				translate('address-book.account-id-is-not-a-valid-account')
 			)
 		}
 
 		// Store old setting
-		const wasTransactionTracked = this.addressBookService.getTransactionTrackingById(this.newAddressAccount)
+		const wasTransactionTracked = this.svcAddressBook.getTransactionTrackingById(this.newAddressAccount)
 
 		try {
-			await this.addressBookService.saveAddress(
+			await this.svcAddressBook.saveAddress(
 				this.newAddressAccount,
 				this.newAddressName,
 				this.newTrackBalance,
 				this.newTrackTransactions
 			)
-			this.notificationService.sendSuccess(
-				this.translocoService.translate('address-book.address-book-entry-saved-successfully')
+			this.svcNotifications.sendSuccess(
+				translate('address-book.address-book-entry-saved-successfully')
 			)
 			// If this is one of our accounts, set its name and let it propagate through the app
-			const walletAccount = this.walletService.accounts().find((a) => a.address === this.newAddressAccount)
+			const walletAccount = this.svcWallet.accounts().find((a) => a.address === this.newAddressAccount)
 			if (walletAccount) {
 				walletAccount.addressBookName = this.newAddressName
 			}
 
 			// track account transaction (if unchanged)
 			if (this.newTrackTransactions && !wasTransactionTracked) {
-				this.walletService.trackAddress(this.newAddressAccount)
+				this.svcWallet.trackAddress(this.newAddressAccount)
 			} else if (!this.newTrackTransactions && wasTransactionTracked) {
-				this.walletService.untrackAddress(this.newAddressAccount)
+				this.svcWallet.untrackAddress(this.newAddressAccount)
 			}
 
 			this.updateTrackedBalances()
 			this.cancelNewAddress()
 		} catch (err) {
-			this.notificationService.sendError(
-				this.translocoService.translate('address-book.unable-to-save-entry', { message: err.message })
+			this.svcNotifications.sendError(
+				translate('address-book.unable-to-save-entry', { message: err.message })
 			)
 		}
 	}
@@ -355,31 +354,31 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	copied () {
-		this.notificationService.removeNotification('success-copied')
-		this.notificationService.sendSuccess(
-			this.translocoService.translate('address-book.account-address-copied-to-clipboard'),
+		this.svcNotifications.removeNotification('success-copied')
+		this.svcNotifications.sendSuccess(
+			translate('address-book.account-address-copied-to-clipboard'),
 			{ identifier: 'success-copied' }
 		)
 	}
 
 	async deleteAddress (account) {
 		try {
-			this.addressBookService.deleteAddress(account)
-			this.notificationService.sendSuccess(
-				this.translocoService.translate('address-book.successfully-deleted-address-book-entry')
+			this.svcAddressBook.deleteAddress(account)
+			this.svcNotifications.sendSuccess(
+				translate('address-book.successfully-deleted-address-book-entry')
 			)
-			this.walletService.untrackAddress(account)
+			this.svcWallet.untrackAddress(account)
 			this.updateTrackedBalances()
 		} catch (err) {
-			this.notificationService.sendError(
-				this.translocoService.translate('address-book.unable-to-delete-entry', { message: err.message })
+			this.svcNotifications.sendError(
+				translate('address-book.unable-to-delete-entry', { message: err.message })
 			)
 		}
 	}
 
 	// open qr reader modal
 	openQR (reference, type) {
-		const qrResult = this.qrModalService.openQR(reference, type)
+		const qrResult = this.svcQrModal.openQR(reference, type)
 		qrResult.then(
 			(data) => {
 				switch (data.reference) {
@@ -403,7 +402,7 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	async exportAddressBook () {
-		const exportData = this.addressBookService.addressBook
+		const exportData = this.svcAddressBook.addressBook
 		const base64Data = btoa(this.toBinary(JSON.stringify(exportData)))
 		const exportUrl = `https://gnault.cc/import-address-book#${base64Data}`
 		this.addressBookQRExportUrl = exportUrl
@@ -418,10 +417,10 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 	exportAddressBookToFile () {
 		const fileName = `Gnault-AddressBook.json`
 
-		const exportData = this.addressBookService.addressBook
+		const exportData = this.svcAddressBook.addressBook
 		this.triggerFileDownload(fileName, exportData)
 
-		this.notificationService.sendSuccess(this.translocoService.translate('address-book.address-book-export-downloaded'))
+		this.svcNotifications.sendSuccess(translate('address-book.address-book-export-downloaded'))
 	}
 
 	importFromFile (files) {
@@ -436,16 +435,16 @@ export class AddressBookComponent implements OnInit, AfterViewInit, OnDestroy {
 			try {
 				const importData = JSON.parse(fileData)
 				if (!importData.length || (!importData[0].account && !importData[0].address)) {
-					return this.notificationService.sendError(
-						this.translocoService.translate('address-book.bad-import-data-make-sure-you-selected-a-gnault-address-book')
+					return this.svcNotifications.sendError(
+						translate('address-book.bad-import-data-make-sure-you-selected-a-gnault-address-book')
 					)
 				}
 
 				const encoded = btoa(this.toBinary(JSON.stringify(importData)))
 				this.router.navigate(['import-address-book'], { fragment: encoded })
 			} catch (err) {
-				this.notificationService.sendError(
-					this.translocoService.translate('address-book.unable-to-parse-import-data-make-sure-you-selected-the-right')
+				this.svcNotifications.sendError(
+					translate('address-book.unable-to-parse-import-data-make-sure-you-selected-the-right')
 				)
 			}
 		}

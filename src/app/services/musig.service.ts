@@ -1,15 +1,15 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core'
-import { Account } from 'libnemo'
-import { Observable } from 'rxjs'
 import { NotificationsService, UtilService } from 'app/services'
 import { environment } from 'environments/environment'
+import { Account } from 'libnemo'
+import { Observable } from 'rxjs'
 
 @Injectable({ providedIn: 'root' })
 export class MusigService {
-	private util = inject(UtilService)
-	private notificationService = inject(NotificationsService)
 	private http = inject(HttpClient)
+	private svcNotifications = inject(NotificationsService)
+	private svcUtil = inject(UtilService)
 
 	// The multisig wasm library can be validated by running build-or-validate_musig_wasm.sh
 	private wasmURL = environment.desktop
@@ -110,7 +110,7 @@ export class MusigService {
 		try {
 			return this.aggregate(storedAccounts, runWithPubkeys)
 		} catch (err) {
-			this.notificationService.sendError(err.toString(), { length: 0 })
+			this.svcNotifications.sendError(err.toString(), { length: 0 })
 			return null
 		}
 	}
@@ -119,7 +119,7 @@ export class MusigService {
 		try {
 			return this.multiSign(privateKey, blockHash, inputMultisigData)
 		} catch (err) {
-			this.notificationService.sendError(err.toString(), { length: 0 })
+			this.svcNotifications.sendError(err.toString(), { length: 0 })
 			return null
 		}
 	}
@@ -181,10 +181,10 @@ export class MusigService {
 		let multisigAccount = ''
 		// Stage 0 (init)
 		if (!this.musigStagePtr) {
-			if (!this.util.nano.isValidHash(privateKey)) {
+			if (!this.svcUtil.nano.isValidHash(privateKey)) {
 				throw new Error('Invalid private key')
 			}
-			if (!this.util.nano.isValidHash(blockHash)) {
+			if (!this.svcUtil.nano.isValidHash(blockHash)) {
 				throw new Error('Invalid block hash')
 			}
 			const outPtr = this.wasm.musig_malloc(65)
@@ -223,12 +223,12 @@ export class MusigService {
 			const protocolInputPtrs = this.wasm.musig_malloc(protocolInputs.length * 4)
 			const protocolInputPtrsBuf = new Uint32Array(this.wasm.memory.buffer, protocolInputPtrs, protocolInputs.length)
 			for (let i = 0; i < protocolInputs.length; i++) {
-				protocolInputPtrsBuf[i] = this.copyToWasm(this.util.hex.toUint8(protocolInputs[i]))
+				protocolInputPtrsBuf[i] = this.copyToWasm(this.svcUtil.hex.toUint8(protocolInputs[i]))
 			}
 
 			let privateKeyPtr
 			if (this.musigStageNum === 0) {
-				privateKeyPtr = this.copyToWasm(this.util.hex.toUint8(privateKey))
+				privateKeyPtr = this.copyToWasm(this.svcUtil.hex.toUint8(privateKey))
 			}
 
 			const outLen = this.musigStageNum === 2
@@ -254,7 +254,7 @@ export class MusigService {
 				}
 				this.savedPublicKeys.push(pub)
 
-				const blockhash = this.util.hex.toUint8(blockHash)
+				const blockhash = this.svcUtil.hex.toUint8(blockHash)
 				const blockhashPtr = this.copyToWasm(blockhash)
 				const result = await this.aggregate('', (pubkeys, pubkeysLen) => {
 					const flags = 0 // Set to 1 if private key is a raw/expanded scalar (unusual)

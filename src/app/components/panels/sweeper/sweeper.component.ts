@@ -28,24 +28,23 @@ const SWEEP_MAX_RECEIVABLE = 100
 	imports: [AmountSplitPipe, FormsModule, RaiPipe, SqueezePipe],
 })
 export class SweeperComponent implements OnInit {
-	private svcAppSettings = inject(AppSettingsService)
-	private walletService = inject(WalletService)
-	private notificationService = inject(NotificationsService)
-	private appSettings = inject(AppSettingsService)
-	private api = inject(ApiService)
-	private workPool = inject(WorkPoolService)
-	private nanoBlock = inject(NanoBlockService)
-	private util = inject(UtilService)
 	private route = inject(Router)
+	private svcApi = inject(ApiService)
+	private svcAppSettings = inject(AppSettingsService)
+	private svcNanoBlock = inject(NanoBlockService)
+	private svcNotifications = inject(NotificationsService)
+	private svcUtil = inject(UtilService)
+	private svcWorkPool = inject(WorkPoolService)
 
-	accounts = this.walletService.accounts
+	svcWallet = inject(WalletService)
+
 	indexMax = INDEX_MAX
 	incomingMax = SWEEP_MAX_RECEIVABLE
 	UIkit = (window as any).UIkit
 
-	myAccountModel = this.accounts[0]?.id ?? '0'
+	myAccountModel = this.svcWallet.accounts()[0]?.id ?? '0'
 	sourceWallet = ''
-	destinationAccount = this.accounts[0]?.id ?? ''
+	destinationAccount = this.svcWallet.accounts()[0]?.id ?? ''
 	startIndex = '0'
 	endIndex = '5'
 	maxIncoming = SWEEP_MAX_RECEIVABLE.toString()
@@ -63,7 +62,7 @@ export class SweeperComponent implements OnInit {
 	keyCount = 0
 	pendingCallback = null
 	totalSwept = '0'
-	customAccountSelected = this.accounts.length === 0
+	customAccountSelected = this.svcWallet.accounts().length === 0
 
 	validSeed = false
 	validDestination = this.myAccountModel !== '0'
@@ -86,16 +85,16 @@ export class SweeperComponent implements OnInit {
 	async ngOnInit () {
 		// Update selected account if changed in the sidebar
 		effect(() => {
-			const account = this.walletService.selectedAccount()
+			const account = this.svcWallet.selectedAccount()
 			if (this.selAccountInit) {
-				this.myAccountModel = account?.address ?? this.accounts[0]?.address ?? '0'
+				this.myAccountModel = account?.address ?? this.svcWallet.accounts()[0]?.address ?? '0'
 			}
 			this.selAccountInit = true
 		})
 
 		// Set the account selected in the sidebar as default
-		if (this.walletService.selectedAccount() != null) {
-			this.myAccountModel = this.walletService.selectedAccount().address
+		if (this.svcWallet.selectedAccount() != null) {
+			this.myAccountModel = this.svcWallet.selectedAccount().address
 		}
 	}
 
@@ -187,7 +186,7 @@ export class SweeperComponent implements OnInit {
 	}
 
 	maxIncomingChange (value) {
-		if (!this.util.string.isNumeric(value) || value % 1 !== 0) {
+		if (!this.svcUtil.string.isNumeric(value) || value % 1 !== 0) {
 			this.validMaxIncoming = false
 			return
 		} else {
@@ -239,7 +238,7 @@ export class SweeperComponent implements OnInit {
 		// make an extra check on valid destination
 		if (this.validDestination) {
 			this.appendLog('Transfer started: ' + account.address)
-			const work = await this.workPool.getWork(previous, 1) // send threshold
+			const work = await this.svcWorkPool.getWork(previous, 1) // send threshold
 			// create the block with the work found
 			const block = await new Block(account.address, '0', this.representative, previous)
 				.send(destinationAccount.address, '0')
@@ -247,25 +246,25 @@ export class SweeperComponent implements OnInit {
 			await block.sign(account.privateKey)
 
 			// publish block for each iteration
-			const data = await this.api.process(block.toJSON(), TxType.send)
+			const data = await this.svcApi.process(block.toJSON(), TxType.send)
 			if (data.hash) {
-				const blockInfo = await this.api.blockInfo(data.hash)
+				const blockInfo = await this.svcApi.blockInfo(data.hash)
 				const nanoAmountSent = blockInfo?.amount ?? 0n
 				this.totalSwept += nanoAmountSent
 
-				this.notificationService.sendInfo(
+				this.svcNotifications.sendInfo(
 					`Account ${account.address} was swept and ${'Ӿ' + nanoAmountSent.toString(10)} transferred to ${this.destinationAccount}`,
 					{ length: 15000 }
 				)
 				this.appendLog(`Funds transferred (Ӿ${nanoAmountSent.toString(10)}): ${data.hash}`)
 				console.log(`${this.adjustedBalance} raw transferred to ${this.destinationAccount}`)
 			} else {
-				this.notificationService.sendWarning('Failed processing block.')
+				this.svcNotifications.sendWarning('Failed processing block.')
 				this.appendLog(`Failed processing block: ${data.error}`)
 			}
 			sendCallback()
 		} else {
-			this.notificationService.sendError('The destination address is not valid.')
+			this.svcNotifications.sendError('The destination address is not valid.')
 			sendCallback()
 		}
 	}
@@ -288,7 +287,7 @@ export class SweeperComponent implements OnInit {
 				// input hash is the opening address public key
 				workInputHash = this.pubKey
 			}
-			const work = await this.workPool.getWork(workInputHash, 1 / 64) // receive threshold
+			const work = await this.svcWorkPool.getWork(workInputHash, 1 / 64) // receive threshold
 			// create the block with the work found
 			const block = await new Block(this.destinationAccount, this.adjustedBalance, this.previous, this.representative)
 				.receive(key, 0)
@@ -298,7 +297,7 @@ export class SweeperComponent implements OnInit {
 			this.previous = block.hash
 
 			// publish block for each iteration
-			const data = await this.api.process(block, this.subType === 'open' ? TxType.open : TxType.receive)
+			const data = await this.svcApi.process(block, this.subType === 'open' ? TxType.open : TxType.receive)
 			if (data.hash) {
 				this.appendLog(`Processed receivable: ${data.hash}`)
 
@@ -316,14 +315,14 @@ export class SweeperComponent implements OnInit {
 					this.pendingCallback(this.previous)
 				}
 			} else {
-				this.notificationService.sendWarning(`Failed processing block`)
+				this.svcNotifications.sendWarning(`Failed processing block`)
 				this.appendLog('Failed processing block: ' + data.error)
 			}
 		} catch (error) {
 			if (error.message === 'invalid_hash') {
-				this.notificationService.sendError(`Block hash must be 64 character hex string`)
+				this.svcNotifications.sendError(`Block hash must be 64 character hex string`)
 			} else {
-				this.notificationService.sendError(`An unknown error occurred while generating PoW`)
+				this.svcNotifications.sendError(`An unknown error occurred while generating PoW`)
 				console.log('An unknown error occurred while generating PoW' + error)
 			}
 			this.sweeping = false
@@ -343,15 +342,15 @@ export class SweeperComponent implements OnInit {
 		if (settings.minimumReceive) {
 			const minAmount = settings.minimumReceive.toString()
 			if (settings.receivableOption === 'amount') {
-				data = await this.api.receivableLimitSorted(address, this.maxIncoming, minAmount)
+				data = await this.svcApi.receivableLimitSorted(address, this.maxIncoming, minAmount)
 			} else {
-				data = await this.api.receivableLimit(address, this.maxIncoming, minAmount)
+				data = await this.svcApi.receivableLimit(address, this.maxIncoming, minAmount)
 			}
 		} else {
 			if (settings.receivableOption === 'amount') {
-				data = await this.api.receivableSorted(address, this.maxIncoming)
+				data = await this.svcApi.receivableSorted(address, this.maxIncoming)
 			} else {
-				data = await this.api.receivable(address, this.maxIncoming)
+				data = await this.svcApi.receivable(address, this.maxIncoming)
 			}
 		}
 
@@ -364,7 +363,7 @@ export class SweeperComponent implements OnInit {
 					raw = this.util.big.add(raw, data.blocks[key].amount)
 				}.bind(this)
 			)
-			const nanoAmount = this.util.nano.rawToMnano(raw)
+			const nanoAmount = this.svcUtil.nano.rawToMnano(raw)
 			const receivable = { count: Object.keys(data.blocks).length, raw: raw, XNO: nanoAmount, blocks: data.blocks }
 			const row = 'Found ' + receivable.count + ' receivable containing total ' + receivable.XNO + ' XNO'
 			this.appendLog(row)
@@ -403,11 +402,11 @@ export class SweeperComponent implements OnInit {
 		let balance = 0n // balance will be 0 if open block
 		this.adjustedBalance = balance.toString()
 		let previous = null // previous is null if we create open block
-		this.representative = this.settings().defaultRepresentative || this.nanoBlock.getRandomRepresentative()
+		this.representative = this.settings().defaultRepresentative || this.svcNanoBlock.getRandomRepresentative()
 		let subType = 'open'
 
 		// retrive from RPC
-		const accountInfo = await this.api.accountInfo(account.address)
+		const accountInfo = await this.svcApi.accountInfo(account.address)
 		let validResponse = false
 		// if frontier is returned it means the account has been opened and we create a receive block
 		if (accountInfo.frontier) {
@@ -445,7 +444,7 @@ export class SweeperComponent implements OnInit {
 				}
 			)
 		} else {
-			this.notificationService.sendError(`Bad RPC response. Please try again.`)
+			this.svcNotifications.sendError(`Bad RPC response. Please try again.`)
 			accountCallback()
 		}
 	}
@@ -493,15 +492,15 @@ export class SweeperComponent implements OnInit {
 				// Seed must be 64 for regular nano blake derivation to happen
 				// For other lengths, only bip39/44 derivation is possible
 				if (seed.length < 32) {
-					this.notificationService.sendError(`Mnemonic must be at least 12 words`)
+					this.svcNotifications.sendError(`Mnemonic must be at least 12 words`)
 					return
 				}
 				if (seed.length > 64) {
-					this.notificationService.sendError(`Mnemonic must be no more than 64 words`)
+					this.svcNotifications.sendError(`Mnemonic must be no more than 64 words`)
 					return
 				}
 				if (seed.length % 8 !== 0) {
-					this.notificationService.sendError(`Mnemonic must be multiple of 3 words`)
+					this.svcNotifications.sendError(`Mnemonic must be multiple of 3 words`)
 					return
 				}
 			}
@@ -552,33 +551,33 @@ export class SweeperComponent implements OnInit {
 				)
 			}
 		} else {
-			this.notificationService.sendError(`Invalid input format! Please check.`)
+			this.svcNotifications.sendError(`Invalid input format! Please check.`)
 		}
 	}
 
 	/* Start the sweeping */
 	async sweep () {
 		if (!this.validSeed) {
-			this.notificationService.sendError(`No valid source wallet provided!`)
+			this.svcNotifications.sendError(`No valid source wallet provided!`)
 			return
 		}
 		if (!this.validDestination) {
-			this.notificationService.sendError(`No valid destination account provided!`)
+			this.svcNotifications.sendError(`No valid destination account provided!`)
 			return
 		}
 
 		if (this.validStartIndex && this.validEndIndex) {
 			if (parseInt(this.startIndex, 10) > parseInt(this.endIndex, 10)) {
-				this.notificationService.sendError(`End Index must be equal or larger than Start Index`)
+				this.svcNotifications.sendError(`End Index must be equal or larger than Start Index`)
 				return
 			}
 		} else {
-			this.notificationService.sendError(`Not valid start and end indexes`)
+			this.svcNotifications.sendError(`Not valid start and end indexes`)
 			return
 		}
 
 		if (!this.validMaxIncoming) {
-			this.notificationService.sendError(`Not a valid number for Max Incoming`)
+			this.svcNotifications.sendError(`Not a valid number for Max Incoming`)
 			return
 		}
 

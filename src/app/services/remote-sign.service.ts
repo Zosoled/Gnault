@@ -5,12 +5,12 @@ import { NotificationsService, UtilService } from 'app/services'
 @Injectable({ providedIn: 'root' })
 export class RemoteSignService {
 	private router = inject(Router)
-	private notifcationService = inject(NotificationsService)
-	private util = inject(UtilService)
+	private svcNotifcations = inject(NotificationsService)
+	private svcUtil = inject(UtilService)
 
 	navigateSignBlock (url) {
 		if (!this.checkSignBlock(url.pathname)) {
-			return this.notifcationService.sendWarning('Not a recognized format of an unsigned block.', { length: 5000 })
+			return this.svcNotifcations.sendWarning('Not a recognized format of an unsigned block.', { length: 5000 })
 		}
 		try {
 			const data = JSON.parse(url.pathname)
@@ -46,13 +46,13 @@ export class RemoteSignService {
 			}
 			this.router.navigate(['sign'], { queryParams: paramsSign })
 		} catch (error) {
-			this.notifcationService.sendWarning('Block sign data detected but not correct format.', { length: 5000 })
+			this.svcNotifcations.sendWarning('Block sign data detected but not correct format.', { length: 5000 })
 		}
 	}
 
 	navigateProcessBlock (url) {
 		if (!this.checkSignBlock(url.pathname) || !this.checkProcessBlock(url.pathname)) {
-			return this.notifcationService.sendWarning('Not a recognized format of a signed block.', { length: 5000 })
+			return this.svcNotifcations.sendWarning('Not a recognized format of a signed block.', { length: 5000 })
 		}
 		try {
 			const data = JSON.parse(url.pathname)
@@ -81,7 +81,7 @@ export class RemoteSignService {
 			}
 			this.router.navigate(['sign'], { queryParams: paramsProcess })
 		} catch (error) {
-			this.notifcationService.sendWarning('Block process data detected but not correct format.', { length: 5000 })
+			this.svcNotifcations.sendWarning('Block process data detected but not correct format.', { length: 5000 })
 		}
 	}
 
@@ -90,17 +90,17 @@ export class RemoteSignService {
 			const data = JSON.parse(stringdata)
 			console.log(data)
 
-			return (this.util.account.isValidAccount(data.block.account) &&
-				(this.util.account.isValidAccount(data.previous?.account) ?? true) &&
-				this.util.account.isValidAccount(data.block.representative) &&
-				(this.util.account.isValidAccount(data.previous?.representative) ?? true) &&
-				this.util.account.isValidAmount(data.block.balance) &&
-				(this.util.account.isValidAmount(data.previous?.balance) ?? true) &&
-				this.util.nano.isValidHash(data.block.previous) &&
-				(this.util.nano.isValidHash(data.previous?.previous) ?? true) &&
-				this.util.nano.isValidHash(data.block.link) &&
-				(this.util.nano.isValidHash(data.previous?.link) ?? true) &&
-				(this.util.nano.isValidSignature(data.previous?.signature) ?? true))
+			return (this.svcUtil.account.isValidAccount(data.block.account) &&
+				(this.svcUtil.account.isValidAccount(data.previous?.account) ?? true) &&
+				this.svcUtil.account.isValidAccount(data.block.representative) &&
+				(this.svcUtil.account.isValidAccount(data.previous?.representative) ?? true) &&
+				this.svcUtil.account.isValidAmount(data.block.balance) &&
+				(this.svcUtil.account.isValidAmount(data.previous?.balance) ?? true) &&
+				this.svcUtil.nano.isValidHash(data.block.previous) &&
+				(this.svcUtil.nano.isValidHash(data.previous?.previous) ?? true) &&
+				this.svcUtil.nano.isValidHash(data.block.link) &&
+				(this.svcUtil.nano.isValidHash(data.previous?.link) ?? true) &&
+				(this.svcUtil.nano.isValidSignature(data.previous?.signature) ?? true))
 		} catch (error) {
 			return false
 		}
@@ -110,8 +110,8 @@ export class RemoteSignService {
 		try {
 			const data = JSON.parse(stringdata)
 			return (
-				this.util.nano.isValidSignature(data.block.signature)
-				&& (this.util.nano.isValidWork(data.block.work) ?? true)
+				this.svcUtil.nano.isValidSignature(data.block.signature)
+				&& (this.svcUtil.nano.isValidWork(data.block.work) ?? true)
 			)
 		} catch (error) {
 			return false
